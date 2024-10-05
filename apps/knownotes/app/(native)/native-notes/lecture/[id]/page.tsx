@@ -6,15 +6,9 @@ export const maxDuration = 30;
 
 interface LecturePageProps {
   params: { id: string };
-  searchParams: {
-    theme?: string;
-  };
 }
 
-export default async function NativePage({
-  params,
-  searchParams,
-}: LecturePageProps) {
+export default async function NativePage({ params }: LecturePageProps) {
   const { data: lecture } = await supabase
     .from("Lecture")
     .select("*")
