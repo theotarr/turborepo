@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
 import throttle from "lodash.throttle";
 
 /**
@@ -19,8 +21,10 @@ export const useTimer = ({
   const [elapsedInMs, setElapsedInMs] = useState(0);
   const startTime = useRef<number | null>(null);
   const pausedTime = useRef<number | null>(null);
-  const intervalId = useRef<NodeJS.Timer | null>(null);
+  const intervalId = useRef<number | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const throttledOnFinish = useMemo(
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call
     () => throttle(onFinish, 100, { trailing: false }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
@@ -37,6 +41,7 @@ export const useTimer = ({
     if (mode === "timer" && elapsedInMs >= initialTimeInMs) {
       removeInterval();
       setElapsedInMs(initialTimeInMs);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       throttledOnFinish();
     }
   }, [elapsedInMs, initialTimeInMs, mode, throttledOnFinish]);
@@ -58,13 +63,16 @@ export const useTimer = ({
     if (!startTime.current) {
       startTime.current = Date.now();
     }
-
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     intervalId.current = setInterval(() => {
       if (!pausedTime.current) {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         setElapsedInMs(Date.now() - startTime.current!);
       } else {
         // If the timer is paused, we need to update the start time
         const elapsedSincePaused = Date.now() - pausedTime.current;
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         startTime.current = startTime.current! + elapsedSincePaused;
         pausedTime.current = null;
       }

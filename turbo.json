@@ -36,11 +36,9 @@
     },
     "generate": {
       "cache": false
-      // "interactive": true
     },
     "push": {
       "cache": false
-      // "interactive": true
     },
     "studio": {
       "cache": false,
@@ -48,7 +46,6 @@
     },
     "ui-add": {
       "cache": false
-      // "interactive": true
     }
   },
   "globalEnv": [
