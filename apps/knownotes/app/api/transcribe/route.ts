@@ -10,7 +10,6 @@ export async function GET(request: Request) {
   let { result: projectsResult, error: projectsError } =
     await deepgram.manage.getProjects();
 
-  console.log(projectsResult);
   if (projectsError) {
     return NextResponse.json(projectsError);
   }
@@ -34,6 +33,7 @@ export async function GET(request: Request) {
     });
 
   if (newKeyError) {
+    console.error(newKeyError);
     return NextResponse.json(newKeyError);
   }
 

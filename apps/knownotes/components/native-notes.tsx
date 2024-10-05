@@ -37,7 +37,6 @@ export function NativeNotesPage({ lecture }: NativeNotesPageProps) {
   return (
     <>
       <Editor
-        immediatelyRender={false}
         lectureId={lecture.id}
         defaultValue={enhancedNotes}
         className="relative z-0 flex grow flex-col overflow-hidden border-0 bg-background shadow-none"

@@ -27,7 +27,6 @@ export default function Editor({
   editable = true,
   autoFocus = false,
   id,
-  immediatelyRender = true,
 }: {
   /**
    * Additional classes to add to the editor container.
@@ -89,10 +88,6 @@ export default function Editor({
    * id to pass to the editor
    */
   id?: string;
-  /**
-   * Whether to render the editor immediately or not
-   */
-  immediatelyRender?: boolean;
 }) {
   const { setEditor } = useNotesStore();
   const [hydrated, setHydrated] = useState(false);
@@ -103,7 +98,7 @@ export default function Editor({
 
   const editor = useEditor({
     editable,
-    immediatelyRender,
+    immediatelyRender: false,
     extensions: [...defaultExtensions, ...extensions],
     editorProps: {
       ...defaultEditorProps,
