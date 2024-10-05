@@ -85,7 +85,6 @@ export default function Record() {
       console.log("Recording started");
 
       recording.setOnRecordingStatusUpdate((status) => {
-        console.log(`Metering: ${status.metering}`);
         metering.value = status.metering ?? -100;
       });
     } catch (err) {
