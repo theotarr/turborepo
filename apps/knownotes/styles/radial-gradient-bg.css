@@ -1,0 +1,21 @@
+.radial-gradient-bg {
+  background-image: radial-gradient(
+    121.58% 100% at 276px 345px,
+    theme("colors.muted.foreground") 0%,
+    theme("colors.accent.DEFAULT") 100%
+  );
+}
+
+.dark .radial-gradient-bg {
+  opacity: 0.5;
+  background-image: radial-gradient(
+    121.58% 100% at 276px 345px,
+    theme("colors.accent.DEFAULT") 0%,
+    theme("colors.muted.foreground") 100%
+  );
+}
+
+.remove-accordian-h3 h3 {
+  margin: 0;
+  padding: 0;
+}

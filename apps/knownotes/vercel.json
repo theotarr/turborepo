@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/send-paywall-dropoff-email",
+      "schedule": "0 * * * *"
+    }
+  ]
+}

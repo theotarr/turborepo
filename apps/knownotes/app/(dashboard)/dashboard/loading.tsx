@@ -1,0 +1,29 @@
+import { Button } from "@/components/ui/button"
+import { DashboardHeader } from "@/components/header"
+import { Icons } from "@/components/icons"
+import { LectureItem } from "@/components/lecture-item"
+import { DashboardShell } from "@/components/shell"
+import { ListItemSkeleton } from "@/components/list-item-skeleton"
+
+export default function DashboardLoading() {
+  return (
+    <DashboardShell>
+      <DashboardHeader
+        heading="Dashboard"
+        text="Manage your lectures and courses."
+      >
+        <Button variant={"secondary"}>
+          <Icons.add className="mr-2 h-4 w-4" />
+          New lecture
+        </Button>
+      </DashboardHeader>
+      <div className="divide-border-200 divide-y rounded-md border">
+        <ListItemSkeleton />
+        <ListItemSkeleton />
+        <ListItemSkeleton />
+        <ListItemSkeleton />
+        <ListItemSkeleton />
+      </div>
+    </DashboardShell>
+  )
+}

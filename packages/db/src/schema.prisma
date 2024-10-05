@@ -1,0 +1,217 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgres"
+  url        = env("DATABASE_URL")
+  directUrl  = env("DIRECT_URL")
+  extensions = [vector]
+}
+
+enum MessageRole {
+  USER
+  ASSISTANT
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum UserSignUpQuestionType {
+  HOW_DID_YOU_HEAR_ABOUT_US
+}
+
+enum LectureType {
+  LIVE
+  YOUTUBE
+  AUDIO_FILE
+  PDF
+}
+
+model Lecture {
+  id             String      @id @default(dbgenerated("uuid_generate_v1()")) @db.Uuid
+  title          String
+  type           LectureType @default(LIVE)
+  transcript     Json[]
+  notes          Json?
+  enhancedNotes  Json?
+  markdownNotes  String?
+  youtubeVideoId String?
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @db.Uuid
+
+  course   Course? @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  courseId String? @db.Uuid
+
+  messages   Message[]
+  documents  Document[]
+  questions  Question[]
+  flashcards Flashcard[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+model Flashcard {
+  id         String @id @default(dbgenerated("uuid_generate_v1()")) @db.Uuid
+  term       String
+  definition String
+
+  lectureId String  @db.Uuid
+  lecture   Lecture @relation(fields: [lectureId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+model Question {
+  id          String   @id @default(dbgenerated("uuid_generate_v1()")) @db.Uuid
+  question    String
+  choices     String[]
+  answerIndex Int
+
+  lectureId String  @db.Uuid
+  lecture   Lecture @relation(fields: [lectureId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+model Document {
+  id        String                @id @default(dbgenerated("uuid_generate_v1()")) @db.Uuid
+  content   String
+  embedding Unsupported("vector")
+  metadata  Json
+
+  lecture   Lecture @relation(fields: [lectureId], references: [id], onDelete: Cascade)
+  lectureId String  @db.Uuid
+  course    Course? @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  courseId  String? @db.Uuid
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+model Course {
+  id   String @id @default(dbgenerated("uuid_generate_v1()")) @db.Uuid
+  name String
+
+  lectures  Lecture[]
+  documents Document[] // for later when we build out `chat with course` feature
+  chats     Chat[]
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @db.Uuid
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+model Chat {
+  id           String    @id @default(dbgenerated("uuid_generate_v1()")) @db.Uuid
+  name         String    @default("New Chat")
+  systemPrompt String?
+  messages     Message[]
+
+  userId   String @db.Uuid
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courseId String @db.Uuid
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+model Message {
+  id      String      @id @default(dbgenerated("uuid_generate_v1()")) @db.Uuid
+  content String
+  sources Json[]      @default([])
+  role    MessageRole
+
+  lecture   Lecture? @relation(fields: [lectureId], references: [id], onDelete: Cascade)
+  lectureId String?  @db.Uuid
+  chat      Chat?    @relation(fields: [chatId], references: [id])
+  chatId    String?  @db.Uuid
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+model Account {
+  id                String  @id @default(dbgenerated("uuid_generate_v1()")) @db.Uuid
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  userId String @db.Uuid
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(dbgenerated("uuid_generate_v1()")) @db.Uuid
+  sessionToken String   @unique
+  expires      DateTime
+  userId       String   @db.Uuid
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String    @id @default(dbgenerated("uuid_generate_v1()")) @db.Uuid
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  role          UserRole  @default(USER)
+
+  accounts        Account[]
+  sessions        Session[]
+  signUpQuestions UserSignUpQuestion[]
+  lectures        Lecture[]
+  courses         Course[]
+  chats           Chat[]
+
+  // Stripe Subscription
+  stripeCustomerId       String?   @unique
+  stripeSubscriptionId   String?   @unique
+  stripePriceId          String?
+  stripeCurrentPeriodEnd DateTime?
+
+  // Emails
+  sentFreeTrialOfferEmailAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model UserSignUpQuestion {
+  id           String                 @id @default(dbgenerated("uuid_generate_v1()")) @db.Uuid
+  questionType UserSignUpQuestionType
+  answer       String
+
+  userId String? @db.Uuid
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
