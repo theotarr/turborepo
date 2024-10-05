@@ -7,7 +7,6 @@ import { EditorContent, JSONContent, useEditor } from "@tiptap/react";
 import { useDebouncedCallback } from "use-debounce";
 
 import { EditorBubbleMenu } from "./bubble-menu";
-import { defaultEditorContent } from "./default-content";
 import { defaultExtensions } from "./extensions";
 import { ImageResizer } from "./extensions/image-resizer";
 import { defaultEditorProps } from "./props";
@@ -19,7 +18,7 @@ import { useNotesStore } from "../notes-page";
 
 export default function Editor({
   className = "relative min-h-[500px] w-full max-w-screen-lg border-border bg-background sm:mb-[calc(20vh)]",
-  defaultValue = defaultEditorContent,
+  defaultValue,
   extensions = [],
   editorProps = {},
   onUpdate = () => {},
@@ -119,8 +118,7 @@ export default function Editor({
 
   useEffect(() => {
     if (!editor || hydrated) return;
-
-    editor.commands.setContent(defaultValue);
+    if (defaultValue) editor.commands.setContent(defaultValue);
     setEditor(editor); // initialize the editor in the zustand store so we can use it in other components
     setHydrated(true);
 
