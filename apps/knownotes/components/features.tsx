@@ -28,6 +28,7 @@ export function PrimaryFeatures() {
         </h2>
         <div className="mt-8 h-full rounded-t-lg border-x border-t bg-background shadow-sm">
           <Editor
+            immediatelyRender={false}
             className="pt-2"
             editable={false}
             autoFocus={false}
@@ -81,6 +82,7 @@ metaphysics, epistemology, ethics, logic
         </div>
         <div className="mt-8 h-full rounded-t-lg border-x border-t bg-background shadow-sm">
           <Editor
+            immediatelyRender={false}
             className="pb-16 pt-4"
             editable={false}
             autoFocus={false}
