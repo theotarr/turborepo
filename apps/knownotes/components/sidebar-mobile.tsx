@@ -1,7 +1,7 @@
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
-import { ChatHistory } from "./chat-history"
-import { SidebarToggleMobile, SidebarWrapper } from "./sidebar"
+import { ChatHistory } from "./chat-history";
+import { SidebarToggleMobile, SidebarWrapper } from "./sidebar";
 
 export function SidebarMobile({ userId }: { userId: string }) {
   return (
@@ -19,5 +19,5 @@ export function SidebarMobile({ userId }: { userId: string }) {
         </SidebarWrapper>
       </SheetContent>
     </Sheet>
-  )
+  );
 }

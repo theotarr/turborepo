@@ -1,29 +1,28 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { StreamableValue } from "ai/rsc"
-import rehypeRaw from "rehype-raw"
-import remarkGfm from "remark-gfm"
-import remarkMath from "remark-math"
+import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardTitle } from "@/components/ui/card";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { useStreamableText } from "@/hooks/use-streamable-text";
+import { cn, formatDate } from "@/lib/utils";
+import { StreamableValue } from "ai/rsc";
+import rehypeRaw from "rehype-raw";
+import remarkGfm from "remark-gfm";
+import remarkMath from "remark-math";
 
-import { cn, formatDate } from "@/lib/utils"
-import { useStreamableText } from "@/hooks/use-streamable-text"
-import { Badge } from "@/components/ui/badge"
-import { Card, CardTitle } from "@/components/ui/card"
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
-
-import { ChatMessageActions } from "./chat-message-actions"
-import { Icons } from "./icons"
-import { MemoizedReactMarkdown } from "./markdown"
-import { spinner } from "./spinner"
+import { ChatMessageActions } from "./chat-message-actions";
+import { Icons } from "./icons";
+import { MemoizedReactMarkdown } from "./markdown";
+import { spinner } from "./spinner";
 
 // Different types of message bubbles.
 export function UserMessage({
   children,
   className,
 }: {
-  children: React.ReactNode
-  className?: string
+  children: React.ReactNode;
+  className?: string;
 }) {
   return (
     <div className={cn("group relative flex items-start md:-ml-12", className)}>
@@ -35,7 +34,7 @@ export function UserMessage({
       </div>
       <ChatMessageActions content={children?.toString() as string} />
     </div>
-  )
+  );
 }
 
 export function BotMessage({
@@ -44,15 +43,15 @@ export function BotMessage({
   className,
 }: {
   sources?: {
-    id: string
-    title: string
-    source: string
-    date: string
-  }[]
-  content: string | StreamableValue<string>
-  className?: string
+    id: string;
+    title: string;
+    source: string;
+    date: string;
+  }[];
+  content: string | StreamableValue<string>;
+  className?: string;
 }) {
-  const text = useStreamableText(content)
+  const text = useStreamableText(content);
 
   return (
     <div className={cn("group relative flex items-start md:-ml-12", className)}>
@@ -92,12 +91,12 @@ export function BotMessage({
           </div>
         )}
         <MemoizedReactMarkdown
-          className="prose break-words dark:prose-invert prose-p:leading-relaxed prose-pre:p-0"
+          className="prose dark:prose-invert prose-p:leading-relaxed prose-pre:p-0 break-words"
           rehypePlugins={[rehypeRaw]}
           remarkPlugins={[remarkGfm, remarkMath]}
           components={{
             p({ children }) {
-              return <p className="mb-2 last:mb-0">{children}</p>
+              return <p className="mb-2 last:mb-0">{children}</p>;
             },
             // code({ node, inline, className, children, ...props }) {
             //   if (children.length) {
@@ -136,7 +135,7 @@ export function BotMessage({
       </div>
       <ChatMessageActions content={content.toString()} />
     </div>
-  )
+  );
 }
 
 export function SystemMessage({ children }: { children: React.ReactNode }) {
@@ -148,7 +147,7 @@ export function SystemMessage({ children }: { children: React.ReactNode }) {
     >
       <div className={"max-w-[600px] flex-initial p-2"}>{children}</div>
     </div>
-  )
+  );
 }
 
 export function SpinnerMessage() {
@@ -161,5 +160,5 @@ export function SpinnerMessage() {
         {spinner}
       </div>
     </div>
-  )
+  );
 }

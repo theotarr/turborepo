@@ -1,19 +1,18 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { Course } from "@prisma/client"
+import * as React from "react";
+import { createCourse } from "@/app/(auth)/actions";
+import { Icons } from "@/components/icons";
+import { buttonVariants } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
+import { Course } from "@prisma/client";
 
-import { cn } from "@/lib/utils"
-import { buttonVariants } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Icons } from "@/components/icons"
-import { createCourse } from "@/app/(auth)/actions"
-
-import { CourseItem } from "./course-item"
+import { CourseItem } from "./course-item";
 
 interface AddCoursesFormProps extends React.HTMLAttributes<HTMLDivElement> {
-  courses: Course[]
+  courses: Course[];
 }
 
 export function AddCoursesForm({
@@ -21,9 +20,9 @@ export function AddCoursesForm({
   className,
   ...props
 }: AddCoursesFormProps) {
-  const [isLoading, setIsLoading] = React.useState<boolean>(false)
-  const [courseName, setCourseName] = React.useState<string>("")
-  const [courseList, setCourseList] = React.useState<Course[]>(courses)
+  const [isLoading, setIsLoading] = React.useState<boolean>(false);
+  const [courseName, setCourseName] = React.useState<string>("");
+  const [courseList, setCourseList] = React.useState<Course[]>(courses);
 
   return (
     <div className={cn("space-y-6", className)} {...props}>
@@ -41,11 +40,11 @@ export function AddCoursesForm({
           />
           <button
             onClick={async () => {
-              setIsLoading(true)
-              const course = await createCourse(courseName)
-              setCourseList((prev) => [...prev, course])
-              setCourseName("")
-              setIsLoading(false)
+              setIsLoading(true);
+              const course = await createCourse(courseName);
+              setCourseList((prev) => [...prev, course]);
+              setCourseName("");
+              setIsLoading(false);
             }}
             className={cn(buttonVariants())}
             disabled={isLoading}
@@ -67,5 +66,5 @@ export function AddCoursesForm({
         <></>
       )}
     </div>
-  )
+  );
 }

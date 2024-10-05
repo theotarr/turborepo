@@ -1,11 +1,10 @@
-import Link from "next/link"
+import Link from "next/link";
+import { PricingSection } from "@/components/pricing";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { absoluteUrl } from "@/lib/utils";
 
-import { absoluteUrl } from "@/lib/utils"
-import { Button, buttonVariants } from "@/components/ui/button"
-import { PricingSection } from "@/components/pricing"
-
-const title = "Affiliate"
-const ogUrl = `${absoluteUrl("")}/api/og?heading=${title}&mode=light`
+const title = "Affiliate";
+const ogUrl = `${absoluteUrl("")}/api/og?heading=${title}&mode=light`;
 
 export const metadata = {
   title,
@@ -26,7 +25,7 @@ export const metadata = {
     title,
     images: [ogUrl],
   },
-}
+};
 
 const steps = [
   {
@@ -44,7 +43,7 @@ const steps = [
     description:
       "We'll send you commission via PayPal at the end of every month.",
   },
-]
+];
 
 export default function AffiliatePage() {
   return (
@@ -122,5 +121,5 @@ export default function AffiliatePage() {
         </div>
       </section>
     </div>
-  )
+  );
 }

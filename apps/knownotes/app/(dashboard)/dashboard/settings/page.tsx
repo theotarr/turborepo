@@ -1,19 +1,19 @@
-import { redirect } from "next/navigation"
-import { auth } from "@acme/auth"
+import { redirect } from "next/navigation";
+import { BillingForm } from "@/components/billing-form";
+import { DashboardHeader } from "@/components/header";
+import { DashboardShell } from "@/components/shell";
+import { UserNameForm } from "@/components/user-name-form";
+import { stripe } from "@/lib/stripe";
+import { getUserSubscriptionPlan } from "@/lib/subscription";
+import { absoluteUrl } from "@/lib/utils";
 
-import { stripe } from "@/lib/stripe"
-import { getUserSubscriptionPlan } from "@/lib/subscription"
-import { absoluteUrl } from "@/lib/utils"
-import { BillingForm } from "@/components/billing-form"
-import { DashboardHeader } from "@/components/header"
-import { DashboardShell } from "@/components/shell"
-import { UserNameForm } from "@/components/user-name-form"
+import { auth } from "@acme/auth";
 
-const title = "Settings"
-const description = "Manage your account settings."
+const title = "Settings";
+const description = "Manage your account settings.";
 const ogUrl = `${absoluteUrl("")}/api/og?heading=${
   description ?? title
-}&mode=light&type=${title}`
+}&mode=light&type=${title}`;
 
 export const metadata = {
   title,
@@ -37,22 +37,22 @@ export const metadata = {
     description,
     images: [ogUrl],
   },
-}
+};
 
 export default async function SettingsPage() {
-  const session = await auth()
-  if (!session) redirect("/login")
+  const session = await auth();
+  if (!session) redirect("/login");
 
-  const subscriptionPlan = await getUserSubscriptionPlan(session.user.id)
+  const subscriptionPlan = await getUserSubscriptionPlan(session.user.id);
 
   // If user has a paid plan, check cancel status on Stripe.
-  let cancelAtPeriodEnd = false
+  let cancelAtPeriodEnd = false;
 
   if (subscriptionPlan.isPro && subscriptionPlan.stripeSubscriptionId) {
     const stripePlan = await stripe.subscriptions.retrieve(
-      subscriptionPlan.stripeSubscriptionId
-    )
-    cancelAtPeriodEnd = stripePlan.cancel_at_period_end
+      subscriptionPlan.stripeSubscriptionId,
+    );
+    cancelAtPeriodEnd = stripePlan.cancel_at_period_end;
   }
 
   return (
@@ -80,5 +80,5 @@ export default async function SettingsPage() {
         {/* <UserDeleteForm user={{ id: user.id }} /> */}
       </div>
     </DashboardShell>
-  )
+  );
 }

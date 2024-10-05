@@ -1,28 +1,28 @@
-import { redirect } from "next/navigation"
-import { auth } from "@acme/auth"
-
-import { db } from "@/lib/db"
-import { absoluteUrl } from "@/lib/utils"
-import { buttonVariants } from "@/components/ui/button"
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
-import { CourseCard } from "@/components/course-card"
-import { CourseCreateDialog } from "@/components/course-create-dialog"
-import { EmptyPlaceholder } from "@/components/empty-placeholder"
-import { DashboardHeader } from "@/components/header"
-import { LectureCreateDialog } from "@/components/lecture-create-dialog"
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { CourseCard } from "@/components/course-card";
+import { CourseCreateDialog } from "@/components/course-create-dialog";
+import { EmptyPlaceholder } from "@/components/empty-placeholder";
+import { DashboardHeader } from "@/components/header";
+import { LectureCreateDialog } from "@/components/lecture-create-dialog";
+import { LectureItem } from "@/components/lecture-item";
 import {
   QuickChat,
   QuickLecture,
   QuickYoutubeImport as QuickUpload,
-} from "@/components/quick-action-new"
-import { DashboardShell } from "@/components/shell"
-import { LectureItem } from "@/components/lecture-item"
-import Link from "next/link"
-import { Course } from "@prisma/client"
+} from "@/components/quick-action-new";
+import { DashboardShell } from "@/components/shell";
+import { buttonVariants } from "@/components/ui/button";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { db } from "@/lib/db";
+import { absoluteUrl } from "@/lib/utils";
+import { Course } from "@prisma/client";
 
-const title = "Dashboard"
-const ogUrl = `${absoluteUrl("")}/api/og?heading=${title}&mode=light`
-const description = "Manage your lectures and courses."
+import { auth } from "@acme/auth";
+
+const title = "Dashboard";
+const ogUrl = `${absoluteUrl("")}/api/og?heading=${title}&mode=light`;
+const description = "Manage your lectures and courses.";
 
 export const metadata = {
   title,
@@ -49,11 +49,11 @@ export const metadata = {
     description,
     images: [ogUrl],
   },
-}
+};
 
 export default async function DashboardPage() {
-  const session = await auth()
-  if (!session) redirect("/login")
+  const session = await auth();
+  if (!session) redirect("/login");
 
   const user = await db.user.findUnique({
     where: { id: session.user.id },
@@ -66,7 +66,7 @@ export default async function DashboardPage() {
         },
       },
     },
-  })
+  });
   const lectures = await db.lecture.findMany({
     where: { userId: session.user.id },
     include: {
@@ -75,7 +75,7 @@ export default async function DashboardPage() {
     // Limit to 6 lectures, otherwise with a ton of lectures and transcripts the request will time out or exceed maximum request size for 1 request.
     take: 6,
     orderBy: { updatedAt: "desc" },
-  })
+  });
 
   return (
     <DashboardShell>
@@ -167,5 +167,5 @@ export default async function DashboardPage() {
         </EmptyPlaceholder>
       )}
     </DashboardShell>
-  )
+  );
 }

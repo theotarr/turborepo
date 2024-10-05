@@ -1,11 +1,8 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { Course } from "@prisma/client"
-import { toast } from "sonner"
-
-import { cn } from "@/lib/utils"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Icons } from "@/components/icons";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,8 +13,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
-import { buttonVariants } from "@/components/ui/button"
+} from "@/components/ui/alert-dialog";
+import { buttonVariants } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -26,31 +23,33 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
+} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Icons } from "@/components/icons"
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
+import { Course } from "@prisma/client";
+import { toast } from "sonner";
 
 async function deleteCourse(courseId: string) {
   const response = await fetch(`/api/course/${courseId}`, {
     method: "DELETE",
-  })
+  });
 
   if (!response?.ok) {
     toast.error(
-      "Something went wrong. Your course was not deleted. Please try again."
-    )
-    return false
+      "Something went wrong. Your course was not deleted. Please try again.",
+    );
+    return false;
   }
 
-  return true
+  return true;
 }
 
 async function updateCourse(courseId: string, name: string) {
@@ -62,30 +61,30 @@ async function updateCourse(courseId: string, name: string) {
     body: JSON.stringify({
       name,
     }),
-  })
+  });
 
   if (!response?.ok) {
     toast.error(
-      "Something went wrong. Your course was not updated. Please try again."
-    )
-    return false
+      "Something went wrong. Your course was not updated. Please try again.",
+    );
+    return false;
   }
 
-  return true
+  return true;
 }
 
 interface CourseOperationsProps {
-  course: Course
+  course: Course;
 }
 
 export function CourseOperations({ course }: CourseOperationsProps) {
-  const router = useRouter()
+  const router = useRouter();
 
-  const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false)
-  const [isDeleteLoading, setIsDeleteLoading] = useState(false)
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
-  const [isUpdateLoading, setIsUpdateLoading] = useState(false)
-  const [courseName, setCourseName] = useState<string>(course.name)
+  const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
+  const [isDeleteLoading, setIsDeleteLoading] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isUpdateLoading, setIsUpdateLoading] = useState(false);
+  const [courseName, setCourseName] = useState<string>(course.name);
 
   return (
     <>
@@ -130,13 +129,13 @@ export function CourseOperations({ course }: CourseOperationsProps) {
                 <button
                   className={cn(buttonVariants())}
                   onClick={async (event) => {
-                    event.preventDefault()
-                    setIsUpdateLoading(true)
-                    const updated = await updateCourse(course.id, courseName)
+                    event.preventDefault();
+                    setIsUpdateLoading(true);
+                    const updated = await updateCourse(course.id, courseName);
                     if (updated) {
-                      setIsUpdateLoading(false)
-                      setIsEditDialogOpen(false)
-                      router.refresh()
+                      setIsUpdateLoading(false);
+                      setIsEditDialogOpen(false);
+                      router.refresh();
                     }
                   }}
                   disabled={isUpdateLoading}
@@ -175,14 +174,14 @@ export function CourseOperations({ course }: CourseOperationsProps) {
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
                 <AlertDialogAction
                   onClick={async (event) => {
-                    event.preventDefault()
-                    setIsDeleteLoading(true)
-                    const deleted = await deleteCourse(course.id)
+                    event.preventDefault();
+                    setIsDeleteLoading(true);
+                    const deleted = await deleteCourse(course.id);
                     if (deleted) {
-                      setIsDeleteLoading(false)
-                      setIsDeleteAlertOpen(false)
-                      router.push("/dashboard")
-                      router.refresh()
+                      setIsDeleteLoading(false);
+                      setIsDeleteAlertOpen(false);
+                      router.push("/dashboard");
+                      router.refresh();
                     }
                   }}
                   className="bg-red-600 focus:ring-red-600"
@@ -200,5 +199,5 @@ export function CourseOperations({ course }: CourseOperationsProps) {
         </DropdownMenuContent>
       </DropdownMenu>
     </>
-  )
+  );
 }

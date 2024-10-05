@@ -1,19 +1,18 @@
-import * as React from "react"
+import * as React from "react";
+import { SidebarList } from "@/components/sidebar-list";
+import { supabase } from "@/lib/supabase";
 
-import { supabase } from "@/lib/supabase"
-import { SidebarList } from "@/components/sidebar-list"
-
-import { ChatCreateDialog } from "./chat-create-dialog"
+import { ChatCreateDialog } from "./chat-create-dialog";
 
 interface ChatHistoryProps {
-  userId: string
+  userId: string;
 }
 
 export async function ChatHistory({ userId }: ChatHistoryProps) {
   const { data: courses } = await supabase // This runs on the edge, so we can't use Prisma.
     .from("Course")
     .select("id, name")
-    .eq("userId", userId)
+    .eq("userId", userId);
 
   return (
     <div className="flex h-full flex-col">
@@ -36,5 +35,5 @@ export async function ChatHistory({ userId }: ChatHistoryProps) {
         <SidebarList userId={userId} />
       </React.Suspense>
     </div>
-  )
+  );
 }

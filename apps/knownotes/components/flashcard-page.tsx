@@ -1,84 +1,85 @@
-"use client"
+"use client";
 
-import { Course, Lecture } from "@prisma/client"
-import { useEffect } from "react"
-import { generateFlashcards } from "@/lib/lecture/flashcards"
-import { readStreamableValue } from "ai/rsc"
-import { Transcript } from "@/types"
-import { FlashcardItem } from "./flashcard-item"
-import { create } from "zustand"
-import { FlashcardArray } from "react-quizlet-flashcard"
+import { useEffect } from "react";
+import { generateFlashcards } from "@/lib/lecture/flashcards";
+import { Transcript } from "@/types";
+import { Course, Lecture } from "@prisma/client";
+import { readStreamableValue } from "ai/rsc";
+import { FlashcardArray } from "react-quizlet-flashcard";
+import { create } from "zustand";
+
+import { FlashcardItem } from "./flashcard-item";
 
 interface FlashcardPageProps {
   lecture: Lecture & {
-    course: Course
+    course: Course;
     flashcards: {
-      id: string
-      term: string
-      definition: string
-    }[]
-  }
+      id: string;
+      term: string;
+      definition: string;
+    }[];
+  };
 }
 
 export const useFlashcardStore = create<{
   flashcards: {
-    id: string
-    term: string
-    definition: string
-  }[]
+    id: string;
+    term: string;
+    definition: string;
+  }[];
   setFlashcards: (
-    flashcards: { id: string; term: string; definition: string }[]
-  ) => void
-  updateFlashcard: (id: string, term: string, definition: string) => void
-  deleteFlashcard: (id: string) => void
+    flashcards: { id: string; term: string; definition: string }[],
+  ) => void;
+  updateFlashcard: (id: string, term: string, definition: string) => void;
+  deleteFlashcard: (id: string) => void;
 }>((set) => ({
   flashcards: [],
   setFlashcards: (flashcards) => set({ flashcards }),
   updateFlashcard: (id, term, definition) => {
     set((state) => {
-      const flashcard = state.flashcards.find((card) => card.id === id)
-      if (!flashcard) return state
+      const flashcard = state.flashcards.find((card) => card.id === id);
+      if (!flashcard) return state;
 
-      flashcard.term = term
-      flashcard.definition = definition
+      flashcard.term = term;
+      flashcard.definition = definition;
 
-      return { flashcards: state.flashcards }
-    })
+      return { flashcards: state.flashcards };
+    });
   },
   deleteFlashcard: (id) => {
     set((state) => {
-      const flashcards = state.flashcards.filter((card) => card.id !== id)
-      return { flashcards }
-    })
+      const flashcards = state.flashcards.filter((card) => card.id !== id);
+      return { flashcards };
+    });
   },
-}))
+}));
 
 export const FlashcardPage = ({ lecture }: FlashcardPageProps) => {
-  const { flashcards, setFlashcards } = useFlashcardStore()
+  const { flashcards, setFlashcards } = useFlashcardStore();
 
   // On page load, check if any flashcards exist, if not, stream generate them.
   useEffect(() => {
     async function generate() {
       const object = await generateFlashcards(
         lecture.id,
-        lecture.transcript as any as Transcript[]
-      )
+        lecture.transcript as any as Transcript[],
+      );
 
       for await (const partialObject of readStreamableValue(object)) {
         if (partialObject) {
-          setFlashcards(partialObject.flashcards)
+          setFlashcards(partialObject.flashcards);
         }
       }
     }
 
     if (lecture.flashcards.length === 0) {
-      generate()
+      generate();
     } else {
-      setFlashcards(lecture.flashcards)
+      setFlashcards(lecture.flashcards);
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, []);
 
   return (
     <div className="my-16 flex flex-col items-center space-y-6 pb-16">
@@ -131,5 +132,5 @@ export const FlashcardPage = ({ lecture }: FlashcardPageProps) => {
           ))}
       </div>
     </div>
-  )
-}
+  );
+};

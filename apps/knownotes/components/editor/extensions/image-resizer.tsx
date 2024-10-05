@@ -1,20 +1,20 @@
-import Moveable from "react-moveable"
+import Moveable from "react-moveable";
 
 export const ImageResizer = ({ editor }) => {
   const updateMediaSize = () => {
     const imageInfo = document.querySelector(
-      ".ProseMirror-selectednode"
-    ) as HTMLImageElement
+      ".ProseMirror-selectednode",
+    ) as HTMLImageElement;
     if (imageInfo) {
-      const selection = editor.state.selection
+      const selection = editor.state.selection;
       editor.commands.setImage({
         src: imageInfo.src,
         width: Number(imageInfo.style.width.replace("px", "")),
         height: Number(imageInfo.style.height.replace("px", "")),
-      })
-      editor.commands.setNodeSelection(selection.from)
+      });
+      editor.commands.setNodeSelection(selection.from);
     }
-  }
+  };
 
   return (
     <>
@@ -41,12 +41,12 @@ export const ImageResizer = ({ editor }) => {
         // clientX,
         // clientY,
         any) => {
-          delta[0] && (target!.style.width = `${width}px`)
-          delta[1] && (target!.style.height = `${height}px`)
+          delta[0] && (target!.style.width = `${width}px`);
+          delta[1] && (target!.style.height = `${height}px`);
         }}
         // { target, isDrag, clientX, clientY }: any
         onResizeEnd={() => {
-          updateMediaSize()
+          updateMediaSize();
         }}
         /* scalable */
         /* Only one of resizable, scalable, warpable can be used. */
@@ -63,9 +63,9 @@ export const ImageResizer = ({ editor }) => {
         }: // clientX,
         // clientY,
         any) => {
-          target!.style.transform = transform
+          target!.style.transform = transform;
         }}
       />
     </>
-  )
-}
+  );
+};

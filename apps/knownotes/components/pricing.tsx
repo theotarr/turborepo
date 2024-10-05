@@ -1,13 +1,12 @@
-"use client"
+"use client";
 
-import { useEffect } from "react"
-import Link from "next/link"
-
-import { proPlan } from "@/config/subscriptions"
-import { sendGAEvent } from "@/lib/analytics"
-import { cn } from "@/lib/utils"
-import { buttonVariants } from "@/components/ui/button"
-import { Icons } from "@/components/icons"
+import { useEffect } from "react";
+import Link from "next/link";
+import { Icons } from "@/components/icons";
+import { buttonVariants } from "@/components/ui/button";
+import { proPlan } from "@/config/subscriptions";
+import { sendGAEvent } from "@/lib/analytics";
+import { cn } from "@/lib/utils";
 
 const paidPlan = {
   name: "KnowNotes Pro",
@@ -22,7 +21,7 @@ const paidPlan = {
     "Unlimited AI quizzes",
   ],
   buttonText: "Get Started",
-}
+};
 
 export function PricingSection() {
   return (
@@ -38,31 +37,31 @@ export function PricingSection() {
         <PricingCard />
       </div>
     </section>
-  )
+  );
 }
 
 export function PricingCard({
   className,
   ...props
 }: {
-  className?: string
-  [key: string]: any
+  className?: string;
+  [key: string]: any;
 }) {
   useEffect(() => {
     const handleScroll = () => {
-      const pricingCard = document.getElementById("pricing-card")
+      const pricingCard = document.getElementById("pricing-card");
       if (pricingCard) {
-        const rect = pricingCard.getBoundingClientRect()
-        const isVisible = rect.top < window.innerHeight && rect.bottom >= 0
-        if (isVisible) sendGAEvent("event", "scroll_to_pricing_card")
+        const rect = pricingCard.getBoundingClientRect();
+        const isVisible = rect.top < window.innerHeight && rect.bottom >= 0;
+        if (isVisible) sendGAEvent("event", "scroll_to_pricing_card");
       }
-    }
+    };
 
-    window.addEventListener("scroll", handleScroll)
+    window.addEventListener("scroll", handleScroll);
     return () => {
-      window.removeEventListener("scroll", handleScroll)
-    }
-  }, [])
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
 
   return (
     <div className={className} {...props}>
@@ -85,7 +84,7 @@ export function PricingCard({
             Offer valid until
             <span className="ml-1 font-semibold text-primary">
               {new Date(
-                Date.now() + 2 * 24 * 60 * 60 * 1000
+                Date.now() + 2 * 24 * 60 * 60 * 1000,
               ).toLocaleDateString("en-US", { month: "long", day: "numeric" })}
             </span>
           </div>
@@ -93,7 +92,7 @@ export function PricingCard({
             href="/login"
             className={cn(
               buttonVariants({ variant: "shadow", size: "lg" }),
-              "mx-8 mt-4 inline-flex h-14 rounded-xl px-3 py-2 text-center text-xl font-semibold leading-6"
+              "mx-8 mt-4 inline-flex h-14 rounded-xl px-3 py-2 text-center text-xl font-semibold leading-6",
             )}
           >
             {paidPlan.buttonText}
@@ -121,5 +120,5 @@ export function PricingCard({
         </div>
       </div>
     </div>
-  )
+  );
 }

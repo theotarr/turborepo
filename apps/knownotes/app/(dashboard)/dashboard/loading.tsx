@@ -1,9 +1,9 @@
-import { Button } from "@/components/ui/button"
-import { DashboardHeader } from "@/components/header"
-import { Icons } from "@/components/icons"
-import { LectureItem } from "@/components/lecture-item"
-import { DashboardShell } from "@/components/shell"
-import { ListItemSkeleton } from "@/components/list-item-skeleton"
+import { DashboardHeader } from "@/components/header";
+import { Icons } from "@/components/icons";
+import { LectureItem } from "@/components/lecture-item";
+import { ListItemSkeleton } from "@/components/list-item-skeleton";
+import { DashboardShell } from "@/components/shell";
+import { Button } from "@/components/ui/button";
 
 export default function DashboardLoading() {
   return (
@@ -25,5 +25,5 @@ export default function DashboardLoading() {
         <ListItemSkeleton />
       </div>
     </DashboardShell>
-  )
+  );
 }

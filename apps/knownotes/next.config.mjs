@@ -1,10 +1,10 @@
-import { fileURLToPath } from "url"
-import createJiti from "jiti"
+import { fileURLToPath } from "url";
+import createJiti from "jiti";
 // import withBundleAnalyzer from "@next/bundle-analyzer"
-import { withContentlayer } from "next-contentlayer"
+import { withContentlayer } from "next-contentlayer";
 
 // Import env files to validate at build time. Use jiti so we can load .ts files in here.
-createJiti(fileURLToPath(import.meta.url))("./env")
+createJiti(fileURLToPath(import.meta.url))("./env");
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -27,13 +27,13 @@ const nextConfig = {
     config.experiments = {
       ...config.experiments,
       topLevelAwait: true,
-    }
-    return config
+    };
+    return config;
   },
   images: {
     domains: ["cdn.loom.com"],
   },
-}
+};
 
 // export default withBundleAnalyzer(withContentlayer(nextConfig))
-export default withContentlayer(nextConfig)
+export default withContentlayer(nextConfig);

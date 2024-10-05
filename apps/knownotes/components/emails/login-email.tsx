@@ -11,9 +11,9 @@ import {
   Section,
   Tailwind,
   Text,
-} from "@react-email/components"
+} from "@react-email/components";
 
-import { tailwindEmailConfig } from "./tailwind-email-theme"
+import { tailwindEmailConfig } from "./tailwind-email-theme";
 
 export default function LoginEmail({ url }: { url: string }) {
   return (
@@ -57,5 +57,5 @@ export default function LoginEmail({ url }: { url: string }) {
         </Body>
       </Tailwind>
     </Html>
-  )
+  );
 }

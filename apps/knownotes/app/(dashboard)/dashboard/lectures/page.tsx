@@ -1,25 +1,25 @@
-import { Metadata } from "next"
-import Link from "next/link"
-import { auth } from "@acme/auth"
-import { Course, Lecture } from "@prisma/client"
+import { Metadata } from "next";
+import Link from "next/link";
+import { EmptyPlaceholder } from "@/components/empty-placeholder";
+import { DashboardHeader } from "@/components/header";
+import { Icons } from "@/components/icons";
+import { LectureItem } from "@/components/lecture-item";
+import { DashboardShell } from "@/components/shell";
+import { Button } from "@/components/ui/button";
+import { env } from "@/env";
+import { db } from "@/lib/db";
+import { Course, Lecture } from "@prisma/client";
 
-import { env } from "@/env"
-import { db } from "@/lib/db"
-import { Button } from "@/components/ui/button"
-import { EmptyPlaceholder } from "@/components/empty-placeholder"
-import { DashboardHeader } from "@/components/header"
-import { Icons } from "@/components/icons"
-import { LectureItem } from "@/components/lecture-item"
-import { DashboardShell } from "@/components/shell"
+import { auth } from "@acme/auth";
 
-const title = "Lectures"
-const description = "View and manage your lectures."
+const title = "Lectures";
+const description = "View and manage your lectures.";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const ogUrl = new URL(`${env.NEXT_PUBLIC_APP_URL}/api/og`)
-  ogUrl.searchParams.set("heading", "Your Lectures")
-  ogUrl.searchParams.set("type", "Course")
-  ogUrl.searchParams.set("mode", "light")
+  const ogUrl = new URL(`${env.NEXT_PUBLIC_APP_URL}/api/og`);
+  ogUrl.searchParams.set("heading", "Your Lectures");
+  ogUrl.searchParams.set("type", "Course");
+  ogUrl.searchParams.set("mode", "light");
 
   return {
     title,
@@ -43,11 +43,11 @@ export async function generateMetadata(): Promise<Metadata> {
       description,
       images: [ogUrl.toString()],
     },
-  }
+  };
 }
 
 export default async function LecturesPage() {
-  const session = await auth()
+  const session = await auth();
   const user = await db.user.findUnique({
     where: { id: session?.user.id },
     include: {
@@ -63,7 +63,7 @@ export default async function LecturesPage() {
       },
       courses: true,
     },
-  })
+  });
 
   return (
     <DashboardShell>
@@ -106,5 +106,5 @@ export default async function LecturesPage() {
         )}
       </div>
     </DashboardShell>
-  )
+  );
 }

@@ -1,5 +1,10 @@
-import { Dispatch, FC, SetStateAction } from "react"
-import { Editor } from "@tiptap/core"
+import { Dispatch, FC, SetStateAction } from "react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Editor } from "@tiptap/core";
 import {
   Check,
   CheckSquare,
@@ -11,20 +16,14 @@ import {
   ListOrdered,
   TextIcon,
   TextQuote,
-} from "lucide-react"
+} from "lucide-react";
 
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
-
-import { BubbleMenuItem } from "."
+import { BubbleMenuItem } from ".";
 
 interface NodeSelectorProps {
-  editor: Editor
-  isOpen: boolean
-  setIsOpen: Dispatch<SetStateAction<boolean>>
+  editor: Editor;
+  isOpen: boolean;
+  setIsOpen: Dispatch<SetStateAction<boolean>>;
 }
 
 export const NodeSelector: FC<NodeSelectorProps> = ({
@@ -98,11 +97,11 @@ export const NodeSelector: FC<NodeSelectorProps> = ({
       command: () => editor.chain().focus().toggleCodeBlock().run(),
       isActive: () => editor.isActive("codeBlock"),
     },
-  ]
+  ];
 
   const activeItem = items.filter((item) => item.isActive()).pop() ?? {
     name: "Multiple",
-  }
+  };
 
   return (
     <Popover open={isOpen}>
@@ -123,8 +122,8 @@ export const NodeSelector: FC<NodeSelectorProps> = ({
             <button
               key={index}
               onClick={() => {
-                item.command()
-                setIsOpen(false)
+                item.command();
+                setIsOpen(false);
               }}
               className="flex items-center justify-between rounded-sm px-2 py-1 text-sm text-secondary-foreground hover:bg-secondary"
               type="button"
@@ -141,5 +140,5 @@ export const NodeSelector: FC<NodeSelectorProps> = ({
         </PopoverContent>
       </div>
     </Popover>
-  )
-}
+  );
+};

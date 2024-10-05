@@ -1,31 +1,31 @@
-"use client"
+"use client";
 
-import { useMount } from "react-use"
-import TiktokPixel from "tiktok-pixel"
+import { useMount } from "react-use";
+import TiktokPixel from "tiktok-pixel";
 
 declare global {
   interface Window {
-    dataLayer?: Object[]
+    dataLayer?: Object[];
   }
 }
 
-const TIKTOK_PIXEL_ID = "COH8383C77UC70DIPSOG"
+const TIKTOK_PIXEL_ID = "COH8383C77UC70DIPSOG";
 
 export function Analytics({
   userId,
   email,
 }: {
-  userId?: string
-  email?: string
+  userId?: string;
+  email?: string;
 }) {
   useMount(() => {
     // push the user id to google analytics (the datalayer)
     if (userId) {
-      window.dataLayer = window.dataLayer || []
+      window.dataLayer = window.dataLayer || [];
       window.dataLayer.push({
         event: "login",
         userId,
-      })
+      });
     }
 
     // Initialize Tiktok Pixel
@@ -36,8 +36,8 @@ export function Analytics({
       },
       {
         debug: true,
-      }
-    )
-  })
-  return <></>
+      },
+    );
+  });
+  return <></>;
 }

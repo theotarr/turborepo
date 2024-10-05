@@ -1,29 +1,29 @@
-import { redirect } from "next/navigation"
-import { auth } from "@acme/auth"
-
-import { chatConfig } from "@/config/chat"
-import { getUserSubscriptionPlan } from "@/lib/subscription"
+import { redirect } from "next/navigation";
 // import { getUserSubscriptionPlan } from "@/lib/subscription";
-import { MainNav } from "@/components/main-nav"
-import { PaymentDialog } from "@/components/payment-dialog"
-import { SidebarDesktop } from "@/components/sidebar-desktop"
-import { UserAccountNav } from "@/components/user-account-nav"
+import { MainNav } from "@/components/main-nav";
+import { PaymentDialog } from "@/components/payment-dialog";
+import { SidebarDesktop } from "@/components/sidebar-desktop";
+import { UserAccountNav } from "@/components/user-account-nav";
+import { chatConfig } from "@/config/chat";
+import { getUserSubscriptionPlan } from "@/lib/subscription";
+
+import { auth } from "@acme/auth";
 
 interface ChatLayoutProps {
-  children?: React.ReactNode
+  children?: React.ReactNode;
 }
 
 export default async function ChatLayout({ children }: ChatLayoutProps) {
-  const session = await auth()
-  if (!session) return redirect("/login")
+  const session = await auth();
+  if (!session) return redirect("/login");
 
-  const subscription = await getUserSubscriptionPlan(session.user.id)
+  const subscription = await getUserSubscriptionPlan(session.user.id);
 
   if (
     subscription.stripeSubscriptionId &&
     subscription.stripeCurrentPeriodEnd < new Date().getTime()
   )
-    return redirect("/dashboard/settings")
+    return redirect("/dashboard/settings");
 
   return (
     <>
@@ -56,5 +56,5 @@ export default async function ChatLayout({ children }: ChatLayoutProps) {
         </main>
       </div>
     </>
-  )
+  );
 }

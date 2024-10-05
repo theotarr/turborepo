@@ -1,17 +1,16 @@
-import React from "react"
-import Link from "next/link"
-import { X } from "lucide-react"
+import React from "react";
+import Link from "next/link";
+import { cn } from "@/lib/utils";
+import { X } from "lucide-react";
 
-import { cn } from "@/lib/utils"
-
-import { buttonVariants } from "./ui/button"
+import { buttonVariants } from "./ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "./ui/card"
+} from "./ui/card";
 
 interface StaticAffiliateCardProps
   extends React.HTMLAttributes<HTMLDivElement> {}
@@ -38,7 +37,7 @@ export function StaticAffiliateCard({
               size: "sm",
               variant: "default",
             }),
-            "w-full"
+            "w-full",
           )}
           target="_blank"
           href="https://affiliates.knownotes.ai"
@@ -47,12 +46,12 @@ export function StaticAffiliateCard({
         </Link>
       </CardContent>
     </Card>
-  )
+  );
 }
 
 interface AffiliateCardProps extends React.HTMLAttributes<HTMLDivElement> {
-  open: boolean
-  onClose: () => void
+  open: boolean;
+  onClose: () => void;
 }
 
 export function AffiliateCard({
@@ -66,7 +65,7 @@ export function AffiliateCard({
       className={cn(
         "absolute bottom-4 right-4 z-50",
         className,
-        !open && "hidden"
+        !open && "hidden",
       )}
       {...props}
     >
@@ -90,7 +89,7 @@ export function AffiliateCard({
               size: "sm",
               variant: "default",
             }),
-            "w-full"
+            "w-full",
           )}
           target="_blank"
           href="https://affiliates.knownotes.ai"
@@ -99,5 +98,5 @@ export function AffiliateCard({
         </Link>
       </CardContent>
     </Card>
-  )
+  );
 }

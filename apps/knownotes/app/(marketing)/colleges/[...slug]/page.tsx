@@ -1,31 +1,29 @@
-import { notFound } from "next/navigation"
-import { allColleges } from "contentlayer/generated"
+import { notFound } from "next/navigation";
+import { allColleges } from "contentlayer/generated";
 
-import "@/styles/mdx.css"
-import { Metadata } from "next"
-import Image from "next/image"
-import Link from "next/link"
+import "@/styles/mdx.css";
 
-import { env } from "@/env"
-import { absoluteUrl, cn } from "@/lib/utils"
-import { Button, buttonVariants } from "@/components/ui/button"
-import { PrimaryFeatures } from "@/components/features"
-import { PricingCard } from "@/components/pricing"
-import { TrustPilot } from "@/components/trust-pilot"
-
-import AmericanLogo from "@/assets/images/institutions/american.png"
-import BerkelyLogo from "@/assets/images/institutions/berkeley.png"
-import HarvardLogo from "@/assets/images/institutions/harvard.png"
-import McGillLogo from "@/assets/images/institutions/mcgill.png"
-import MITLogo from "@/assets/images/institutions/mit.png"
-import NYULogo from "@/assets/images/institutions/nyu.png"
-import PrincetonLogo from "@/assets/images/institutions/princeton.png"
-import StanfordLogo from "@/assets/images/institutions/stanford.png"
-import YaleLogo from "@/assets/images/institutions/yale.png"
-
-import { InfiniteMovingCards } from "@/components/ui/infinite-scroll"
-import { FaqArray } from "@/components/faq"
-import { ReviewGrid } from "@/components/testimonials"
+import { Metadata } from "next";
+import Image from "next/image";
+import Link from "next/link";
+import AmericanLogo from "@/assets/images/institutions/american.png";
+import BerkelyLogo from "@/assets/images/institutions/berkeley.png";
+import HarvardLogo from "@/assets/images/institutions/harvard.png";
+import McGillLogo from "@/assets/images/institutions/mcgill.png";
+import MITLogo from "@/assets/images/institutions/mit.png";
+import NYULogo from "@/assets/images/institutions/nyu.png";
+import PrincetonLogo from "@/assets/images/institutions/princeton.png";
+import StanfordLogo from "@/assets/images/institutions/stanford.png";
+import YaleLogo from "@/assets/images/institutions/yale.png";
+import { FaqArray } from "@/components/faq";
+import { PrimaryFeatures } from "@/components/features";
+import { PricingCard } from "@/components/pricing";
+import { ReviewGrid } from "@/components/testimonials";
+import { TrustPilot } from "@/components/trust-pilot";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { InfiniteMovingCards } from "@/components/ui/infinite-scroll";
+import { env } from "@/env";
+import { absoluteUrl, cn } from "@/lib/utils";
 
 const institutionImages = [
   <Image
@@ -109,43 +107,43 @@ const institutionImages = [
       height: "auto",
     }}
   />,
-]
+];
 
 interface CollegePageProps {
   params: {
-    slug: string[]
-  }
+    slug: string[];
+  };
 }
 
 async function getCollegeFromParams(params) {
-  const slug = params?.slug?.join("/")
-  const college = allColleges.find((post) => post.slugAsParams === slug)
+  const slug = params?.slug?.join("/");
+  const college = allColleges.find((post) => post.slugAsParams === slug);
 
   if (!college) {
-    null
+    null;
   }
 
-  return college
+  return college;
 }
 
 export async function generateMetadata({
   params,
 }: CollegePageProps): Promise<Metadata> {
-  const college = await getCollegeFromParams(params)
+  const college = await getCollegeFromParams(params);
 
   if (!college) {
-    return {}
+    return {};
   }
 
-  const url = env.NEXT_PUBLIC_APP_URL
+  const url = env.NEXT_PUBLIC_APP_URL;
 
-  const ogUrl = new URL(`${url}/api/og`)
-  ogUrl.searchParams.set("heading", college.title)
-  ogUrl.searchParams.set("type", "College")
-  ogUrl.searchParams.set("mode", "light")
+  const ogUrl = new URL(`${url}/api/og`);
+  ogUrl.searchParams.set("heading", college.title);
+  ogUrl.searchParams.set("type", "College");
+  ogUrl.searchParams.set("mode", "light");
 
-  const title = `KnowNotes x ${college.title}`
-  const description = `KnowNotes x ${college.title}`
+  const title = `KnowNotes x ${college.title}`;
+  const description = `KnowNotes x ${college.title}`;
 
   return {
     title,
@@ -170,7 +168,7 @@ export async function generateMetadata({
       description,
       images: [ogUrl.toString()],
     },
-  }
+  };
 }
 
 export async function generateStaticParams(): Promise<
@@ -178,14 +176,14 @@ export async function generateStaticParams(): Promise<
 > {
   return allColleges.map((post) => ({
     slug: post.slugAsParams.split("/"),
-  }))
+  }));
 }
 
 export default async function CollegePage({ params }: CollegePageProps) {
-  const college = await getCollegeFromParams(params)
+  const college = await getCollegeFromParams(params);
 
   if (!college) {
-    notFound()
+    notFound();
   }
 
   return (
@@ -205,7 +203,7 @@ export default async function CollegePage({ params }: CollegePageProps) {
               href="/login"
               className={cn(
                 buttonVariants({ size: "lg", variant: "shadow" }),
-                "h-12 w-56 rounded-lg text-base font-semibold"
+                "h-12 w-56 rounded-lg text-base font-semibold",
               )}
             >
               Get Started
@@ -305,5 +303,5 @@ export default async function CollegePage({ params }: CollegePageProps) {
         </div>
       </section>
     </>
-  )
+  );
 }

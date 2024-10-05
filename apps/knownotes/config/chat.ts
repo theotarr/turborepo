@@ -1,4 +1,4 @@
-import { ChatConfig } from "types"
+import { ChatConfig } from "types";
 
 export const chatConfig: ChatConfig = {
   mainNav: [
@@ -20,4 +20,4 @@ export const chatConfig: ChatConfig = {
     },
   ],
   sidebarNav: [],
-}
+};

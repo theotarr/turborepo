@@ -1,22 +1,22 @@
-"use server"
+"use server";
 
-import { Transcript } from "@/types"
-import { createStreamableValue } from "ai/rsc"
-import { streamObject } from "ai"
-import { openai } from "@ai-sdk/openai"
+import { supabase } from "@/lib/supabase";
+import { Transcript } from "@/types";
+import { openai } from "@ai-sdk/openai";
+import { streamObject } from "ai";
+import { createStreamableValue } from "ai/rsc";
+import { z } from "zod";
 
-import { supabase } from "@/lib/supabase"
+import { auth } from "@acme/auth";
 
-import { formatTranscript } from "../utils"
-import { auth } from "@acme/auth"
-import { z } from "zod"
+import { formatTranscript } from "../utils";
 
 export async function generateQuiz(
   lectureId: string,
-  transcript: Transcript[]
+  transcript: Transcript[],
 ) {
-  const session = await auth()
-  if (!session) throw new Error("User not authenticated")
+  const session = await auth();
+  if (!session) throw new Error("User not authenticated");
 
   // Verify the user has access to the lecture.
   const { data: lecture, error } = await supabase
@@ -24,13 +24,13 @@ export async function generateQuiz(
     .select()
     .eq("id", lectureId)
     .eq("userId", session.user.id)
-    .single()
-  if (error) throw error
-  if (!lecture) throw new Error("Lecture not found")
+    .single();
+  if (error) throw error;
+  if (!lecture) throw new Error("Lecture not found");
 
-  const stream = createStreamableValue()
+  const stream = createStreamableValue();
 
-  ;(async () => {
+  (async () => {
     const { partialObjectStream } = await streamObject({
       model: openai("gpt-4o"),
       schema: z.object({
@@ -39,7 +39,7 @@ export async function generateQuiz(
             question: z.string(),
             choices: z.array(z.string()),
             answerIndex: z.number(),
-          })
+          }),
         ),
       }),
       system: `\
@@ -58,17 +58,17 @@ export async function generateQuiz(
             question,
             choices,
             answerIndex,
-          }))
-        )
+          })),
+        );
       },
-    })
+    });
 
     for await (const partialObject of partialObjectStream) {
-      stream.update(partialObject)
+      stream.update(partialObject);
     }
 
-    stream.done()
-  })()
+    stream.done();
+  })();
 
-  return stream.value
+  return stream.value;
 }

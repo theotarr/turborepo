@@ -1,23 +1,23 @@
-import { InputRule } from "@tiptap/core"
-import { Color } from "@tiptap/extension-color"
-import Highlight from "@tiptap/extension-highlight"
-import HorizontalRule from "@tiptap/extension-horizontal-rule"
-import TiptapLink from "@tiptap/extension-link"
-import Placeholder from "@tiptap/extension-placeholder"
-import TaskItem from "@tiptap/extension-task-item"
-import TaskList from "@tiptap/extension-task-list"
-import TextStyle from "@tiptap/extension-text-style"
-import TiptapUnderline from "@tiptap/extension-underline"
-import StarterKit from "@tiptap/starter-kit"
-import { Markdown } from "tiptap-markdown"
-import Mathematics from "@tiptap-pro/extension-mathematics"
+import Mathematics from "@tiptap-pro/extension-mathematics";
+import { InputRule } from "@tiptap/core";
+import { Color } from "@tiptap/extension-color";
+import Highlight from "@tiptap/extension-highlight";
+import HorizontalRule from "@tiptap/extension-horizontal-rule";
+import TiptapLink from "@tiptap/extension-link";
+import Placeholder from "@tiptap/extension-placeholder";
+import TaskItem from "@tiptap/extension-task-item";
+import TaskList from "@tiptap/extension-task-list";
+import TextStyle from "@tiptap/extension-text-style";
+import TiptapUnderline from "@tiptap/extension-underline";
+import StarterKit from "@tiptap/starter-kit";
+import { Markdown } from "tiptap-markdown";
 
-import CustomKeymap from "./custom-keymap"
-import DragAndDrop from "./drag-and-drop"
-import SlashCommand from "./slash-command"
-import UpdatedImage from "./updated-image"
+import CustomKeymap from "./custom-keymap";
+import DragAndDrop from "./drag-and-drop";
+import SlashCommand from "./slash-command";
+import UpdatedImage from "./updated-image";
 
-const mathRegex = /\\\((.*?)\\\)/gi
+const mathRegex = /\\\((.*?)\\\)/gi;
 
 export const defaultExtensions = [
   StarterKit.configure({
@@ -74,19 +74,19 @@ export const defaultExtensions = [
         new InputRule({
           find: /^(?:---|—-|___\s|\*\*\*\s)$/,
           handler: ({ state, range }) => {
-            const attributes = {}
+            const attributes = {};
 
-            const { tr } = state
-            const start = range.from
-            let end = range.to
+            const { tr } = state;
+            const start = range.from;
+            let end = range.to;
 
             tr.insert(start - 1, this.type.create(attributes)).delete(
               tr.mapping.map(start),
-              tr.mapping.map(end)
-            )
+              tr.mapping.map(end),
+            );
           },
         }),
-      ]
+      ];
     },
   }).configure({
     HTMLAttributes: {
@@ -107,9 +107,9 @@ export const defaultExtensions = [
   Placeholder.configure({
     placeholder: ({ node }) => {
       if (node.type.name === "heading") {
-        return `Heading ${node.attrs.level}`
+        return `Heading ${node.attrs.level}`;
       }
-      return "Press '/' to format text..."
+      return "Press '/' to format text...";
     },
     includeChildren: true,
   }),
@@ -141,4 +141,4 @@ export const defaultExtensions = [
   Mathematics.configure({
     regex: mathRegex,
   }),
-]
+];

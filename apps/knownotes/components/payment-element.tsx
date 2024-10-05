@@ -1,103 +1,102 @@
-"use client"
+"use client";
 
-import { useState } from "react"
+import type { StripeError } from "@stripe/stripe-js";
+import { useState } from "react";
+import { sendGAEvent } from "@/lib/analytics";
+import getStripe from "@/lib/get-stripejs";
+import { createSetupIntent, validatePromotionCode } from "@/lib/stripe/actions";
+import { cn } from "@/lib/utils";
 import {
   Elements,
   PaymentElement,
   useElements,
   useStripe,
-} from "@stripe/react-stripe-js"
-import type { StripeError } from "@stripe/stripe-js"
-import { useTheme } from "next-themes"
-import { toast } from "sonner"
-import TiktokPixel from "tiktok-pixel"
-import { useDebouncedCallback } from "use-debounce"
+} from "@stripe/react-stripe-js";
+import { useTheme } from "next-themes";
+import { toast } from "sonner";
+import TiktokPixel from "tiktok-pixel";
+import { useDebouncedCallback } from "use-debounce";
 
-import { sendGAEvent } from "@/lib/analytics"
-import getStripe from "@/lib/get-stripejs"
-import { createSetupIntent, validatePromotionCode } from "@/lib/stripe/actions"
-import { cn } from "@/lib/utils"
-
-import { Icons } from "./icons"
-import { buttonVariants } from "./ui/button"
-import { Input } from "./ui/input"
-import { Label } from "./ui/label"
+import { Icons } from "./icons";
+import { buttonVariants } from "./ui/button";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
 
 interface CheckoutFormProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 function CheckoutForm({ className, ...props }: CheckoutFormProps) {
-  const { theme } = useTheme()
-  const [paymentType, setPaymentType] = useState<string>("")
+  const { theme } = useTheme();
+  const [paymentType, setPaymentType] = useState<string>("");
   const [payment, setPayment] = useState<{
-    status: "initial" | "processing" | "error"
-  }>({ status: "initial" })
-  const [errorMessage, setErrorMessage] = useState<string>("")
+    status: "initial" | "processing" | "error";
+  }>({ status: "initial" });
+  const [errorMessage, setErrorMessage] = useState<string>("");
 
-  const [promoCode, setPromoCode] = useState<string>("")
+  const [promoCode, setPromoCode] = useState<string>("");
   const [promoCodeMessage, setPromoCodeMessage] = useState<{
-    status: "applied" | "error"
-    message: string
-  } | null>(null)
+    status: "applied" | "error";
+    message: string;
+  } | null>(null);
   const debouncedPromoCode = useDebouncedCallback(async (promoCode: string) => {
     if (!promoCode) {
-      setPromoCodeMessage(null)
-      return
+      setPromoCodeMessage(null);
+      return;
     }
 
-    const { valid } = await validatePromotionCode(promoCode)
+    const { valid } = await validatePromotionCode(promoCode);
     if (valid) {
       setPromoCodeMessage({
         status: "applied",
         message: `Promo code applied! You get your first week free!`,
-      })
-      toast.success(`Promo code applied! You get your first week free!`)
+      });
+      toast.success(`Promo code applied! You get your first week free!`);
     } else {
       setPromoCodeMessage({
         status: "error",
         message: `Invalid promo code`,
-      })
-      toast.error("Invalid promo code")
+      });
+      toast.error("Invalid promo code");
     }
-  }, 500)
+  }, 500);
 
-  const stripe = useStripe()
-  const elements = useElements()
+  const stripe = useStripe();
+  const elements = useElements();
 
   const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
     try {
-      e.preventDefault()
+      e.preventDefault();
       // Abort if form isn't valid
-      if (!e.currentTarget.reportValidity()) return
-      if (!elements || !stripe) return
-      setPayment({ status: "processing" })
-      const { error: submitError } = await elements.submit()
+      if (!e.currentTarget.reportValidity()) return;
+      if (!elements || !stripe) return;
+      setPayment({ status: "processing" });
+      const { error: submitError } = await elements.submit();
       if (submitError) {
-        setPayment({ status: "error" })
+        setPayment({ status: "error" });
         sendGAEvent("event", "payment_error_stripe", {
           paymentType,
           errorMessage: submitError.message ?? "An unknown error occurred",
-        })
-        setErrorMessage(submitError.message ?? "An unknown error occurred")
-        return
+        });
+        setErrorMessage(submitError.message ?? "An unknown error occurred");
+        return;
       }
 
       // Send a payment details event to Tiktok pixel and GA.
       sendGAEvent("event", "add_payment_info", {
         paymentType,
-      })
-      TiktokPixel.track("AddPaymentInfo", {})
+      });
+      TiktokPixel.track("AddPaymentInfo", {});
 
       // Create a SetupIntent.
       const { client_secret: clientSecret } = await createSetupIntent(
-        window.promotekit_referral
-      )
+        window.promotekit_referral,
+      );
 
       // Confirm the SetupIntent with the payment method.
       const return_url =
         window.location.pathname.startsWith("/lecture") ||
         window.location.pathname.startsWith("/chat")
           ? window.location.href
-          : `${window.location.origin}/result`
+          : `${window.location.origin}/result`;
 
       const { error: confirmError } = await stripe!.confirmSetup({
         elements,
@@ -105,25 +104,29 @@ function CheckoutForm({ className, ...props }: CheckoutFormProps) {
         confirmParams: {
           return_url,
         },
-      })
+      });
 
       if (confirmError) {
-        setPayment({ status: "error" })
+        setPayment({ status: "error" });
         setErrorMessage(
-          confirmError.message ?? "An unknown error occurred. Please try again."
-        )
+          confirmError.message ??
+            "An unknown error occurred. Please try again.",
+        );
         toast.error(
-          confirmError.message ?? "An unknown error occurred. Please try again."
-        )
-        console.error(confirmError)
+          confirmError.message ??
+            "An unknown error occurred. Please try again.",
+        );
+        console.error(confirmError);
       }
     } catch (err) {
-      const { message } = err as StripeError
-      setPayment({ status: "error" })
-      setErrorMessage(message ?? "An unknown error occurred. Please try again.")
-      toast.error(message ?? "An unknown error occurred. Please try again.")
+      const { message } = err as StripeError;
+      setPayment({ status: "error" });
+      setErrorMessage(
+        message ?? "An unknown error occurred. Please try again.",
+      );
+      toast.error(message ?? "An unknown error occurred. Please try again.");
     }
-  }
+  };
 
   return (
     <>
@@ -146,7 +149,7 @@ function CheckoutForm({ className, ...props }: CheckoutFormProps) {
           <div className="FormRow elements-style antialiased">
             <PaymentElement
               onChange={(e) => {
-                setPaymentType(e.value.type)
+                setPaymentType(e.value.type);
               }}
               options={{
                 terms: {
@@ -214,7 +217,7 @@ function CheckoutForm({ className, ...props }: CheckoutFormProps) {
               variant: "shadow",
               size: "lg",
             }),
-            "mt-6 w-full text-base font-semibold"
+            "mt-6 w-full text-base font-semibold",
           )}
           type="submit"
           disabled={
@@ -236,7 +239,7 @@ function CheckoutForm({ className, ...props }: CheckoutFormProps) {
         )}
       </form>
     </>
-  )
+  );
 }
 
 interface PaymentElementsFormProps
@@ -246,7 +249,7 @@ export function PaymentElementsForm({
   className,
   ...props
 }: PaymentElementsFormProps) {
-  const { theme } = useTheme()
+  const { theme } = useTheme();
   return (
     <Elements
       stripe={getStripe()}
@@ -297,5 +300,5 @@ export function PaymentElementsForm({
     >
       <CheckoutForm className={className} {...props} />
     </Elements>
-  )
+  );
 }

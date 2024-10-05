@@ -1,59 +1,59 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { Transcript } from "@/types"
-import { Course, Lecture, Message } from "@prisma/client"
-import { Editor as EditorType, JSONContent } from "@tiptap/core"
-import ContentEditable from "react-contenteditable"
-import { toast } from "sonner"
-import { useDebouncedCallback } from "use-debounce"
-import { create } from "zustand"
-import { generateEnhancedNotes } from "@/lib/lecture/notes"
-import { sendGAEvent } from "@/lib/analytics"
-import { updateLecture } from "@/lib/lecture/actions"
-import { cn, formatDate } from "@/lib/utils"
+import { useEffect, useState } from "react";
+import Link from "next/link";
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
-} from "@/components/ui/resizable"
+} from "@/components/ui/resizable";
+import { sendGAEvent } from "@/lib/analytics";
+import { updateLecture } from "@/lib/lecture/actions";
+import { generateEnhancedNotes } from "@/lib/lecture/notes";
+import { cn, formatDate } from "@/lib/utils";
+import { Transcript } from "@/types";
+import { Course, Lecture, Message } from "@prisma/client";
+import { Editor as EditorType, JSONContent } from "@tiptap/core";
+import { readStreamableValue } from "ai/rsc";
+import ContentEditable from "react-contenteditable";
+import { toast } from "sonner";
+import { useDebouncedCallback } from "use-debounce";
+import { create } from "zustand";
 
-import { AffiliateCard } from "./affiliate-card"
-import { Chat } from "./chat-lecture"
-import { Dictaphone } from "./dictaphone"
-import Editor from "./editor"
-import { Badge } from "./ui/badge"
-import { CourseSelectBadge } from "./course-select-badge"
-import { readStreamableValue } from "ai/rsc"
-import { Icons } from "./icons"
+import { AffiliateCard } from "./affiliate-card";
+import { Chat } from "./chat-lecture";
+import { CourseSelectBadge } from "./course-select-badge";
+import { Dictaphone } from "./dictaphone";
+import Editor from "./editor";
+import { Icons } from "./icons";
+import { Badge } from "./ui/badge";
+import { buttonVariants } from "./ui/button";
 import {
-  TooltipProvider,
   Tooltip,
-  TooltipTrigger,
   TooltipContent,
-} from "./ui/tooltip"
-import { buttonVariants } from "./ui/button"
-import Link from "next/link"
+  TooltipProvider,
+  TooltipTrigger,
+} from "./ui/tooltip";
 
 export const useTabStore = create<{
-  activeTab: "notes" | "chat" | string
-  setActiveTab: (tab: "notes" | "chat" | string) => void
-  notesTab: "notes" | "enhanced"
-  setNotesTab: (tab: "notes" | "enhanced") => void
+  activeTab: "notes" | "chat" | string;
+  setActiveTab: (tab: "notes" | "chat" | string) => void;
+  notesTab: "notes" | "enhanced";
+  setNotesTab: (tab: "notes" | "enhanced") => void;
 }>((set) => ({
   activeTab: "notes",
   setActiveTab: (activeTab) => set({ activeTab }),
   notesTab: "notes",
   setNotesTab: (notesTab) => set({ notesTab }),
-}))
+}));
 
 export const useNotesStore = create<{
-  editor: EditorType | null
-  setEditor: (editor: EditorType | null) => void
-  notes: JSONContent | string | undefined
-  setNotes: (notes: JSONContent | string) => void
-  enhancedNotes: JSONContent | string | undefined
-  setEnhancedNotes: (notes: JSONContent | string | undefined) => void
+  editor: EditorType | null;
+  setEditor: (editor: EditorType | null) => void;
+  notes: JSONContent | string | undefined;
+  setNotes: (notes: JSONContent | string) => void;
+  enhancedNotes: JSONContent | string | undefined;
+  setEnhancedNotes: (notes: JSONContent | string | undefined) => void;
 }>((set) => ({
   editor: null,
   setEditor: (editor) => set({ editor }),
@@ -61,14 +61,14 @@ export const useNotesStore = create<{
   setNotes: (notes) => set({ notes }),
   enhancedNotes: undefined,
   setEnhancedNotes: (notes) => set({ enhancedNotes: notes }),
-}))
+}));
 
 export const useTranscriptStore = create<{
-  transcript: Transcript[]
-  setTranscript: (transcript: Transcript[]) => void
-  addTranscript: (transcript: Transcript) => void
-  interim: Transcript | null
-  setInterim: (transcript: Transcript | null) => void
+  transcript: Transcript[];
+  setTranscript: (transcript: Transcript[]) => void;
+  addTranscript: (transcript: Transcript) => void;
+  interim: Transcript | null;
+  setInterim: (transcript: Transcript | null) => void;
 }>((set) => ({
   transcript: [],
   setTranscript: (transcript) => set({ transcript }),
@@ -76,55 +76,55 @@ export const useTranscriptStore = create<{
     set((state) => ({ transcript: [...state.transcript, transcript] })),
   interim: null,
   setInterim: (transcript) => set({ interim: transcript }),
-}))
+}));
 
 export function isNotesNull(notes: JSONContent | string | undefined) {
   // If the notes are undefined, return true.
-  if (!notes) return true
+  if (!notes) return true;
   if (typeof notes === "string") {
-    if (notes.length === 0) return true
+    if (notes.length === 0) return true;
   } else {
     // If the notes are JSONContent and the content is empty, return true.
-    if (notes.type === "doc" && notes.content?.length === 0) return true
+    if (notes.type === "doc" && notes.content?.length === 0) return true;
 
     // Now we need to check the raw text content. So walk through and extract all text fields.
-    const result: string[] = []
+    const result: string[] = [];
 
     function traverse(obj) {
       if (typeof obj === "object" && obj !== null) {
         if (Array.isArray(obj)) {
-          obj.forEach((item) => traverse(item))
+          obj.forEach((item) => traverse(item));
         } else {
           for (const [key, value] of Object.entries(obj)) {
             if (key === "text" && typeof value === "string") {
-              result.push(value)
+              result.push(value);
             }
-            traverse(value)
+            traverse(value);
           }
         }
       }
     }
 
-    traverse(notes)
+    traverse(notes);
 
     // If the result is empty, return true.
-    if (result.length === 0) return true
+    if (result.length === 0) return true;
   }
 
-  return false
+  return false;
 }
 
 interface NotesPageProps {
   lecture: Lecture & {
-    course: Course
-    messages: Message[]
-  }
-  courses: Course[]
+    course: Course;
+    messages: Message[];
+  };
+  courses: Course[];
 }
 
 export function NotesPage({ lecture, courses }: NotesPageProps) {
-  const [hydrated, setHydrated] = useState(false)
-  const { notesTab, setNotesTab } = useTabStore()
+  const [hydrated, setHydrated] = useState(false);
+  const { notesTab, setNotesTab } = useTabStore();
   const {
     editor,
     setEditor,
@@ -132,77 +132,77 @@ export function NotesPage({ lecture, courses }: NotesPageProps) {
     setNotes,
     enhancedNotes,
     setEnhancedNotes,
-  } = useNotesStore()
-  const [isGeneratingNotes, setIsGeneratingNotes] = useState(false)
+  } = useNotesStore();
+  const [isGeneratingNotes, setIsGeneratingNotes] = useState(false);
   const { transcript, addTranscript, setTranscript, setInterim } =
-    useTranscriptStore()
+    useTranscriptStore();
   const [isUpdateTranscriptLoading, setIsUpdateTranscriptLoading] =
-    useState(false)
-  const [saveStatus, setSaveStatus] = useState("Saved")
-  const [isAffiliateCardOpen, setIsAffiliateCardOpen] = useState(false)
+    useState(false);
+  const [saveStatus, setSaveStatus] = useState("Saved");
+  const [isAffiliateCardOpen, setIsAffiliateCardOpen] = useState(false);
   const [resizablePanelDirection, setResizablePanelDirection] = useState<
     "horizontal" | "vertical"
-  >("horizontal")
+  >("horizontal");
 
   const [selectedCourseId, setSelectedCourseId] = useState<string | undefined>(
-    lecture.course?.id ?? undefined
-  )
+    lecture.course?.id ?? undefined,
+  );
 
-  const [lectureTitle, setLectureTitle] = useState(lecture.title)
+  const [lectureTitle, setLectureTitle] = useState(lecture.title);
   const debouncedLectureTitle = useDebouncedCallback(async (title: string) => {
-    setSaveStatus("Saving...")
+    setSaveStatus("Saving...");
     try {
       await updateLecture({
         lectureId: lecture.id,
         title,
-      })
-      setSaveStatus("Saved")
+      });
+      setSaveStatus("Saved");
     } catch (err) {
-      console.error(err)
-      setSaveStatus("Error")
+      console.error(err);
+      setSaveStatus("Error");
     }
-  }, 500)
+  }, 500);
 
   function changeNotesTab(tab: "notes" | "enhanced") {
-    setNotesTab(tab)
+    setNotesTab(tab);
     if (tab === "notes")
-      editor?.commands.setContent(notes as JSONContent | string)
-    else editor?.commands.setContent(enhancedNotes as JSONContent | string)
+      editor?.commands.setContent(notes as JSONContent | string);
+    else editor?.commands.setContent(enhancedNotes as JSONContent | string);
   }
 
   // Hydate the component with the lecture data.
   useEffect(() => {
     if (!hydrated) {
-      setTranscript(lecture.transcript as any as Transcript[])
-      setLectureTitle(lecture.title)
+      setTranscript(lecture.transcript as any as Transcript[]);
+      setLectureTitle(lecture.title);
 
       // If there are markdown notes, default the notes tab to markdown.
       if (lecture.markdownNotes && !lecture.enhancedNotes) {
-        setEnhancedNotes(lecture.markdownNotes as string)
-        setNotes(lecture.notes as JSONContent)
-        setNotesTab("enhanced")
-        editor?.commands.setContent(lecture.markdownNotes)
+        setEnhancedNotes(lecture.markdownNotes as string);
+        setNotes(lecture.notes as JSONContent);
+        setNotesTab("enhanced");
+        editor?.commands.setContent(lecture.markdownNotes);
       } else if (lecture.enhancedNotes) {
         // If there are enhanced notes, default the notes tab to enhanced.
-        setEnhancedNotes(lecture.enhancedNotes as JSONContent)
-        setNotes(lecture.notes as JSONContent)
-        setNotesTab("enhanced")
-        editor?.commands.setContent(lecture.enhancedNotes as JSONContent)
+        setEnhancedNotes(lecture.enhancedNotes as JSONContent);
+        setNotes(lecture.notes as JSONContent);
+        setNotesTab("enhanced");
+        editor?.commands.setContent(lecture.enhancedNotes as JSONContent);
       } else {
-        setNotes(lecture.notes as JSONContent)
-        setNotesTab("notes")
-        editor?.commands.setContent(lecture.notes as JSONContent)
+        setNotes(lecture.notes as JSONContent);
+        setNotesTab("notes");
+        editor?.commands.setContent(lecture.notes as JSONContent);
       }
 
-      setHydrated(true)
+      setHydrated(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, []);
 
   // Update the title metadata of the page when the lecture title is updated.
   useEffect(() => {
-    document.title = lectureTitle
-  }, [lectureTitle])
+    document.title = lectureTitle;
+  }, [lectureTitle]);
 
   // Save the new transcript in the DB.
   useEffect(() => {
@@ -215,45 +215,45 @@ export function NotesPage({ lecture, courses }: NotesPageProps) {
         body: JSON.stringify({
           transcript,
         }),
-      })
+      });
       setTimeout(() => {
-        if (response.ok) setSaveStatus("Saved")
-        else setSaveStatus("Error")
-      }, 500)
+        if (response.ok) setSaveStatus("Saved");
+        else setSaveStatus("Error");
+      }, 500);
     }
 
     if (isUpdateTranscriptLoading) {
-      updateLectureTranscript(transcript)
-      setIsUpdateTranscriptLoading(false)
+      updateLectureTranscript(transcript);
+      setIsUpdateTranscriptLoading(false);
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isUpdateTranscriptLoading])
+  }, [isUpdateTranscriptLoading]);
 
   // Open the affiliate card after 2 minutes.
   useEffect(() => {
     const timer = setTimeout(() => {
-      setIsAffiliateCardOpen(true)
-    }, 120 * 1000) // 120 seconds
+      setIsAffiliateCardOpen(true);
+    }, 120 * 1000); // 120 seconds
 
     return () => {
-      clearTimeout(timer)
-    }
-  }, [])
+      clearTimeout(timer);
+    };
+  }, []);
 
   // Change the direction of the resizable panel group based on the screen size
   useEffect(() => {
     const onResize = () => {
       if (window.innerWidth < 768) {
-        setResizablePanelDirection("vertical")
+        setResizablePanelDirection("vertical");
       } else {
-        setResizablePanelDirection("horizontal")
+        setResizablePanelDirection("horizontal");
       }
-    }
-    onResize()
-    window.addEventListener("resize", onResize)
-    return () => window.removeEventListener("resize", onResize)
-  }, [])
+    };
+    onResize();
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
 
   return (
     <>
@@ -267,35 +267,35 @@ export function NotesPage({ lecture, courses }: NotesPageProps) {
           <div className="absolute bottom-16 left-1/2 z-10 -translate-x-1/2">
             <Dictaphone
               onCaption={(t) => {
-                setIsUpdateTranscriptLoading(true)
-                addTranscript(t)
-                setInterim(null)
+                setIsUpdateTranscriptLoading(true);
+                addTranscript(t);
+                setInterim(null);
               }}
               onInterimCaption={(t) => setInterim(t)}
               onGenerate={async () => {
-                setIsGeneratingNotes(true)
+                setIsGeneratingNotes(true);
 
                 // Get the notes in markdown format.
-                changeNotesTab("notes")
-                const markdownNotes = editor?.storage.markdown.getMarkdown()
+                changeNotesTab("notes");
+                const markdownNotes = editor?.storage.markdown.getMarkdown();
 
-                setNotesTab("enhanced")
-                setEnhancedNotes(undefined)
+                setNotesTab("enhanced");
+                setEnhancedNotes(undefined);
                 // sendGAEvent("Notes", "Generate Enhanced Notes", lecture.id)
                 const output = await generateEnhancedNotes(
                   lecture.id,
                   transcript,
-                  markdownNotes
-                )
-                let text = ""
+                  markdownNotes,
+                );
+                let text = "";
 
                 for await (const delta of readStreamableValue(output)) {
-                  text = `${text}${delta}`
-                  setEnhancedNotes(text)
-                  editor?.commands.setContent(text)
+                  text = `${text}${delta}`;
+                  setEnhancedNotes(text);
+                  editor?.commands.setContent(text);
                 }
 
-                setIsGeneratingNotes(false)
+                setIsGeneratingNotes(false);
               }}
             />
           </div>
@@ -312,7 +312,7 @@ export function NotesPage({ lecture, courses }: NotesPageProps) {
                     "mt-4 text-2xl font-semibold tracking-tight outline-none ring-0",
                     lectureTitle === "Untitled lecture"
                       ? "text-secondary-foreground/50"
-                      : "text-secondary-foreground"
+                      : "text-secondary-foreground",
                   )}
                   tagName="h1"
                   html={lectureTitle}
@@ -320,18 +320,19 @@ export function NotesPage({ lecture, courses }: NotesPageProps) {
                     // Check if the new title contains a newline character.
                     // If it does, prevent it from adding html to the title and focus the editor.
                     if (e.key === "Enter") {
-                      e.preventDefault()
+                      e.preventDefault();
                       // editor?.chain().focus("start").run() // This doesn't work.
                     }
                   }}
                   onChange={(e) => {
-                    setLectureTitle(e.target.value)
-                    debouncedLectureTitle(e.target.value)
-                    setSaveStatus("Unsaved")
+                    setLectureTitle(e.target.value);
+                    debouncedLectureTitle(e.target.value);
+                    setSaveStatus("Unsaved");
                   }}
                   onFocus={() => {
                     // If the title is "Untitled lecture", clear it when the user focuses on it.
-                    if (lectureTitle === "Untitled lecture") setLectureTitle("")
+                    if (lectureTitle === "Untitled lecture")
+                      setLectureTitle("");
                   }}
                 />
                 <div className="mt-2 flex gap-2">
@@ -340,8 +341,8 @@ export function NotesPage({ lecture, courses }: NotesPageProps) {
                       courses={courses}
                       selectedCourseId={selectedCourseId}
                       onSelect={async (courseId) => {
-                        setSelectedCourseId(courseId)
-                        setSaveStatus("Saving...")
+                        setSelectedCourseId(courseId);
+                        setSaveStatus("Saving...");
                         const response = await fetch(
                           `/api/lecture/${lecture.id}`,
                           {
@@ -352,15 +353,15 @@ export function NotesPage({ lecture, courses }: NotesPageProps) {
                             body: JSON.stringify({
                               courseId,
                             }),
-                          }
-                        )
+                          },
+                        );
 
                         if (!response?.ok) {
-                          setSaveStatus("Error")
+                          setSaveStatus("Error");
                           toast.error(
-                            "Something went wrong. Your lecture was not deleted. Please try again."
-                          )
-                        } else setSaveStatus("Saved")
+                            "Something went wrong. Your lecture was not deleted. Please try again.",
+                          );
+                        } else setSaveStatus("Saved");
                       }}
                     />
                   ) : (
@@ -382,7 +383,7 @@ export function NotesPage({ lecture, courses }: NotesPageProps) {
                           className={cn(
                             buttonVariants({ variant: "outline" }),
                             "h-auto w-auto rounded-l-full rounded-r border border-border bg-transparent p-2",
-                            notesTab === "notes" ? "bg-primary/10" : ""
+                            notesTab === "notes" ? "bg-primary/10" : "",
                           )}
                           disabled={isGeneratingNotes}
                         >
@@ -399,7 +400,7 @@ export function NotesPage({ lecture, courses }: NotesPageProps) {
                           className={cn(
                             buttonVariants({ variant: "outline" }),
                             "h-auto w-auto rounded-l rounded-r-full border border-border bg-transparent p-2",
-                            notesTab === "enhanced" ? "bg-primary/10" : ""
+                            notesTab === "enhanced" ? "bg-primary/10" : "",
                           )}
                           disabled={isGeneratingNotes}
                         >
@@ -416,19 +417,19 @@ export function NotesPage({ lecture, courses }: NotesPageProps) {
                 defaultValue={notesTab === "notes" ? notes : enhancedNotes}
                 className="relative z-0 flex grow flex-col overflow-hidden border-0 bg-background py-2 shadow-none"
                 onUpdate={(e) => {
-                  if (isGeneratingNotes || !e) return
+                  if (isGeneratingNotes || !e) return;
 
                   // Update the editor state.
-                  setSaveStatus("Unsaved")
-                  setEditor(e)
+                  setSaveStatus("Unsaved");
+                  setEditor(e);
 
                   // Update the notes state.
-                  if (notesTab === "notes") setNotes(e.getJSON())
-                  else setEnhancedNotes(e.getJSON())
+                  if (notesTab === "notes") setNotes(e.getJSON());
+                  else setEnhancedNotes(e.getJSON());
                 }}
                 onDebouncedUpdate={async (e) => {
-                  setSaveStatus("Saving...")
-                  const notes = e?.getJSON()
+                  setSaveStatus("Saving...");
+                  const notes = e?.getJSON();
                   try {
                     await updateLecture({
                       lectureId: lecture.id,
@@ -441,11 +442,11 @@ export function NotesPage({ lecture, courses }: NotesPageProps) {
                           ? JSON.stringify(notes)
                           : undefined,
                       // markdownNotes: notesTab === "enhanced" ? e?.storage.markdown.getMarkdown() : undefined,
-                    })
-                    setSaveStatus("Saved")
+                    });
+                    setSaveStatus("Saved");
                   } catch (err) {
-                    console.error(err)
-                    setSaveStatus("Error")
+                    console.error(err);
+                    setSaveStatus("Error");
                   }
                 }}
                 saveStatus={saveStatus}
@@ -466,5 +467,5 @@ export function NotesPage({ lecture, courses }: NotesPageProps) {
         </ResizablePanel>
       </ResizablePanelGroup>
     </>
-  )
+  );
 }

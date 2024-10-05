@@ -1,52 +1,51 @@
-"use client"
+"use client";
 
-import { useEffect } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
-import { UserSubscriptionPlan } from "@/types"
-import { create } from "zustand"
+import { useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Dialog, DialogClose, DialogContent } from "@/components/ui/dialog";
+import { updateUserSubsciptionPlan } from "@/lib/stripe/actions";
+import { UserSubscriptionPlan } from "@/types";
+import { create } from "zustand";
 
-import { updateUserSubsciptionPlan } from "@/lib/stripe/actions"
-import { Dialog, DialogClose, DialogContent } from "@/components/ui/dialog"
-
-import { PaymentElementsForm } from "./payment-element"
+import { PaymentElementsForm } from "./payment-element";
 
 export const usePaymentDialogStore = create<{
-  open: boolean
-  setOpen: (open: boolean) => void
+  open: boolean;
+  setOpen: (open: boolean) => void;
 }>((set) => ({
   open: false,
   setOpen: (open) => set({ open }),
-}))
+}));
 
 interface PaymentDialogProps extends React.ComponentPropsWithoutRef<"div"> {
-  subscription: UserSubscriptionPlan
+  subscription: UserSubscriptionPlan;
 }
 
 export function PaymentDialog({ subscription, ...props }: PaymentDialogProps) {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const { open, setOpen } = usePaymentDialogStore()
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { open, setOpen } = usePaymentDialogStore();
 
   useEffect(() => {
     // If the search param contains `setup_intent`, then run the server action to update the user's subscription plan.
-    const setupIntentId = searchParams.get("setup_intent")
+    const setupIntentId = searchParams.get("setup_intent");
 
     async function updateSubscrptionSetupIntent(id: string) {
-      await updateUserSubsciptionPlan(id)
-      router.refresh()
+      await updateUserSubsciptionPlan(id);
+      router.refresh();
     }
 
     // If there is no subscription, open the dialog
     if (!subscription.isPro && !subscription.stripeCurrentPeriodEnd) {
-      setOpen(true) // not subscribed, open the payment dialog to subscribe
+      setOpen(true); // not subscribed, open the payment dialog to subscribe
 
       if (setupIntentId) {
         // If the setup intent is present, the user was redirected from Stripe and has completed the setup intent.
-        updateSubscrptionSetupIntent(setupIntentId)
-        setOpen(false)
+        updateSubscrptionSetupIntent(setupIntentId);
+        setOpen(false);
       }
     }
-  }, [router, searchParams, setOpen, subscription])
+  }, [router, searchParams, setOpen, subscription]);
 
   return (
     <>
@@ -56,5 +55,5 @@ export function PaymentDialog({ subscription, ...props }: PaymentDialogProps) {
         </DialogContent>
       </Dialog>
     </>
-  )
+  );
 }

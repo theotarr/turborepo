@@ -1,9 +1,8 @@
-import * as React from "react"
-
-import { siteConfig } from "@/config/site"
-import { cn } from "@/lib/utils"
-import { Icons } from "@/components/icons"
-import { ModeToggle } from "@/components/mode-toggle"
+import * as React from "react";
+import { Icons } from "@/components/icons";
+import { ModeToggle } from "@/components/mode-toggle";
+import { siteConfig } from "@/config/site";
+import { cn } from "@/lib/utils";
 
 export function SiteFooter({ className }: React.HTMLAttributes<HTMLElement>) {
   return (
@@ -18,7 +17,7 @@ export function SiteFooter({ className }: React.HTMLAttributes<HTMLElement>) {
         <ModeToggle />
       </div>
     </footer>
-  )
+  );
 }
 
 export function Footer({ className }: React.HTMLAttributes<HTMLElement>) {
@@ -42,7 +41,7 @@ export function Footer({ className }: React.HTMLAttributes<HTMLElement>) {
         </nav>
         <div className="mt-10 flex justify-center space-x-10">
           {siteConfig.socials.map((item) => {
-            const Icon = Icons[item.icon]
+            const Icon = Icons[item.icon];
             return (
               <a
                 key={item.href}
@@ -53,7 +52,7 @@ export function Footer({ className }: React.HTMLAttributes<HTMLElement>) {
                 <span className="sr-only">{item.title}</span>
                 <Icon className="h-6 w-6" aria-hidden="true" />
               </a>
-            )
+            );
           })}
         </div>
         <p className="mt-10 text-center text-xs leading-5">
@@ -61,5 +60,5 @@ export function Footer({ className }: React.HTMLAttributes<HTMLElement>) {
         </p>
       </div>
     </footer>
-  )
+  );
 }

@@ -1,16 +1,16 @@
-import Link from "next/link"
-import { auth } from "@acme/auth"
+import Link from "next/link";
+import { Icons } from "@/components/icons";
+import { db } from "@/lib/db";
 
-import { db } from "@/lib/db"
-import { Icons } from "@/components/icons"
+import { auth } from "@acme/auth";
 
 export default async function ChatPage() {
-  const session = await auth()
+  const session = await auth();
   const courses = await db.course.findMany({
     where: {
       userId: session?.user?.id,
     },
-  })
+  });
 
   return (
     <>
@@ -42,5 +42,5 @@ export default async function ChatPage() {
         </div>
       </div>
     </>
-  )
+  );
 }

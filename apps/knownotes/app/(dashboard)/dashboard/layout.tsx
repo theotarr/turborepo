@@ -1,28 +1,28 @@
-import Link from "next/link"
-import { redirect } from "next/navigation"
-import { auth } from "@acme/auth"
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { StaticAffiliateCard } from "@/components/affiliate-card";
+import { LectureCommandMenu } from "@/components/command-menu";
+import { MainNav } from "@/components/main-nav";
+import { DashboardNav } from "@/components/nav";
+import { SiteFooter } from "@/components/site-footer";
+import { UserAccountNav } from "@/components/user-account-nav";
+import { dashboardConfig } from "@/config/dashboard";
+import { getLectures } from "@/lib/lecture/actions";
+import { getUserSubscriptionPlan } from "@/lib/subscription";
 
-import { dashboardConfig } from "@/config/dashboard"
-import { getUserSubscriptionPlan } from "@/lib/subscription"
-import { StaticAffiliateCard } from "@/components/affiliate-card"
-import { MainNav } from "@/components/main-nav"
-import { DashboardNav } from "@/components/nav"
-import { SiteFooter } from "@/components/site-footer"
-import { UserAccountNav } from "@/components/user-account-nav"
-import { LectureCommandMenu } from "@/components/command-menu"
-import { getLectures } from "@/lib/lecture/actions"
+import { auth } from "@acme/auth";
 
 interface DashboardLayoutProps {
-  children?: React.ReactNode
+  children?: React.ReactNode;
 }
 
 export default async function DashboardLayout({
   children,
 }: DashboardLayoutProps) {
-  const session = await auth()
-  if (!session) return redirect("/login")
+  const session = await auth();
+  if (!session) return redirect("/login");
 
-  const subscription = await getUserSubscriptionPlan(session.user?.id)
+  const subscription = await getUserSubscriptionPlan(session.user?.id);
 
   return (
     <>
@@ -72,5 +72,5 @@ export default async function DashboardLayout({
         <SiteFooter className="border-t" />
       </div>
     </>
-  )
+  );
 }

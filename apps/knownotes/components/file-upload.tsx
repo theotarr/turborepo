@@ -1,6 +1,7 @@
-"use client"
+"use client";
 
-import { useCallback, useState } from "react"
+import { useCallback, useState } from "react";
+import { cn } from "@/lib/utils";
 import {
   AudioWaveform,
   File,
@@ -9,13 +10,11 @@ import {
   UploadCloud,
   Video,
   X,
-} from "lucide-react"
-import { useDropzone } from "react-dropzone"
+} from "lucide-react";
+import { useDropzone } from "react-dropzone";
 
-import { cn } from "@/lib/utils"
-
-import { Icons } from "./icons"
-import { buttonVariants } from "./ui/button"
+import { Icons } from "./icons";
+import { buttonVariants } from "./ui/button";
 import {
   Dialog,
   DialogContent,
@@ -23,14 +22,14 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "./ui/dialog"
-import { Input } from "./ui/input"
-import { ScrollArea } from "./ui/scroll-area"
+} from "./ui/dialog";
+import { Input } from "./ui/input";
+import { ScrollArea } from "./ui/scroll-area";
 
 interface FileUploadProgress {
-  progress: number
-  File: File
-  source: AbortController | null
+  progress: number;
+  File: File;
+  source: AbortController | null;
 }
 
 enum FileTypes {
@@ -44,35 +43,35 @@ enum FileTypes {
 const ImageColor = {
   bgColor: "bg-purple-600",
   fillColor: "fill-purple-600",
-}
+};
 
 const PdfColor = {
   bgColor: "bg-blue-400",
   fillColor: "fill-blue-400",
-}
+};
 
 const AudioColor = {
   bgColor: "bg-yellow-400",
   fillColor: "fill-yellow-400",
-}
+};
 
 const VideoColor = {
   bgColor: "bg-green-400",
   fillColor: "fill-green-400",
-}
+};
 
 const OtherColor = {
   bgColor: "bg-gray-400",
   fillColor: "fill-gray-400",
-}
+};
 
 interface FileUploadDialogProps {
-  className?: string
-  [key: string]: any
+  className?: string;
+  [key: string]: any;
 }
 
 interface ProgressBarProps extends React.ComponentPropsWithoutRef<"div"> {
-  value: number
+  value: number;
 }
 
 const ProgressBar = ({ value, className }: ProgressBarProps) => {
@@ -85,72 +84,72 @@ const ProgressBar = ({ value, className }: ProgressBarProps) => {
         }}
         className={cn(
           "absolute inset-y-0 left-0 h-full rounded-full bg-primary transition-all duration-150",
-          className
+          className,
         )}
       ></div>
       <div className="absolute inset-y-0 left-0 flex h-full w-full items-center justify-center"></div>
     </div>
-  )
-}
+  );
+};
 
 export function FileUpload({ className, ...props }: FileUploadDialogProps) {
-  const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
-  const [filesToUpload, setFilesToUpload] = useState<FileUploadProgress[]>([])
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [filesToUpload, setFilesToUpload] = useState<FileUploadProgress[]>([]);
 
   const getFileIconAndColor = (file: File) => {
     if (file.type.includes(FileTypes.Image)) {
       return {
         icon: <FileImage size={40} className={ImageColor.fillColor} />,
         color: ImageColor.bgColor,
-      }
+      };
     }
 
     if (file.type.includes(FileTypes.Pdf)) {
       return {
         icon: <File size={40} className={PdfColor.fillColor} />,
         color: PdfColor.bgColor,
-      }
+      };
     }
 
     if (file.type.includes(FileTypes.Audio)) {
       return {
         icon: <AudioWaveform size={40} className={AudioColor.fillColor} />,
         color: AudioColor.bgColor,
-      }
+      };
     }
 
     if (file.type.includes(FileTypes.Video)) {
       return {
         icon: <Video size={40} className={VideoColor.fillColor} />,
         color: VideoColor.bgColor,
-      }
+      };
     }
 
     return {
       icon: <FolderArchive size={40} className={OtherColor.fillColor} />,
       color: OtherColor.bgColor,
-    }
-  }
+    };
+  };
 
   const onUploadProgress = (
     progressEvent: ProgressEvent,
     file: File,
-    cancelSource: AbortController
+    cancelSource: AbortController,
   ) => {
     const progress = Math.round(
-      (progressEvent.loaded / (progressEvent.total ?? 0)) * 100
-    )
+      (progressEvent.loaded / (progressEvent.total ?? 0)) * 100,
+    );
 
     if (progress === 100) {
       setUploadedFiles((prevUploadedFiles) => {
-        return [...prevUploadedFiles, file]
-      })
+        return [...prevUploadedFiles, file];
+      });
 
       setFilesToUpload((prevUploadProgress) => {
-        return prevUploadProgress.filter((item) => item.File !== file)
-      })
+        return prevUploadProgress.filter((item) => item.File !== file);
+      });
 
-      return
+      return;
     }
 
     setFilesToUpload((prevUploadProgress) => {
@@ -160,18 +159,18 @@ export function FileUpload({ className, ...props }: FileUploadDialogProps) {
             ...item,
             progress,
             source: cancelSource,
-          }
+          };
         } else {
-          return item
+          return item;
         }
-      })
-    })
-  }
+      });
+    });
+  };
 
   const uploadImageToCloudinary = async (
     formData: FormData,
     onUploadProgress: (progressEvent: ProgressEvent) => void,
-    cancelSource: AbortController
+    cancelSource: AbortController,
   ) => {
     return fetch(
       `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUD_NAME}/image/upload`,
@@ -180,19 +179,19 @@ export function FileUpload({ className, ...props }: FileUploadDialogProps) {
         body: formData,
         signal: cancelSource.signal,
         // Remove the onUploadProgress property
-      }
-    )
-  }
+      },
+    );
+  };
 
   const removeFile = (file: File) => {
     setFilesToUpload((prevUploadProgress) => {
-      return prevUploadProgress.filter((item) => item.File !== file)
-    })
+      return prevUploadProgress.filter((item) => item.File !== file);
+    });
 
     setUploadedFiles((prevUploadedFiles) => {
-      return prevUploadedFiles.filter((item) => item !== file)
-    })
-  }
+      return prevUploadedFiles.filter((item) => item !== file);
+    });
+  };
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     setFilesToUpload((prevUploadProgress) => {
@@ -203,10 +202,10 @@ export function FileUpload({ className, ...props }: FileUploadDialogProps) {
             progress: 0,
             File: file,
             source: null,
-          }
+          };
         }),
-      ]
-    })
+      ];
+    });
 
     // cloudinary upload
 
@@ -232,9 +231,9 @@ export function FileUpload({ className, ...props }: FileUploadDialogProps) {
     // } catch (error) {
     //   console.error("Error uploading files: ", error);
     // }
-  }, [])
+  }, []);
 
-  const { getRootProps, getInputProps } = useDropzone({ onDrop })
+  const { getRootProps, getInputProps } = useDropzone({ onDrop });
 
   return (
     <Dialog>
@@ -265,8 +264,8 @@ export function FileUpload({ className, ...props }: FileUploadDialogProps) {
             {...getRootProps()}
             className="relative flex w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-border bg-background py-6 hover:bg-secondary/20"
           >
-            <div className=" text-center">
-              <div className=" mx-auto max-w-min rounded-md border p-2">
+            <div className="text-center">
+              <div className="mx-auto max-w-min rounded-md border p-2">
                 <UploadCloud size={20} />
               </div>
 
@@ -329,15 +328,15 @@ export function FileUpload({ className, ...props }: FileUploadDialogProps) {
                       <button
                         onClick={() => {
                           if (fileUploadProgress.source)
-                            fileUploadProgress.source.abort()
-                          removeFile(fileUploadProgress.File)
+                            fileUploadProgress.source.abort();
+                          removeFile(fileUploadProgress.File);
                         }}
                         className="hidden cursor-pointer items-center justify-center bg-red-500 px-2 text-secondary-foreground transition-all group-hover:flex"
                       >
                         <X size={20} />
                       </button>
                     </div>
-                  )
+                  );
                 })}
               </div>
             </ScrollArea>
@@ -362,7 +361,7 @@ export function FileUpload({ className, ...props }: FileUploadDialogProps) {
                       </div>
                       <div className="ml-2 w-full space-y-1">
                         <div className="flex justify-between text-sm">
-                          <p className="text-muted-foreground ">
+                          <p className="text-muted-foreground">
                             {file.name.slice(0, 25)}
                           </p>
                         </div>
@@ -375,12 +374,12 @@ export function FileUpload({ className, ...props }: FileUploadDialogProps) {
                       <X size={20} />
                     </button>
                   </div>
-                )
+                );
               })}
             </div>
           </div>
         )}
       </DialogContent>
     </Dialog>
-  )
+  );
 }

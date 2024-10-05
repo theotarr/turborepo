@@ -1,22 +1,21 @@
-import * as React from "react"
-import { TooltipProvider } from "@radix-ui/react-tooltip"
-import { UseChatHelpers } from "ai/react"
-import Textarea from "react-textarea-autosize"
-
-import { useEnterSubmit } from "@/hooks/use-enter-submit"
-import { Button } from "@/components/ui/button"
+import * as React from "react";
+import { Icons } from "@/components/icons";
+import { Button } from "@/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/ui/tooltip"
-import { Icons } from "@/components/icons"
+} from "@/components/ui/tooltip";
+import { useEnterSubmit } from "@/hooks/use-enter-submit";
+import { TooltipProvider } from "@radix-ui/react-tooltip";
+import { UseChatHelpers } from "ai/react";
+import Textarea from "react-textarea-autosize";
 
 export interface PromptProps
   extends Pick<UseChatHelpers, "input" | "setInput"> {
-  onSubmit: (value: string) => Promise<void>
-  isLoading: boolean
-  placeholder?: string
+  onSubmit: (value: string) => Promise<void>;
+  isLoading: boolean;
+  placeholder?: string;
 }
 
 export function PromptForm({
@@ -26,23 +25,23 @@ export function PromptForm({
   isLoading,
   placeholder = "Send a message.",
 }: PromptProps) {
-  const { formRef, onKeyDown } = useEnterSubmit()
-  const inputRef = React.useRef<HTMLTextAreaElement>(null)
+  const { formRef, onKeyDown } = useEnterSubmit();
+  const inputRef = React.useRef<HTMLTextAreaElement>(null);
 
   React.useEffect(() => {
     if (inputRef.current) {
-      inputRef.current.focus()
+      inputRef.current.focus();
     }
-  }, [])
+  }, []);
 
   return (
     <form
       onSubmit={async (e) => {
-        e.preventDefault()
-        if (!input?.trim()) return
+        e.preventDefault();
+        if (!input?.trim()) return;
 
-        setInput("")
-        await onSubmit(input)
+        setInput("");
+        await onSubmit(input);
       }}
       ref={formRef}
     >
@@ -76,5 +75,5 @@ export function PromptForm({
         </TooltipProvider>
       </div>
     </form>
-  )
+  );
 }

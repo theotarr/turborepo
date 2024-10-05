@@ -1,9 +1,5 @@
-import Link from "next/link"
-import { Transcript } from "@/types"
-import { Course, Lecture } from "@prisma/client"
-
-import { cn, formatDate } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -11,18 +7,21 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
+} from "@/components/ui/card";
+import { cn, formatDate } from "@/lib/utils";
+import { Transcript } from "@/types";
+import { Course, Lecture } from "@prisma/client";
 
-import { LectureOperations } from "./lecture-operations"
-import { Badge } from "./ui/badge"
+import { LectureOperations } from "./lecture-operations";
+import { Badge } from "./ui/badge";
 
 type LectureCardProps = {
   lecture: Lecture & {
-    course: Course
-  }
-  courses?: Course[]
-  className?: string
-}
+    course: Course;
+  };
+  courses?: Course[];
+  className?: string;
+};
 
 export function LectureCard({
   lecture,
@@ -61,5 +60,5 @@ export function LectureCard({
         </Link>
       </CardFooter>
     </Card>
-  )
+  );
 }

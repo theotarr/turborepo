@@ -1,20 +1,20 @@
-import { redirect } from "next/navigation"
-import { auth } from "@acme/auth"
+import { redirect } from "next/navigation";
+import { PaymentElementsForm } from "@/components/payment-element";
+import { getUserSubscriptionPlan } from "@/lib/subscription";
 
-import { getUserSubscriptionPlan } from "@/lib/subscription"
-import { PaymentElementsForm } from "@/components/payment-element"
+import { auth } from "@acme/auth";
 
 export const metadata = {
   title: "Welcome to KnowNotes!",
   description:
     "Thanks for joining us! We'd love to hear about your needs and how we can help you.",
-}
+};
 
 export default async function WelcomePage() {
-  const session = await auth()
-  if (!session) redirect("/login")
+  const session = await auth();
+  if (!session) redirect("/login");
 
-  const subscription = await getUserSubscriptionPlan(session.user.id)
+  const subscription = await getUserSubscriptionPlan(session.user.id);
 
   // if (subscription.stripeCurrentPeriodEnd < new Date().getTime()) {
   //   // subscription expired, redirect to settings page to update payment method
@@ -23,7 +23,7 @@ export default async function WelcomePage() {
 
   if (subscription.isPro) {
     // already subscribed, redirect to dashboard
-    redirect("/dashboard")
+    redirect("/dashboard");
   }
 
   return (
@@ -35,5 +35,5 @@ export default async function WelcomePage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

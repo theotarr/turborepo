@@ -6,9 +6,9 @@ import {
   Section,
   Tailwind,
   Text,
-} from "@react-email/components"
+} from "@react-email/components";
 
-import { tailwindEmailConfig } from "./tailwind-email-theme"
+import { tailwindEmailConfig } from "./tailwind-email-theme";
 
 export default function NewUserOfferEmail() {
   return (
@@ -34,5 +34,5 @@ export default function NewUserOfferEmail() {
         </Body>
       </Tailwind>
     </Html>
-  )
+  );
 }

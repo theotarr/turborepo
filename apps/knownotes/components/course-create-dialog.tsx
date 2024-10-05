@@ -1,11 +1,8 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { toast } from "sonner"
-
-import { cn } from "@/lib/utils"
-import { Button, buttonVariants } from "@/components/ui/button"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -14,11 +11,13 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
-import { Icons } from "./icons"
-import { Input } from "./ui/input"
+import { Icons } from "./icons";
+import { Input } from "./ui/input";
 
 async function createCourse({ name }: { name: string }) {
   const response = await fetch(`/api/course`, {
@@ -29,36 +28,36 @@ async function createCourse({ name }: { name: string }) {
     body: JSON.stringify({
       name,
     }),
-  })
-  const { courseId } = await response.json()
+  });
+  const { courseId } = await response.json();
   return {
     courseId,
-  }
+  };
 }
 
 interface CourseCreateDialogProps {
-  className?: string
-  [key: string]: any
+  className?: string;
+  [key: string]: any;
 }
 
 export function CourseCreateDialog({ className }: CourseCreateDialogProps) {
-  const router = useRouter()
-  const [name, setName] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
+  const router = useRouter();
+  const [name, setName] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const onSubmit = async (e) => {
-    e.preventDefault()
-    setIsLoading(true)
-    const { courseId } = await createCourse({ name })
-    setIsLoading(false)
+    e.preventDefault();
+    setIsLoading(true);
+    const { courseId } = await createCourse({ name });
+    setIsLoading(false);
     if (!courseId) {
-      return toast.error("Something went wrong. Please try again.")
+      return toast.error("Something went wrong. Please try again.");
     } else {
-      toast.success("Success!")
-      router.push(`/course/${courseId}`)
-      router.refresh()
+      toast.success("Success!");
+      router.push(`/course/${courseId}`);
+      router.refresh();
     }
-  }
+  };
 
   return (
     <Dialog>
@@ -108,5 +107,5 @@ export function CourseCreateDialog({ className }: CourseCreateDialogProps) {
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

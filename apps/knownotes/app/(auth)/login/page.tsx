@@ -1,15 +1,15 @@
-import Link from "next/link"
-import { redirect } from "next/navigation"
-import { auth } from "@acme/auth"
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { Icons } from "@/components/icons";
+import { buttonVariants } from "@/components/ui/button";
+import { UserAuthForm } from "@/components/user-auth-form";
+import { absoluteUrl, cn } from "@/lib/utils";
 
-import { absoluteUrl, cn } from "@/lib/utils"
-import { buttonVariants } from "@/components/ui/button"
-import { Icons } from "@/components/icons"
-import { UserAuthForm } from "@/components/user-auth-form"
+import { auth } from "@acme/auth";
 
-const title = "Login"
-const description = "Sign in to your account."
-const ogUrl = `${absoluteUrl("")}/api/og?heading=Login`
+const title = "Login";
+const description = "Sign in to your account.";
+const ogUrl = `${absoluteUrl("")}/api/og?heading=Login`;
 
 export const metadata = {
   title,
@@ -36,10 +36,10 @@ export const metadata = {
     description,
     images: [ogUrl],
   },
-}
+};
 export default async function LoginPage() {
-  const session = await auth()
-  if (session) redirect("/dashboard")
+  const session = await auth();
+  if (session) redirect("/dashboard");
 
   return (
     <div className="container flex h-screen w-screen flex-col items-center justify-center">
@@ -47,7 +47,7 @@ export default async function LoginPage() {
         href="/"
         className={cn(
           buttonVariants({ variant: "ghost" }),
-          "absolute left-4 top-4 md:left-8 md:top-8"
+          "absolute left-4 top-4 md:left-8 md:top-8",
         )}
       >
         <>
@@ -76,5 +76,5 @@ export default async function LoginPage() {
         </p>
       </div>
     </div>
-  )
+  );
 }

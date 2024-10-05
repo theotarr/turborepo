@@ -1,57 +1,58 @@
-"use client"
+"use client";
 
-import { Course, Lecture } from "@prisma/client"
-import { useEffect, useState } from "react"
-import { readStreamableValue } from "ai/rsc"
-import { Transcript } from "@/types"
-import { generateQuiz } from "@/lib/lecture/quiz"
-import { Progress } from "./ui/progress"
-import { QuestionItem } from "./question-item"
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { generateQuiz } from "@/lib/lecture/quiz";
+import { cn } from "@/lib/utils";
+import { Transcript } from "@/types";
+import { Course, Lecture } from "@prisma/client";
+import { readStreamableValue } from "ai/rsc";
+
+import { QuestionItem } from "./question-item";
+import { Button, buttonVariants } from "./ui/button";
 import {
   Dialog,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "./ui/dialog"
-import { Button, buttonVariants } from "./ui/button"
-import Link from "next/link"
-import { cn } from "@/lib/utils"
+} from "./ui/dialog";
+import { Progress } from "./ui/progress";
 
 interface QuizPageProps {
   lecture: Lecture & {
-    course: Course
+    course: Course;
     questions: {
-      id: string
-      question: string
-      choices: string[]
-      answerIndex: number
-    }[]
-  }
+      id: string;
+      question: string;
+      choices: string[];
+      answerIndex: number;
+    }[];
+  };
 }
 
 export const QuizPage = ({ lecture }: QuizPageProps) => {
   const [questions, setQuestions] = useState<
     {
-      id: string
-      question: string
-      choices: string[]
-      answerIndex: number
-      selectedAnswer?: string
+      id: string;
+      question: string;
+      choices: string[];
+      answerIndex: number;
+      selectedAnswer?: string;
     }[]
-  >(lecture.questions ?? [])
-  const [correctAnswers, setCorrectAnswers] = useState(0)
-  const [currentQuestion, setCurrentQuestion] = useState(0)
+  >(lecture.questions ?? []);
+  const [correctAnswers, setCorrectAnswers] = useState(0);
+  const [currentQuestion, setCurrentQuestion] = useState(0);
   const [isQuizCompleteDialogOpen, setIsQuizCompleteDialogOpen] =
-    useState(false)
+    useState(false);
 
   function formatRecapTitle() {
-    if (!questions || !questions.length) return ""
-    const accuracy = (correctAnswers / questions.length) * 100
-    if (accuracy >= 90) return "Excellent job!"
-    if (accuracy >= 75) return "Good job!"
-    if (accuracy >= 50) return "Not bad!"
-    return "Better luck next time!"
+    if (!questions || !questions.length) return "";
+    const accuracy = (correctAnswers / questions.length) * 100;
+    if (accuracy >= 90) return "Excellent job!";
+    if (accuracy >= 75) return "Good job!";
+    if (accuracy >= 50) return "Not bad!";
+    return "Better luck next time!";
   }
 
   // On page load, check if any flashcards exist, if not, stream generate them.
@@ -59,8 +60,8 @@ export const QuizPage = ({ lecture }: QuizPageProps) => {
     async function generate() {
       const object = await generateQuiz(
         lecture.id,
-        lecture.transcript as any as Transcript[]
-      )
+        lecture.transcript as any as Transcript[],
+      );
 
       for await (const partialObject of readStreamableValue(object)) {
         if (partialObject && partialObject.questions) {
@@ -73,19 +74,19 @@ export const QuizPage = ({ lecture }: QuizPageProps) => {
             // Only update the last question in the array not to reshuffle the answers.
             setQuestions((questions) => {
               const question =
-                partialObject.questions[partialObject.questions.length - 1]
-              return [...questions, question]
-            })
+                partialObject.questions[partialObject.questions.length - 1];
+              return [...questions, question];
+            });
           }
         }
       }
     }
 
-    if (lecture.questions.length === 0) generate()
-    else setQuestions(lecture.questions)
+    if (lecture.questions.length === 0) generate();
+    else setQuestions(lecture.questions);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, []);
 
   return (
     <>
@@ -110,15 +111,15 @@ export const QuizPage = ({ lecture }: QuizPageProps) => {
                 className={cn(
                   buttonVariants({
                     variant: "secondary",
-                  })
+                  }),
                 )}
               >
                 Back to Notes
               </Link>
               <Button
                 onClick={() => {
-                  setIsQuizCompleteDialogOpen(false)
-                  window.location.reload()
+                  setIsQuizCompleteDialogOpen(false);
+                  window.location.reload();
                 }}
               >
                 Play Again
@@ -151,19 +152,19 @@ export const QuizPage = ({ lecture }: QuizPageProps) => {
               <QuestionItem
                 question={questions[currentQuestion]}
                 onNext={({ isCorrect, selectedAnswer }) => {
-                  if (isCorrect) setCorrectAnswers(correctAnswers + 1)
+                  if (isCorrect) setCorrectAnswers(correctAnswers + 1);
 
                   // Update the selected answer.
                   setQuestions((questions) => {
-                    const question = questions[currentQuestion]
-                    question.selectedAnswer = selectedAnswer
-                    return [...questions]
-                  })
+                    const question = questions[currentQuestion];
+                    question.selectedAnswer = selectedAnswer;
+                    return [...questions];
+                  });
 
                   // Check for the end of the quiz.
                   if (currentQuestion === questions.length - 1)
-                    setIsQuizCompleteDialogOpen(true)
-                  else setCurrentQuestion(currentQuestion + 1)
+                    setIsQuizCompleteDialogOpen(true);
+                  else setCurrentQuestion(currentQuestion + 1);
                 }}
               />
             </>
@@ -173,5 +174,5 @@ export const QuizPage = ({ lecture }: QuizPageProps) => {
         </div>
       </div>
     </>
-  )
-}
+  );
+};

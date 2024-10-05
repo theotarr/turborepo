@@ -1,21 +1,20 @@
-import { NextRequest } from "next/server"
-import { OpenAIStream, StreamingTextResponse } from "ai"
-import OpenAI from "openai"
-import * as z from "zod"
-
-import { env } from "@/env"
-import { RequiresProPlanError } from "@/lib/exceptions"
+import { NextRequest } from "next/server";
+import { env } from "@/env";
+import { RequiresProPlanError } from "@/lib/exceptions";
+import { OpenAIStream, StreamingTextResponse } from "ai";
+import OpenAI from "openai";
+import * as z from "zod";
 
 // Optional, but recommended: run on the edge runtime.
 // See https://vercel.com/docs/concepts/functions/edge-functions
-export const runtime = "edge"
+export const runtime = "edge";
 const routeContextSchema = z.object({
   lectureId: z.string(),
   prompt: z.string(),
-})
+});
 const openai = new OpenAI({
   apiKey: env.OPENAI_API_KEY,
-})
+});
 
 export async function POST(req: NextRequest) {
   try {
@@ -52,9 +51,9 @@ export async function POST(req: NextRequest) {
     //   // admins can chat as much as they want
     //   throw new RequiresProPlanError()
 
-    const json = await req.json()
-    const body = routeContextSchema.parse(json)
-    const { prompt, lectureId } = body
+    const json = await req.json();
+    const body = routeContextSchema.parse(json);
+    const { prompt, lectureId } = body;
 
     // // Find the lecture in the DB
     // const { data: lecture } = await supabase
@@ -86,20 +85,20 @@ export async function POST(req: NextRequest) {
       frequency_penalty: 0,
       presence_penalty: 0,
       n: 1,
-    })
+    });
 
-    const stream = OpenAIStream(response)
-    return new StreamingTextResponse(stream)
+    const stream = OpenAIStream(response);
+    return new StreamingTextResponse(stream);
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return new Response(JSON.stringify(error.issues), { status: 422 })
+      return new Response(JSON.stringify(error.issues), { status: 422 });
     }
 
     if (error instanceof RequiresProPlanError) {
-      return new Response("Requires Pro Plan", { status: 402 })
+      return new Response("Requires Pro Plan", { status: 402 });
     }
 
-    console.error(error)
-    return new Response("Something went wrong...", { status: 500 })
+    console.error(error);
+    return new Response("Something went wrong...", { status: 500 });
   }
 }

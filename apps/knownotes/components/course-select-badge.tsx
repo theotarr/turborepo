@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Select,
   SelectContent,
@@ -5,18 +6,18 @@ import {
   SelectItem,
   SelectLabel,
   SelectValue,
-} from "@/components/ui/select"
-import { Badge } from "./ui/badge"
-import { useState } from "react"
-import { SelectTrigger } from "@radix-ui/react-select"
+} from "@/components/ui/select";
+import { SelectTrigger } from "@radix-ui/react-select";
+
+import { Badge } from "./ui/badge";
 
 interface CourseSelectBadgeProps {
   courses: {
-    id: string
-    name: string
-  }[]
-  selectedCourseId?: string
-  onSelect: (courseId: string) => void
+    id: string;
+    name: string;
+  }[];
+  selectedCourseId?: string;
+  onSelect: (courseId: string) => void;
 }
 
 export const CourseSelectBadge = ({
@@ -24,7 +25,7 @@ export const CourseSelectBadge = ({
   selectedCourseId,
   onSelect,
 }: CourseSelectBadgeProps) => {
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(false);
 
   return (
     <Select
@@ -52,5 +53,5 @@ export const CourseSelectBadge = ({
         </SelectGroup>
       </SelectContent>
     </Select>
-  )
-}
+  );
+};

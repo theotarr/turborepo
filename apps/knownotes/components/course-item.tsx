@@ -1,14 +1,13 @@
-import Link from "next/link"
-import { Course } from "@prisma/client"
+import Link from "next/link";
+import { Icons } from "@/components/icons";
+import { Skeleton } from "@/components/ui/skeleton";
+import { formatDate } from "@/lib/utils";
+import { Course } from "@prisma/client";
 
-import { formatDate } from "@/lib/utils"
-import { Skeleton } from "@/components/ui/skeleton"
-import { Icons } from "@/components/icons"
-
-import { CourseOperations } from "./course-operations"
+import { CourseOperations } from "./course-operations";
 
 interface CourseItemProps {
-  course: Course
+  course: Course;
 }
 
 export function CourseItem({ course }: CourseItemProps) {
@@ -30,7 +29,7 @@ export function CourseItem({ course }: CourseItemProps) {
       </div>
       <CourseOperations course={course} />
     </div>
-  )
+  );
 }
 
 CourseItem.Skeleton = function CourseItemSkeleton() {
@@ -41,5 +40,5 @@ CourseItem.Skeleton = function CourseItemSkeleton() {
         <Skeleton className="h-4 w-4/5" />
       </div>
     </div>
-  )
-}
+  );
+};

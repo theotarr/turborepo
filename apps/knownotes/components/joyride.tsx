@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import Joyride, {
   ACTIONS,
@@ -6,24 +6,24 @@ import Joyride, {
   EVENTS,
   STATUS,
   Step,
-} from "react-joyride"
-import { useMount, useSetState } from "react-use"
+} from "react-joyride";
+import { useMount, useSetState } from "react-use";
 
-import { useTabStore } from "./notes-page"
+import { useTabStore } from "./notes-page";
 
 interface State {
-  run: boolean
-  steps: Step[]
-  stepIndex: number
+  run: boolean;
+  steps: Step[];
+  stepIndex: number;
 }
 
 export const JoyrideComponent = () => {
-  const { setActiveTab } = useTabStore()
+  const { setActiveTab } = useTabStore();
   const [{ run, steps, stepIndex }, setState] = useSetState<State>({
     run: false,
     stepIndex: 0,
     steps: [],
-  })
+  });
 
   useMount(() => {
     setState({
@@ -71,31 +71,31 @@ export const JoyrideComponent = () => {
             "You can ask any questions you have here, and we'll answer them for you based on what your teacher is saying.",
         },
       ],
-    })
-  })
+    });
+  });
 
   const handleJoyrideCallback = (data: CallBackProps) => {
-    const { status, index, action, type } = data
-    const finishedStatuses: string[] = [STATUS.FINISHED, STATUS.SKIPPED]
+    const { status, index, action, type } = data;
+    const finishedStatuses: string[] = [STATUS.FINISHED, STATUS.SKIPPED];
 
     if (finishedStatuses.includes(status)) {
-      setState({ run: false, stepIndex: 0 })
-      localStorage.setItem("joyride", JSON.stringify(false))
+      setState({ run: false, stepIndex: 0 });
+      localStorage.setItem("joyride", JSON.stringify(false));
     } else if (
       ([EVENTS.STEP_AFTER, EVENTS.TARGET_NOT_FOUND] as string[]).includes(type)
     ) {
-      const nextStepIndex = index + (action === ACTIONS.PREV ? -1 : 1)
+      const nextStepIndex = index + (action === ACTIONS.PREV ? -1 : 1);
 
       if (
         (action === "next" && index === 1) ||
         (action === "prev" && index === 2)
       )
-        setActiveTab("notes")
-      else if (action === "next" && index === 2) setActiveTab("chat")
+        setActiveTab("notes");
+      else if (action === "next" && index === 2) setActiveTab("chat");
 
-      setTimeout(() => setState({ run: true, stepIndex: nextStepIndex }), 200)
+      setTimeout(() => setState({ run: true, stepIndex: nextStepIndex }), 200);
     }
-  }
+  };
 
   return (
     <Joyride
@@ -116,5 +116,5 @@ export const JoyrideComponent = () => {
         },
       }}
     />
-  )
-}
+  );
+};

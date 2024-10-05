@@ -1,8 +1,8 @@
-import { absoluteUrl } from "@/lib/utils"
-import { PricingSection } from "@/components/pricing"
+import { PricingSection } from "@/components/pricing";
+import { absoluteUrl } from "@/lib/utils";
 
-const title = "Pricing"
-const ogUrl = `${absoluteUrl("")}/api/og?heading=${title}&mode=light`
+const title = "Pricing";
+const ogUrl = `${absoluteUrl("")}/api/og?heading=${title}&mode=light`;
 
 export const metadata = {
   title,
@@ -23,8 +23,8 @@ export const metadata = {
     title,
     images: [ogUrl],
   },
-}
+};
 
 export default function PricingPage() {
-  return <PricingSection />
+  return <PricingSection />;
 }

@@ -1,22 +1,21 @@
-import { Dispatch, FC, SetStateAction } from "react"
-import { Editor } from "@tiptap/core"
-import { Check, ChevronDown } from "lucide-react"
-
+import { Dispatch, FC, SetStateAction } from "react";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover"
+} from "@/components/ui/popover";
+import { Editor } from "@tiptap/core";
+import { Check, ChevronDown } from "lucide-react";
 
 export interface BubbleColorMenuItem {
-  name: string
-  color: string
+  name: string;
+  color: string;
 }
 
 interface ColorSelectorProps {
-  editor: Editor
-  isOpen: boolean
-  setIsOpen: Dispatch<SetStateAction<boolean>>
+  editor: Editor;
+  isOpen: boolean;
+  setIsOpen: Dispatch<SetStateAction<boolean>>;
 }
 
 const TEXT_COLORS: BubbleColorMenuItem[] = [
@@ -56,7 +55,7 @@ const TEXT_COLORS: BubbleColorMenuItem[] = [
     name: "Gray",
     color: "#A8A29E",
   },
-]
+];
 
 const HIGHLIGHT_COLORS: BubbleColorMenuItem[] = [
   {
@@ -95,7 +94,7 @@ const HIGHLIGHT_COLORS: BubbleColorMenuItem[] = [
     name: "Gray",
     color: "var(--highlight-gray)",
   },
-]
+];
 
 export const ColorSelector: FC<ColorSelectorProps> = ({
   editor,
@@ -103,12 +102,12 @@ export const ColorSelector: FC<ColorSelectorProps> = ({
   setIsOpen,
 }) => {
   const activeColorItem = TEXT_COLORS.find(({ color }) =>
-    editor.isActive("textStyle", { color })
-  )
+    editor.isActive("textStyle", { color }),
+  );
 
   const activeHighlightItem = HIGHLIGHT_COLORS.find(({ color }) =>
-    editor.isActive("highlight", { color })
-  )
+    editor.isActive("highlight", { color }),
+  );
 
   return (
     <Popover open={isOpen}>
@@ -141,14 +140,14 @@ export const ColorSelector: FC<ColorSelectorProps> = ({
             <button
               key={index}
               onClick={() => {
-                editor.commands.unsetColor()
+                editor.commands.unsetColor();
                 name !== "Default" &&
                   editor
                     .chain()
                     .focus()
                     .setColor(color || "")
-                    .run()
-                setIsOpen(false)
+                    .run();
+                setIsOpen(false);
               }}
               className="flex items-center justify-between rounded-sm px-2 py-1 text-sm text-secondary-foreground hover:bg-secondary"
               type="button"
@@ -176,9 +175,9 @@ export const ColorSelector: FC<ColorSelectorProps> = ({
             <button
               key={index}
               onClick={() => {
-                editor.commands.unsetHighlight()
-                name !== "Default" && editor.commands.setHighlight({ color })
-                setIsOpen(false)
+                editor.commands.unsetHighlight();
+                name !== "Default" && editor.commands.setHighlight({ color });
+                setIsOpen(false);
               }}
               className="flex items-center justify-between rounded-sm px-2 py-1 text-sm text-secondary-foreground hover:bg-secondary"
               type="button"
@@ -200,5 +199,5 @@ export const ColorSelector: FC<ColorSelectorProps> = ({
         </PopoverContent>
       </div>
     </Popover>
-  )
-}
+  );
+};

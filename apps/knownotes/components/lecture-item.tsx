@@ -1,15 +1,15 @@
-import { Course, Lecture } from "@prisma/client"
+import Link from "next/link";
+import { LectureOperations } from "@/components/lecture-operations";
+import { formatLectureType, formatShortDate } from "@/lib/utils";
+import { Course, Lecture } from "@prisma/client";
 
-import { formatLectureType, formatShortDate } from "@/lib/utils"
-import { LectureOperations } from "@/components/lecture-operations"
-import { Badge } from "./ui/badge"
-import Link from "next/link"
+import { Badge } from "./ui/badge";
 
 interface LectureItemProps {
   lecture: Lecture & {
-    course?: Course
-  }
-  courses?: Course[]
+    course?: Course;
+  };
+  courses?: Course[];
 }
 
 export function LectureItem({ lecture, courses }: LectureItemProps) {
@@ -40,5 +40,5 @@ export function LectureItem({ lecture, courses }: LectureItemProps) {
         <LectureOperations lecture={lecture as any} courses={courses} />
       </div>
     </div>
-  )
+  );
 }

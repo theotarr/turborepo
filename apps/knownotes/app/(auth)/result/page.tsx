@@ -1,37 +1,37 @@
-import { redirect } from "next/navigation"
-import { auth } from "@acme/auth"
-import type { Stripe } from "stripe"
+import type { Stripe } from "stripe";
+import { redirect } from "next/navigation";
+import { Icons } from "@/components/icons";
+import { PaymentResultRedirect } from "@/components/payment-result-redirect";
+import { proPlan } from "@/config/subscriptions";
+import { db } from "@/lib/db";
+import { stripe } from "@/lib/stripe";
 
-import { proPlan } from "@/config/subscriptions"
-import { db } from "@/lib/db"
-import { stripe } from "@/lib/stripe"
-import { Icons } from "@/components/icons"
-import { PaymentResultRedirect } from "@/components/payment-result-redirect"
+import { auth } from "@acme/auth";
 
 export const metadata = {
   title: "Welcome to KnowNotes!",
   description:
     "Thanks for joining us! We'd love to hear about your needs and how we can help you.",
-}
+};
 
 export default async function ResultPage({
   searchParams,
 }: {
-  searchParams: { setup_intent: string }
+  searchParams: { setup_intent: string };
 }) {
-  if (!searchParams.setup_intent) redirect("/welcome")
-  const session = await auth()
+  if (!searchParams.setup_intent) redirect("/welcome");
+  const session = await auth();
   const user = await db.user.findUnique({
     where: { id: session?.user?.id },
-  })
+  });
 
-  if (!user) redirect("/welcome")
-  if (user.stripeSubscriptionId) redirect("/dashboard")
+  if (!user) redirect("/welcome");
+  if (user.stripeSubscriptionId) redirect("/dashboard");
 
   const setuptIntent: Stripe.SetupIntent = await stripe.setupIntents.retrieve(
-    searchParams.setup_intent
-  )
-  const result = setuptIntent.status === "succeeded" ? "success" : "error"
+    searchParams.setup_intent,
+  );
+  const result = setuptIntent.status === "succeeded" ? "success" : "error";
 
   if (result === "error") {
     // remove the stripe customer id from the user
@@ -43,7 +43,7 @@ export default async function ResultPage({
         stripeSubscriptionId: undefined,
         stripePriceId: undefined,
       },
-    })
+    });
   } else if (result === "success") {
     // Add the price id and a temporary current period end date of 5min from now to wait for stripe webhook
     await db.user.update({
@@ -51,10 +51,10 @@ export default async function ResultPage({
       data: {
         stripePriceId: proPlan.stripePriceIds[0],
         stripeCurrentPeriodEnd: new Date(
-          Date.now() + 1000 * 60 * 5
+          Date.now() + 1000 * 60 * 5,
         ).toISOString(),
       },
-    })
+    });
   }
 
   return (
@@ -79,5 +79,5 @@ export default async function ResultPage({
         </div>
       </div>
     </div>
-  )
+  );
 }

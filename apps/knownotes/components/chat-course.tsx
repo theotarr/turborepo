@@ -1,25 +1,24 @@
-"use client"
+"use client";
 
-import React, { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
-import { useAIState, useActions, useUIState } from "ai/rsc"
+import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
+import { useActions, useAIState, useUIState } from "ai/rsc";
 
-import { cn } from "@/lib/utils"
-
-import { ButtonScrollToBottom } from "./button-scroll-to-bottom"
-import { PromptForm } from "./chat-form"
-import { EmptyChat } from "./empty-chat"
-import { UserMessage } from "./message"
-import { Separator } from "./ui/separator"
+import { ButtonScrollToBottom } from "./button-scroll-to-bottom";
+import { PromptForm } from "./chat-form";
+import { EmptyChat } from "./empty-chat";
+import { UserMessage } from "./message";
+import { Separator } from "./ui/separator";
 
 interface ChatCourseProps extends React.HTMLAttributes<HTMLDivElement> {
-  id: string
+  id: string;
   course: {
-    id: string
-    name: string
-  }
-  chatName?: string
-  userId: string
+    id: string;
+    name: string;
+  };
+  chatName?: string;
+  userId: string;
 }
 
 const exampleMessages = [
@@ -43,7 +42,7 @@ const exampleMessages = [
     subheading: `on the history of Reconstruction in the US`,
     message: `Help me study for the test on the history of Reconstruction in the US`,
   },
-]
+];
 
 export function ChatCourse({
   id,
@@ -53,26 +52,26 @@ export function ChatCourse({
   className,
   ...props
 }: ChatCourseProps) {
-  const router = useRouter()
-  const [aiState] = useAIState()
-  const [messages, setMessages] = useUIState()
-  const [input, setInput] = useState("")
-  const { submitCourseMessage } = useActions()
-  const isLoading = true
+  const router = useRouter();
+  const [aiState] = useAIState();
+  const [messages, setMessages] = useUIState();
+  const [input, setInput] = useState("");
+  const { submitCourseMessage } = useActions();
+  const isLoading = true;
 
   // Push the user the explicit url for this chat when they send their first message.
   useEffect(() => {
     if (messages.length === 1) {
-      window.history.pushState({}, "", `/chat/${course.id}/${id}`)
+      window.history.pushState({}, "", `/chat/${course.id}/${id}`);
     }
-  }, [messages, router, id, course.id])
+  }, [messages, router, id, course.id]);
 
   useEffect(() => {
-    const messagesLength = aiState.messages.length
+    const messagesLength = aiState.messages.length;
     if (messagesLength === 2) {
-      router.refresh() // Refresh the router to get the new chat in sidebar.
+      router.refresh(); // Refresh the router to get the new chat in sidebar.
     }
-  }, [aiState.messages, router])
+  }, [aiState.messages, router]);
 
   return (
     <div
@@ -144,17 +143,17 @@ export function ChatCourse({
                         | "system",
                       display: <UserMessage>{input}</UserMessage>,
                     },
-                  ])
+                  ]);
 
                   // Submit the user message to the server.
                   const message = await submitCourseMessage(
                     input,
                     userId,
                     id,
-                    course.id
-                  )
-                  setMessages((prev) => [...prev, message])
-                  setInput("")
+                    course.id,
+                  );
+                  setMessages((prev) => [...prev, message]);
+                  setInput("");
                 }}
                 input={input}
                 setInput={setInput}
@@ -165,5 +164,5 @@ export function ChatCourse({
         </div>
       </div>
     </div>
-  )
+  );
 }

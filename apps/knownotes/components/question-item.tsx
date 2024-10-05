@@ -1,54 +1,54 @@
-"use client"
+"use client";
 
-import React from "react"
-import { useEffect, useMemo, useState } from "react"
-import { Skeleton } from "./ui/skeleton"
+import React, { useEffect, useMemo, useState } from "react";
+
+import { Skeleton } from "./ui/skeleton";
 
 interface QuestionProps {
   question: {
-    question: string
-    choices: string[]
-    answerIndex: number
-    selectedAnswer?: string
-  }
+    question: string;
+    choices: string[];
+    answerIndex: number;
+    selectedAnswer?: string;
+  };
   onNext: ({
     isCorrect,
     selectedAnswer,
   }: {
-    isCorrect: boolean
-    selectedAnswer: string
-  }) => void
+    isCorrect: boolean;
+    selectedAnswer: string;
+  }) => void;
 }
 
 export function QuestionItem({ question, onNext }: QuestionProps) {
   const shuffled = useMemo(() => {
-    const choices = [...question.choices]
+    const choices = [...question.choices];
     for (let i = choices.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1))
-      ;[choices[i], choices[j]] = [choices[j], choices[i]]
+      const j = Math.floor(Math.random() * (i + 1));
+      [choices[i], choices[j]] = [choices[j], choices[i]];
     }
-    return choices
-  }, [question.choices])
-  const [answer, setAnswer] = useState("")
+    return choices;
+  }, [question.choices]);
+  const [answer, setAnswer] = useState("");
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   function isCorrectAnswer(answer: string) {
-    return answer === question.choices[question.answerIndex]
+    return answer === question.choices[question.answerIndex];
   }
 
   useEffect(() => {
     // Check if the selected answer has changed and if it is correct
-    if (!answer) return
+    if (!answer) return;
 
     const interval = setInterval(() => {
       onNext({
         isCorrect: isCorrectAnswer(answer),
         selectedAnswer: answer,
-      })
-      setAnswer("")
-    }, 1000)
-    return () => clearInterval(interval)
-  }, [answer, isCorrectAnswer, onNext, question])
+      });
+      setAnswer("");
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [answer, isCorrectAnswer, onNext, question]);
 
   return (
     <div className="mt-5 grid gap-5 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2">
@@ -65,8 +65,8 @@ export function QuestionItem({ question, onNext }: QuestionProps) {
                   ? "bg-primary"
                   : "bg-destructive"
                 : answer && isCorrectAnswer(option)
-                ? "bg-primary"
-                : "bg-background"
+                  ? "bg-primary"
+                  : "bg-background"
             }`}
             onClick={() => setAnswer(option)}
           >
@@ -78,7 +78,7 @@ export function QuestionItem({ question, onNext }: QuestionProps) {
         ))}
       </div>
     </div>
-  )
+  );
 }
 
 QuestionItem.Skeleton = function QuestionItemSkeleton() {
@@ -94,5 +94,5 @@ QuestionItem.Skeleton = function QuestionItemSkeleton() {
         <Skeleton className="h-12 w-[350px]" />
       </div>
     </div>
-  )
-}
+  );
+};

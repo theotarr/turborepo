@@ -5,11 +5,12 @@ import React, {
   useLayoutEffect,
   useRef,
   useState,
-} from "react"
-import { Editor, Extension, Range } from "@tiptap/core"
-import { ReactRenderer } from "@tiptap/react"
-import Suggestion from "@tiptap/suggestion"
-import va from "@vercel/analytics"
+} from "react";
+import { sendGAEvent } from "@/lib/analytics";
+import { Editor, Extension, Range } from "@tiptap/core";
+import { ReactRenderer } from "@tiptap/react";
+import Suggestion from "@tiptap/suggestion";
+import va from "@vercel/analytics";
 import {
   CheckSquare,
   Code,
@@ -20,20 +21,18 @@ import {
   ListOrdered,
   Text,
   TextQuote,
-} from "lucide-react"
-import tippy from "tippy.js"
-
-import { sendGAEvent } from "@/lib/analytics"
+} from "lucide-react";
+import tippy from "tippy.js";
 
 interface CommandItemProps {
-  title: string
-  description: string
-  icon: ReactNode
+  title: string;
+  description: string;
+  icon: ReactNode;
 }
 
 interface CommandProps {
-  editor: Editor
-  range: Range
+  editor: Editor;
+  range: Range;
 }
 
 const Command = Extension.create({
@@ -47,14 +46,14 @@ const Command = Extension.create({
           range,
           props,
         }: {
-          editor: Editor
-          range: Range
-          props: any
+          editor: Editor;
+          range: Range;
+          props: any;
         }) => {
-          props.command({ editor, range })
+          props.command({ editor, range });
         },
       },
-    }
+    };
   },
   addProseMirrorPlugins() {
     return [
@@ -62,9 +61,9 @@ const Command = Extension.create({
         editor: this.editor,
         ...this.options.suggestion,
       }),
-    ]
+    ];
   },
-})
+});
 
 const getSuggestionItems = ({ query }: { query: string }) => {
   return [
@@ -94,7 +93,7 @@ const getSuggestionItems = ({ query }: { query: string }) => {
           .focus()
           .deleteRange(range)
           .toggleNode("paragraph", "paragraph")
-          .run()
+          .run();
       },
     },
     {
@@ -103,7 +102,7 @@ const getSuggestionItems = ({ query }: { query: string }) => {
       searchTerms: ["todo", "task", "list", "check", "checkbox"],
       icon: <CheckSquare size={18} />,
       command: ({ editor, range }: CommandProps) => {
-        editor.chain().focus().deleteRange(range).toggleTaskList().run()
+        editor.chain().focus().deleteRange(range).toggleTaskList().run();
       },
     },
     {
@@ -117,7 +116,7 @@ const getSuggestionItems = ({ query }: { query: string }) => {
           .focus()
           .deleteRange(range)
           .setNode("heading", { level: 1 })
-          .run()
+          .run();
       },
     },
     {
@@ -131,7 +130,7 @@ const getSuggestionItems = ({ query }: { query: string }) => {
           .focus()
           .deleteRange(range)
           .setNode("heading", { level: 2 })
-          .run()
+          .run();
       },
     },
     {
@@ -145,7 +144,7 @@ const getSuggestionItems = ({ query }: { query: string }) => {
           .focus()
           .deleteRange(range)
           .setNode("heading", { level: 3 })
-          .run()
+          .run();
       },
     },
     {
@@ -154,7 +153,7 @@ const getSuggestionItems = ({ query }: { query: string }) => {
       searchTerms: ["unordered", "point"],
       icon: <List size={18} />,
       command: ({ editor, range }: CommandProps) => {
-        editor.chain().focus().deleteRange(range).toggleBulletList().run()
+        editor.chain().focus().deleteRange(range).toggleBulletList().run();
       },
     },
     {
@@ -163,7 +162,7 @@ const getSuggestionItems = ({ query }: { query: string }) => {
       searchTerms: ["ordered"],
       icon: <ListOrdered size={18} />,
       command: ({ editor, range }: CommandProps) => {
-        editor.chain().focus().deleteRange(range).toggleOrderedList().run()
+        editor.chain().focus().deleteRange(range).toggleOrderedList().run();
       },
     },
     {
@@ -211,31 +210,31 @@ const getSuggestionItems = ({ query }: { query: string }) => {
     // },
   ].filter((item) => {
     if (typeof query === "string" && query.length > 0) {
-      const search = query.toLowerCase()
+      const search = query.toLowerCase();
       return (
         item.title.toLowerCase().includes(search) ||
         item.description.toLowerCase().includes(search) ||
         (item.searchTerms &&
           item.searchTerms.some((term: string) => term.includes(search)))
-      )
+      );
     }
-    return true
-  })
-}
+    return true;
+  });
+};
 
 export const updateScrollView = (container: HTMLElement, item: HTMLElement) => {
-  const containerHeight = container.offsetHeight
-  const itemHeight = item ? item.offsetHeight : 0
+  const containerHeight = container.offsetHeight;
+  const itemHeight = item ? item.offsetHeight : 0;
 
-  const top = item.offsetTop
-  const bottom = top + itemHeight
+  const top = item.offsetTop;
+  const bottom = top + itemHeight;
 
   if (top < container.scrollTop) {
-    container.scrollTop -= container.scrollTop - top + 5
+    container.scrollTop -= container.scrollTop - top + 5;
   } else if (bottom > containerHeight + container.scrollTop) {
-    container.scrollTop += bottom - containerHeight - container.scrollTop + 5
+    container.scrollTop += bottom - containerHeight - container.scrollTop + 5;
   }
-}
+};
 
 const CommandList = ({
   items,
@@ -243,68 +242,68 @@ const CommandList = ({
   editor,
   range,
 }: {
-  items: CommandItemProps[]
-  command: any
-  editor: any
-  range: any
+  items: CommandItemProps[];
+  command: any;
+  editor: any;
+  range: any;
 }) => {
-  const [selectedIndex, setSelectedIndex] = useState(0)
+  const [selectedIndex, setSelectedIndex] = useState(0);
 
   const selectItem = useCallback(
     (index: number) => {
-      const item = items[index]
+      const item = items[index];
       va.track("Slash Command Used", {
         command: item.title,
-      })
+      });
       sendGAEvent("event", "slash_command", {
         command: item.title,
-      })
+      });
       if (item) {
-        command(item)
+        command(item);
       }
     },
-    [command, items]
-  )
+    [command, items],
+  );
 
   useEffect(() => {
-    const navigationKeys = ["ArrowUp", "ArrowDown", "Enter"]
+    const navigationKeys = ["ArrowUp", "ArrowDown", "Enter"];
     const onKeyDown = (e: KeyboardEvent) => {
       if (navigationKeys.includes(e.key)) {
-        e.preventDefault()
+        e.preventDefault();
         if (e.key === "ArrowUp") {
-          setSelectedIndex((selectedIndex + items.length - 1) % items.length)
-          return true
+          setSelectedIndex((selectedIndex + items.length - 1) % items.length);
+          return true;
         }
         if (e.key === "ArrowDown") {
-          setSelectedIndex((selectedIndex + 1) % items.length)
-          return true
+          setSelectedIndex((selectedIndex + 1) % items.length);
+          return true;
         }
         if (e.key === "Enter") {
-          selectItem(selectedIndex)
-          return true
+          selectItem(selectedIndex);
+          return true;
         }
-        return false
+        return false;
       }
-    }
-    document.addEventListener("keydown", onKeyDown)
+    };
+    document.addEventListener("keydown", onKeyDown);
     return () => {
-      document.removeEventListener("keydown", onKeyDown)
-    }
-  }, [items, selectedIndex, setSelectedIndex, selectItem])
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [items, selectedIndex, setSelectedIndex, selectItem]);
 
   useEffect(() => {
-    setSelectedIndex(0)
-  }, [items])
+    setSelectedIndex(0);
+  }, [items]);
 
-  const commandListContainer = useRef<HTMLDivElement>(null)
+  const commandListContainer = useRef<HTMLDivElement>(null);
 
   useLayoutEffect(() => {
-    const container = commandListContainer?.current
+    const container = commandListContainer?.current;
 
-    const item = container?.children[selectedIndex] as HTMLElement
+    const item = container?.children[selectedIndex] as HTMLElement;
 
-    if (item && container) updateScrollView(container, item)
-  }, [selectedIndex])
+    if (item && container) updateScrollView(container, item);
+  }, [selectedIndex]);
 
   return items.length > 0 ? (
     <div
@@ -333,22 +332,22 @@ const CommandList = ({
               </p>
             </div>
           </button>
-        )
+        );
       })}
     </div>
-  ) : null
-}
+  ) : null;
+};
 
 const renderItems = () => {
-  let component: ReactRenderer | null = null
-  let popup: any | null = null
+  let component: ReactRenderer | null = null;
+  let popup: any | null = null;
 
   return {
     onStart: (props: { editor: Editor; clientRect: DOMRect }) => {
       component = new ReactRenderer(CommandList, {
         props,
         editor: props.editor,
-      })
+      });
 
       // @ts-ignore
       popup = tippy("body", {
@@ -359,38 +358,38 @@ const renderItems = () => {
         interactive: true,
         trigger: "manual",
         placement: "bottom-start",
-      })
+      });
     },
     onUpdate: (props: { editor: Editor; clientRect: DOMRect }) => {
-      component?.updateProps(props)
+      component?.updateProps(props);
 
       popup &&
         popup[0].setProps({
           getReferenceClientRect: props.clientRect,
-        })
+        });
     },
     onKeyDown: (props: { event: KeyboardEvent }) => {
       if (props.event.key === "Escape") {
-        popup?.[0].hide()
+        popup?.[0].hide();
 
-        return true
+        return true;
       }
 
       // @ts-ignore
-      return component?.ref?.onKeyDown(props)
+      return component?.ref?.onKeyDown(props);
     },
     onExit: () => {
-      popup?.[0].destroy()
-      component?.destroy()
+      popup?.[0].destroy();
+      component?.destroy();
     },
-  }
-}
+  };
+};
 
 const SlashCommand = Command.configure({
   suggestion: {
     items: getSuggestionItems,
     render: renderItems,
   },
-})
+});
 
-export default SlashCommand
+export default SlashCommand;

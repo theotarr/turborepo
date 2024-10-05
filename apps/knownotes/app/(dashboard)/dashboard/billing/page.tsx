@@ -1,19 +1,19 @@
-import { redirect } from "next/navigation"
-import { auth } from "@acme/auth"
+import { redirect } from "next/navigation";
+import { BillingForm } from "@/components/billing-form";
+import { DashboardHeader } from "@/components/header";
+import { DashboardShell } from "@/components/shell";
+import { stripe } from "@/lib/stripe";
+import { getUserSubscriptionPlan } from "@/lib/subscription";
+import { absoluteUrl } from "@/lib/utils";
 
-import { stripe } from "@/lib/stripe"
-import { getUserSubscriptionPlan } from "@/lib/subscription"
-import { absoluteUrl } from "@/lib/utils"
-import { BillingForm } from "@/components/billing-form"
-import { DashboardHeader } from "@/components/header"
-import { DashboardShell } from "@/components/shell"
+import { auth } from "@acme/auth";
 
-const title = "Billing"
-const description = "Manage billing and your subscription plan."
+const title = "Billing";
+const description = "Manage billing and your subscription plan.";
 
 const ogUrl = `${absoluteUrl("")}/api/og?heading=${
   description ?? title
-}&mode=light&type=${title}`
+}&mode=light&type=${title}`;
 
 export const metadata = {
   title,
@@ -37,21 +37,21 @@ export const metadata = {
     description,
     images: [ogUrl],
   },
-}
+};
 
 export default async function BillingPage() {
-  const session = await auth()
-  if (!session) redirect("/login")
+  const session = await auth();
+  if (!session) redirect("/login");
 
-  const subscriptionPlan = await getUserSubscriptionPlan(session.user.id)
+  const subscriptionPlan = await getUserSubscriptionPlan(session.user.id);
 
   // If user has a pro plan, check cancel status on Stripe.
-  let isCanceled = false
+  let isCanceled = false;
   if (subscriptionPlan.isPro && subscriptionPlan.stripeSubscriptionId) {
     const stripePlan = await stripe.subscriptions.retrieve(
-      subscriptionPlan.stripeSubscriptionId
-    )
-    isCanceled = stripePlan.cancel_at_period_end
+      subscriptionPlan.stripeSubscriptionId,
+    );
+    isCanceled = stripePlan.cancel_at_period_end;
   }
 
   return (
@@ -69,5 +69,5 @@ export default async function BillingPage() {
         />
       </div>
     </DashboardShell>
-  )
+  );
 }

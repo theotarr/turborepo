@@ -1,18 +1,17 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { toast } from "sonner"
-
-import { cn } from "@/lib/utils"
-import { Input } from "@/components/ui/input"
+import * as React from "react";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 interface DocsSearchProps extends React.HTMLAttributes<HTMLFormElement> {}
 
 export function DocsSearch({ className, ...props }: DocsSearchProps) {
   function onSubmit(event: React.SyntheticEvent) {
-    event.preventDefault()
+    event.preventDefault();
 
-    return toast.info("Not implemented")
+    return toast.info("Not implemented");
   }
 
   return (
@@ -30,5 +29,5 @@ export function DocsSearch({ className, ...props }: DocsSearchProps) {
         <span className="text-xs">⌘</span>K
       </kbd>
     </form>
-  )
+  );
 }

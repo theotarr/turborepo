@@ -1,21 +1,21 @@
-import { Metadata } from "next"
-import Link from "next/link"
-import { redirect } from "next/navigation"
-import { auth } from "@acme/auth"
+import { Metadata } from "next";
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { Icons } from "@/components/icons";
+import { QuizPage } from "@/components/quiz-page";
+import { buttonVariants } from "@/components/ui/button";
+import { UserAccountNav } from "@/components/user-account-nav";
+import { env } from "@/env";
+import { supabase } from "@/lib/supabase";
+import { absoluteUrl, cn } from "@/lib/utils";
 
-import { env } from "@/env"
-import { supabase } from "@/lib/supabase"
-import { absoluteUrl, cn } from "@/lib/utils"
-import { buttonVariants } from "@/components/ui/button"
-import { Icons } from "@/components/icons"
-import { UserAccountNav } from "@/components/user-account-nav"
-import { QuizPage } from "@/components/quiz-page"
+import { auth } from "@acme/auth";
 
-export const dynamic = "force-dynamic"
-export const maxDuration = 30
+export const dynamic = "force-dynamic";
+export const maxDuration = 30;
 
 interface LecturePageProps {
-  params: { id: string }
+  params: { id: string };
 }
 
 export async function generateMetadata({
@@ -25,16 +25,16 @@ export async function generateMetadata({
     .from("Lecture")
     .select("*")
     .eq("id", params.id)
-    .single()
-  if (!lecture) return {}
+    .single();
+  if (!lecture) return {};
 
-  const ogUrl = new URL(`${env.NEXT_PUBLIC_APP_URL}/api/og`)
-  ogUrl.searchParams.set("heading", lecture.title)
-  ogUrl.searchParams.set("type", "Course")
-  ogUrl.searchParams.set("mode", "light")
+  const ogUrl = new URL(`${env.NEXT_PUBLIC_APP_URL}/api/og`);
+  ogUrl.searchParams.set("heading", lecture.title);
+  ogUrl.searchParams.set("type", "Course");
+  ogUrl.searchParams.set("mode", "light");
 
-  const title = `Quiz on ${lecture.title}`
-  const description = "Take the quiz on this lecture."
+  const title = `Quiz on ${lecture.title}`;
+  const description = "Take the quiz on this lecture.";
 
   return {
     title,
@@ -58,24 +58,24 @@ export async function generateMetadata({
       description,
       images: [ogUrl.toString()],
     },
-  }
+  };
 }
 
 export default async function LecturePage({ params }: LecturePageProps) {
-  const session = await auth()
-  if (!session) redirect("/login")
+  const session = await auth();
+  if (!session) redirect("/login");
 
   const { data: lecture } = await supabase
     .from("Lecture")
     .select("*, course:courseId (*), Question(*)")
     .eq("userId", session.user.id)
     .eq("id", params.id)
-    .single()
-  if (!lecture) return redirect("/404") // Lecture not found
+    .single();
+  if (!lecture) return redirect("/404"); // Lecture not found
 
   // Convert lecture.Question to lecture.questions
-  lecture.questions = lecture.Question
-  delete lecture.Question
+  lecture.questions = lecture.Question;
+  delete lecture.Question;
 
   return (
     <>
@@ -108,5 +108,5 @@ export default async function LecturePage({ params }: LecturePageProps) {
         </main>
       </div>
     </>
-  )
+  );
 }

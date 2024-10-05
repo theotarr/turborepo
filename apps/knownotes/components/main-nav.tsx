@@ -1,31 +1,30 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { useSelectedLayoutSegment } from "next/navigation"
-import { create } from "zustand"
-
-import { MainNavItem } from "types"
-import { siteConfig } from "@/config/site"
-import { cn } from "@/lib/utils"
-import { Icons } from "@/components/icons"
-import { MobileNav } from "@/components/mobile-nav"
+import Link from "next/link";
+import { useSelectedLayoutSegment } from "next/navigation";
+import { Icons } from "@/components/icons";
+import { MobileNav } from "@/components/mobile-nav";
+import { siteConfig } from "@/config/site";
+import { cn } from "@/lib/utils";
+import { MainNavItem } from "types";
+import { create } from "zustand";
 
 interface MainNavProps {
-  items?: MainNavItem[]
-  children?: React.ReactNode
+  items?: MainNavItem[];
+  children?: React.ReactNode;
 }
 
 export const useMobileNavStore = create<{
-  showMobileMenu: boolean
-  setShowMobileMenu: (showMobileMenu: boolean) => void
+  showMobileMenu: boolean;
+  setShowMobileMenu: (showMobileMenu: boolean) => void;
 }>((set) => ({
   showMobileMenu: false,
   setShowMobileMenu: (showMobileMenu) => set({ showMobileMenu }),
-}))
+}));
 
 export function MainNav({ items, children }: MainNavProps) {
-  const segment = useSelectedLayoutSegment()
-  const { showMobileMenu, setShowMobileMenu } = useMobileNavStore()
+  const segment = useSelectedLayoutSegment();
+  const { showMobileMenu, setShowMobileMenu } = useMobileNavStore();
 
   return (
     <div className="flex gap-6 md:gap-10">
@@ -46,7 +45,7 @@ export function MainNav({ items, children }: MainNavProps) {
                 item.href.startsWith(`/${segment}`)
                   ? "text-foreground"
                   : "text-foreground/60",
-                item.disabled && "cursor-not-allowed opacity-80"
+                item.disabled && "cursor-not-allowed opacity-80",
               )}
             >
               {item.title}
@@ -65,5 +64,5 @@ export function MainNav({ items, children }: MainNavProps) {
         <MobileNav items={items}>{children}</MobileNav>
       )}
     </div>
-  )
+  );
 }

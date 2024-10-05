@@ -1,21 +1,21 @@
-import Link from "next/link"
-import { auth } from "@acme/auth"
+import Link from "next/link";
+import { MainNav } from "@/components/main-nav";
+import { Footer } from "@/components/site-footer";
+import { buttonVariants } from "@/components/ui/button";
+import { UserAccountNav } from "@/components/user-account-nav";
+import { marketingConfig } from "@/config/marketing";
+import { cn } from "@/lib/utils";
 
-import { marketingConfig } from "@/config/marketing"
-import { cn } from "@/lib/utils"
-import { buttonVariants } from "@/components/ui/button"
-import { MainNav } from "@/components/main-nav"
-import { Footer } from "@/components/site-footer"
-import { UserAccountNav } from "@/components/user-account-nav"
+import { auth } from "@acme/auth";
 
 interface MarketingLayoutProps {
-  children: React.ReactNode
+  children: React.ReactNode;
 }
 
 export default async function MarketingLayout({
   children,
 }: MarketingLayoutProps) {
-  const session = await auth()
+  const session = await auth();
   return (
     <div className="flex min-h-screen flex-col overflow-x-hidden">
       <header className="container z-40 bg-background">
@@ -39,7 +39,7 @@ export default async function MarketingLayout({
                     href="/login"
                     className={cn(
                       buttonVariants({ variant: "secondary", size: "sm" }),
-                      "px-4"
+                      "px-4",
                     )}
                   >
                     Login
@@ -53,5 +53,5 @@ export default async function MarketingLayout({
       <main className="flex-1">{children}</main>
       <Footer />
     </div>
-  )
+  );
 }

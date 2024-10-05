@@ -1,11 +1,8 @@
-"use client"
+"use client";
 
-import { HTMLAttributes, useState } from "react"
-import { useRouter } from "next/navigation"
-import { Transcript } from "@/types"
-import { toast } from "sonner"
-
-import { cn } from "@/lib/utils"
+import { HTMLAttributes, useState } from "react";
+import { useRouter } from "next/navigation";
+import { Icons } from "@/components/icons";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,15 +13,15 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
-import { Button, buttonVariants } from "@/components/ui/button"
+} from "@/components/ui/alert-dialog";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Command,
   CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,
-} from "@/components/ui/command"
+} from "@/components/ui/command";
 import {
   Dialog,
   DialogContent,
@@ -33,33 +30,34 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
+} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover"
-import { Icons } from "@/components/icons"
-
-import { deleteLecture } from "@/lib/lecture/actions"
+} from "@/components/ui/popover";
+import { deleteLecture } from "@/lib/lecture/actions";
+import { cn } from "@/lib/utils";
+import { Transcript } from "@/types";
+import { toast } from "sonner";
 
 async function updateLecture({
   lectureId,
   title,
   courseId,
 }: {
-  lectureId: string
-  title: string
-  courseId?: string
+  lectureId: string;
+  title: string;
+  courseId?: string;
 }) {
   const response = await fetch(`/api/lecture/${lectureId}`, {
     method: "PATCH",
@@ -70,29 +68,29 @@ async function updateLecture({
       title,
       courseId,
     }),
-  })
+  });
 
   if (!response?.ok) {
     toast.error(
-      "Something went wrong. Your lecture was not deleted. Please try again."
-    )
-    return false
+      "Something went wrong. Your lecture was not deleted. Please try again.",
+    );
+    return false;
   }
 
-  return true
+  return true;
 }
 
 interface LectureOperationsProps extends HTMLAttributes<HTMLDivElement> {
   lecture: {
-    id: string
-    title: string
-    courseId?: string
-    transcript: Transcript[]
-  }
+    id: string;
+    title: string;
+    courseId?: string;
+    transcript: Transcript[];
+  };
   courses?: {
-    id: string
-    name: string
-  }[]
+    id: string;
+    name: string;
+  }[];
 }
 
 export function LectureOperations({
@@ -100,20 +98,20 @@ export function LectureOperations({
   courses,
   className,
 }: LectureOperationsProps) {
-  const router = useRouter()
+  const router = useRouter();
 
-  const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false)
-  const [isDeleteLoading, setIsDeleteLoading] = useState(false)
+  const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
+  const [isDeleteLoading, setIsDeleteLoading] = useState(false);
 
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
-  const [isUpdateLoading, setIsUpdateLoading] = useState(false)
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isUpdateLoading, setIsUpdateLoading] = useState(false);
 
-  const [isCourseComboOpen, setIsCourseComboOpen] = useState(false)
+  const [isCourseComboOpen, setIsCourseComboOpen] = useState(false);
   const [courseId, setCourseId] = useState<string | undefined>(
-    lecture.courseId ?? undefined
-  )
+    lecture.courseId ?? undefined,
+  );
 
-  const [lectureName, setLectureName] = useState<string>(lecture.title)
+  const [lectureName, setLectureName] = useState<string>(lecture.title);
 
   return (
     <>
@@ -121,7 +119,7 @@ export function LectureOperations({
         <DropdownMenuTrigger
           className={cn(
             "flex size-8 items-center justify-center rounded-md border transition-colors hover:bg-muted",
-            className
+            className,
           )}
         >
           <Icons.ellipsis className="h-4 w-4" />
@@ -189,8 +187,8 @@ export function LectureOperations({
                                 key={c.id}
                                 value={c.id}
                                 onSelect={(cur) => {
-                                  setCourseId(cur === courseId ? "" : cur)
-                                  setIsCourseComboOpen(false)
+                                  setCourseId(cur === courseId ? "" : cur);
+                                  setIsCourseComboOpen(false);
                                 }}
                               >
                                 <Icons.check
@@ -198,7 +196,7 @@ export function LectureOperations({
                                     "mr-2 h-4 w-4",
                                     courseId === c.id
                                       ? "opacity-100"
-                                      : "opacity-0"
+                                      : "opacity-0",
                                   )}
                                 />
                                 {c.name}
@@ -215,17 +213,17 @@ export function LectureOperations({
                 <button
                   className={cn(buttonVariants())}
                   onClick={async (event) => {
-                    event.preventDefault()
-                    setIsUpdateLoading(true)
+                    event.preventDefault();
+                    setIsUpdateLoading(true);
                     const updated = await updateLecture({
                       lectureId: lecture.id,
                       title: lectureName,
                       courseId,
-                    })
+                    });
                     if (updated) {
-                      setIsUpdateLoading(false)
-                      setIsEditDialogOpen(false)
-                      router.refresh()
+                      setIsUpdateLoading(false);
+                      setIsEditDialogOpen(false);
+                      router.refresh();
                     }
                   }}
                   disabled={isUpdateLoading}
@@ -264,21 +262,21 @@ export function LectureOperations({
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
                 <AlertDialogAction
                   onClick={async (event) => {
-                    event.preventDefault()
-                    setIsDeleteLoading(true)
+                    event.preventDefault();
+                    setIsDeleteLoading(true);
 
                     try {
-                      await deleteLecture(lecture.id)
-                      setIsDeleteLoading(false)
-                      setIsDeleteAlertOpen(false)
-                      router.refresh()
+                      await deleteLecture(lecture.id);
+                      setIsDeleteLoading(false);
+                      setIsDeleteAlertOpen(false);
+                      router.refresh();
                     } catch (error) {
-                      console.error("Error deleting lecture:", error)
-                      setIsDeleteLoading(false)
-                      setIsDeleteAlertOpen(false)
+                      console.error("Error deleting lecture:", error);
+                      setIsDeleteLoading(false);
+                      setIsDeleteAlertOpen(false);
                       toast.error(
-                        "Something went wrong. Your lecture was not deleted. Please try again."
-                      )
+                        "Something went wrong. Your lecture was not deleted. Please try again.",
+                      );
                     }
                   }}
                   className="bg-red-600 focus:ring-red-600"
@@ -296,5 +294,5 @@ export function LectureOperations({
         </DropdownMenuContent>
       </DropdownMenu>
     </>
-  )
+  );
 }

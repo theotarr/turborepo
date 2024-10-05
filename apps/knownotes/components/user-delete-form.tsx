@@ -1,11 +1,8 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { useRouter } from "next/navigation"
-import { User } from "@prisma/client"
-import { toast } from "sonner"
-
-import { cn } from "@/lib/utils"
+import * as React from "react";
+import { useRouter } from "next/navigation";
+import { Icons } from "@/components/icons";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,8 +13,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
-import { Button, buttonVariants } from "@/components/ui/button"
+} from "@/components/ui/alert-dialog";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -25,11 +22,13 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import { Icons } from "@/components/icons"
+} from "@/components/ui/card";
+import { cn } from "@/lib/utils";
+import { User } from "@prisma/client";
+import { toast } from "sonner";
 
 interface UserDeleteFormProps extends React.HTMLAttributes<HTMLDivElement> {
-  user: Pick<User, "id">
+  user: Pick<User, "id">;
 }
 
 export function UserDeleteForm({
@@ -37,26 +36,26 @@ export function UserDeleteForm({
   className,
   ...props
 }: UserDeleteFormProps) {
-  const router = useRouter()
-  const [isSaving, setIsSaving] = React.useState<boolean>(false)
+  const router = useRouter();
+  const [isSaving, setIsSaving] = React.useState<boolean>(false);
 
   async function onSubmit() {
-    setIsSaving(true)
+    setIsSaving(true);
 
     const response = await fetch(`/api/users/${user.id}`, {
       method: "DELETE",
-    })
+    });
 
-    setIsSaving(false)
+    setIsSaving(false);
 
     if (!response?.ok) {
       return toast.error(
-        "Something went wrong. Your account was not deleted. Please try again."
-      )
+        "Something went wrong. Your account was not deleted. Please try again.",
+      );
     }
-    toast.success("Your account has been deleted.")
-    router.push("/")
-    router.refresh()
+    toast.success("Your account has been deleted.");
+    router.push("/");
+    router.refresh();
   }
 
   return (
@@ -74,7 +73,7 @@ export function UserDeleteForm({
                   buttonVariants({
                     variant: "secondary",
                   }),
-                  className
+                  className,
                 )}
                 disabled={isSaving}
               >
@@ -105,5 +104,5 @@ export function UserDeleteForm({
         </CardFooter>
       </Card>
     </div>
-  )
+  );
 }

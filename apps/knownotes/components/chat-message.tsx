@@ -1,16 +1,15 @@
 // Inspired by Chatbot-UI and modified to fit the needs of this project
 // @see https://github.com/mckaywrigley/chatbot-ui/blob/main/components/Chat/ChatMessage.tsx
 
-import { Message } from "ai"
+import { cn } from "@/lib/utils";
+import { Message } from "ai";
 
-import { cn } from "@/lib/utils"
-
-import { BotMessage, UserMessage } from "./message"
+import { BotMessage, UserMessage } from "./message";
 
 export interface ChatMessageProps {
   message: Message & {
-    sources?: { id: string; title: string; source: string; date: string }[]
-  }
+    sources?: { id: string; title: string; source: string; date: string }[];
+  };
 }
 
 export function ChatMessage({ message, ...props }: ChatMessageProps) {
@@ -25,5 +24,5 @@ export function ChatMessage({ message, ...props }: ChatMessageProps) {
         <BotMessage sources={message.sources} content={message.content} />
       )}
     </div>
-  )
+  );
 }

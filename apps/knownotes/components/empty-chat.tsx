@@ -17,5 +17,5 @@ export function EmptyChat() {
         </p>
       </div>
     </div>
-  )
+  );
 }

@@ -1,4 +1,4 @@
-import { AdminConfig } from "types"
+import { AdminConfig } from "types";
 
 export const adminConfig: AdminConfig = {
   mainNav: [
@@ -14,4 +14,4 @@ export const adminConfig: AdminConfig = {
       icon: "gauge",
     },
   ],
-}
+};

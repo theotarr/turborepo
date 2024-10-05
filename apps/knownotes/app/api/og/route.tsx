@@ -1,16 +1,16 @@
-import { ImageResponse } from "next/og"
-import { NextRequest } from "next/server"
+import { ImageResponse } from "next/og";
+import { NextRequest } from "next/server";
 
-export const runtime = "edge"
+export const runtime = "edge";
 
 export async function GET(req: NextRequest) {
-  const { searchParams } = req.nextUrl
-  let heading = searchParams.get("heading")
+  const { searchParams } = req.nextUrl;
+  let heading = searchParams.get("heading");
   heading =
     heading?.length! > 140
       ? `${heading?.substring(0, 140)}...`
-      : heading ?? "KnowNotes"
-  const type = searchParams.get("type") ?? "The AI Assistant For Students"
+      : (heading ?? "KnowNotes");
+  const type = searchParams.get("type") ?? "The AI Assistant For Students";
 
   // const geistRegular = fetch(
   //   new URL("../../../assets/fonts/GeistVariableVF.ttf", import.meta.url)
@@ -20,18 +20,18 @@ export async function GET(req: NextRequest) {
   // ).then((res) => res.arrayBuffer())
 
   const geistRegular = fetch(
-    new URL("../../../assets/fonts/Inter-Regular.ttf", import.meta.url)
-  ).then((res) => res.arrayBuffer())
+    new URL("../../../assets/fonts/Inter-Regular.ttf", import.meta.url),
+  ).then((res) => res.arrayBuffer());
   const geistBold = fetch(
-    new URL("../../../assets/fonts/Inter-Bold.ttf", import.meta.url)
-  ).then((res) => res.arrayBuffer())
+    new URL("../../../assets/fonts/Inter-Bold.ttf", import.meta.url),
+  ).then((res) => res.arrayBuffer());
 
   try {
-    const fontRegular = await geistRegular
-    const fontBold = await geistBold
+    const fontRegular = await geistRegular;
+    const fontBold = await geistBold;
 
-    const paint = "#000"
-    const fontSize = heading?.length! > 100 ? "70px" : "100px"
+    const paint = "#000";
+    const fontSize = heading?.length! > 100 ? "70px" : "100px";
 
     return new ImageResponse(
       (
@@ -123,12 +123,12 @@ export async function GET(req: NextRequest) {
             style: "normal",
           },
         ],
-      }
-    )
+      },
+    );
   } catch (error) {
-    console.error(error)
+    console.error(error);
     return new Response(`Failed to generate image`, {
       status: 500,
-    })
+    });
   }
 }

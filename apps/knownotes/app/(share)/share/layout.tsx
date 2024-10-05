@@ -1,9 +1,9 @@
-import { buttonVariants } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
-import Link from "next/link"
+import Link from "next/link";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 interface LectureShareLayoutProps {
-  children?: React.ReactNode
+  children?: React.ReactNode;
 }
 
 export default async function LectureShareLayout({
@@ -19,7 +19,7 @@ export default async function LectureShareLayout({
           href="/register"
           className={cn(
             buttonVariants({ size: "sm" }),
-            "h-auto w-auto rounded-full px-2.5 py-1"
+            "h-auto w-auto rounded-full px-2.5 py-1",
           )}
         >
           Try now
@@ -30,5 +30,5 @@ export default async function LectureShareLayout({
         {children}
       </main>
     </>
-  )
+  );
 }

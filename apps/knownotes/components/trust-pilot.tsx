@@ -1,6 +1,6 @@
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
 
-import { Icons } from "./icons"
+import { Icons } from "./icons";
 
 interface TrustPilotProps extends React.HTMLAttributes<HTMLDivElement> {}
 
@@ -9,7 +9,7 @@ export function TrustPilot({ className, ...props }: TrustPilotProps) {
     <div
       className={cn(
         "flex flex-col items-center justify-center gap-2 sm:flex-row",
-        className
+        className,
       )}
       {...props}
     >
@@ -29,5 +29,5 @@ export function TrustPilot({ className, ...props }: TrustPilotProps) {
         Loved by <span className="font-semibold">10,000+</span> students
       </p>
     </div>
-  )
+  );
 }

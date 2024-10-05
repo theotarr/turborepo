@@ -1,13 +1,13 @@
-import { NextRequest } from "next/server"
-import { auth } from "@acme/auth"
-import { z } from "zod"
+import { NextRequest } from "next/server";
+import { proPlan } from "@/config/subscriptions";
+import { stripe } from "@/lib/stripe";
+import { getUserSubscriptionPlan } from "@/lib/subscription";
+import { absoluteUrl } from "@/lib/utils";
+import { z } from "zod";
 
-import { proPlan } from "@/config/subscriptions"
-import { stripe } from "@/lib/stripe"
-import { getUserSubscriptionPlan } from "@/lib/subscription"
-import { absoluteUrl } from "@/lib/utils"
+import { auth } from "@acme/auth";
 
-const billingUrl = absoluteUrl("/dashboard/settings")
+const billingUrl = absoluteUrl("/dashboard/settings");
 
 export async function GET(req: NextRequest) {
   try {
@@ -16,10 +16,10 @@ export async function GET(req: NextRequest) {
     //   return new Response(null, { status: 400 })
     // }
 
-    const session = await auth()
-    if (!session) return new Response(null, { status: 403 })
+    const session = await auth();
+    if (!session) return new Response(null, { status: 403 });
 
-    const subscriptionPlan = await getUserSubscriptionPlan(session.user.id)
+    const subscriptionPlan = await getUserSubscriptionPlan(session.user.id);
 
     // The user is on the pro plan.
     // Create a portal session to manage subscription.
@@ -31,9 +31,9 @@ export async function GET(req: NextRequest) {
       const stripeSession = await stripe.billingPortal.sessions.create({
         customer: subscriptionPlan.stripeCustomerId,
         return_url: billingUrl,
-      })
+      });
 
-      return new Response(JSON.stringify({ url: stripeSession.url }))
+      return new Response(JSON.stringify({ url: stripeSession.url }));
     }
 
     // The user is on the free plan.
@@ -60,16 +60,16 @@ export async function GET(req: NextRequest) {
           userId: session.user.id,
         },
       },
-    })
+    });
 
-    return new Response(JSON.stringify({ url: stripeSession.url }))
+    return new Response(JSON.stringify({ url: stripeSession.url }));
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return new Response(JSON.stringify(error.issues), { status: 422 })
+      return new Response(JSON.stringify(error.issues), { status: 422 });
     }
 
-    console.error(error)
+    console.error(error);
 
-    return new Response(null, { status: 500 })
+    return new Response(null, { status: 500 });
   }
 }

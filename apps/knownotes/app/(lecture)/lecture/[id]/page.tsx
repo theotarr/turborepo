@@ -1,29 +1,29 @@
-import { Metadata } from "next"
-import Link from "next/link"
-import { redirect } from "next/navigation"
-import { auth } from "@acme/auth"
-
-import { env } from "@/env"
-import { AI } from "@/lib/chat/actions"
-import { supabase } from "@/lib/supabase"
-import { absoluteUrl, cn } from "@/lib/utils"
-import { buttonVariants } from "@/components/ui/button"
-import { Icons } from "@/components/icons"
-import { NotesPage } from "@/components/notes-page"
-import { UserAccountNav } from "@/components/user-account-nav"
-import { Course } from "@prisma/client"
+import { Metadata } from "next";
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { Icons } from "@/components/icons";
+import { NotesPage } from "@/components/notes-page";
+import { buttonVariants } from "@/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip"
+} from "@/components/ui/tooltip";
+import { UserAccountNav } from "@/components/user-account-nav";
+import { env } from "@/env";
+import { AI } from "@/lib/chat/actions";
+import { supabase } from "@/lib/supabase";
+import { absoluteUrl, cn } from "@/lib/utils";
+import { Course } from "@prisma/client";
 
-export const dynamic = "force-dynamic"
-export const maxDuration = 30
+import { auth } from "@acme/auth";
+
+export const dynamic = "force-dynamic";
+export const maxDuration = 30;
 
 interface LecturePageProps {
-  params: { id: string }
+  params: { id: string };
 }
 
 export async function generateMetadata({
@@ -33,13 +33,13 @@ export async function generateMetadata({
     .from("Lecture")
     .select("*")
     .eq("id", params.id)
-    .single()
-  if (!lecture) return {}
+    .single();
+  if (!lecture) return {};
 
-  const ogUrl = new URL(`${env.NEXT_PUBLIC_APP_URL}/api/og`)
-  ogUrl.searchParams.set("heading", lecture.title)
-  ogUrl.searchParams.set("type", "Course")
-  ogUrl.searchParams.set("mode", "light")
+  const ogUrl = new URL(`${env.NEXT_PUBLIC_APP_URL}/api/og`);
+  ogUrl.searchParams.set("heading", lecture.title);
+  ogUrl.searchParams.set("type", "Course");
+  ogUrl.searchParams.set("mode", "light");
 
   return {
     title: lecture.title,
@@ -63,30 +63,30 @@ export async function generateMetadata({
       description: "View this lecture on KnowNotes.",
       images: [ogUrl.toString()],
     },
-  }
+  };
 }
 
 export default async function LecturePage({ params }: LecturePageProps) {
-  const session = await auth()
-  if (!session) redirect("/login")
+  const session = await auth();
+  if (!session) redirect("/login");
 
   const { data: courses } = await supabase
     .from("Course")
     .select("*")
-    .eq("userId", session.user.id)
+    .eq("userId", session.user.id);
 
   const { data: lecture } = await supabase
     .from("Lecture")
     .select("*, course:courseId (*), Message(*)")
     .eq("userId", session.user.id)
     .eq("id", params.id)
-    .single()
+    .single();
 
   // Convert lecture.Message to lecture.messages
-  lecture.messages = lecture.Message
-  delete lecture.Message
+  lecture.messages = lecture.Message;
+  delete lecture.Message;
 
-  if (!lecture) return <>Loading...</>
+  if (!lecture) return <>Loading...</>;
 
   const aiState = {
     chatId: lecture.id,
@@ -99,7 +99,7 @@ export default async function LecturePage({ params }: LecturePageProps) {
         | "system",
       content: m.content,
     })),
-  }
+  };
 
   return (
     // @ts-ignore
@@ -115,7 +115,7 @@ export default async function LecturePage({ params }: LecturePageProps) {
                       href="/dashboard"
                       className={cn(
                         buttonVariants({ variant: "ghost" }),
-                        "p-1"
+                        "p-1",
                       )}
                     >
                       <Icons.chevronLeft className="h-4 w-4" />
@@ -143,5 +143,5 @@ export default async function LecturePage({ params }: LecturePageProps) {
         </main>
       </div>
     </AI>
-  )
+  );
 }

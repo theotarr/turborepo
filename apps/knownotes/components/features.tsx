@@ -1,15 +1,16 @@
-"use client"
+"use client";
 
-import { cn } from "@/lib/utils"
-import Editor from "./editor"
-import { Icons } from "./icons"
-import { Button, buttonVariants } from "./ui/button"
-import { Card } from "./ui/card"
-import Image, { StaticImageData } from "next/image"
-import CourseChatImage from "@/assets/images/features/course-chat.png"
-import ImportLectureImage from "@/assets/images/features/import-lecture.png"
-import LiveChatImage from "@/assets/images/features/live-lecture-chat.png"
-import LiveLectureImage from "@/assets/images/features/live-lecture.png"
+import Image, { StaticImageData } from "next/image";
+import CourseChatImage from "@/assets/images/features/course-chat.png";
+import ImportLectureImage from "@/assets/images/features/import-lecture.png";
+import LiveChatImage from "@/assets/images/features/live-lecture-chat.png";
+import LiveLectureImage from "@/assets/images/features/live-lecture.png";
+import { cn } from "@/lib/utils";
+
+import Editor from "./editor";
+import { Icons } from "./icons";
+import { Button, buttonVariants } from "./ui/button";
+import { Card } from "./ui/card";
 
 export function PrimaryFeatures() {
   return (
@@ -41,7 +42,7 @@ metaphysics, epistemology, ethics, logic
           <button
             className={cn(
               buttonVariants({ variant: "outline" }),
-              "h-auto w-auto rounded-l-full border border-border p-2.5 pr-1.5 shadow-lg"
+              "h-auto w-auto rounded-l-full border border-border p-2.5 pr-1.5 shadow-lg",
             )}
           >
             <Icons.audioLines className={cn("size-8 p-1 text-primary")} />
@@ -50,7 +51,7 @@ metaphysics, epistemology, ethics, logic
           <button
             className={cn(
               buttonVariants({ variant: "outline" }),
-              "h-auto w-auto rounded-r-full border border-border p-2.5 pl-1.5 shadow-lg"
+              "h-auto w-auto rounded-r-full border border-border p-2.5 pl-1.5 shadow-lg",
             )}
           >
             <Icons.square className="size-8 fill-secondary-foreground p-1 text-secondary-foreground" />
@@ -94,7 +95,7 @@ metaphysics, epistemology, ethics, logic
         </div>
       </Card>
     </div>
-  )
+  );
 }
 
 export function FeatureGrid({ className }: { className?: string }) {
@@ -102,7 +103,7 @@ export function FeatureGrid({ className }: { className?: string }) {
     <div
       className={cn(
         "grid grid-cols-1 gap-12 gap-y-8 md:grid-cols-2",
-        className
+        className,
       )}
     >
       <ImageFeature
@@ -124,7 +125,7 @@ export function FeatureGrid({ className }: { className?: string }) {
         description="Automatically take notes from your lectures and classes."
       />
     </div>
-  )
+  );
 }
 
 function ImageFeature({
@@ -132,9 +133,9 @@ function ImageFeature({
   title,
   description,
 }: {
-  src: string | StaticImageData
-  title: string
-  description: string
+  src: string | StaticImageData;
+  title: string;
+  description: string;
 }) {
   return (
     <div className="flex flex-col space-y-4 pt-4">
@@ -157,15 +158,15 @@ function ImageFeature({
         <p className="text-base text-muted-foreground">{description}</p>
       </div>
     </div>
-  )
+  );
 }
 
 function TextFeature({
   title,
   description,
 }: {
-  title: string
-  description: string
+  title: string;
+  description: string;
 }) {
   return (
     <div className="flex flex-col space-y-2 border-t pt-6">
@@ -174,5 +175,5 @@ function TextFeature({
       </h3>
       <p className="text-base text-muted-foreground">{description}</p>
     </div>
-  )
+  );
 }

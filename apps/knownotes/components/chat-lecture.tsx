@@ -1,33 +1,32 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Message } from "ai/react"
-import { useActions, useUIState } from "ai/rsc"
+import { useState } from "react";
+import Link from "next/link";
+import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
+import { sendGAEvent } from "@/lib/analytics";
+import { absoluteUrl, cn } from "@/lib/utils";
+import { Message } from "ai/react";
+import { useActions, useUIState } from "ai/rsc";
+import { toast } from "sonner";
 
-import { sendGAEvent } from "@/lib/analytics"
-
-import { PromptForm } from "./chat-form"
-import { ChatList } from "./chat-list"
-import { UserMessage } from "./message"
-import { useNotesStore, useTranscriptStore } from "./notes-page"
-import { Button, buttonVariants } from "./ui/button"
-import { Separator } from "./ui/separator"
-import { Icons } from "./icons"
-import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard"
-import { toast } from "sonner"
-import { absoluteUrl, cn } from "@/lib/utils"
-import Link from "next/link"
+import { PromptForm } from "./chat-form";
+import { ChatList } from "./chat-list";
+import { Icons } from "./icons";
+import { UserMessage } from "./message";
+import { useNotesStore, useTranscriptStore } from "./notes-page";
+import { Button, buttonVariants } from "./ui/button";
+import { Separator } from "./ui/separator";
 
 const CHAT_TEMPLATES = [
   "List key concepts",
   "Summarize lecture",
   "Answer question",
-]
+];
 
 interface ChatProps extends React.HTMLAttributes<HTMLDivElement> {
-  messages?: Message[]
-  onMessage?: (message: Message) => void
-  lectureId: string
+  messages?: Message[];
+  onMessage?: (message: Message) => void;
+  lectureId: string;
 }
 
 export function Chat({
@@ -35,14 +34,14 @@ export function Chat({
   lectureId,
   ...props
 }: ChatProps) {
-  const { copyToClipboard } = useCopyToClipboard({})
-  const { transcript } = useTranscriptStore()
-  const { editor, enhancedNotes } = useNotesStore()
+  const { copyToClipboard } = useCopyToClipboard({});
+  const { transcript } = useTranscriptStore();
+  const { editor, enhancedNotes } = useNotesStore();
   // const [aiState] = useAIState()
-  const [messages, setMessages] = useUIState()
-  const [input, setInput] = useState("")
-  const { submitLectureMessage } = useActions()
-  const isLoading = true
+  const [messages, setMessages] = useUIState();
+  const [input, setInput] = useState("");
+  const { submitLectureMessage } = useActions();
+  const isLoading = true;
 
   return (
     <div {...props}>
@@ -61,7 +60,7 @@ export function Chat({
                       buttonVariants({
                         variant: "default",
                         size: "sm",
-                      })
+                      }),
                     )}
                   >
                     <Icons.flashcards className="mr-2 size-4" />
@@ -73,7 +72,7 @@ export function Chat({
                       buttonVariants({
                         variant: "default",
                         size: "sm",
-                      })
+                      }),
                     )}
                   >
                     <Icons.quiz className="mr-2 size-4" />
@@ -91,11 +90,11 @@ export function Chat({
                 variant="outline"
                 size="sm"
                 onClick={() => {
-                  copyToClipboard(absoluteUrl(`/share/lecture/${lectureId}`))
+                  copyToClipboard(absoluteUrl(`/share/lecture/${lectureId}`));
                   sendGAEvent("event", "copy_link", {
                     url: window.location.href,
-                  })
-                  toast.success("Link copied to clipboard.")
+                  });
+                  toast.success("Link copied to clipboard.");
                 }}
               >
                 <Icons.link className="mr-2 size-4" />
@@ -105,9 +104,9 @@ export function Chat({
                 variant="outline"
                 size="sm"
                 onClick={() => {
-                  copyToClipboard(editor?.storage.markdown.getMarkdown())
-                  sendGAEvent("event", "copy_notes")
-                  toast.success("Notes copied to clipboard.")
+                  copyToClipboard(editor?.storage.markdown.getMarkdown());
+                  sendGAEvent("event", "copy_notes");
+                  toast.success("Notes copied to clipboard.");
                 }}
               >
                 <Icons.copy className="mr-2 size-4" />
@@ -127,7 +126,7 @@ export function Chat({
                   onClick={async () => {
                     sendGAEvent("event", "submit_chat_template", {
                       template,
-                    })
+                    });
 
                     // Optimistically add the user message to the chat.
                     setMessages((prev) => [
@@ -141,16 +140,16 @@ export function Chat({
                           | "system",
                         display: <UserMessage>{template}</UserMessage>,
                       },
-                    ])
+                    ]);
 
                     // Submit the user message to the server.
                     const message = await submitLectureMessage(
                       template,
                       lectureId,
-                      transcript
-                    )
-                    setMessages((prev) => [...prev, message])
-                    setInput("")
+                      transcript,
+                    );
+                    setMessages((prev) => [...prev, message]);
+                    setInput("");
                   }}
                 >
                   {template}
@@ -168,7 +167,7 @@ export function Chat({
               onSubmit={async (input) => {
                 sendGAEvent("event", "submit_chat_form", {
                   prompt: input,
-                })
+                });
                 setMessages((prev) => [
                   ...prev,
                   {
@@ -180,16 +179,16 @@ export function Chat({
                       | "system",
                     display: <UserMessage>{input}</UserMessage>,
                   },
-                ])
+                ]);
 
                 // Submit the user message to the server.
                 const message = await submitLectureMessage(
                   input,
                   lectureId,
-                  transcript
-                )
-                setMessages((prev) => [...prev, message])
-                setInput("")
+                  transcript,
+                );
+                setMessages((prev) => [...prev, message]);
+                setInput("");
               }}
               input={input}
               setInput={setInput}
@@ -199,5 +198,5 @@ export function Chat({
         </div>
       </div>
     </div>
-  )
+  );
 }

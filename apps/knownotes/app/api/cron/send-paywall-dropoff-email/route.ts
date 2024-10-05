@@ -1,12 +1,12 @@
-import { env } from "@/env"
-import { db } from "@/lib/db"
-import { resend } from "@/lib/resend"
-import NewUserOfferEmail from "@/components/emails/new-user-offer-email"
+import NewUserOfferEmail from "@/components/emails/new-user-offer-email";
+import { env } from "@/env";
+import { db } from "@/lib/db";
+import { resend } from "@/lib/resend";
 
-export const maxDuration = 300 // 5 minutes
+export const maxDuration = 300; // 5 minutes
 
 export async function GET(request: Request) {
-  const authHeader = request.headers.get("Authorization")
+  const authHeader = request.headers.get("Authorization");
   if (authHeader !== `Bearer ${env.CRON_SECRET}`) {
     return new Response(
       JSON.stringify({
@@ -14,8 +14,8 @@ export async function GET(request: Request) {
       }),
       {
         status: 401,
-      }
-    )
+      },
+    );
   }
 
   // Get all the users that have signed up, but haven't completed the paywall. And haven't been sent the free trial offer email.
@@ -24,13 +24,13 @@ export async function GET(request: Request) {
       stripePriceId: null,
       sentFreeTrialOfferEmailAt: null,
     },
-  })
+  });
 
   // Send the free trial offer email to each user.
-  const successfulEmails: string[] = []
+  const successfulEmails: string[] = [];
 
   for (const user of users) {
-    if (!user.email) continue
+    if (!user.email) continue;
 
     const emailResponse = await resend.emails.send({
       from: "Theo <theo@knownotes.ai>",
@@ -44,14 +44,14 @@ We lost you when you hit the checkout page! If you still want to try out KnowNot
 
 Theo (Founder @ KnowNotes)`,
       react: NewUserOfferEmail(),
-    })
+    });
 
     if (emailResponse.error) {
       console.error(
         `Error sending free trial offer email to ${user.email}:`,
-        emailResponse.error
-      )
-      continue
+        emailResponse.error,
+      );
+      continue;
     }
 
     // Update the user's sentFreeTrialOfferEmailAt timestamp.
@@ -62,8 +62,8 @@ Theo (Founder @ KnowNotes)`,
       data: {
         sentFreeTrialOfferEmailAt: new Date(),
       },
-    })
-    successfulEmails.push(user.email)
+    });
+    successfulEmails.push(user.email);
   }
 
   return new Response(
@@ -73,6 +73,6 @@ Theo (Founder @ KnowNotes)`,
           ? `Sent emails to: ${successfulEmails.join(", ")}.`
           : "No emails sent.",
     }),
-    { status: 200 }
-  )
+    { status: 200 },
+  );
 }

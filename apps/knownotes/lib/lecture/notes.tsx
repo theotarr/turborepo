@@ -1,22 +1,22 @@
-"use server"
+"use server";
 
-import { Transcript } from "@/types"
-import { createStreamableValue } from "ai/rsc"
-import { streamText } from "ai"
-import { openai } from "@ai-sdk/openai"
+import { supabase } from "@/lib/supabase";
+import { Transcript } from "@/types";
+import { openai } from "@ai-sdk/openai";
+import { streamText } from "ai";
+import { createStreamableValue } from "ai/rsc";
 
-import { supabase } from "@/lib/supabase"
+import { auth } from "@acme/auth";
 
-import { formatTranscript } from "../utils"
-import { auth } from "@acme/auth"
+import { formatTranscript } from "../utils";
 
 export async function generateEnhancedNotes(
   lectureId: string,
   transcript: Transcript[],
-  notes: string
+  notes: string,
 ) {
-  const session = await auth()
-  if (!session) throw new Error("User not authenticated")
+  const session = await auth();
+  if (!session) throw new Error("User not authenticated");
 
   // Verify the user has access to the lecture.
   const { data: lecture, error } = await supabase
@@ -24,13 +24,13 @@ export async function generateEnhancedNotes(
     .select()
     .eq("id", lectureId)
     .eq("userId", session.user.id)
-    .single()
-  if (error) throw error
-  if (!lecture) throw new Error("Lecture not found")
+    .single();
+  if (error) throw error;
+  if (!lecture) throw new Error("Lecture not found");
 
-  const stream = createStreamableValue()
+  const stream = createStreamableValue();
 
-  ;(async () => {
+  (async () => {
     const { textStream } = await streamText({
       model: openai("gpt-4o"),
       system: `\
@@ -59,16 +59,16 @@ export async function generateEnhancedNotes(
             enhancedNotes: text,
             markdownNotes: text,
           })
-          .eq("id", lectureId)
+          .eq("id", lectureId);
       },
-    })
+    });
 
     for await (const chunk of textStream) {
-      stream.update(chunk)
+      stream.update(chunk);
     }
 
-    stream.done()
-  })()
+    stream.done();
+  })();
 
-  return stream.value
+  return stream.value;
 }

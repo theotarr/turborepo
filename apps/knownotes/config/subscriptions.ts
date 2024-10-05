@@ -1,4 +1,4 @@
-import { SubscriptionPlan } from "types"
+import { SubscriptionPlan } from "types";
 
 // export const freePlan: SubscriptionPlan = {
 //   name: "Class Clown",
@@ -17,7 +17,7 @@ export const freePlan: SubscriptionPlan = {
   lecturesPerMonth: 30,
   noteGenerationsPerMonth: 500,
   messagesPerMonth: 500,
-}
+};
 
 export const proPlan: SubscriptionPlan = {
   name: "KnowNotes Pro",
@@ -30,4 +30,4 @@ export const proPlan: SubscriptionPlan = {
   lecturesPerMonth: 1_000,
   noteGenerationsPerMonth: 1_000,
   messagesPerMonth: 1_000,
-}
+};

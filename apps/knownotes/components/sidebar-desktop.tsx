@@ -1,15 +1,15 @@
-import { auth } from "@acme/auth"
+import { SidebarToggle, SidebarWrapper } from "@/components/sidebar";
 
-import { SidebarToggle, SidebarWrapper } from "@/components/sidebar"
+import { auth } from "@acme/auth";
 
-import { ChatHistory } from "./chat-history"
-import { SidebarMobile } from "./sidebar-mobile"
+import { ChatHistory } from "./chat-history";
+import { SidebarMobile } from "./sidebar-mobile";
 
 export async function SidebarDesktop() {
-  const session = await auth()
+  const session = await auth();
 
   if (!session) {
-    return <></>
+    return <></>;
   }
 
   return (
@@ -21,5 +21,5 @@ export async function SidebarDesktop() {
       </SidebarWrapper>
       <SidebarMobile userId={session.user.id} />
     </>
-  )
+  );
 }

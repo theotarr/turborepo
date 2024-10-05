@@ -1,13 +1,12 @@
-import Link from "next/link"
+import Link from "next/link";
+import { Icons } from "@/components/icons";
+import { buttonVariants } from "@/components/ui/button";
+import { UserAuthForm } from "@/components/user-auth-form";
+import { absoluteUrl, cn } from "@/lib/utils";
 
-import { absoluteUrl, cn } from "@/lib/utils"
-import { buttonVariants } from "@/components/ui/button"
-import { Icons } from "@/components/icons"
-import { UserAuthForm } from "@/components/user-auth-form"
-
-const title = "Create an account"
-const description = "Get started with KnowNotes."
-const ogUrl = `${absoluteUrl("")}/api/og?heading=Register`
+const title = "Create an account";
+const description = "Get started with KnowNotes.";
+const ogUrl = `${absoluteUrl("")}/api/og?heading=Register`;
 
 export const metadata = {
   title,
@@ -34,7 +33,7 @@ export const metadata = {
     description,
     images: [ogUrl],
   },
-}
+};
 
 export default function RegisterPage() {
   return (
@@ -43,7 +42,7 @@ export default function RegisterPage() {
         href="/login"
         className={cn(
           buttonVariants({ variant: "ghost" }),
-          "absolute right-4 top-4 md:right-8 md:top-8"
+          "absolute right-4 top-4 md:right-8 md:top-8",
         )}
       >
         Login
@@ -81,5 +80,5 @@ export default function RegisterPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

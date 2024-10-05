@@ -1,14 +1,14 @@
-import { Metadata } from "next"
-import { env } from "@/env"
-import { supabase } from "@/lib/supabase"
-import { absoluteUrl } from "@/lib/utils"
-import { NotesSharePage } from "@/components/notes-share-page"
+import { Metadata } from "next";
+import { NotesSharePage } from "@/components/notes-share-page";
+import { env } from "@/env";
+import { supabase } from "@/lib/supabase";
+import { absoluteUrl } from "@/lib/utils";
 
-export const dynamic = "force-dynamic"
-export const maxDuration = 30
+export const dynamic = "force-dynamic";
+export const maxDuration = 30;
 
 interface LecturePageProps {
-  params: { id: string }
+  params: { id: string };
 }
 
 export async function generateMetadata({
@@ -18,13 +18,13 @@ export async function generateMetadata({
     .from("Lecture")
     .select("*")
     .eq("id", params.id)
-    .single()
-  if (!lecture) return {}
+    .single();
+  if (!lecture) return {};
 
-  const ogUrl = new URL(`${env.NEXT_PUBLIC_APP_URL}/api/og`)
-  ogUrl.searchParams.set("heading", lecture.title)
-  ogUrl.searchParams.set("type", "Course")
-  ogUrl.searchParams.set("mode", "light")
+  const ogUrl = new URL(`${env.NEXT_PUBLIC_APP_URL}/api/og`);
+  ogUrl.searchParams.set("heading", lecture.title);
+  ogUrl.searchParams.set("type", "Course");
+  ogUrl.searchParams.set("mode", "light");
 
   return {
     title: lecture.title,
@@ -48,7 +48,7 @@ export async function generateMetadata({
       description: "View this lecture on KnowNotes.",
       images: [ogUrl.toString()],
     },
-  }
+  };
 }
 
 export default async function SharePage({ params }: LecturePageProps) {
@@ -56,13 +56,13 @@ export default async function SharePage({ params }: LecturePageProps) {
     .from("Lecture")
     .select("*, course:courseId (*), Message(*)")
     .eq("id", params.id)
-    .single()
+    .single();
 
   // Convert lecture.Message to lecture.messages
-  lecture.messages = lecture.Message
-  delete lecture.Message
+  lecture.messages = lecture.Message;
+  delete lecture.Message;
 
-  if (!lecture) return <>Loading...</>
+  if (!lecture) return <>Loading...</>;
 
   return (
     <div className="flex flex-col overflow-hidden">
@@ -70,5 +70,5 @@ export default async function SharePage({ params }: LecturePageProps) {
         <NotesSharePage lecture={lecture} />
       </main>
     </div>
-  )
+  );
 }

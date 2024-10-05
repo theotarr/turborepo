@@ -1,23 +1,22 @@
 // @ts-ignore
-import { cache } from "react"
-import { Chat } from "openai/resources"
+import { cache } from "react";
+import { getChats } from "@/app/(chat)/actions";
+import { Chat } from "openai/resources";
 
-import { getChats } from "@/app/(chat)/actions"
-
-import { ModeToggle } from "./mode-toggle"
-import { SidebarItems } from "./sidebar-items"
+import { ModeToggle } from "./mode-toggle";
+import { SidebarItems } from "./sidebar-items";
 
 interface SidebarListProps {
-  userId: string
-  children?: React.ReactNode
+  userId: string;
+  children?: React.ReactNode;
 }
 
 const loadChats = cache(async (userId: string) => {
-  return await getChats(userId)
-})
+  return await getChats(userId);
+});
 
 export async function SidebarList({ userId }: SidebarListProps) {
-  const chats = (await loadChats(userId)) as Record<string, Chat[]>
+  const chats = (await loadChats(userId)) as Record<string, Chat[]>;
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
       <div className="flex-1 overflow-auto">
@@ -37,5 +36,5 @@ export async function SidebarList({ userId }: SidebarListProps) {
         {/* <ClearHistory clearChats={clearChats} isEnabled={chats?.length > 0} /> */}
       </div>
     </div>
-  )
+  );
 }

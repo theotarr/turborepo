@@ -1,19 +1,18 @@
-"use client"
+"use client";
 
-import { useEffect, useRef } from "react"
-import { Transcript } from "@/types"
+import { useEffect, useRef } from "react";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+import { Transcript } from "@/types";
 
-import { cn } from "@/lib/utils"
-import { Badge } from "@/components/ui/badge"
-
-import { TranscriptActions } from "./transcript-actions"
+import { TranscriptActions } from "./transcript-actions";
 
 export function TranscriptItem({
   id,
   transcript,
 }: {
-  id?: string
-  transcript: Transcript
+  id?: string;
+  transcript: Transcript;
 }) {
   return (
     <div
@@ -29,13 +28,13 @@ export function TranscriptItem({
       </div>
       <TranscriptActions transcript={transcript} />
     </div>
-  )
+  );
 }
 
 interface TranscriptListProps extends React.HTMLAttributes<HTMLDivElement> {
-  transcript: Transcript[]
-  interim: Transcript | null
-  scroll?: boolean
+  transcript: Transcript[];
+  interim: Transcript | null;
+  scroll?: boolean;
 }
 
 export function TranscriptList({
@@ -45,23 +44,23 @@ export function TranscriptList({
   className,
   ...props
 }: TranscriptListProps) {
-  const container = useRef<HTMLDivElement>(null)
+  const container = useRef<HTMLDivElement>(null);
 
   const Scroll = () => {
     const { offsetHeight, scrollHeight, scrollTop } =
-      container.current as HTMLDivElement
+      container.current as HTMLDivElement;
     if (scrollHeight <= scrollTop + offsetHeight + 100) {
       container.current?.scrollTo({
         left: 0,
         top: scrollHeight,
         behavior: "smooth",
-      })
+      });
     }
-  }
+  };
 
   useEffect(() => {
-    Scroll()
-  }, [transcript, interim])
+    Scroll();
+  }, [transcript, interim]);
 
   return (
     // {/* <div className="mx-2 grid w-full items-center gap-1.5">
@@ -78,5 +77,5 @@ export function TranscriptList({
       ))}
       {interim && <TranscriptItem transcript={interim} />}
     </div>
-  )
+  );
 }

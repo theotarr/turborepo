@@ -1,24 +1,23 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { signIn } from "next-auth/react"
-import { useForm } from "react-hook-form"
-import { toast } from "sonner"
-import TiktokPixel from "tiktok-pixel"
-import * as z from "zod"
-
-import { cn } from "@/lib/utils"
-import { userAuthSchema } from "@/lib/validations/auth"
-import { Button, buttonVariants } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Icons } from "@/components/icons"
-import { registeredInPastMinute } from "@/app/(auth)/actions"
+import * as React from "react";
+import { registeredInPastMinute } from "@/app/(auth)/actions";
+import { Icons } from "@/components/icons";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
+import { userAuthSchema } from "@/lib/validations/auth";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { signIn } from "next-auth/react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import TiktokPixel from "tiktok-pixel";
+import * as z from "zod";
 
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {}
 
-type FormData = z.infer<typeof userAuthSchema>
+type FormData = z.infer<typeof userAuthSchema>;
 
 export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   const {
@@ -27,35 +26,35 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(userAuthSchema),
-  })
-  const [isLoading, setIsLoading] = React.useState<boolean>(false)
+  });
+  const [isLoading, setIsLoading] = React.useState<boolean>(false);
 
   async function onSubmit(data: FormData) {
-    setIsLoading(true)
+    setIsLoading(true);
 
     try {
       if (await registeredInPastMinute()) {
-        TiktokPixel.track("CompleteRegistration", {})
+        TiktokPixel.track("CompleteRegistration", {});
       }
       await signIn("resend", {
         email: data.email.toLowerCase(),
         redirect: false,
         callbackUrl: "/onboarding",
-      })
+      });
     } catch (error) {
       // If the error is a TypeError, ignore it
       if (error instanceof TypeError) {
       } else {
-        console.error({ error })
-        setIsLoading(false)
-        return toast.error("Something went wrong. Please try again.")
+        console.error({ error });
+        setIsLoading(false);
+        return toast.error("Something went wrong. Please try again.");
       }
     }
 
-    setIsLoading(false)
+    setIsLoading(false);
     return toast.success(
-      "Check your email, we sent you a login link. Be sure to check your spam too."
-    )
+      "Check your email, we sent you a login link. Be sure to check your spam too.",
+    );
   }
 
   return (
@@ -103,13 +102,13 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
       <Button
         variant="outline"
         onClick={async () => {
-          const isNewUser = await registeredInPastMinute()
+          const isNewUser = await registeredInPastMinute();
           if (isNewUser) {
-            TiktokPixel.track("CompleteRegistration", {})
+            TiktokPixel.track("CompleteRegistration", {});
           }
           await signIn("google", {
             callbackUrl: "/onboarding",
-          })
+          });
         }}
         type="button"
         disabled={isLoading}
@@ -122,5 +121,5 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
         Google
       </Button>
     </div>
-  )
+  );
 }

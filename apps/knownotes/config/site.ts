@@ -1,4 +1,4 @@
-import { SiteConfig } from "types"
+import { SiteConfig } from "types";
 
 export const siteConfig: SiteConfig = {
   name: "KnowNotes",
@@ -59,4 +59,4 @@ export const siteConfig: SiteConfig = {
     //   icon: "twitter",
     // },
   ],
-}
+};

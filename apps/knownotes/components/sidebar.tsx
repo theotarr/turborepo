@@ -1,25 +1,24 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { create } from "zustand"
-
-import { cn } from "@/lib/utils"
+import * as React from "react";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip"
+} from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
+import { create } from "zustand";
 
-import { Icons } from "./icons"
-import { Button } from "./ui/button"
+import { Icons } from "./icons";
+import { Button } from "./ui/button";
 
 export const useSidebarStore = create<{
-  isSidebarOpen: boolean
-  isLoading: boolean
-  setIsLoading: (isLoading: boolean) => void
-  toggleSidebar: () => void
-  setIsSidebarOpen: (isSidebarOpen: boolean) => void
+  isSidebarOpen: boolean;
+  isLoading: boolean;
+  setIsLoading: (isLoading: boolean) => void;
+  toggleSidebar: () => void;
+  setIsSidebarOpen: (isSidebarOpen: boolean) => void;
 }>((set) => ({
   isSidebarOpen: true,
   isLoading: false,
@@ -27,12 +26,12 @@ export const useSidebarStore = create<{
   toggleSidebar: () =>
     set((state) => ({ isSidebarOpen: !state.isSidebarOpen })),
   setIsSidebarOpen: (isSidebarOpen) => set({ isSidebarOpen }),
-}))
+}));
 
 export interface SidebarProps extends React.ComponentProps<"div"> {}
 
 export function SidebarWrapper({ className, children }: SidebarProps) {
-  const { isSidebarOpen, isLoading } = useSidebarStore()
+  const { isSidebarOpen, isLoading } = useSidebarStore();
 
   return (
     <div
@@ -41,13 +40,13 @@ export function SidebarWrapper({ className, children }: SidebarProps) {
     >
       {children}
     </div>
-  )
+  );
 }
 
 interface SidebarToggleProps extends React.ComponentProps<typeof Button> {}
 
 export function SidebarToggle({ ...props }: SidebarToggleProps) {
-  const { toggleSidebar, isSidebarOpen } = useSidebarStore()
+  const { toggleSidebar, isSidebarOpen } = useSidebarStore();
 
   return (
     <TooltipProvider delayDuration={5}>
@@ -57,7 +56,7 @@ export function SidebarToggle({ ...props }: SidebarToggleProps) {
             variant="ghost"
             className={cn("-ml-2 hidden p-0 lg:flex", props.className)}
             onClick={() => {
-              toggleSidebar()
+              toggleSidebar();
             }}
             {...props}
           >
@@ -74,11 +73,11 @@ export function SidebarToggle({ ...props }: SidebarToggleProps) {
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
-  )
+  );
 }
 
 export function SidebarToggleMobile({ ...props }: SidebarToggleProps) {
-  const { toggleSidebar } = useSidebarStore()
+  const { toggleSidebar } = useSidebarStore();
 
   return (
     <TooltipProvider delayDuration={5}>
@@ -88,7 +87,7 @@ export function SidebarToggleMobile({ ...props }: SidebarToggleProps) {
             variant="ghost"
             className={cn("-ml-2 hidden p-0 lg:flex", props.className)}
             onClick={() => {
-              toggleSidebar()
+              toggleSidebar();
             }}
             {...props}
           >
@@ -101,5 +100,5 @@ export function SidebarToggleMobile({ ...props }: SidebarToggleProps) {
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
-  )
+  );
 }

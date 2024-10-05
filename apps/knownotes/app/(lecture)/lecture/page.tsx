@@ -1,15 +1,14 @@
-import { redirect } from "next/navigation"
+import { redirect } from "next/navigation";
+import { DashboardShell } from "@/components/shell";
+import { absoluteUrl } from "@/lib/utils";
 
-import { absoluteUrl } from "@/lib/utils"
-import { DashboardShell } from "@/components/shell"
+import { createLecture } from "../actions";
 
-import { createLecture } from "../actions"
+export const runtime = "edge";
+export const maxDuration = 300; // 300 seconds
 
-export const runtime = "edge"
-export const maxDuration = 300 // 300 seconds
-
-const title = "Record Lecture"
-const ogUrl = `${absoluteUrl("")}/api/og?heading=${title}&mode=light`
+const title = "Record Lecture";
+const ogUrl = `${absoluteUrl("")}/api/og?heading=${title}&mode=light`;
 
 export const metadata = {
   title,
@@ -39,21 +38,21 @@ export const metadata = {
       "Record, transcribe, and automatically generate notes using KnowNotes.",
     images: [ogUrl],
   },
-}
+};
 
 interface RecordPageParams {
-  params: {}
-  searchParams: { courseId?: string }
+  params: {};
+  searchParams: { courseId?: string };
 }
 
 export default async function LecturePage({ searchParams }: RecordPageParams) {
-  const { courseId } = searchParams
-  const id = await createLecture(courseId, "LIVE")
-  if (id) redirect(`/lecture/${id}`)
+  const { courseId } = searchParams;
+  const id = await createLecture(courseId, "LIVE");
+  if (id) redirect(`/lecture/${id}`);
 
   return (
     <DashboardShell>
       <div>Creating new live lecture environment...</div>
     </DashboardShell>
-  )
+  );
 }

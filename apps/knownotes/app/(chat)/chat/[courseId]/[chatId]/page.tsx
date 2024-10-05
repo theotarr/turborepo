@@ -1,18 +1,18 @@
-import { Metadata } from "next"
-import { redirect } from "next/navigation"
-import { auth } from "@acme/auth"
+import { Metadata } from "next";
+import { redirect } from "next/navigation";
+import { ChatCourse } from "@/components/chat-course";
+import { env } from "@/env";
+import { AI } from "@/lib/chat/actions";
+import { supabase } from "@/lib/supabase";
+import { absoluteUrl } from "@/lib/utils";
 
-import { env } from "@/env"
-import { AI } from "@/lib/chat/actions"
-import { supabase } from "@/lib/supabase"
-import { absoluteUrl } from "@/lib/utils"
-import { ChatCourse } from "@/components/chat-course"
+import { auth } from "@acme/auth";
 
-export const runtime = "edge"
-export const maxDuration = 300 // 5 min in seconds
+export const runtime = "edge";
+export const maxDuration = 300; // 5 min in seconds
 
 interface SavedChatPageProps {
-  params: { courseId: string; chatId: string }
+  params: { courseId: string; chatId: string };
 }
 
 export async function generateMetadata({
@@ -22,8 +22,8 @@ export async function generateMetadata({
     .from("Course")
     .select("id, name")
     .eq("id", params.courseId)
-    .single()
-  if (!course) return {}
+    .single();
+  if (!course) return {};
 
   const chat = params.chatId
     ? (
@@ -33,15 +33,15 @@ export async function generateMetadata({
           .eq("id", params.chatId)
           .single()
       ).data
-    : null
+    : null;
 
-  const ogUrl = new URL(`${env.NEXT_PUBLIC_APP_URL}/api/og`)
-  ogUrl.searchParams.set("heading", course.name + " AI Tutor")
-  ogUrl.searchParams.set("type", "AI Tutor")
-  ogUrl.searchParams.set("mode", "light")
+  const ogUrl = new URL(`${env.NEXT_PUBLIC_APP_URL}/api/og`);
+  ogUrl.searchParams.set("heading", course.name + " AI Tutor");
+  ogUrl.searchParams.set("type", "AI Tutor");
+  ogUrl.searchParams.set("mode", "light");
 
-  const title = chat ? chat.name : course.name + " AI Tutor"
-  const description = "Your own personal AI tutor for " + course.name
+  const title = chat ? chat.name : course.name + " AI Tutor";
+  const description = "Your own personal AI tutor for " + course.name;
 
   return {
     title,
@@ -67,29 +67,29 @@ export async function generateMetadata({
       description,
       images: [ogUrl.toString()],
     },
-  }
+  };
 }
 
 export default async function CourseChatPage({ params }: SavedChatPageProps) {
-  const session = await auth()
-  if (!session) redirect("/login")
+  const session = await auth();
+  if (!session) redirect("/login");
 
   const { data: course } = await supabase
     .from("Course")
     .select("*")
     .eq("id", params.courseId)
-    .single()
-  if (!course || course.userId !== session.user.id) redirect("/404")
+    .single();
+  if (!course || course.userId !== session.user.id) redirect("/404");
 
   const { data: chat } = await supabase
     .from("Chat")
     .select("*, Message(*)")
     .eq("id", params.chatId)
-    .single()
+    .single();
 
   // Convert chat.Message to chat.messages
-  chat.messages = chat.Message
-  delete chat.Message
+  chat.messages = chat.Message;
+  delete chat.Message;
 
   const aiState = {
     chatId: chat.id as string,
@@ -103,7 +103,7 @@ export default async function CourseChatPage({ params }: SavedChatPageProps) {
       content: m.content as string,
       sources: m.sources,
     })),
-  }
+  };
 
   return (
     // @ts-ignore
@@ -115,5 +115,5 @@ export default async function CourseChatPage({ params }: SavedChatPageProps) {
         userId={session.user.id}
       />
     </AI>
-  )
+  );
 }

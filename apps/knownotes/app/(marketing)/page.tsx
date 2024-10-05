@@ -1,30 +1,29 @@
-import Image from "next/image"
-import Link from "next/link"
-import AmericanLogo from "@/assets/images/institutions/american.png"
-import BerkelyLogo from "@/assets/images/institutions/berkeley.png"
-import HarvardLogo from "@/assets/images/institutions/harvard.png"
-import McGillLogo from "@/assets/images/institutions/mcgill.png"
-import MITLogo from "@/assets/images/institutions/mit.png"
-import NYULogo from "@/assets/images/institutions/nyu.png"
-import PrincetonLogo from "@/assets/images/institutions/princeton.png"
-import StanfordLogo from "@/assets/images/institutions/stanford.png"
-import YaleLogo from "@/assets/images/institutions/yale.png"
+import Image from "next/image";
+import Link from "next/link";
+import AmericanLogo from "@/assets/images/institutions/american.png";
+import BerkelyLogo from "@/assets/images/institutions/berkeley.png";
+import HarvardLogo from "@/assets/images/institutions/harvard.png";
+import McGillLogo from "@/assets/images/institutions/mcgill.png";
+import MITLogo from "@/assets/images/institutions/mit.png";
+import NYULogo from "@/assets/images/institutions/nyu.png";
+import PrincetonLogo from "@/assets/images/institutions/princeton.png";
+import StanfordLogo from "@/assets/images/institutions/stanford.png";
+import YaleLogo from "@/assets/images/institutions/yale.png";
+import { FaqArray } from "@/components/faq";
+import { FeatureGrid, PrimaryFeatures } from "@/components/features";
+import { PricingCard } from "@/components/pricing";
+import { ReviewGrid } from "@/components/testimonials";
+import { TrustPilot } from "@/components/trust-pilot";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { InfiniteMovingCards } from "@/components/ui/infinite-scroll";
+import { absoluteUrl, cn } from "@/lib/utils";
 
-import { absoluteUrl, cn } from "@/lib/utils"
-import { Button, buttonVariants } from "@/components/ui/button"
-import { InfiniteMovingCards } from "@/components/ui/infinite-scroll"
-import { FaqArray } from "@/components/faq"
-import { PricingCard } from "@/components/pricing"
-import { ReviewGrid } from "@/components/testimonials"
-import { TrustPilot } from "@/components/trust-pilot"
-import { FeatureGrid, PrimaryFeatures } from "@/components/features"
-
-const title = "KnowNotes"
+const title = "KnowNotes";
 const description =
-  "The AI assistant for students. Automatically take notes, transcribe lectures, and get personalized tutoring on your own circulum."
+  "The AI assistant for students. Automatically take notes, transcribe lectures, and get personalized tutoring on your own circulum.";
 const ogUrl = `${absoluteUrl(
-  ""
-)}/api/og?heading=${title}&mode=light&type=The AI Assistant for Students`
+  "",
+)}/api/og?heading=${title}&mode=light&type=The AI Assistant for Students`;
 
 export const metadata = {
   title: {
@@ -50,7 +49,7 @@ export const metadata = {
     description,
     images: [ogUrl],
   },
-}
+};
 
 const institutionImages = [
   <Image
@@ -134,7 +133,7 @@ const institutionImages = [
       height: "auto",
     }}
   />,
-]
+];
 
 export default async function IndexPage() {
   return (
@@ -156,7 +155,7 @@ export default async function IndexPage() {
               href="/login"
               className={cn(
                 buttonVariants({ size: "lg", variant: "shadow" }),
-                "h-12 w-56 rounded-lg text-base font-semibold"
+                "h-12 w-56 rounded-lg text-base font-semibold",
               )}
             >
               Get Started
@@ -259,5 +258,5 @@ export default async function IndexPage() {
         </div>
       </section>
     </>
-  )
+  );
 }

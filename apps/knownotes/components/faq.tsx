@@ -3,7 +3,7 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/components/ui/accordion"
+} from "@/components/ui/accordion";
 
 const faqs = [
   {
@@ -26,7 +26,7 @@ const faqs = [
     answer:
       "Yes! Join our affiliate program so you can paid every month to invite your friends, family, and classmates!",
   },
-]
+];
 
 export function FaqArray() {
   return (
@@ -46,5 +46,5 @@ export function FaqArray() {
         </AccordionItem>
       ))}
     </Accordion>
-  )
+  );
 }

@@ -1,32 +1,31 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { Course, Lecture } from "@prisma/client"
-
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
+} from "@/components/ui/card";
+import { cn } from "@/lib/utils";
+import { Course, Lecture } from "@prisma/client";
 
-import { useLectureCreateDialogStore } from "./lecture-create-dialog"
-import { Badge } from "./ui/badge"
+import { useLectureCreateDialogStore } from "./lecture-create-dialog";
+import { Badge } from "./ui/badge";
 
 type CourseCardProps = {
   course: Course & {
     _count: {
-      lectures: number
-    }
-  }
-  className?: string
-}
+      lectures: number;
+    };
+  };
+  className?: string;
+};
 
 export function CourseCard({ course, className, ...props }: CourseCardProps) {
-  const { setOpen, setSelectedCourseId } = useLectureCreateDialogStore()
+  const { setOpen, setSelectedCourseId } = useLectureCreateDialogStore();
 
   return (
     <Card className={cn("w-[340px] border", className)} {...props}>
@@ -52,8 +51,8 @@ export function CourseCard({ course, className, ...props }: CourseCardProps) {
         </Link>
         <Button
           onClick={() => {
-            setSelectedCourseId(course.id)
-            setOpen(true)
+            setSelectedCourseId(course.id);
+            setOpen(true);
           }}
           size={"sm"}
           variant={"secondary"}
@@ -62,5 +61,5 @@ export function CourseCard({ course, className, ...props }: CourseCardProps) {
         </Button>
       </CardFooter>
     </Card>
-  )
+  );
 }

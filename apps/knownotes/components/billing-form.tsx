@@ -1,11 +1,8 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { toast } from "sonner"
-
-import { UserSubscriptionPlan } from "types"
-import { cn, formatDate } from "@/lib/utils"
-import { buttonVariants } from "@/components/ui/button"
+import * as React from "react";
+import { Icons } from "@/components/icons";
+import { buttonVariants } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -13,13 +10,15 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import { Icons } from "@/components/icons"
+} from "@/components/ui/card";
+import { cn, formatDate } from "@/lib/utils";
+import { toast } from "sonner";
+import { UserSubscriptionPlan } from "types";
 
 interface BillingFormProps extends React.HTMLAttributes<HTMLFormElement> {
   subscriptionPlan: UserSubscriptionPlan & {
-    isCanceled: boolean
-  }
+    isCanceled: boolean;
+  };
 }
 
 export function BillingForm({
@@ -27,27 +26,27 @@ export function BillingForm({
   className,
   ...props
 }: BillingFormProps) {
-  const [isLoading, setIsLoading] = React.useState<boolean>(false)
+  const [isLoading, setIsLoading] = React.useState<boolean>(false);
 
   async function onSubmit(event) {
-    event.preventDefault()
-    setIsLoading(!isLoading)
+    event.preventDefault();
+    setIsLoading(!isLoading);
 
     // Get a Stripe session URL.
-    const response = await fetch("/api/users/stripe")
+    const response = await fetch("/api/users/stripe");
 
     if (!response?.ok) {
       return toast.error(
-        "Something went wrong. Please refresh the page and try again."
-      )
+        "Something went wrong. Please refresh the page and try again.",
+      );
     }
 
     // Redirect to the Stripe session.
     // This could be a checkout page for initial upgrade.
     // Or portal to manage existing subscription.
-    const session = await response.json()
+    const session = await response.json();
     if (session) {
-      window.location.href = session.url
+      window.location.href = session.url;
     }
   }
 
@@ -69,7 +68,7 @@ export function BillingForm({
                 variant: subscriptionPlan.stripeSubscriptionId
                   ? "outline"
                   : "default",
-              })
+              }),
             )}
             disabled={isLoading}
           >
@@ -106,5 +105,5 @@ export function BillingForm({
         </CardFooter>
       </Card>
     </form>
-  )
+  );
 }

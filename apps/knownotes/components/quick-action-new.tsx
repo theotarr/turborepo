@@ -1,25 +1,24 @@
-"use client"
+"use client";
 
-import { useRouter } from "next/navigation"
-
-import { cn } from "@/lib/utils"
+import { useRouter } from "next/navigation";
 import {
   Card,
   CardContent,
   CardDescription,
   CardTitle,
-} from "@/components/ui/card"
+} from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
-import { Icons } from "./icons"
-import { useLectureCreateDialogStore } from "./lecture-create-dialog"
+import { Icons } from "./icons";
+import { useLectureCreateDialogStore } from "./lecture-create-dialog";
 
 interface QuickActionProps {
-  icon: keyof typeof Icons
-  title: string
-  description?: string
-  primary?: boolean
-  className?: string
-  [key: string]: any
+  icon: keyof typeof Icons;
+  title: string;
+  description?: string;
+  primary?: boolean;
+  className?: string;
+  [key: string]: any;
 }
 export function QuickAction({
   icon,
@@ -29,12 +28,12 @@ export function QuickAction({
   className,
   ...props
 }: QuickActionProps) {
-  const Icon = Icons[icon]
+  const Icon = Icons[icon];
   return (
     <Card
       className={cn(
         "group max-w-[400px] cursor-pointer pt-4 transition-all hover:bg-secondary/40 md:max-w-full",
-        className
+        className,
       )}
       {...props}
     >
@@ -48,11 +47,11 @@ export function QuickAction({
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
 
 export function QuickChat() {
-  const router = useRouter()
+  const router = useRouter();
   return (
     <QuickAction
       icon="messageSquareText"
@@ -60,11 +59,11 @@ export function QuickChat() {
       description="AI tutor trained on all your course lectures"
       onClick={() => router.push("/chat")}
     />
-  )
+  );
 }
 
 export function QuickLecture() {
-  const { setOpen, setTab } = useLectureCreateDialogStore()
+  const { setOpen, setTab } = useLectureCreateDialogStore();
   return (
     <QuickAction
       icon="add"
@@ -72,15 +71,15 @@ export function QuickLecture() {
       description="Start a live lecture to take notes"
       primary={true}
       onClick={() => {
-        setOpen(true)
-        setTab("live")
+        setOpen(true);
+        setTab("live");
       }}
     />
-  )
+  );
 }
 
 export function QuickYoutubeImport() {
-  const { setOpen, setTab } = useLectureCreateDialogStore()
+  const { setOpen, setTab } = useLectureCreateDialogStore();
   return (
     <QuickAction
       icon="youtube"
@@ -88,15 +87,15 @@ export function QuickYoutubeImport() {
       description="Upload a lecture for notes and an AI-tutor"
       primary={true}
       onClick={() => {
-        setOpen(true)
-        setTab("youtube")
+        setOpen(true);
+        setTab("youtube");
       }}
     />
-  )
+  );
 }
 
 export function QuickAudioUpload() {
-  const { setOpen, setTab } = useLectureCreateDialogStore()
+  const { setOpen, setTab } = useLectureCreateDialogStore();
   return (
     <QuickAction
       icon="audioFile"
@@ -104,11 +103,11 @@ export function QuickAudioUpload() {
       description="Upload a file for notes and AI-tutor."
       primary={true}
       onClick={() => {
-        setOpen(true)
-        setTab("audio")
+        setOpen(true);
+        setTab("audio");
       }}
     />
-  )
+  );
 }
 
 export function QuickAffiliate() {
@@ -120,5 +119,5 @@ export function QuickAffiliate() {
       primary={true}
       onClick={() => window.open("https://affiliates.knownotes.ai/", "_blank")}
     />
-  )
+  );
 }

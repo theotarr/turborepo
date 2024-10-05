@@ -1,24 +1,24 @@
-import { auth } from "@acme/auth"
-import { Transcript } from "@/types"
-import * as z from "zod"
+import { db } from "@/lib/db";
+import { Transcript } from "@/types";
+import * as z from "zod";
 
-import { db } from "@/lib/db"
+import { auth } from "@acme/auth";
 
 const routePostSchema = z.object({
   lectureId: z.string(),
   transcript: z.custom<Transcript[]>(),
-})
+});
 
 export async function POST(req: Request) {
   // Get the request body and validate it.
-  const json = await req.json()
-  const body = routePostSchema.parse(json)
-  const { lectureId, transcript } = body
+  const json = await req.json();
+  const body = routePostSchema.parse(json);
+  const { lectureId, transcript } = body;
 
-  const session = await auth()
-  if (!session) return new Response("Unauthorized", { status: 403 })
+  const session = await auth();
+  if (!session) return new Response("Unauthorized", { status: 403 });
 
-  const { user } = session
+  const { user } = session;
 
   // if the lecture exists, update the transcript
   const lecture = await db.lecture.upsert({
@@ -38,7 +38,7 @@ export async function POST(req: Request) {
     update: {
       transcript: transcript as any,
     },
-  })
+  });
 
-  return new Response(JSON.stringify({ lecture }))
+  return new Response(JSON.stringify({ lecture }));
 }

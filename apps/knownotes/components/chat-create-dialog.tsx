@@ -1,17 +1,15 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-
-import { cn } from "@/lib/utils"
-import { Button, buttonVariants } from "@/components/ui/button"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Command,
   CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,
-} from "@/components/ui/command"
+} from "@/components/ui/command";
 import {
   Dialog,
   DialogContent,
@@ -19,33 +17,34 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover"
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 
-import { Icons } from "./icons"
+import { Icons } from "./icons";
 
 interface ChatCreateDialogProps {
   courses: {
-    id: string
-    name: string
-  }[]
-  className?: string
-  [key: string]: any
+    id: string;
+    name: string;
+  }[];
+  className?: string;
+  [key: string]: any;
 }
 
 export function ChatCreateDialog({
   courses,
   className,
 }: ChatCreateDialogProps) {
-  const router = useRouter()
-  const [open, setOpen] = useState(false)
-  const [coursePopoverOpen, setCoursePopoverOpen] = useState(false)
-  const [selectedCourseId, setSelectedCourseId] = useState("")
+  const router = useRouter();
+  const [open, setOpen] = useState(false);
+  const [coursePopoverOpen, setCoursePopoverOpen] = useState(false);
+  const [selectedCourseId, setSelectedCourseId] = useState("");
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -56,7 +55,7 @@ export function ChatCreateDialog({
               ? className
               : cn(
                   buttonVariants({ variant: "outline" }),
-                  "h-10 w-full justify-start px-4 shadow-none"
+                  "h-10 w-full justify-start px-4 shadow-none",
                 )
           }
         >
@@ -118,9 +117,9 @@ export function ChatCreateDialog({
                         value={c.id}
                         onSelect={(cur) => {
                           setSelectedCourseId(
-                            cur === selectedCourseId ? "" : cur
-                          )
-                          setCoursePopoverOpen(false)
+                            cur === selectedCourseId ? "" : cur,
+                          );
+                          setCoursePopoverOpen(false);
                         }}
                       >
                         <Icons.check
@@ -128,7 +127,7 @@ export function ChatCreateDialog({
                             "mr-2 h-4 w-4",
                             selectedCourseId === c.id
                               ? "opacity-100"
-                              : "opacity-0"
+                              : "opacity-0",
                           )}
                         />
                         {c.name}
@@ -143,8 +142,8 @@ export function ChatCreateDialog({
         <DialogFooter>
           <Button
             onClick={() => {
-              router.push(`/chat/${selectedCourseId}`)
-              setOpen(false)
+              router.push(`/chat/${selectedCourseId}`);
+              setOpen(false);
             }}
           >
             New Chat
@@ -152,5 +151,5 @@ export function ChatCreateDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

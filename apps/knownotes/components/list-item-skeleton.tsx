@@ -1,4 +1,4 @@
-import { Skeleton } from "./ui/skeleton"
+import { Skeleton } from "./ui/skeleton";
 
 export function ListItemSkeleton() {
   return (
@@ -8,5 +8,5 @@ export function ListItemSkeleton() {
         <Skeleton className="h-4 w-4/5" />
       </div>
     </div>
-  )
+  );
 }

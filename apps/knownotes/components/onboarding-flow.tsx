@@ -1,24 +1,23 @@
-"use client"
+"use client";
 
-import React from "react"
-import { useRouter } from "next/navigation"
-import { Course } from "@prisma/client"
+import React from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
+import { Course } from "@prisma/client";
 
-import { cn } from "@/lib/utils"
-
-import { AddCoursesForm } from "./add-courses-form"
-import { Icons } from "./icons"
-import { Button } from "./ui/button"
-import Image from "next/image"
-import Link from "next/link"
+import { AddCoursesForm } from "./add-courses-form";
+import { Icons } from "./icons";
+import { Button } from "./ui/button";
 
 interface OnboardingProps extends React.HTMLAttributes<HTMLDivElement> {
-  courses: Course[]
+  courses: Course[];
 }
 
 export function Onboarding({ courses, className, ...props }: OnboardingProps) {
-  const router = useRouter()
-  const [step, setStep] = React.useState(0)
+  const router = useRouter();
+  const [step, setStep] = React.useState(0);
 
   return (
     <div
@@ -84,5 +83,5 @@ export function Onboarding({ courses, className, ...props }: OnboardingProps) {
         Continue
       </Button>
     </div>
-  )
+  );
 }

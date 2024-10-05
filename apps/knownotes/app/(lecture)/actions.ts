@@ -1,18 +1,19 @@
-"use server"
+"use server";
 
-import { redirect } from "next/navigation"
-import { auth } from "@acme/auth"
-import { LectureType } from "@prisma/client"
-import { freePlan, proPlan } from "@/config/subscriptions"
-import { countLecturesFromPastMonth } from "@/lib/rate-limit"
-import { supabase } from "@/lib/supabase"
+import { redirect } from "next/navigation";
+import { freePlan, proPlan } from "@/config/subscriptions";
+import { countLecturesFromPastMonth } from "@/lib/rate-limit";
+import { supabase } from "@/lib/supabase";
+import { LectureType } from "@prisma/client";
+
+import { auth } from "@acme/auth";
 
 export async function createLecture(
   courseId?: string,
-  type: LectureType = "LIVE"
+  type: LectureType = "LIVE",
 ): Promise<string> {
-  const session = await auth()
-  if (!session) redirect("/login")
+  const session = await auth();
+  if (!session) redirect("/login");
 
   const { data, error } = await supabase
     .from("Lecture")
@@ -24,39 +25,41 @@ export async function createLecture(
       courseId: courseId || null,
     })
     .select("id")
-    .single()
+    .single();
 
   if (error)
-    throw new Error(`There was an error creating the lecture: ${error.message}`)
+    throw new Error(
+      `There was an error creating the lecture: ${error.message}`,
+    );
 
-  return data.id as string
+  return data.id as string;
 }
 
 export async function rateLimitLectures() {
-  const session = await auth()
-  if (!session) redirect("/login")
+  const session = await auth();
+  if (!session) redirect("/login");
   const { data: user } = await supabase
     .from("User")
     .select("*")
     .eq("id", session.user.id)
-    .single()
-  if (!user) redirect("/login")
+    .single();
+  if (!user) redirect("/login");
 
-  const lecturesPastMonth = await countLecturesFromPastMonth(session.user.id)
+  const lecturesPastMonth = await countLecturesFromPastMonth(session.user.id);
   const { data: stripePriceId } = await supabase
     .from("User")
     .select("stripePriceId")
     .eq("id", session.user.id)
-    .single()
+    .single();
 
-  if (!stripePriceId) redirect("/dashboard/settings")
+  if (!stripePriceId) redirect("/dashboard/settings");
 
   // find the user's subscription plan based on the stripePriceId on the user obj
-  let monthlyLectureCap = freePlan.messagesPerMonth!
+  let monthlyLectureCap = freePlan.messagesPerMonth!;
   if (proPlan.stripePriceIds.includes(user.stripePriceId)) {
     // If the user is on the pro plan.
-    monthlyLectureCap = proPlan.messagesPerMonth!
+    monthlyLectureCap = proPlan.messagesPerMonth!;
   }
 
-  if (lecturesPastMonth >= monthlyLectureCap) redirect("/dashboard/settings")
+  if (lecturesPastMonth >= monthlyLectureCap) redirect("/dashboard/settings");
 }

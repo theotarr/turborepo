@@ -1,22 +1,22 @@
-import { Metadata } from "next"
-import Link from "next/link"
-import { auth } from "@acme/auth"
+import { Metadata } from "next";
+import Link from "next/link";
+import { CourseOperations } from "@/components/course-operations";
+import { EmptyPlaceholder } from "@/components/empty-placeholder";
+import { DashboardHeader } from "@/components/header";
+import { Icons } from "@/components/icons";
+import { LectureItem } from "@/components/lecture-item";
+import { DashboardShell } from "@/components/shell";
+import { Button } from "@/components/ui/button";
+import { env } from "@/env";
+import { db } from "@/lib/db";
+import { absoluteUrl } from "@/lib/utils";
 
-import { env } from "@/env"
-import { db } from "@/lib/db"
-import { absoluteUrl } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { CourseOperations } from "@/components/course-operations"
-import { EmptyPlaceholder } from "@/components/empty-placeholder"
-import { DashboardHeader } from "@/components/header"
-import { Icons } from "@/components/icons"
-import { LectureItem } from "@/components/lecture-item"
-import { DashboardShell } from "@/components/shell"
+import { auth } from "@acme/auth";
 
 // import { FileUpload } from "@/components/file-upload"
 
 interface CoursePageProps {
-  params: { courseId: string }
+  params: { courseId: string };
 }
 
 export async function generateMetadata({
@@ -24,13 +24,13 @@ export async function generateMetadata({
 }: CoursePageProps): Promise<Metadata> {
   const course = await db.course.findUnique({
     where: { id: params.courseId },
-  })
-  if (!course) return {}
+  });
+  if (!course) return {};
 
-  const ogUrl = new URL(`${env.NEXT_PUBLIC_APP_URL}/api/og`)
-  ogUrl.searchParams.set("heading", course.name)
-  ogUrl.searchParams.set("type", "Course")
-  ogUrl.searchParams.set("mode", "light")
+  const ogUrl = new URL(`${env.NEXT_PUBLIC_APP_URL}/api/og`);
+  ogUrl.searchParams.set("heading", course.name);
+  ogUrl.searchParams.set("type", "Course");
+  ogUrl.searchParams.set("mode", "light");
 
   return {
     title: course.name,
@@ -54,17 +54,17 @@ export async function generateMetadata({
       description: "View this course's lectures on KnowNotes.",
       images: [ogUrl.toString()],
     },
-  }
+  };
 }
 
 export default async function CoursePage({ params }) {
-  const session = await auth()
+  const session = await auth();
   const user = await db.user.findUnique({
     where: { id: session?.user.id },
     include: {
       courses: true,
     },
-  })
+  });
 
   const course = await db.course.findFirst({
     where: { id: params.courseId },
@@ -73,8 +73,8 @@ export default async function CoursePage({ params }) {
         orderBy: { createdAt: "desc" },
       },
     },
-  })
-  if (!course) return <>Loading...</>
+  });
+  if (!course) return <>Loading...</>;
 
   return (
     <DashboardShell>
@@ -122,5 +122,5 @@ export default async function CoursePage({ params }) {
         )}
       </div>
     </DashboardShell>
-  )
+  );
 }

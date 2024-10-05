@@ -1,30 +1,29 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { Chat } from "@prisma/client"
-
-import { cn } from "@/lib/utils"
-import { buttonVariants } from "@/components/ui/button"
+import * as React from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { buttonVariants } from "@/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/ui/tooltip"
+} from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
+import { Chat } from "@prisma/client";
 
-import { Icons } from "./icons"
+import { Icons } from "./icons";
 
 interface SidebarItemProps {
-  chat: Chat
-  children: React.ReactNode
+  chat: Chat;
+  children: React.ReactNode;
 }
 
 export function SidebarItem({ chat, children }: SidebarItemProps) {
-  const pathname = usePathname()
+  const pathname = usePathname();
 
-  const isActive = pathname === `/chat/${chat.id}`
-  if (!chat?.id) return null
+  const isActive = pathname === `/chat/${chat.id}`;
+  if (!chat?.id) return null;
 
   return (
     <div className="relative h-8">
@@ -33,7 +32,7 @@ export function SidebarItem({ chat, children }: SidebarItemProps) {
         className={cn(
           buttonVariants({ variant: "ghost" }),
           "group w-full justify-start px-4 transition-colors hover:bg-accent/40",
-          isActive && "bg-secondary pr-16 font-semibold"
+          isActive && "bg-secondary pr-16 font-semibold",
         )}
       >
         {/* {chat.sharePath ? (
@@ -60,5 +59,5 @@ export function SidebarItem({ chat, children }: SidebarItemProps) {
       </Link>
       {isActive && <div className="absolute right-2 top-1">{children}</div>}
     </div>
-  )
+  );
 }

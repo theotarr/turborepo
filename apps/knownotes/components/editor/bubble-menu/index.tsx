@@ -1,27 +1,26 @@
-import { FC, useState } from "react"
-import { BubbleMenu, BubbleMenuProps, isNodeSelection } from "@tiptap/react"
+import { FC, useState } from "react";
+import { cn } from "@/lib/utils";
+import { BubbleMenu, BubbleMenuProps, isNodeSelection } from "@tiptap/react";
 import {
   BoldIcon,
   CodeIcon,
   ItalicIcon,
   StrikethroughIcon,
   UnderlineIcon,
-} from "lucide-react"
+} from "lucide-react";
 
-import { cn } from "@/lib/utils"
-
-import { ColorSelector } from "./color-selector"
-import { LinkSelector } from "./link-selector"
-import { NodeSelector } from "./node-selector"
+import { ColorSelector } from "./color-selector";
+import { LinkSelector } from "./link-selector";
+import { NodeSelector } from "./node-selector";
 
 export interface BubbleMenuItem {
-  name: string
-  isActive: () => boolean
-  command: () => void
-  icon: typeof BoldIcon
+  name: string;
+  isActive: () => boolean;
+  command: () => void;
+  icon: typeof BoldIcon;
 }
 
-type EditorBubbleMenuProps = Omit<BubbleMenuProps, "children">
+type EditorBubbleMenuProps = Omit<BubbleMenuProps, "children">;
 
 export const EditorBubbleMenu: FC<EditorBubbleMenuProps> = (props) => {
   const items: BubbleMenuItem[] = [
@@ -55,36 +54,36 @@ export const EditorBubbleMenu: FC<EditorBubbleMenuProps> = (props) => {
       command: () => props.editor?.chain().focus().toggleCode().run(),
       icon: CodeIcon,
     },
-  ]
+  ];
 
   const bubbleMenuProps: EditorBubbleMenuProps = {
     ...props,
     shouldShow: ({ state, editor }) => {
-      const { selection } = state
-      const { empty } = selection
+      const { selection } = state;
+      const { empty } = selection;
 
       // don't show bubble menu if:
       // - the selected node is an image
       // - the selection is empty
       // - the selection is a node selection (for drag handles)
       if (editor.isActive("image") || empty || isNodeSelection(selection)) {
-        return false
+        return false;
       }
-      return true
+      return true;
     },
     tippyOptions: {
       moveTransition: "transform 0.15s ease-out",
       onHidden: () => {
-        setIsNodeSelectorOpen(false)
-        setIsColorSelectorOpen(false)
-        setIsLinkSelectorOpen(false)
+        setIsNodeSelectorOpen(false);
+        setIsColorSelectorOpen(false);
+        setIsLinkSelectorOpen(false);
       },
     },
-  }
+  };
 
-  const [isNodeSelectorOpen, setIsNodeSelectorOpen] = useState(false)
-  const [isColorSelectorOpen, setIsColorSelectorOpen] = useState(false)
-  const [isLinkSelectorOpen, setIsLinkSelectorOpen] = useState(false)
+  const [isNodeSelectorOpen, setIsNodeSelectorOpen] = useState(false);
+  const [isColorSelectorOpen, setIsColorSelectorOpen] = useState(false);
+  const [isLinkSelectorOpen, setIsLinkSelectorOpen] = useState(false);
 
   return (
     <BubbleMenu
@@ -95,18 +94,18 @@ export const EditorBubbleMenu: FC<EditorBubbleMenuProps> = (props) => {
         editor={props.editor!}
         isOpen={isNodeSelectorOpen}
         setIsOpen={() => {
-          setIsNodeSelectorOpen(!isNodeSelectorOpen)
-          setIsColorSelectorOpen(false)
-          setIsLinkSelectorOpen(false)
+          setIsNodeSelectorOpen(!isNodeSelectorOpen);
+          setIsColorSelectorOpen(false);
+          setIsLinkSelectorOpen(false);
         }}
       />
       <LinkSelector
         editor={props.editor!}
         isOpen={isLinkSelectorOpen}
         setIsOpen={() => {
-          setIsLinkSelectorOpen(!isLinkSelectorOpen)
-          setIsColorSelectorOpen(false)
-          setIsNodeSelectorOpen(false)
+          setIsLinkSelectorOpen(!isLinkSelectorOpen);
+          setIsColorSelectorOpen(false);
+          setIsNodeSelectorOpen(false);
         }}
       />
       <div className="flex">
@@ -135,5 +134,5 @@ export const EditorBubbleMenu: FC<EditorBubbleMenuProps> = (props) => {
         }}
       /> */}
     </BubbleMenu>
-  )
-}
+  );
+};

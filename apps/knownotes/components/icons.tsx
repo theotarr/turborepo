@@ -4,6 +4,7 @@ import {
   Aperture,
   ArrowDown,
   ArrowRight,
+  AudioLines,
   Book,
   BoxSelect,
   Calendar,
@@ -21,7 +22,9 @@ import {
   FileSignature,
   FileText,
   Folder,
+  FolderClosed,
   Forward,
+  GalleryVerticalEnd,
   Gauge,
   GraduationCap,
   HelpCircle,
@@ -29,6 +32,7 @@ import {
   Image,
   Instagram,
   Laptop,
+  Link,
   LinkedinIcon,
   List,
   Loader2,
@@ -55,19 +59,15 @@ import {
   Star,
   StickyNote,
   SunMedium,
+  Text,
   Trash,
   Twitter,
   User,
   X,
   XOctagon,
   Youtube,
-  AudioLines,
-  Text,
-  Link,
-  GalleryVerticalEnd,
-  FolderClosed,
   Zap,
-} from "lucide-react"
+} from "lucide-react";
 
 export const Icons = {
   zap: Zap,
@@ -295,4 +295,4 @@ export const Icons = {
       ></path>
     </svg>
   ),
-}
+};

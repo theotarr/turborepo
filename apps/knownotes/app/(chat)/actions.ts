@@ -1,14 +1,14 @@
-"use server"
+"use server";
 
-import { redirect } from "next/navigation"
-import { auth } from "@acme/auth"
-import { Chat } from "@prisma/client"
+import { redirect } from "next/navigation";
+import { supabase } from "@/lib/supabase";
+import { Chat } from "@prisma/client";
 
-import { supabase } from "@/lib/supabase"
+import { auth } from "@acme/auth";
 
 export async function getChats(userId: string) {
-  const session = await auth()
-  if (!session) return redirect("/login")
+  const session = await auth();
+  if (!session) return redirect("/login");
 
   try {
     const { data: chats, error } = await supabase
@@ -20,27 +20,30 @@ export async function getChats(userId: string) {
           id,
           name
         )
-      `
+      `,
       )
       .eq("userId", userId)
-      .order("createdAt", { ascending: false })
+      .order("createdAt", { ascending: false });
 
     if (error) {
-      throw new Error("There was an error fetching the chats.")
+      throw new Error("There was an error fetching the chats.");
     }
 
     // Group the chats in a nested array by course (if a chat doesn't have a course, it will be grouped in the last array)
-    const chatsByCourse = chats.reduce((acc, chat) => {
-      const course = chat.course?.name
-      if (!acc[course]) {
-        acc[course] = []
-      }
-      acc[course].push(chat)
-      return acc
-    }, {} as Record<string, Chat[]>)
-    return chatsByCourse
+    const chatsByCourse = chats.reduce(
+      (acc, chat) => {
+        const course = chat.course?.name;
+        if (!acc[course]) {
+          acc[course] = [];
+        }
+        acc[course].push(chat);
+        return acc;
+      },
+      {} as Record<string, Chat[]>,
+    );
+    return chatsByCourse;
   } catch (error) {
-    return []
+    return [];
   }
 }
 

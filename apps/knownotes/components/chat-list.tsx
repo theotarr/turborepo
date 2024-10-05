@@ -1,14 +1,14 @@
-import { UIState } from "@/lib/chat/actions"
-import { cn } from "@/lib/utils"
-import { Separator } from "@/components/ui/separator"
+import { Separator } from "@/components/ui/separator";
+import { UIState } from "@/lib/chat/actions";
+import { cn } from "@/lib/utils";
 
 export interface ChatList extends React.HTMLAttributes<HTMLDivElement> {
-  messages: UIState
+  messages: UIState;
 }
 
 export function ChatList({ messages, className, ...props }: ChatList) {
   if (!messages.length) {
-    return null
+    return null;
   }
 
   return (
@@ -23,5 +23,5 @@ export function ChatList({ messages, className, ...props }: ChatList) {
         </div>
       ))}
     </div>
-  )
+  );
 }

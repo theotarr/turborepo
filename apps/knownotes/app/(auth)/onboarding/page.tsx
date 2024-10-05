@@ -1,24 +1,24 @@
-import { redirect } from "next/navigation"
-import { auth } from "@acme/auth"
+import { redirect } from "next/navigation";
+import { Onboarding } from "@/components/onboarding-flow";
+import { db } from "@/lib/db";
 
-import { db } from "@/lib/db"
-import { Onboarding } from "@/components/onboarding-flow"
+import { auth } from "@acme/auth";
 
 export const metadata = {
   title: "Welcome to KnowNotes!",
   description:
     "Thanks for joining us! We'd love to hear about your needs and how we can help you.",
-}
+};
 
 export default async function OnboardingPage() {
-  const session = await auth()
-  if (!session) return redirect("/login")
+  const session = await auth();
+  if (!session) return redirect("/login");
 
   const courses = await db.course.findMany({
     where: {
       userId: session.user.id,
     },
-  })
+  });
 
   // // If the user already has courses, redirect them to the dashboard.
   // if (courses.length > 0) {
@@ -31,5 +31,5 @@ export default async function OnboardingPage() {
         <Onboarding courses={courses} />
       </div>
     </div>
-  )
+  );
 }

@@ -1,12 +1,8 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { useRouter } from "next/navigation"
-import { DialogProps } from "@radix-ui/react-alert-dialog"
-import { useTheme } from "next-themes"
-import { useDebouncedCallback } from "use-debounce"
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+import * as React from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
 import {
   CommandDialog,
   CommandEmpty,
@@ -15,53 +11,57 @@ import {
   CommandItem,
   CommandList,
   CommandSeparator,
-} from "@/components/ui/command"
+} from "@/components/ui/command";
+import { searchLectures } from "@/lib/lecture/actions";
+import { cn } from "@/lib/utils";
+import { Lecture } from "@prisma/client";
+import { DialogProps } from "@radix-ui/react-alert-dialog";
+import { useTheme } from "next-themes";
+import { useDebouncedCallback } from "use-debounce";
 
-import { Icons } from "./icons"
-import { Lecture } from "@prisma/client"
-import { searchLectures } from "@/lib/lecture/actions"
+import { Icons } from "./icons";
 
 type LectureCommandMenuProps = {
-  lectures: Lecture[]
-} & DialogProps
+  lectures: Lecture[];
+} & DialogProps;
 
 export function LectureCommandMenu({
   lectures,
   ...props
 }: LectureCommandMenuProps) {
-  const router = useRouter()
-  const [open, setOpen] = React.useState(false)
-  const [results, setResults] = React.useState<Lecture[]>(lectures)
-  const [search, setSearch] = React.useState("")
+  const router = useRouter();
+  const [open, setOpen] = React.useState(false);
+  const [results, setResults] = React.useState<Lecture[]>(lectures);
+  const [search, setSearch] = React.useState("");
   const debouncedSearch = useDebouncedCallback(async (value: string) => {
-    const searchResults = await searchLectures(value)
-    setResults(searchResults)
-  })
-  const { setTheme } = useTheme()
+    const searchResults = await searchLectures(value);
+    setResults(searchResults);
+  });
+  const { setTheme } = useTheme();
 
   React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault()
-        setOpen((open) => !open)
+        e.preventDefault();
+        setOpen((open) => !open);
       }
-    }
+    };
 
-    document.addEventListener("keydown", down)
-    return () => document.removeEventListener("keydown", down)
-  }, [])
+    document.addEventListener("keydown", down);
+    return () => document.removeEventListener("keydown", down);
+  }, []);
 
   const runCommand = React.useCallback((command: () => unknown) => {
-    setOpen(false)
-    command()
-  }, [])
+    setOpen(false);
+    command();
+  }, []);
 
   return (
     <>
       <Button
         variant="outline"
         className={cn(
-          "relative h-9 w-full justify-start rounded-[0.5rem] text-sm text-muted-foreground sm:pr-12 md:w-40 lg:w-64"
+          "relative h-9 w-full justify-start rounded-[0.5rem] text-sm text-muted-foreground sm:pr-12 md:w-40 lg:w-64",
         )}
         onClick={() => setOpen(true)}
         {...props}
@@ -76,8 +76,8 @@ export function LectureCommandMenu({
         <CommandInput
           value={search}
           onValueChange={(search) => {
-            setSearch(search)
-            debouncedSearch(search)
+            setSearch(search);
+            debouncedSearch(search);
           }}
           placeholder="Search your lectures..."
         />
@@ -90,8 +90,8 @@ export function LectureCommandMenu({
                   key={lecture.id}
                   onSelect={() =>
                     runCommand(() => {
-                      router.push(`/lecture/${lecture.id}`)
-                      router.refresh()
+                      router.push(`/lecture/${lecture.id}`);
+                      router.refresh();
                     })
                   }
                 >
@@ -104,5 +104,5 @@ export function LectureCommandMenu({
         </CommandList>
       </CommandDialog>
     </>
-  )
+  );
 }

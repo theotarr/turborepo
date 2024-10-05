@@ -1,17 +1,16 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-
-import { SidebarNavItem } from "types"
-import { cn } from "@/lib/utils"
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
+import { SidebarNavItem } from "types";
 
 export interface DocsSidebarNavProps {
-  items: SidebarNavItem[]
+  items: SidebarNavItem[];
 }
 
 export function DocsSidebarNav({ items }: DocsSidebarNavProps) {
-  const pathname = usePathname()
+  const pathname = usePathname();
 
   return items.length ? (
     <div className="w-full">
@@ -26,12 +25,12 @@ export function DocsSidebarNav({ items }: DocsSidebarNavProps) {
         </div>
       ))}
     </div>
-  ) : null
+  ) : null;
 }
 
 interface DocsSidebarNavItemsProps {
-  items: SidebarNavItem[]
-  pathname: string | null
+  items: SidebarNavItem[];
+  pathname: string | null;
 }
 
 export function DocsSidebarNavItems({
@@ -49,7 +48,7 @@ export function DocsSidebarNavItems({
               "flex w-full items-center rounded-md p-2 hover:underline",
               {
                 "bg-muted": pathname === item.href,
-              }
+              },
             )}
             target={item.external ? "_blank" : ""}
             rel={item.external ? "noreferrer" : ""}
@@ -60,8 +59,8 @@ export function DocsSidebarNavItems({
           <span className="flex w-full cursor-not-allowed items-center rounded-md p-2 opacity-60">
             {item.title}
           </span>
-        )
+        ),
       )}
     </div>
-  ) : null
+  ) : null;
 }
