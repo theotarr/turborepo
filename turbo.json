@@ -10,6 +10,13 @@
     },
     "build": {
       "dependsOn": ["^build", "^generate"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        ".env.production.local",
+        ".env.local",
+        ".env.production",
+        ".env"
+      ],
       "outputs": [".cache/tsbuildinfo.json", "dist/**"]
     },
     "dev": {
