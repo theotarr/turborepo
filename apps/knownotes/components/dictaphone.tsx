@@ -200,6 +200,7 @@ export const Dictaphone = ({
   // Process the blob queue.
   useEffect(() => {
     const processQueue = async () => {
+      // Checking for a size greater than 0 fixes a bug on iOS Safari where a size of 0 packet closes the connection.
       if (size > 0 && !isProcessing) {
         setProcessing(true);
 
