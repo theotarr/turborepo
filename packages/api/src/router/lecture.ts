@@ -43,10 +43,14 @@ export const lectureRouter = {
     }),
   byUser: protectedProcedure.query(({ ctx }) => {
     return ctx.db.lecture.findMany({
+      where: {
+        userId: ctx.session.user.id,
+      },
       include: {
         course: true,
       },
-      // Limit to 6 lectures, otherwise with a ton of lectures and transcripts the request will time out or exceed maximum request size for 1 request.
+      // Limit to 6 lectures, otherwise lectures with massive transcripts
+      // will cause the request to time out or exceed maximum request size.
       take: 6,
       orderBy: { updatedAt: "desc" },
     });
