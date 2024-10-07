@@ -20,11 +20,11 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   assetBundlePatterns: ["**/*"],
   ios: {
-    bundleIdentifier: "your.bundle.identifier",
+    bundleIdentifier: "ai.knownotes.mobile",
     supportsTablet: true,
   },
   android: {
-    package: "your.bundle.identifier",
+    package: "ai.knownotes.mobile",
     adaptiveIcon: {
       foregroundImage: "./assets/icon-light.png",
       backgroundColor: "#000000",
