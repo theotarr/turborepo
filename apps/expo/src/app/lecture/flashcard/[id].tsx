@@ -41,8 +41,9 @@ export default function Lecture() {
     }
 
     async function createFlashcards() {
+      if (!lecture) return;
       const cards = await createFlashcardsMutation.mutateAsync({
-        lectureId: lecture?.id,
+        lectureId: lecture.id,
       });
       setFlashcards(
         cards.map((card) => ({ front: card.term, back: card.definition })),
@@ -51,10 +52,10 @@ export default function Lecture() {
 
     // Generate flashcards.
     setIsLoadingFlashcards(true);
-    createFlashcards().then(() => {
+    void createFlashcards().then(() => {
       setIsLoadingFlashcards(false);
     });
-  }, [lecture]);
+  }, [createFlashcardsMutation, flashcards.length, lecture]);
 
   if (!lecture) return null;
 

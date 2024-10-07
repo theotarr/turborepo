@@ -11,7 +11,7 @@ import Animated, {
 import Svg, {
   Defs,
   // FeGaussianBlur,
-  Filter,
+  // Filter,
   Path,
   RadialGradient,
   Stop,
@@ -74,9 +74,9 @@ export const GlowingWaves = () => {
             <Stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.3" />
             <Stop offset="100%" stopColor="#000000" stopOpacity="0" />
           </RadialGradient>
-          <Filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-            {/* <FeGaussianBlur stdDeviation="10" /> */}
-          </Filter>
+          {/* <Filter id="glow" x="-20%" y="-20%" width="140%" height="140%"> */}
+          {/* <FeGaussianBlur stdDeviation="10" /> */}
+          {/* </Filter> */}
         </Defs>
         <AnimatedPath animatedProps={wave4} fill="none" filter="url(#glow)" />
         <AnimatedPath animatedProps={wave3} fill="none" filter="url(#glow)" />

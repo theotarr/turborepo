@@ -36,14 +36,19 @@ export default function Lecture() {
   const [isLoadingMessage, setIsLoadingMessage] = useState(false);
   const [height, setHeight] = useState(0);
 
+  // Get the height of the screen.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const onLayout = (event: any) => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
     const { height } = event.nativeEvent.layout;
     setHeight(height / 2);
   };
 
   const submitMessage = async (value: string) => {
+    if (!lecture) return;
+
     const { message } = await createMessage.mutateAsync({
-      lectureId: lecture?.id!,
+      lectureId: lecture.id,
       messages,
     });
     setMessages([

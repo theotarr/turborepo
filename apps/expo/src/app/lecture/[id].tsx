@@ -1,14 +1,12 @@
-import { useState } from "react";
 import { ActivityIndicator, SafeAreaView, View } from "react-native";
-import { ScrollView } from "react-native-gesture-handler";
 import { WebView } from "react-native-webview";
 import { Stack, useGlobalSearchParams, useRouter } from "expo-router";
 import {
   ChevronLeft,
   GalleryVerticalEnd,
-  Languages,
+  // Languages,
   Sparkles,
-  TextIcon,
+  // TextIcon,
 } from "lucide-react-native";
 
 import { Badge } from "~/components/ui/badge";
@@ -26,7 +24,6 @@ export default function Lecture() {
   const { id } = useGlobalSearchParams();
   if (!id || typeof id !== "string") throw new Error("unreachable");
   const { data: lecture } = api.lecture.byId.useQuery({ id });
-  const [isLoadingWebView, setIsLoadingWebView] = useState(true);
 
   if (!lecture) return null;
 
@@ -69,17 +66,11 @@ export default function Lecture() {
                 </Badge>
               )}
               <Badge variant="secondary">
-                <Text>{formatShortDate(lecture.createdAt)}</Text>
+                <Text>{formatShortDate(lecture.createdAt.getTime())}</Text>
               </Badge>
             </View>
           </View>
         </View>
-        {/* <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          bounces={false}
-          style={{ marginBottom: 0, paddingBottom: 0, height: 30 }}
-        > */}
         <View className="mt-6 flex flex-row flex-wrap gap-4">
           <Button
             variant="secondary"
@@ -126,7 +117,6 @@ export default function Lecture() {
               <Text>Transcript</Text>
             </Button> */}
         </View>
-        {/* </ScrollView> */}
         <WebView
           originWhitelist={["*"]}
           style={{ backgroundColor: "transparent", marginTop: 8 }}

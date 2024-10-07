@@ -1,5 +1,5 @@
 import type { StopwatchTimerMethods } from "react-native-animated-stopwatch-timer";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Pressable, SafeAreaView, View } from "react-native";
 import Animated, {
   interpolate,
@@ -66,6 +66,7 @@ export default function Record() {
     }
 
     try {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
       if (permissionResponse?.status !== "granted") {
         console.log("Requesting permission...");
         await requestPermission();
@@ -117,7 +118,8 @@ export default function Record() {
       await Audio.setAudioModeAsync({
         allowsRecordingIOS: false,
       });
-      const recordingUri = recording?.getURI()!;
+      const recordingUri = recording?.getURI();
+      if (!recordingUri) throw new Error("No recording URI");
       const uri = await FileSystem.readAsStringAsync(recordingUri, {
         encoding: FileSystem.EncodingType.Base64,
       });

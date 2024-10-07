@@ -3,7 +3,6 @@ import { Pressable, SafeAreaView, ScrollView, View } from "react-native";
 import { router, Stack } from "expo-router";
 import { MoveRight, Plus, Settings } from "lucide-react-native";
 
-import type { Course, Lecture } from ".prisma/client";
 import { LectureItem } from "~/components/lecture-item";
 import {
   BottomSheet,
@@ -21,11 +20,11 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(false);
 
   const lectures = api.lecture.byUser.useQuery();
-  const courses = api.auth.getUser.useQuery();
+  const user = api.auth.getUser.useQuery();
   const createLecture = api.lecture.create.useMutation();
 
   if (!lectures.data) return null;
-  if (!courses.data) return null;
+  if (!user.data) return null;
 
   return (
     <SafeAreaView className="bg-background">
@@ -53,16 +52,16 @@ export default function DashboardPage() {
         </Text>
         <ScrollView>
           <View className="divide-y divide-border rounded-md border border-border">
-            {lectures.data.map((lecture: Lecture) => (
+            {lectures.data.map((lecture) => (
               <LectureItem
                 key={lecture.id}
                 lecture={lecture}
-                courses={courses.data as unknown as Course[]}
+                courses={user.data?.courses}
               />
             ))}
           </View>
         </ScrollView>
-        <BottomSheet>
+        {/* <BottomSheet>
           <BottomSheetOpenTrigger asChild>
             <Pressable className="absolute -top-16 right-8 z-10 w-auto rounded-full bg-primary p-4">
               <Plus color={NAV_THEME[colorScheme].background} size={30} />
@@ -98,7 +97,7 @@ export default function DashboardPage() {
               </Pressable>
             </BottomSheetView>
           </BottomSheetContent>
-        </BottomSheet>
+        </BottomSheet> */}
       </View>
     </SafeAreaView>
   );

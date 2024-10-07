@@ -107,6 +107,8 @@ const Flashcard: React.FC<FlashcardProps> = ({
 
   const gestureHandler = useAnimatedGestureHandler<
     PanGestureHandlerGestureEvent,
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
     AnimatedGHContext
   >({
     onStart: (_, ctx) => {
