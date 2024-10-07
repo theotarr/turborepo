@@ -48,6 +48,7 @@ const Flashcard: React.FC<FlashcardProps> = ({
   isActive,
 }) => {
   const [isFlipped, setIsFlipped] = useState(false);
+  const [isSwiping, setIsSwiping] = useState(false);
   const rotate = useSharedValue(0);
   const translateX = useSharedValue(0);
 
@@ -90,6 +91,7 @@ const Flashcard: React.FC<FlashcardProps> = ({
   });
 
   const flipCard = () => {
+    if (isSwiping) return;
     const newValue = isFlipped ? 0 : 180;
     rotate.value = withTiming(newValue, {
       duration: 300,
@@ -100,7 +102,9 @@ const Flashcard: React.FC<FlashcardProps> = ({
 
   const handleSwipe = useCallback(
     (direction: "left" | "right") => {
+      setIsSwiping(true);
       onSwipe(direction);
+      setIsSwiping(false);
     },
     [onSwipe],
   );
