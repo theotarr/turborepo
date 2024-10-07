@@ -46,7 +46,8 @@ export async function generateEnhancedNotes(
       2. Include only essential information. Remove any irrelevant details.
       3. Bold vocabulary terms and key concepts, underline important information.
       4. Respond using Markdown syntax (bold/underline/italics, bullet points, numbered lists, headings).
-      5. Use headings to organize information into categories (default to h3).`,
+      5. Use headings to organize information into categories (default to h3).
+      6. Use katex for mathematical formulas.`,
       prompt: `\
       Transcript:
       ${formatTranscript(transcript)}${
