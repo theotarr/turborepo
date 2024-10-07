@@ -55,7 +55,8 @@ export default function Lecture() {
     void createFlashcards().then(() => {
       setIsLoadingFlashcards(false);
     });
-  }, [createFlashcardsMutation, flashcards.length, lecture]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (!lecture) return null;
 

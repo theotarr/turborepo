@@ -17,10 +17,10 @@
     },
     "preview": {
       "extends": "base",
-      "distribution": "internal",
-      "ios": {
-        "simulator": true
-      }
+      "distribution": "internal"
+      // "ios": {
+      //   "simulator": true
+      // }
     },
     "production": {
       "extends": "base"
