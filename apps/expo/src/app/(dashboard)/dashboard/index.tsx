@@ -61,7 +61,7 @@ export default function DashboardPage() {
             ))}
           </View>
         </ScrollView>
-        {/* <BottomSheet>
+        <BottomSheet>
           <BottomSheetOpenTrigger asChild>
             <Pressable className="absolute -top-16 right-8 z-10 w-auto rounded-full bg-primary p-4">
               <Plus color={NAV_THEME[colorScheme].background} size={30} />
@@ -97,7 +97,7 @@ export default function DashboardPage() {
               </Pressable>
             </BottomSheetView>
           </BottomSheetContent>
-        </BottomSheet> */}
+        </BottomSheet>
       </View>
     </SafeAreaView>
   );
