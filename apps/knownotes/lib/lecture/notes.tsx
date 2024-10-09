@@ -29,7 +29,7 @@ export async function generateEnhancedNotes(
   if (!lecture) throw new Error("Lecture not found");
 
   const stream = createStreamableValue();
-
+  console.log("Generating enhanced notes...");
   (async () => {
     const { textStream } = await streamText({
       model: openai("gpt-4o"),
@@ -46,14 +46,15 @@ export async function generateEnhancedNotes(
       2. Include only essential information. Remove any irrelevant details.
       3. Bold vocabulary terms and key concepts, underline important information.
       4. Respond using Markdown syntax (bold/underline/italics, bullet points, numbered lists, headings).
-      5. Use headings to organize information into categories (default to h3).
-      6. Use katex for mathematical formulas.`,
+      5. Write mathematical equations using KaTeX syntax, with inline equations formatted in \\(...\\) and \\[...\\] for block math.
+      6. Use headings to organize information into categories (default to h3).`,
       prompt: `\
       Transcript:
       ${formatTranscript(transcript)}${
         notes.length > 0 ? `\n\nMy notes:\n${notes}` : ""
       }`,
       onFinish: async ({ text }) => {
+        console.log(text);
         await supabase
           .from("Lecture")
           .update({
@@ -65,7 +66,8 @@ export async function generateEnhancedNotes(
     });
 
     for await (const chunk of textStream) {
-      stream.update(chunk);
+      const preserveBackslash = chunk.replace(/\\/g, "\\\\");
+      stream.update(preserveBackslash);
     }
 
     stream.done();
