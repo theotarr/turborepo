@@ -8,8 +8,8 @@ import { absoluteUrl } from "@/lib/utils";
 
 import { auth } from "@acme/auth";
 
-export const runtime = "edge";
-export const maxDuration = 300; // 5 min in seconds
+// export const runtime = "edge";
+export const maxDuration = 60; // 1 min in seconds
 
 interface SavedChatPageProps {
   params: { courseId: string; chatId: string };

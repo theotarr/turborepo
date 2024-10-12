@@ -9,8 +9,8 @@ import { v1 as uuidv1 } from "uuid";
 
 import { auth } from "@acme/auth";
 
-export const runtime = "edge";
-export const maxDuration = 300; // 5 min in seconds
+// export const runtime = "edge";
+export const maxDuration = 60; // 1 min in seconds
 
 interface ChatPageProps {
   params: { courseId: string };
@@ -31,8 +31,8 @@ export async function generateMetadata({
   ogUrl.searchParams.set("type", "AI Tutor");
   ogUrl.searchParams.set("mode", "light");
 
-  const title = course.name + " AI Tutor";
-  const description = "Your own personal AI tutor for " + course.name;
+  const title = `${course.name} AI Tutor`;
+  const description = `Your own personal AI tutor for ${course.name}`;
 
   return {
     title,

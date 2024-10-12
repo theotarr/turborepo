@@ -6,6 +6,7 @@ import { auth } from "@acme/auth";
 
 export default async function ChatPage() {
   const session = await auth();
+
   const courses = await db.course.findMany({
     where: {
       userId: session?.user?.id,
