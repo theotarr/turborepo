@@ -296,6 +296,13 @@ export function NotesPage({ lecture, courses }: NotesPageProps) {
                 }
 
                 setIsGeneratingNotes(false);
+
+                // Update the lecture with the enhanced notes.
+                // Save the notes with the Tiptap JSONContent format so that special characters and LaTeX are preserved.
+                await updateLecture({
+                  lectureId: lecture.id,
+                  enhancedNotes: JSON.stringify(editor?.getJSON()),
+                });
               }}
             />
           </div>

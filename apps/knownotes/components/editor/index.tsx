@@ -113,8 +113,14 @@ export default function Editor({
 
   useEffect(() => {
     if (!editor || hydrated) return;
-    if (defaultValue) editor.commands.setContent(defaultValue);
-    setEditor(editor); // initialize the editor in the zustand store so we can use it in other components
+    if (defaultValue) {
+      // Replace \ with \\ to prevent escaping characters and fixing LaTeX rendering.
+      if (typeof defaultValue === "string")
+        defaultValue = defaultValue.replace(/\\/g, "\\\\");
+
+      editor.commands.setContent(defaultValue);
+    }
+    setEditor(editor); // Initialize the editor in the zustand store so we can use it in other components.
     setHydrated(true);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps

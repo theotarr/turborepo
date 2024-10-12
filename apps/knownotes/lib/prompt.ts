@@ -1,47 +1,36 @@
+import { Transcript } from "@/types";
 import { PromptTemplate } from "@langchain/core/prompts";
 
-const formatNotesPromptTemplate = `
-You are an expert in taking detailed, concise, and easy-to-understand notes.
-Your goal is to format notes for a high school/college student.
-Here are some guidelines to follow when formatting notes:
-1. Create concise, easy-to-understand advanced bullet-point notes.
-2. Include only essential information.
-3. Bold vocabulary terms and key concepts, underline important information.
-4. Remove extraneous language, focusing on critical aspects.
-5. Respond using Markdown syntax (bold/underline/italics, bullet points, numbered lists, headings).
-6. Use headings to organize information into sections (default to h4 depending on how important the topic is, never use h1).
+import { formatTranscript } from "./utils";
 
-We have provided the following notes for you to format:
-------------
-{missingNotes}
-------------
+export function formatEnhancedNotesSystemPrompt(notes: string): string {
+  return `\
+      You are an expert in taking detailed, concise, and easy-to-understand notes.
+      You are provided with a transcript of a lecture ${
+        notes.length > 0 ? "and some minimal notes that I have taken" : ""
+      }.
+      Your goal is to turn ${
+        notes.length > 0 ? "my notes and " : ""
+      } the lecture transcript into detailed and comprehensive notes.
+      Here are some guidelines to follow when formatting notes:
+      1. Create concise, easy-to-understand advanced bullet-point notes.
+      2. Include only essential information. Remove any irrelevant details.
+      3. Bold vocabulary terms and key concepts, underline important information.
+      4. Respond using Markdown syntax (bold/underline/italics, bullet points, numbered lists, headings).
+      5. Write mathematical equations using KaTeX syntax, with inline equations formatted in \\(...\\) and \\[...\\] for block math.
+      6. Use headings to organize information into categories (default to h3).`;
+}
 
-Given the notes and guidelines, format the notes into a readable and concise format.
-If there aren't any missing notes, return nothing.
-
-FORMATTED NOTES:
-`;
-
-export const FORMAT_NOTES_PROMPT = new PromptTemplate({
-  template: formatNotesPromptTemplate,
-  inputVariables: ["missingNotes"],
-});
-
-// const missingNotesPromptTemplate = `Identify the all the points that are not in the notes but are in the recent trascript.
-// Also, correct any names or proper nouns that are wrong in the transcript when referencing them in your list of missing notes.
-// Do not include any information that is already in the notes.
-
-// Notes:
-// {notes}
-
-// Recent Transcript:
-// {transcript}
-
-// List of missing notes from the transcript:`
-// export const MISSING_NOTES_PROMPT = new PromptTemplate({
-//   template: missingNotesPromptTemplate,
-//   inputVariables: ["notes", "transcript"],
-// })
+export function formatEnhancedNotesPrompt(
+  notes: string,
+  transcript: Transcript[],
+): string {
+  return `\
+      Transcript:
+      ${formatTranscript(transcript)}${
+        notes.length > 0 ? `\n\nMy notes:\n${notes}` : ""
+      }`;
+}
 
 const notesPromptTemplate = `
 You are an expert in taking notes.

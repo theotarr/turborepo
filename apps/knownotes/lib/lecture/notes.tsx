@@ -29,7 +29,7 @@ export async function generateEnhancedNotes(
   if (!lecture) throw new Error("Lecture not found");
 
   const stream = createStreamableValue();
-  console.log("Generating enhanced notes...");
+
   (async () => {
     const { textStream } = await streamText({
       model: openai("gpt-4o"),
