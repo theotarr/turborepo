@@ -18,9 +18,18 @@ import { Button, buttonVariants } from "./ui/button";
 import { Separator } from "./ui/separator";
 
 const CHAT_TEMPLATES = [
-  "List key concepts",
-  "Summarize lecture",
-  "Answer question",
+  {
+    text: "List key concepts",
+    prompt: "List key concepts from the lecture so far.",
+  },
+  {
+    text: "Summarize lecture",
+    prompt: "Summarize the lecture so far.",
+  },
+  {
+    text: "Answer question",
+    prompt: "Answer the question that was just asked.",
+  },
 ];
 
 interface ChatProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -138,13 +147,13 @@ export function Chat({
                           | "assistant"
                           | "user"
                           | "system",
-                        display: <UserMessage>{template}</UserMessage>,
+                        display: <UserMessage>{template.text}</UserMessage>,
                       },
                     ]);
 
                     // Submit the user message to the server.
                     const message = await submitLectureMessage(
-                      template,
+                      template.prompt,
                       lectureId,
                       transcript,
                     );
@@ -152,7 +161,7 @@ export function Chat({
                     setInput("");
                   }}
                 >
-                  {template}
+                  {template.text}
                 </Button>
               ))}
           </div>
