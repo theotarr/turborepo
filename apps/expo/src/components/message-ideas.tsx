@@ -2,19 +2,19 @@ import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 const exampleMessages = [
   {
-    heading: "Help me study for the test",
-    subheading: `on the history of Reconstruction in the US`,
-    message: `Help me study for the test on the history of Reconstruction in the US`,
+    heading: "List the key concepts",
+    subheading: `from the lecture.`,
+    message: `List the key concepts from the lecture.`,
   },
   {
-    heading: "What did my teacher say",
-    subheading: "that I need to know for the test?",
-    message: `What did my teacher say that I need to know for the test?`,
+    heading: "Summarize the lecture",
+    subheading: "and action items.",
+    message: `Summarize the lecture and action items.`,
   },
   {
-    heading: "Search for relevant quotes",
-    subheading: "about Macbeth's soliloquy",
-    message: "Search for relevant quotes about a Macbeth's soliloquy",
+    heading: "What do I need to know",
+    subheading: "for the exam?",
+    message: "What do I need to know for the exam?",
   },
 ];
 
