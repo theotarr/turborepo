@@ -26,7 +26,7 @@ export function UserMessage({
 }) {
   return (
     <div className={cn("group relative flex items-start md:-ml-12", className)}>
-      <div className="flex size-[25px] shrink-0 select-none items-center justify-center rounded-md border bg-background shadow-sm">
+      <div className="select-nonet flex size-[25px] shrink-0 items-center justify-center rounded-md border bg-background shadow-sm">
         <Icons.user className="size-4" />
       </div>
       <div className="ml-4 flex-1 space-y-2 overflow-hidden px-1">

@@ -24,12 +24,15 @@ export function ChatForm({
   const { bottom } = useSafeAreaInsets();
 
   return (
-    <BlurView intensity={90} style={{ paddingBottom: bottom, paddingTop: 10 }}>
+    <BlurView
+      intensity={90}
+      style={{ paddingBottom: bottom + 4, paddingTop: 10 }}
+    >
       <View className="flex flex-row items-center justify-center px-5">
         <TextInput
           autoFocus
           placeholder={placeholder}
-          className="mx-5 flex-1 rounded-full border border-border bg-background p-3 px-4"
+          className="mx-5 flex-1 rounded-full border border-border bg-background p-3 px-4 text-secondary-foreground"
           onChangeText={setInput}
           value={input}
           multiline
@@ -41,7 +44,7 @@ export function ChatForm({
             setInput("");
           }}
           disabled={isLoading || input === ""}
-          className="rounded-full bg-accent p-2"
+          className="rounded-full bg-accent p-2.5"
         >
           {input.length > 0 ? (
             <CornerDownLeft

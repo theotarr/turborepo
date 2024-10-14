@@ -11,9 +11,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   icon: "./assets/icon.png",
   userInterfaceStyle: "automatic",
   splash: {
-    image: "./assets/icon-light.png",
+    image: "./assets/icon.png",
     resizeMode: "contain",
-    backgroundColor: "#000000",
+    backgroundColor: "#FFFFFF",
   },
   updates: {
     fallbackToCacheTimeout: 0,
@@ -26,8 +26,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   android: {
     package: "ai.knownotes.mobile",
     adaptiveIcon: {
-      foregroundImage: "./assets/icon-light.png",
-      backgroundColor: "#000000",
+      foregroundImage: "./assets/icon.png",
+      backgroundColor: "#FFFFFF",
     },
   },
   extra: {
