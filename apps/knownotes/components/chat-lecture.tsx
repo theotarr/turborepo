@@ -147,7 +147,7 @@ export function Chat({
                           | "assistant"
                           | "user"
                           | "system",
-                        display: <UserMessage>{template.text}</UserMessage>,
+                        display: <UserMessage>{template.prompt}</UserMessage>,
                       },
                     ]);
 
