@@ -17,7 +17,7 @@ import DragAndDrop from "./drag-and-drop";
 import SlashCommand from "./slash-command";
 import UpdatedImage from "./updated-image";
 
-const mathRegex = /\$([^\$]*)\$|\\\((.*?)\\\)|\\\[(.*?)\\\]/gi;
+const mathRegex = /\\\((.*?)\\\)|\\\[(.*?)\\\]/gi;
 
 export const defaultExtensions = [
   StarterKit.configure({
