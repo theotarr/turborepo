@@ -265,3 +265,19 @@ Deploying your Expo application works slightly differently compared to Next.js o
 The stack originates from [create-t3-app](https://github.com/t3-oss/create-t3-app).
 
 A [blog post](https://jumr.dev/blog/t3-turbo) where I wrote how to migrate a T3 app into this.
+
+# Documentation
+
+In the case that the Simulator is throwing an error like this:
+
+```
+Error: xcrun simctl openurl 70A90EDC-4068-477B-A389-5FCE7710268E exp://192.168.1.81:8081 exited with non-zero code: 60
+@acme/expo:dev: An error was encountered processing the command (domain=NSPOSIXErrorDomain, code=60):
+@acme/expo:dev: Simulator device failed to open exp://192.168.1.81:8081.
+@acme/expo:dev: Operation timed out
+@acme/expo:dev: Underlying error (domain=NSPOSIXErrorDomain, code=60):
+@acme/expo:dev: 	The operation couldn’t be completed. Operation timed out
+@acme/expo:dev: 	Operation timed out
+```
+
+Try deleting the simulator cache by CDing into `~/Library/Developer/CoreSimulator/Caches/` and running `rm -rf *`.
