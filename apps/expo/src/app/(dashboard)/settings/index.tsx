@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { ActivityIndicator, Pressable, SafeAreaView, View } from "react-native";
 import { Link, router, Stack } from "expo-router";
 import { Picker } from "@react-native-picker/picker";
-import { ChevronLeft, Settings } from "lucide-react-native";
+import { ChevronLeft, LogOut, Settings } from "lucide-react-native";
 
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
@@ -11,11 +11,13 @@ import { Text } from "~/components/ui/text";
 import { NAV_THEME } from "~/lib/constants";
 import { useColorScheme } from "~/lib/theme";
 import { api } from "~/utils/api";
+import { useSignOut } from "~/utils/auth";
 
 export default function SettingsPage() {
   const { colorScheme, setColorScheme } = useColorScheme();
   const user = api.auth.getUser.useQuery();
   const updateUser = api.auth.update.useMutation();
+  const signOut = useSignOut();
 
   const [isLoading, setIsLoading] = useState(false);
   const [name, setName] = useState("");
@@ -85,7 +87,18 @@ export default function SettingsPage() {
             .
           </Text>
         </View>
-        <View className="flex flex-row justify-end">
+        <Button
+          onPress={signOut}
+          variant="outline"
+          className="flex w-40 flex-row gap-2"
+        >
+          <LogOut
+            size={20}
+            color={NAV_THEME[colorScheme].secondaryForeground}
+          />
+          <Text>Sign Out</Text>
+        </Button>
+        <View className="mt-6 flex flex-row justify-end">
           <Button
             onPress={async () => {
               setIsLoading(true);
