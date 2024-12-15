@@ -32,6 +32,11 @@ export function BillingForm({
     event.preventDefault();
     setIsLoading(!isLoading);
 
+    if (subscriptionPlan.stripeCurrentPeriodEnd < new Date().getTime()) {
+      // The subscription has ended.
+      // Unpause the subscription.
+    }
+
     // Get a Stripe session URL.
     const response = await fetch("/api/users/stripe");
 

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useSearchParams } from "next/navigation";
 import { registeredInPastMinute } from "@/app/(auth)/actions";
 import { Icons } from "@/components/icons";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -28,6 +29,10 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
     resolver: zodResolver(userAuthSchema),
   });
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
+  const searchParams = useSearchParams();
+  console.log({ searchParams });
+  const isExpoSignIn = searchParams.get("expo-redirect");
+  console.log({ isExpoSignIn });
 
   async function onSubmit(data: FormData) {
     setIsLoading(true);
@@ -39,7 +44,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
       await signIn("resend", {
         email: data.email.toLowerCase(),
         redirect: false,
-        callbackUrl: "/onboarding",
+        callbackUrl: isExpoSignIn ?? "/onboarding",
       });
     } catch (error) {
       // If the error is a TypeError, ignore it

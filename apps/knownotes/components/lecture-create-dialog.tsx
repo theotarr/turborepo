@@ -6,7 +6,6 @@ import { createLecture } from "@/app/(lecture)/actions";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Command,
-  CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,
@@ -277,33 +276,16 @@ export function LectureCreateDialog({
                       disabled={isLoading}
                       placeholder="Search your courses..."
                     />
-                    <CommandEmpty>
-                      <CommandItem
-                        value={"create"}
-                        //   onSelect={(cur) => {
-                        //     setValue(cur === value ? "" : cur)
-                        //     setCoursePopoverOpen(false)
-                        //   }}
-                      >
-                        {/* <Icons.add
-                        className={cn(
-                          "mr-2 h-4 w-4",
-                          selectedCourseId === "create"
-                            ? "opacity-100"
-                            : "opacity-0"
-                        )}
-                      /> */}
-                        No courses found, create one.
-                      </CommandItem>
-                    </CommandEmpty>
                     <CommandGroup>
                       {courses.map((c) => (
                         <CommandItem
                           key={c.id}
                           value={c.id}
-                          onSelect={(cur) => {
+                          onSelect={(currentSelectedCourse) => {
                             setSelectedCourseId(
-                              cur === selectedCourseId ? "" : cur,
+                              currentSelectedCourse === selectedCourseId
+                                ? ""
+                                : currentSelectedCourse,
                             );
                             setCoursePopoverOpen(false);
                           }}

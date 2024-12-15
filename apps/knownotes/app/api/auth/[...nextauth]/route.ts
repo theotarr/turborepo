@@ -56,7 +56,7 @@ export const GET = async (
 
     // Run original handler, then extract the session token from the response
     // Send it back via a query param in the Expo deep link. The Expo app
-    // will then get that and set it in the session storage.
+    // will then get that and set \it in the session storage.
     const authResponse = await handlers.GET(req);
     const setCookie = authResponse.headers
       .getSetCookie()

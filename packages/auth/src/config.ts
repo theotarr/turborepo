@@ -51,7 +51,10 @@ export const authConfig = {
         identifier: email,
         url,
         provider: { from },
+        // token,
+        // request,
       }) {
+        // console.log({ email, url, from, token });
         const resend = new Resend(env.RESEND_API_KEY);
         try {
           await resend.emails.send({
@@ -67,6 +70,17 @@ export const authConfig = {
     }),
   ],
   callbacks: {
+    // async redirect({ url, baseUrl }) {
+    //   // // Allows relative callback URLs
+    //   // if (url.startsWith("/")) return `${baseUrl}${url}`;
+    //   // // Allows callback URLs on the same origin
+    //   // else if (new URL(url).origin === baseUrl) return url;
+    //   // return baseUrl;
+
+    //   // Allow all callback URLs
+    //   console.log({ callbackUrl: url });
+    //   return url;
+    // },
     session: (opts) => {
       if (!("user" in opts))
         throw new Error("unreachable with session strategy");
