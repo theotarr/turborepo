@@ -5,7 +5,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   owner: "theotarr",
   name: "KnowNotes",
   slug: "knownotes",
-  scheme: "ai.knownotes",
+  scheme: "expo",
   version: "0.1.0",
   orientation: "portrait",
   icon: "./assets/icon.png",
@@ -20,11 +20,11 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   assetBundlePatterns: ["**/*"],
   ios: {
-    bundleIdentifier: "ai.knownotes.mobile",
+    bundleIdentifier: "ai.knownotes.ios",
     supportsTablet: true,
   },
   android: {
-    package: "ai.knownotes.mobile",
+    package: "ai.knownotes.ios",
     adaptiveIcon: {
       foregroundImage: "./assets/icon.png",
       backgroundColor: "#FFFFFF",
@@ -39,5 +39,15 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     tsconfigPaths: true,
     typedRoutes: true,
   },
-  plugins: ["expo-router"],
+  plugins: [
+    "expo-router",
+    [
+      "expo-build-properties",
+      {
+        android: {
+          minSdkVersion: 26,
+        },
+      },
+    ],
+  ],
 });

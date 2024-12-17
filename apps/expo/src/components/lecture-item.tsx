@@ -3,6 +3,7 @@ import React from "react";
 import { TouchableOpacity, View } from "react-native";
 import { Link, useRouter } from "expo-router";
 import { useNavigation } from "@react-navigation/native";
+import Superwall from "@superwall/react-native-superwall";
 
 import { Text } from "~/components/ui/text";
 // import { LectureOperations } from "~/components/lecture-operations";
@@ -23,23 +24,24 @@ export function LectureItem({ lecture, courses }: LectureItemProps) {
     <View className="group flex w-full flex-row items-center justify-between p-4 hover:bg-muted/50">
       <View className="grid gap-1">
         <Text
-          onPress={() => router.replace(`/lecture/${lecture.id}`)}
+          onPress={() => {
+            Superwall.shared.register("viewLecture").then(() => {
+              console.log("here");
+              // router.replace(`/lecture/${lecture.id}`);
+            });
+          }}
           className="line-clamp-1 truncate font-semibold hover:underline"
         >
           {lecture.title}
         </Text>
         <View className="flex flex-row space-x-2 text-sm text-muted-foreground">
-          {lecture.type && (
-            <Badge variant="secondary">
-              <Text>{formatLectureType(lecture.type)}</Text>
-            </Badge>
-          )}
+          <Badge variant="secondary">
+            <Text>{formatLectureType(lecture.type)}</Text>
+          </Badge>
           {lecture.course && (
-            <Link href={`/lecture/${lecture.course.id}`}>
-              <Badge variant="outline">
-                <Text>{lecture.course.name}</Text>
-              </Badge>
-            </Link>
+            <Badge variant="outline">
+              <Text>{lecture.course.name}</Text>
+            </Badge>
           )}
         </View>
       </View>

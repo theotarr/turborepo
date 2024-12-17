@@ -44,7 +44,8 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
       await signIn("resend", {
         email: data.email.toLowerCase(),
         redirect: false,
-        callbackUrl: isExpoSignIn ?? "/onboarding",
+        callbackUrl: "/onboarding",
+        // callbackUrl: isExpoSignIn ?? "/onboarding",
       });
     } catch (error) {
       // If the error is a TypeError, ignore it
