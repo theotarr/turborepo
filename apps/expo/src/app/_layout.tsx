@@ -45,8 +45,7 @@ export default function RootLayout() {
       Platform.OS === "ios"
         ? "pk_4c26d917d2debc8d3e77f570082055efc61abb846b7efae4"
         : "MY_ANDROID_API_KEY";
-
-    Superwall.configure(apiKey);
+    void Superwall.configure(apiKey);
   }, []);
 
   React.useEffect(() => {

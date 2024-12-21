@@ -1,12 +1,10 @@
 import type { Course, Lecture } from "@prisma/client";
 import React from "react";
-import { TouchableOpacity, View } from "react-native";
-import { Link, useRouter } from "expo-router";
-import { useNavigation } from "@react-navigation/native";
+import { View } from "react-native";
+import { useRouter } from "expo-router";
 import Superwall from "@superwall/react-native-superwall";
 
 import { Text } from "~/components/ui/text";
-// import { LectureOperations } from "~/components/lecture-operations";
 import { formatLectureType, formatShortDate } from "~/lib/utils";
 import { Badge } from "./ui/badge";
 
@@ -14,10 +12,9 @@ interface LectureItemProps {
   lecture: Lecture & {
     course?: Course;
   };
-  courses?: Course[];
 }
 
-export function LectureItem({ lecture, courses }: LectureItemProps) {
+export function LectureItem({ lecture }: LectureItemProps) {
   const router = useRouter();
 
   return (
@@ -25,9 +22,8 @@ export function LectureItem({ lecture, courses }: LectureItemProps) {
       <View className="grid gap-1">
         <Text
           onPress={() => {
-            Superwall.shared.register("viewLecture").then(() => {
-              console.log("here");
-              // router.replace(`/lecture/${lecture.id}`);
+            void Superwall.shared.register("viewLecture").then(() => {
+              router.replace(`/lecture/${lecture.id}`);
             });
           }}
           className="line-clamp-1 truncate font-semibold hover:underline"
@@ -49,7 +45,6 @@ export function LectureItem({ lecture, courses }: LectureItemProps) {
         <Text className="text-xs text-muted-foreground">
           {formatShortDate(lecture.updatedAt.toDateString())}
         </Text>
-        {/* <LectureOperations lecture={lecture as any} courses={courses} /> */}
       </View>
     </View>
   );

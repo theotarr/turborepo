@@ -1,6 +1,7 @@
 import * as Linking from "expo-linking";
 import { useRouter } from "expo-router";
 import * as Browser from "expo-web-browser";
+import Superwall from "@superwall/react-native-superwall";
 
 import { api } from "./api";
 import { getBaseUrl } from "./base-url";
@@ -40,6 +41,10 @@ export const signUp = async () => {
 
 export const useUser = () => {
   const { data: session } = api.auth.getSession.useQuery();
+  if (session?.user) {
+    void Superwall.shared.identify(session.user.id); // Pass the user id to Superwall.
+    void Superwall.shared.setUserAttributes(session.user);
+  }
   return session?.user ?? null;
 };
 
@@ -63,6 +68,7 @@ export const useSignOut = () => {
     const res = await signOut.mutateAsync();
     if (!res.success) return;
     await deleteToken();
+    await Superwall.shared.reset(); // Reset Superwall user id.
     await utils.invalidate();
     router.replace("/");
   };

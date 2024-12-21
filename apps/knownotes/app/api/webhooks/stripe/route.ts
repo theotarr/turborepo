@@ -34,9 +34,8 @@ export async function POST(req: Request) {
       session.subscription as string,
     );
 
-    // Update the user stripe into in our database.
-    // Since this is the initial subscription, we need to update
-    // the subscription id and customer id.
+    // Update the user in our database.
+    // Since this is the initial subscription, we need to update the subscription id and customer id.
     await db.user.update({
       where: {
         id: session?.metadata?.userId,

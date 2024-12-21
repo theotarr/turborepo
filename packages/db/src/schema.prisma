@@ -192,6 +192,11 @@ model User {
   stripePriceId          String?
   stripeCurrentPeriodEnd DateTime?
 
+  // App Store Subscription
+  appStoreSubscriptionId   String?   @unique
+  appStoreProductId        String?
+  appStoreCurrentPeriodEnd DateTime?
+
   // Emails
   sentFreeTrialOfferEmailAt DateTime?
 
