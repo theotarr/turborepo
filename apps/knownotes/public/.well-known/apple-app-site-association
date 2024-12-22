@@ -1,23 +1,22 @@
 {
-  // This section enables Universal Links
   "applinks": {
     "apps": [],
     "details": [
       {
         // Syntax: "<APPLE_TEAM_ID>.<BUNDLE_ID>"
-        "appID": "<APPLE_TEAM_ID>.ai.knownotes.ios",
+        "appID": "8MW6NC736H.ai.knownotes.ios",
         // All paths that should support redirecting.
         /* @info Replace <CODE>/records/*</CODE> with your own path. */
-        "paths": ["/lecture/*", "/dashboard", "/login", "/record"]
+        "paths": ["/lecture/*", "/dashboard", "/login"]
       }
     ]
   },
   // This section enables Apple Handoff
   "activitycontinuation": {
-    "apps": ["<APPLE_TEAM_ID>.ai.knownotes.ios"]
+    "apps": ["8MW6NC736H.ai.knownotes.ios"]
   },
   // This section enable Shared Web Credentials
   "webcredentials": {
-    "apps": ["<APPLE_TEAM_ID>ai.knownotes.ios"]
+    "apps": ["8MW6NC736H.ai.knownotes.ios"]
   }
 }
