@@ -10,7 +10,7 @@ import { Badge } from "./ui/badge";
 
 interface LectureItemProps {
   lecture: Lecture & {
-    course?: Course;
+    course?: Course | null;
   };
 }
 

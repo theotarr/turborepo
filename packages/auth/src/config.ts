@@ -51,39 +51,36 @@ export const authConfig = {
         identifier: email,
         url,
         provider: { from },
-        // token,
-        // request,
+        request,
       }) {
-        // console.log({ email, url, from, token });
-        const resend = new Resend(env.RESEND_API_KEY);
-        try {
-          await resend.emails.send({
-            html: loginEmailHtml(url),
-            from: `Login <${from}>`,
-            to: email,
-            subject: "Sign in to KnowNotes",
-          });
-        } catch (error) {
-          console.log({ error });
+        const cookies = request.headers.get("cookie") ?? "";
+        const isExpoSignin = cookies
+          .split("; ")
+          .find((cookie: string) =>
+            cookie.startsWith("__acme-expo-redirect-state"),
+          )
+          ?.split("=")[1];
+
+        if (isExpoSignin) {
+          const callbackUrl = new URL(url);
+          callbackUrl.searchParams.set("callbackUrl", "/mobile");
+          url = callbackUrl.toString();
         }
+
+        const resend = new Resend(env.RESEND_API_KEY);
+        await resend.emails.send({
+          html: loginEmailHtml(url),
+          from: `Login <${from}>`,
+          to: email,
+          subject: "Sign in to KnowNotes",
+        });
       },
     }),
   ],
   callbacks: {
-    // async redirect({ url, baseUrl }) {
-    //   // // Allows relative callback URLs
-    //   // if (url.startsWith("/")) return `${baseUrl}${url}`;
-    //   // // Allows callback URLs on the same origin
-    //   // else if (new URL(url).origin === baseUrl) return url;
-    //   // return baseUrl;
-
-    //   // Allow all callback URLs
-    //   console.log({ callbackUrl: url });
-    //   return url;
-    // },
     session: (opts) => {
       if (!("user" in opts))
-        throw new Error("unreachable with session strategy");
+        throw new Error("Unreachable with session strategy.");
 
       return {
         ...opts.session,

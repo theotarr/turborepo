@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Pressable, SafeAreaView, ScrollView, View } from "react-native";
 import { router, Stack } from "expo-router";
+import Superwall from "@superwall/react-native-superwall";
 import { MoveRight, Plus, Settings } from "lucide-react-native";
 
 import { LectureItem } from "~/components/lecture-item";
@@ -53,11 +54,7 @@ export default function DashboardPage() {
         <ScrollView>
           <View className="divide-y divide-border rounded-md border border-border">
             {lectures.data.map((lecture) => (
-              <LectureItem
-                key={lecture.id}
-                lecture={lecture}
-                courses={user.data?.courses}
-              />
+              <LectureItem key={lecture.id} lecture={lecture} />
             ))}
           </View>
         </ScrollView>
@@ -70,19 +67,23 @@ export default function DashboardPage() {
           <BottomSheetContent>
             <BottomSheetView className="gap-6">
               <Pressable
-                onPress={async () => {
-                  if (isLoading) return;
-                  setIsLoading(true);
+                onPress={() => {
+                  void Superwall.shared
+                    .register("createLecture")
+                    .then(async () => {
+                      if (isLoading) return;
+                      setIsLoading(true);
 
-                  // Create a new lecture, then forward to the record page.
-                  try {
-                    const lecture = await createLecture.mutateAsync({});
-                    setIsLoading(false);
-                    router.replace(`/record/${lecture.id}`);
-                  } catch (error) {
-                    console.error(error);
-                    alert("Failed to create lecture");
-                  }
+                      // Create a new lecture, then forward to the record page.
+                      try {
+                        const lecture = await createLecture.mutateAsync({});
+                        setIsLoading(false);
+                        router.replace(`/record/${lecture.id}`);
+                      } catch (error) {
+                        console.error(error);
+                        alert("Failed to create lecture");
+                      }
+                    });
                 }}
               >
                 <View className="flex flex-row items-center justify-between rounded bg-muted px-4 py-3">

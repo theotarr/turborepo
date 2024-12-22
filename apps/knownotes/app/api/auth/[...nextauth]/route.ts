@@ -54,6 +54,8 @@ export const GET = async (
   if (nextauthAction === "callback" && !!isExpoCallback) {
     cookies().delete(EXPO_COOKIE_NAME);
 
+    console.log("Is Expo callback", isExpoCallback);
+
     // Run original handler, then extract the session token from the response
     // Send it back via a query param in the Expo deep link. The Expo app
     // will then get that and set \it in the session storage.
