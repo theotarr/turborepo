@@ -68,8 +68,8 @@ export const useSignOut = () => {
     const res = await signOut.mutateAsync();
     if (!res.success) return;
     await deleteToken();
-    await Superwall.shared.reset(); // Reset Superwall user id.
     await utils.invalidate();
+    void Superwall.shared.reset(); // Reset Superwall user id.
     router.replace("/");
   };
 };

@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Pressable, SafeAreaView, View } from "react-native";
-import { Link, router, Stack } from "expo-router";
+import { Link, Stack, useRouter } from "expo-router";
 import { Picker } from "@react-native-picker/picker";
-import { ChevronLeft, LogOut, Settings } from "lucide-react-native";
+import { ChevronLeft, LogOut } from "lucide-react-native";
 
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
@@ -14,6 +14,7 @@ import { api } from "~/utils/api";
 import { useSignOut } from "~/utils/auth";
 
 export default function SettingsPage() {
+  const router = useRouter();
   const { colorScheme, setColorScheme } = useColorScheme();
   const user = api.auth.getUser.useQuery();
   const updateUser = api.auth.update.useMutation();
@@ -25,9 +26,11 @@ export default function SettingsPage() {
 
   useEffect(() => {
     if (!user.data) return;
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     setName(user.data.name!);
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     setEmail(user.data.email!);
-  }, []);
+  }, [user.data]);
 
   return (
     <SafeAreaView className="bg-background">
@@ -87,17 +90,22 @@ export default function SettingsPage() {
             .
           </Text>
         </View>
-        <Button
-          onPress={signOut}
-          variant="outline"
-          className="flex w-40 flex-row gap-2"
-        >
-          <LogOut
-            size={20}
-            color={NAV_THEME[colorScheme].secondaryForeground}
-          />
-          <Text>Sign Out</Text>
-        </Button>
+        <View className="items-start">
+          <Button
+            onPress={() => {
+              void signOut().then(() => router.replace("/"));
+            }}
+            variant="ghost"
+            size="sm"
+            className="flex flex-row gap-2"
+          >
+            <LogOut
+              size={16}
+              color={NAV_THEME[colorScheme].secondaryForeground}
+            />
+            <Text className="text-sm">Sign Out</Text>
+          </Button>
+        </View>
         <View className="mt-6 flex flex-row justify-end">
           <Button
             onPress={async () => {

@@ -69,9 +69,7 @@ export default function RootLayout() {
     });
   }, []);
 
-  if (!isColorSchemeLoaded) {
-    return null;
-  }
+  if (!isColorSchemeLoaded) return null;
 
   return (
     <TRPCProvider>
