@@ -26,6 +26,10 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       "applinks:knownotes.ai",
       "applinks:knownotes.ai?mode=developer",
     ],
+    infoPlist: {
+      NSMicrophoneUsageDescription:
+        "Need microphone access for recording audio",
+    },
   },
   android: {
     package: "ai.knownotes.ios",
