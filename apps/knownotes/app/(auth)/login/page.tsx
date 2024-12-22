@@ -38,8 +38,8 @@ export const metadata = {
   },
 };
 export default async function LoginPage() {
-  const session = await auth();
-  if (session) redirect("/dashboard");
+  // const session = await auth();
+  // if (session) redirect("/dashboard");
 
   return (
     <div className="container flex h-screen w-screen flex-col items-center justify-center">
