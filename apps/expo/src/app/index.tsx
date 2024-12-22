@@ -1,7 +1,7 @@
 import { View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Redirect, Stack } from "expo-router";
-import { Aperture, ArrowDownRight } from "lucide-react-native";
+import { Aperture } from "lucide-react-native";
 
 import { TrustPilot } from "~/components/trust-pilot";
 import { Button } from "~/components/ui/button";
@@ -22,10 +22,10 @@ export default function Page() {
   return (
     <SafeAreaView className="bg-background">
       <Stack.Screen options={{ title: "" }} />
-      <View className="flex h-full w-full flex-col justify-between p-6">
-        <View className="mb-28 flex flex-1 items-center justify-center">
+      <View className="flex h-full w-full flex-col justify-between p-4">
+        <View className="mb-32 flex flex-1 items-center justify-center">
           <View className="flex flex-col items-center gap-4">
-            <View className="flex flex-row items-center justify-center gap-2 rounded-full bg-primary-foreground p-2 dark:bg-transparent">
+            <View className="flex flex-row items-center justify-center gap-1">
               <Aperture
                 size={20}
                 color={NAV_THEME[colorScheme].secondaryForeground}
@@ -42,7 +42,7 @@ export default function Page() {
             </View>
           </View>
         </View>
-        <View className="relative w-full">
+        <View className="w-full">
           <Button
             variant="outline"
             className="flex w-full flex-row gap-2 rounded-full"
@@ -53,7 +53,7 @@ export default function Page() {
               size={20}
               color={NAV_THEME[colorScheme].secondaryForeground}
             />
-            <Text className="font-semibold">Continue on KnowNotes.ai</Text>
+            <Text>Continue on KnowNotes.ai</Text>
           </Button>
         </View>
       </View>
