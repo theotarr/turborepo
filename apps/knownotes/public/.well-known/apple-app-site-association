@@ -3,7 +3,10 @@
     "apps": [],
     "details": [
       {
-        "appID": "8MW6NC736H.ai.knownotes.ios",
+        "appIDs": [
+          "8MW6NC736H.ai.knownotes.ios",
+          "FAKETEAMID.ai.knownotes.ios"
+        ],
         "paths": [
           "/mobile",
           "/lecture/*",

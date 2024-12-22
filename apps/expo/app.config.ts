@@ -22,7 +22,10 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ios: {
     bundleIdentifier: "ai.knownotes.ios",
     supportsTablet: true,
-    associatedDomains: ["applinks:knownotes.ai"],
+    associatedDomains: [
+      "applinks:knownotes.ai",
+      "applinks:knownotes.ai?mode=developer",
+    ],
   },
   android: {
     package: "ai.knownotes.ios",
