@@ -32,7 +32,10 @@ export function BillingForm({
     event.preventDefault();
     setIsLoading(!isLoading);
 
-    if (subscriptionPlan.stripeCurrentPeriodEnd < new Date().getTime()) {
+    if (
+      subscriptionPlan.stripeCurrentPeriodEnd < new Date().getTime() ||
+      subscriptionPlan.appStoreCurrentPeriodEnd < new Date().getTime()
+    ) {
       // The subscription has ended.
       // Unpause the subscription.
     }
@@ -55,6 +58,13 @@ export function BillingForm({
     }
   }
 
+  // If the user has no subscription, don't show the billing form.
+  if (
+    !subscriptionPlan.stripeSubscriptionId &&
+    !subscriptionPlan.appStoreSubscriptionId
+  )
+    return null;
+
   return (
     <form className={cn(className)} onSubmit={onSubmit} {...props}>
       <Card>
@@ -64,49 +74,62 @@ export function BillingForm({
             Manage your billing and payment methods.
           </CardDescription>
         </CardHeader>
-        {/* <CardContent>{subscriptionPlan.description}</CardContent> */}
         <CardFooter className="flex flex-col items-start space-y-2 md:flex-row md:justify-between md:space-x-0">
-          <button
-            type="submit"
-            className={cn(
-              buttonVariants({
-                variant: subscriptionPlan.stripeSubscriptionId
-                  ? "outline"
-                  : "default",
-              }),
-            )}
-            disabled={isLoading}
-          >
-            {isLoading && (
-              <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-            )}
-            {subscriptionPlan.stripeSubscriptionId &&
-            subscriptionPlan.stripeCurrentPeriodEnd > new Date().getTime() ? (
-              <>Manage Billing</>
-            ) : (
-              <>Unpause Subscription</>
-            )}
-          </button>
-          <>
-            {subscriptionPlan.stripeCurrentPeriodEnd &&
-            subscriptionPlan.stripeCurrentPeriodEnd < new Date().getTime() ? (
-              <>
-                {subscriptionPlan.isCanceled ? (
-                  <p className="text-xs font-medium">
-                    Your subscription is canceled and expires on{" "}
-                    {formatDate(subscriptionPlan.stripeCurrentPeriodEnd)}
-                  </p>
-                ) : (
-                  <p className="text-xs font-medium">
-                    Your subscription has ended. Unpause your subscription to
-                    continue using KnowNotes.
-                  </p>
+          {subscriptionPlan.stripeSubscriptionId ? (
+            <>
+              <button
+                type="submit"
+                className={cn(
+                  buttonVariants({
+                    variant: subscriptionPlan.stripeSubscriptionId
+                      ? "outline"
+                      : "default",
+                  }),
                 )}
-              </>
-            ) : (
-              <></>
-            )}
-          </>
+                disabled={isLoading}
+              >
+                {isLoading && (
+                  <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+                )}
+                {subscriptionPlan.stripeCurrentPeriodEnd >
+                new Date().getTime() ? (
+                  <>Manage Billing</>
+                ) : (
+                  <>Unpause Subscription</>
+                )}
+              </button>
+              <div>
+                {subscriptionPlan.stripeCurrentPeriodEnd <
+                new Date().getTime() ? (
+                  <>
+                    {subscriptionPlan.isCanceled ? (
+                      <p className="text-xs font-medium">
+                        Your subscription is canceled and expires on{" "}
+                        {formatDate(subscriptionPlan.stripeCurrentPeriodEnd)}
+                      </p>
+                    ) : (
+                      <p className="text-xs font-medium">
+                        Your subscription has ended. Unpause your subscription
+                        to continue using KnowNotes.
+                      </p>
+                    )}
+                  </>
+                ) : (
+                  <></>
+                )}
+              </div>
+            </>
+          ) : (
+            <></>
+          )}
+          {subscriptionPlan.appStoreCurrentPeriodEnd ? (
+            <div className="text-sm font-medium">
+              Your subscription was created through the Apple App Store. Use
+              your Apple device to manage your subscription.
+            </div>
+          ) : (
+            <></>
+          )}
         </CardFooter>
       </Card>
     </form>

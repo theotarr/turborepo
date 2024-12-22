@@ -69,14 +69,12 @@ export default async function SettingsPage() {
             email: session.user.email || "",
           }}
         />
-        {subscriptionPlan.stripeCustomerId && (
-          <BillingForm
-            subscriptionPlan={{
-              ...subscriptionPlan,
-              isCanceled: cancelAtPeriodEnd,
-            }}
-          />
-        )}
+        <BillingForm
+          subscriptionPlan={{
+            ...subscriptionPlan,
+            isCanceled: cancelAtPeriodEnd,
+          }}
+        />
         {/* <UserDeleteForm user={{ id: user.id }} /> */}
       </div>
     </DashboardShell>

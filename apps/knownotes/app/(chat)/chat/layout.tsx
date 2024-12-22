@@ -19,6 +19,7 @@ export default async function ChatLayout({ children }: ChatLayoutProps) {
 
   const subscription = await getUserSubscriptionPlan(session.user.id);
 
+  // Redirect to the settings page if the user's Stripe subscription has expired.
   if (
     subscription.stripeSubscriptionId &&
     subscription.stripeCurrentPeriodEnd < new Date().getTime()

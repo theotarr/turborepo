@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Dialog, DialogClose, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { updateUserSubsciptionPlan } from "@/lib/stripe/actions";
 import { UserSubscriptionPlan } from "@/types";
 import { create } from "zustand";
@@ -36,7 +36,11 @@ export function PaymentDialog({ subscription, ...props }: PaymentDialogProps) {
     }
 
     // If there is no subscription, open the dialog
-    if (!subscription.isPro && !subscription.stripeCurrentPeriodEnd) {
+    if (
+      !subscription.isPro &&
+      !subscription.stripeCurrentPeriodEnd &&
+      !subscription.appStoreCurrentPeriodEnd
+    ) {
       setOpen(true); // not subscribed, open the payment dialog to subscribe
 
       if (setupIntentId) {

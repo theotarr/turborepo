@@ -73,6 +73,7 @@ export type SubscriptionPlan = {
   name: string;
   description: string;
   stripePriceIds: string[];
+  appStoreProductIds?: string[];
   chatModel?: "gpt-4o-mini" | "gpt-4" | "gpt-4-turbo" | "gpt-4o";
   lecturesPerMonth?: number;
   messagesPerMonth?: number;
@@ -80,7 +81,12 @@ export type SubscriptionPlan = {
 };
 
 export type UserSubscriptionPlan = SubscriptionPlan &
-  Pick<User, "stripeCustomerId" | "stripeSubscriptionId"> & {
+  Pick<
+    User,
+    "stripeCustomerId" | "stripeSubscriptionId",
+    "appStoreSubscriptionId"
+  > & {
     stripeCurrentPeriodEnd: number;
+    appStoreCurrentPeriodEnd: number;
     isPro: boolean;
   };

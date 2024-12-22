@@ -16,11 +16,6 @@ export default async function WelcomePage() {
 
   const subscription = await getUserSubscriptionPlan(session.user.id);
 
-  // if (subscription.stripeCurrentPeriodEnd < new Date().getTime()) {
-  //   // subscription expired, redirect to settings page to update payment method
-  //   redirect("/dashboard/settings")
-  // }
-
   if (subscription.isPro) {
     // already subscribed, redirect to dashboard
     redirect("/dashboard");

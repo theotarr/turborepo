@@ -7,7 +7,7 @@
         "appID": "8MW6NC736H.ai.knownotes.ios",
         // All paths that should support redirecting.
         /* @info Replace <CODE>/records/*</CODE> with your own path. */
-        "paths": ["/lecture/*", "/dashboard", "/login"]
+        "paths": ["/mobile", "/lecture/*", "/dashboard", "/login"]
       }
     ]
   },

@@ -26,6 +26,7 @@ export const proPlan: SubscriptionPlan = {
     "price_1ObteaLB8OER9Cjf5hpps6bW",
     "price_1P8Wv4LB8OER9CjfJuUAuA8I",
   ],
+  appStoreProductIds: ["weekly_5.99", "yearly_119.99"],
   chatModel: "gpt-4o",
   lecturesPerMonth: 1_000,
   noteGenerationsPerMonth: 1_000,
