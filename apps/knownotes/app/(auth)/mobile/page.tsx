@@ -1,9 +1,10 @@
-import { cookies } from "next/headers";
 import { Icons } from "@/components/icons";
 import { MobileButton } from "@/components/mobile-button";
 
+import { auth } from "@acme/auth";
+
 export default async function MobileLoginSuccessPage() {
-  const sessionToken = cookies().get("authjs.session-token")?.value;
+  const session = await auth();
   return (
     <div className="container flex h-screen w-screen flex-col items-center justify-center">
       <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
@@ -13,10 +14,10 @@ export default async function MobileLoginSuccessPage() {
             Continue in our app
           </h1>
           <p className="text-sm text-muted-foreground">
-            Click the button to continue to the KnowNotes mobile app.
+            Click the button to be redirected to the KnowNotes mobile app.
           </p>
         </div>
-        <MobileButton sessionToken={sessionToken} />
+        <MobileButton sessionToken={session.sessionToken} />
       </div>
     </div>
   );
