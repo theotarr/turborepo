@@ -6,7 +6,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   name: "KnowNotes",
   slug: "knownotes",
   scheme: "knownotes",
-  version: "0.1.1",
+  version: "0.1.2",
   orientation: "portrait",
   icon: "./assets/icon.png",
   userInterfaceStyle: "automatic",
