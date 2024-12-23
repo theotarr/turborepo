@@ -27,6 +27,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       NSMicrophoneUsageDescription:
         "Need microphone access for recording audio",
     },
+    config: {
+      usesNonExemptEncryption: false,
+    },
   },
   android: {
     package: "ai.knownotes.ios",
