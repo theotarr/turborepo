@@ -12,20 +12,15 @@ interface LectureItemProps {
   lecture: Lecture & {
     course?: Course | null;
   };
+  onLecturePress?: () => void;
 }
 
-export function LectureItem({ lecture }: LectureItemProps) {
-  const router = useRouter();
-
+export function LectureItem({ lecture, onLecturePress }: LectureItemProps) {
   return (
     <View className="group flex w-full flex-row items-center justify-between p-4 hover:bg-muted/50">
       <View className="grid gap-1">
         <Text
-          onPress={() => {
-            void Superwall.shared.register("viewLecture").then(() => {
-              router.replace(`/lecture/${lecture.id}`);
-            });
-          }}
+          onPress={onLecturePress}
           className="line-clamp-1 truncate font-semibold hover:underline"
         >
           {lecture.title}
