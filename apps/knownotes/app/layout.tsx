@@ -81,6 +81,9 @@ export default async function RootLayout({ children }: RootLayoutProps) {
   const session = await auth();
   return (
     <html lang="en" className={`${GeistSans.variable}`}>
+      <head>
+        <meta name="apple-itunes-app" content="app-id=6739503513" />
+      </head>
       <TRPCReactProvider>
         <CSPostHogProvider>
           <body
