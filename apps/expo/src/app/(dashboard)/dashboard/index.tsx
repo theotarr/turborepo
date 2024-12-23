@@ -1,9 +1,17 @@
 import { useState } from "react";
-import { Pressable, SafeAreaView, ScrollView, View } from "react-native";
+import {
+  ActivityIndicator,
+  Pressable,
+  RefreshControl,
+  SafeAreaView,
+  ScrollView,
+  View,
+} from "react-native";
 import { router, Stack } from "expo-router";
 import Superwall from "@superwall/react-native-superwall";
 import { MoveRight, Plus, Settings } from "lucide-react-native";
 
+import type { Lecture } from ".prisma/client";
 import { LectureItem } from "~/components/lecture-item";
 import {
   BottomSheet,
@@ -20,8 +28,18 @@ import { shouldShowPaywall } from "~/utils/subscription";
 export default function DashboardPage() {
   const { colorScheme } = useColorScheme();
   const [isLoading, setIsLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
-  const lectures = api.lecture.byUser.useQuery();
+  const lectures = api.lecture.infiniteLectures.useInfiniteQuery(
+    {
+      limit: 20,
+    },
+    {
+      getNextPageParam: (lastPage: { nextCursor: string }) =>
+        lastPage.nextCursor,
+    },
+  );
+
   const user = api.auth.getUser.useQuery();
   const createLecture = api.lecture.create.useMutation();
 
@@ -40,7 +58,17 @@ export default function DashboardPage() {
     }
   }
 
-  if (!lectures.data) return null;
+  async function onRefresh() {
+    setRefreshing(true);
+    await lectures.refetch();
+    setRefreshing(false);
+  }
+
+  const handleLoadMore = () => {
+    if (lectures.hasNextPage) lectures.fetchNextPage();
+  };
+
+  if (!lectures.data?.pages) return null;
   if (!user.data) return null;
 
   return (
@@ -67,34 +95,60 @@ export default function DashboardPage() {
         <Text className="mb-4 text-2xl font-semibold tracking-tighter">
           Lectures
         </Text>
-        <ScrollView>
+        <ScrollView
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+          onScroll={({ nativeEvent }) => {
+            const { layoutMeasurement, contentOffset, contentSize } =
+              nativeEvent;
+            if (
+              layoutMeasurement.height + contentOffset.y >=
+              contentSize.height - 20
+            ) {
+              handleLoadMore();
+            }
+          }}
+          scrollEventThrottle={400}
+        >
           <View className="divide-y divide-border rounded-md border border-border">
-            {lectures.data.map((lecture) => (
-              <LectureItem
-                key={lecture.id}
-                lecture={lecture}
-                onLecturePress={() => {
-                  // Check if the user has an active Stripe subscription.
-                  if (
-                    !shouldShowPaywall(
-                      user.data as {
-                        stripeCurrentPeriodEnd?: string | null;
-                        appStoreCurrentPeriodEnd?: string | null;
-                      },
-                    )
-                  ) {
-                    router.replace(`/lecture/${lecture.id}`);
-                    return;
-                  }
+            {lectures.data.pages.map(
+              (page: { items: Lecture[]; nextCursor: string }[]) =>
+                page.items.map((lecture: Lecture) => (
+                  <LectureItem
+                    key={lecture.id}
+                    lecture={lecture}
+                    onLecturePress={() => {
+                      // Check if the user has an active Stripe subscription.
+                      if (
+                        !shouldShowPaywall(
+                          user.data as {
+                            stripeCurrentPeriodEnd?: string | null;
+                            appStoreCurrentPeriodEnd?: string | null;
+                          },
+                        )
+                      ) {
+                        router.replace(`/lecture/${lecture.id}`);
+                        return;
+                      }
 
-                  // If the user doesn't have an active subscription, show the paywall.
-                  void Superwall.shared.register("viewLecture").then(() => {
-                    router.replace(`/lecture/${lecture.id}`);
-                  });
-                }}
-              />
-            ))}
+                      // If the user doesn't have an active subscription, show the paywall.
+                      void Superwall.shared.register("viewLecture").then(() => {
+                        router.replace(`/lecture/${lecture.id}`);
+                      });
+                    }}
+                  />
+                )),
+            )}
           </View>
+          {lectures.isFetchingNextPage && (
+            <View className="mt-2">
+              <ActivityIndicator
+                size="small"
+                color={NAV_THEME[colorScheme].secondaryForeground}
+              />
+            </View>
+          )}
         </ScrollView>
         <BottomSheet>
           <BottomSheetOpenTrigger asChild>
