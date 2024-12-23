@@ -10,14 +10,14 @@ export function TrustPilot({ ...props }) {
         <View className="flex flex-row gap-0.5">
           {/* eslint-disable-next-line @typescript-eslint/no-unsafe-assignment */}
           {[...Array(5)].map((_, i) => (
-            <Star size={18} fill={"currentColor"} key={i} />
+            <Star size={16} fill={"currentColor"} key={i} />
           ))}
         </View>
         <Text className="text-center text-lg text-muted-foreground">4.8/5</Text>
         <View className="-mt-1 fill-secondary-foreground text-secondary-foreground">
           <Svg
-            width={96}
-            height={30}
+            width={76}
+            height={25}
             color={"currentColor"}
             viewBox="0 0 257 64"
             {...props}
