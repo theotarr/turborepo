@@ -5,7 +5,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   owner: "theotarr",
   name: "KnowNotes",
   slug: "knownotes",
-  scheme: "expo",
+  scheme: "knownotes",
   version: "0.1.1",
   orientation: "portrait",
   icon: "./assets/icon.png",

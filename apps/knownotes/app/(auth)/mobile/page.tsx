@@ -2,9 +2,8 @@ import { cookies } from "next/headers";
 import { Icons } from "@/components/icons";
 import { MobileButton } from "@/components/mobile-button";
 
-export default function MobileLoginSuccessPage() {
+export default async function MobileLoginSuccessPage() {
   const sessionToken = cookies().get("authjs.session-token")?.value;
-  console.log({ sessionToken });
   return (
     <div className="container flex h-screen w-screen flex-col items-center justify-center">
       <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">

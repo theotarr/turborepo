@@ -4,13 +4,11 @@ import { buttonVariants } from "./ui/button";
 
 export function MobileButton({ sessionToken }) {
   return (
-    <button
+    <a
+      href={`knownotes://mobile?session_token=${sessionToken}`}
       className={buttonVariants()}
-      onClick={() => {
-        window.location.href = `https://knownotes.ai/mobile?session_token=${sessionToken}`;
-      }}
     >
       Go to app
-    </button>
+    </a>
   );
 }
