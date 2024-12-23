@@ -46,15 +46,61 @@ export const lectureRouter = {
       where: {
         userId: ctx.session.user.id,
       },
-      include: {
-        course: true,
+      select: {
+        id: true,
+        type: true,
+        title: true,
+        notes: true,
+        enhancedNotes: true,
+        markdownNotes: true,
+        youtubeVideoId: true,
+        createdAt: true,
+        updatedAt: true,
+        userId: true,
+        courseId: true,
+        course: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
       },
-      // Limit to 6 lectures, otherwise lectures with massive transcripts
-      // will cause the request to time out or exceed maximum request size.
-      take: 6,
+      // Limit to 10 lectures, and don't fetch transcripts that are too large as it will cause the request to time out or exceed maximum request size.
+      take: 10,
       orderBy: { updatedAt: "desc" },
     });
   }),
+  infiniteLectures: protectedProcedure
+    .input(
+      z.object({
+        limit: z.number().min(1).max(100).nullish(),
+        cursor: z.string().nullish(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const limit = input.limit ?? 10;
+      const { cursor } = input;
+
+      const lectures = await ctx.db.lecture.findMany({
+        take: limit + 1,
+        where: {
+          userId: ctx.session.user.id,
+        },
+        cursor: cursor ? { id: cursor } : undefined,
+        orderBy: { updatedAt: "desc" },
+      });
+
+      let nextCursor: typeof cursor | undefined = undefined;
+      if (lectures.length > limit) {
+        const nextItem = lectures.pop();
+        nextCursor = nextItem?.id;
+      }
+
+      return {
+        items: lectures,
+        nextCursor,
+      };
+    }),
   create: protectedProcedure
     .input(CreateLectureSchema)
     .mutation(({ ctx, input }) => {

@@ -23,23 +23,21 @@ export default function Page() {
     <SafeAreaView className="bg-background">
       <Stack.Screen options={{ title: "" }} />
       <View className="flex h-full w-full flex-col justify-between p-4">
-        <View className="mb-32 flex flex-1 items-center justify-center">
-          <View className="flex flex-col items-center gap-4">
-            <View className="flex flex-row items-center justify-center gap-1">
-              <Aperture
-                size={20}
-                color={NAV_THEME[colorScheme].secondaryForeground}
-              />
-              <Text className="text-xl font-semibold tracking-tighter text-secondary-foreground">
-                KnowNotes
-              </Text>
-            </View>
-            <Text className="text-center text-5xl font-bold leading-tight tracking-tighter text-secondary-foreground">
-              The AI Assistant{"\n"} For Students
+        <View className="flex flex-col items-center gap-4">
+          <View className="mb-2 flex flex-row items-center gap-2">
+            <Aperture
+              size={20}
+              color={NAV_THEME[colorScheme].secondaryForeground}
+            />
+            <Text className="text-xl font-semibold tracking-tighter text-secondary-foreground">
+              KnowNotes
             </Text>
-            <View className="mt-4">
-              <TrustPilot />
-            </View>
+          </View>
+          <Text className="text-center text-5xl font-bold tracking-tighter text-secondary-foreground">
+            The AI Assistant{"\n"} For Students
+          </Text>
+          <View className="mt-4">
+            <TrustPilot />
           </View>
         </View>
         <View className="w-full">
