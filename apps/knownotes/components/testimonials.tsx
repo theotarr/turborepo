@@ -7,38 +7,44 @@ import { Card } from "./ui/card";
 const reviews = [
   {
     review:
-      "I'm addicted to KnowNotes - I can't imagine life without it. It's saves me hours taking notes and studying every week.",
-    author: "Morgan Daniels",
+      "I can't imagine life without KnowNotes. It's saves me hours taking notes and automates my studying.",
+    author: "Theo Tarr",
+    school: "Harvard University",
     rating: 5,
   },
   {
     review:
       "The chat with course feature is crazy. It pulls up relevant notes and answers questions based on the semester of classes.",
     author: "Alex Chen",
+    school: "Stanford University",
     rating: 5,
   },
   {
     review:
       "It turns my Youtube binges into productive and interactive study sessions. It's a game-changer.",
     author: "Taylor Morgan",
+    school: "Babson College",
     rating: 5,
   },
   {
     review:
       "I feel like I'm studying smarter, not harder. It's a must have for anyone who values efficiency.",
     author: "Jordan Patel",
+    school: "Cornell University",
     rating: 5,
   },
   {
     review:
       "This AI saved my grades and so much of my time this semester. I can't imagine taking notes by hand anymore.",
     author: "Casey Rivers",
+    school: "MIT",
     rating: 5,
   },
   {
     review:
       "The AI answers are tailored to each of my classes. It's like the AI knows exactly what I need to know.",
     author: "Avery Nguyen",
+    school: "Duke University",
     rating: 5,
   },
 ];
@@ -72,12 +78,14 @@ function Review({
   author,
   rating,
   className,
+  school,
   ...props
 }: {
   review: string;
   author: string;
   rating: number;
   className?: string;
+  school?: string;
 }) {
   return (
     <Card className={cn("p-6", className)} {...props}>
@@ -85,9 +93,12 @@ function Review({
         <StarRating rating={rating} />
         <p className="mt-4 text-base leading-7">{review}</p>
       </blockquote>
-      <figcaption className="mt-4 text-base font-medium text-secondary-foreground/80 before:content-['–_']">
+      <figcaption className="mt-6 text-base font-medium text-secondary-foreground/80">
         {author}
       </figcaption>
+      {school && (
+        <p className="mt-1 text-sm text-secondary-foreground/60">{school}</p>
+      )}
     </Card>
   );
 }
