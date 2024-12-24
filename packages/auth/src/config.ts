@@ -4,10 +4,10 @@ import type {
   Session as NextAuthSession,
 } from "next-auth";
 import { skipCSRFCheck } from "@auth/core";
+import Apple from "@auth/core/providers/apple";
+import Google from "@auth/core/providers/google";
+import ResendProvider from "@auth/core/providers/resend";
 import { PrismaAdapter } from "@auth/prisma-adapter";
-import Apple from "next-auth/providers/apple";
-import Google from "next-auth/providers/google";
-import ResendProvider from "next-auth/providers/resend";
 import { Resend } from "resend";
 
 import { db } from "@acme/db";
