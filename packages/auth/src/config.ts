@@ -5,6 +5,7 @@ import type {
 } from "next-auth";
 import { skipCSRFCheck } from "@auth/core";
 import { PrismaAdapter } from "@auth/prisma-adapter";
+import Apple from "next-auth/providers/apple";
 import Google from "next-auth/providers/google";
 import ResendProvider from "next-auth/providers/resend";
 import { Resend } from "resend";
@@ -40,6 +41,10 @@ export const authConfig = {
     newUser: "/onboarding",
   },
   providers: [
+    Apple({
+      clientId: env.AUTH_APPLE_ID as string,
+      clientSecret: env.AUTH_APPLE_SECRET as string,
+    }),
     Google({
       clientId: env.GOOGLE_CLIENT_ID,
       clientSecret: env.GOOGLE_CLIENT_SECRET,

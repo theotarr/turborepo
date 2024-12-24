@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { useSearchParams } from "next/navigation";
 import { registeredInPastMinute } from "@/app/(auth)/actions";
 import { Icons } from "@/components/icons";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -29,10 +28,6 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
     resolver: zodResolver(userAuthSchema),
   });
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
-  const searchParams = useSearchParams();
-  console.log({ searchParams });
-  const isExpoSignIn = searchParams.get("expo-redirect");
-  console.log({ isExpoSignIn });
 
   async function onSubmit(data: FormData) {
     setIsLoading(true);
@@ -44,8 +39,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
       await signIn("resend", {
         email: data.email.toLowerCase(),
         redirect: false,
-        callbackUrl: "/onboarding",
-        // callbackUrl: isExpoSignIn ?? "/onboarding",
+        callbackUrl: "/dashboard",
       });
     } catch (error) {
       // If the error is a TypeError, ignore it
@@ -105,27 +99,50 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
           </span>
         </div>
       </div>
-      <Button
-        variant="outline"
-        onClick={async () => {
-          const isNewUser = await registeredInPastMinute();
-          if (isNewUser) {
-            TiktokPixel.track("CompleteRegistration", {});
-          }
-          await signIn("google", {
-            callbackUrl: "/onboarding",
-          });
-        }}
-        type="button"
-        disabled={isLoading}
-      >
-        {isLoading ? (
-          <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-        ) : (
-          <Icons.google className="mr-2 h-4 w-4" />
-        )}
-        Google
-      </Button>
+      <div className="flex flex-col space-y-4">
+        <Button
+          variant="outline"
+          onClick={async () => {
+            const isNewUser = await registeredInPastMinute();
+            if (isNewUser) {
+              TiktokPixel.track("CompleteRegistration", {});
+            }
+            await signIn("google", {
+              callbackUrl: "/dashboard",
+            });
+          }}
+          type="button"
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            <Icons.google className="mr-2 h-4 w-4" />
+          )}
+          Google
+        </Button>
+        <Button
+          variant="outline"
+          onClick={async () => {
+            const isNewUser = await registeredInPastMinute();
+            if (isNewUser) {
+              TiktokPixel.track("CompleteRegistration", {});
+            }
+            await signIn("apple", {
+              callbackUrl: "/dashboard",
+            });
+          }}
+          type="button"
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            <Icons.apple className="mr-2 h-4 w-4" />
+          )}
+          Apple
+        </Button>
+      </div>
     </div>
   );
 }
