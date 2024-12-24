@@ -42,7 +42,7 @@ export default function Page() {
           </View>
         </View>
         <View className="w-full gap-2">
-          <AppleAuthentication.AppleAuthenticationButton
+          {/* <AppleAuthentication.AppleAuthenticationButton
             buttonType={
               AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN
             }
@@ -72,7 +72,7 @@ export default function Page() {
                 }
               }
             }}
-          />
+          /> */}
           <Button
             variant="outline"
             className="flex w-full flex-row gap-2 rounded-full"
