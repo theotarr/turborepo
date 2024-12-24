@@ -1,5 +1,6 @@
 import { View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import * as AppleAuthentication from "expo-apple-authentication";
 import { Redirect, Stack } from "expo-router";
 import { Aperture } from "lucide-react-native";
 
@@ -40,7 +41,38 @@ export default function Page() {
             <TrustPilot />
           </View>
         </View>
-        <View className="w-full">
+        <View className="w-full gap-2">
+          <AppleAuthentication.AppleAuthenticationButton
+            buttonType={
+              AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN
+            }
+            buttonStyle={
+              AppleAuthentication.AppleAuthenticationButtonStyle.BLACK
+            }
+            cornerRadius={100}
+            style={{
+              width: "100%",
+              height: 56,
+            }}
+            onPress={async () => {
+              try {
+                const credential = await AppleAuthentication.signInAsync({
+                  requestedScopes: [
+                    AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+                    AppleAuthentication.AppleAuthenticationScope.EMAIL,
+                  ],
+                });
+                console.log(credential);
+                // signed in
+              } catch (e) {
+                if (e.code === "ERR_REQUEST_CANCELED") {
+                  // handle that the user canceled the sign-in flow
+                } else {
+                  // handle other errors
+                }
+              }
+            }}
+          />
           <Button
             variant="outline"
             className="flex w-full flex-row gap-2 rounded-full"
@@ -51,7 +83,9 @@ export default function Page() {
               size={20}
               color={NAV_THEME[colorScheme].secondaryForeground}
             />
-            <Text>Continue on KnowNotes.ai</Text>
+            <Text className="native:text-xl text-xl">
+              Continue on KnowNotes.ai
+            </Text>
           </Button>
         </View>
       </View>

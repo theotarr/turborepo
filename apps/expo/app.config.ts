@@ -21,6 +21,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   assetBundlePatterns: ["**/*"],
   ios: {
     bundleIdentifier: "ai.knownotes.ios",
+    usesAppleSignIn: true,
     supportsTablet: true,
     associatedDomains: ["applinks:knownotes.ai"],
     infoPlist: {
@@ -49,6 +50,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   plugins: [
     "expo-router",
+    "expo-apple-authentication",
     [
       "expo-build-properties",
       {
