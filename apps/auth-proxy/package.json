@@ -11,7 +11,7 @@
   },
   "prettier": "@acme/prettier-config",
   "dependencies": {
-    "@auth/core": "0.34.2"
+    "@auth/core": "0.37.4"
   },
   "devDependencies": {
     "@acme/eslint-config": "workspace:*",
