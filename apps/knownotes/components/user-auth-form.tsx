@@ -121,7 +121,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
           )}
           Google
         </Button>
-        {/* <Button
+        <Button
           variant="outline"
           onClick={async () => {
             const isNewUser = await registeredInPastMinute();
@@ -141,7 +141,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
             <Icons.apple className="mr-2 h-4 w-4" />
           )}
           Apple
-        </Button> */}
+        </Button>
       </div>
     </div>
   );

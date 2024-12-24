@@ -28,10 +28,10 @@ export const isSecureContext = env.NODE_ENV !== "development";
 
 export const authConfig = {
   adapter,
-  // In development, we need to skip checks to allow Expo to work
+  // In development, we need to skip checks to allow Expo to work.
   ...(!isSecureContext
     ? {
-        skipCSRFCheck: skipCSRFCheck,
+        skipCSRFCheck: skipCSRFCheck as any,
         trustHost: true,
       }
     : {}),
@@ -42,8 +42,8 @@ export const authConfig = {
   },
   providers: [
     Apple({
-      clientId: env.AUTH_APPLE_ID as string,
-      clientSecret: env.AUTH_APPLE_SECRET as string,
+      clientId: env.AUTH_APPLE_ID,
+      clientSecret: env.AUTH_APPLE_SECRET,
     }),
     Google({
       clientId: env.GOOGLE_CLIENT_ID,

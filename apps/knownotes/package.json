@@ -108,7 +108,7 @@
     "langchain": "^0.1.9",
     "lucide-react": "^0.309.0",
     "next": "14.1.4",
-    "next-auth": "5.0.0-beta.20",
+    "next-auth": "5.0.0-beta.25",
     "next-contentlayer": "^0.3.4",
     "next-themes": "^0.3.0",
     "node-html-parser": "^6.1.13",
@@ -150,7 +150,7 @@
     "tiptap-markdown": "^0.8.8",
     "use-debounce": "^10.0.0",
     "uuid": "^9.0.1",
-    "youtube-transcript": "github:sinedied/youtube-transcript#a10a073ac325b3b88018f321fa1bc5d62fa69b1c",
+    "youtube-transcript": "^1.2.1",
     "youtubei": "^1.5.4",
     "zod": "^3.22.4",
     "zustand": "^4.4.7"
