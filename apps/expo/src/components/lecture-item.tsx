@@ -1,8 +1,6 @@
 import type { Course, Lecture } from "@prisma/client";
 import React from "react";
 import { View } from "react-native";
-import { useRouter } from "expo-router";
-import Superwall from "@superwall/react-native-superwall";
 
 import { Text } from "~/components/ui/text";
 import { formatLectureType, formatShortDate } from "~/lib/utils";

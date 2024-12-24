@@ -7,9 +7,9 @@ import {
   ScrollView,
   View,
 } from "react-native";
-import { router, Stack } from "expo-router";
+import { Link, router, Stack } from "expo-router";
 import Superwall from "@superwall/react-native-superwall";
-import { MoveRight, Plus, Settings } from "lucide-react-native";
+import { MoveRight, Plus, Settings, XIcon } from "lucide-react-native";
 
 import type { Lecture } from ".prisma/client";
 import { LectureItem } from "~/components/lecture-item";
@@ -29,6 +29,7 @@ export default function DashboardPage() {
   const { colorScheme } = useColorScheme();
   const [isLoading, setIsLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [showBanner, setShowBanner] = useState(true);
 
   const lectures = api.lecture.infiniteLectures.useInfiniteQuery(
     {
@@ -90,9 +91,31 @@ export default function DashboardPage() {
           ),
         }}
       />
-
       <View className="h-full w-full px-4 py-6">
-        <Text className="mb-4 text-2xl font-semibold tracking-tighter">
+        {showBanner && (
+          <View className="flex items-center justify-center rounded-lg border border-border bg-secondary p-2 pr-6">
+            <Text className="text-sm text-secondary-foreground/80">
+              For a better experience, use{" "}
+              <Link
+                className="underline"
+                href={"https://knownotes.ai/dashboard"}
+              >
+                Knownotes web
+              </Link>{" "}
+              on your computer.
+            </Text>
+            <Pressable
+              onPress={() => setShowBanner(false)}
+              className="absolute right-4"
+            >
+              <XIcon
+                size={16}
+                color={NAV_THEME[colorScheme].secondaryForeground}
+              />
+            </Pressable>
+          </View>
+        )}
+        <Text className="my-4 text-2xl font-semibold tracking-tighter">
           Lectures
         </Text>
         <ScrollView
