@@ -1,7 +1,7 @@
 import { Auth } from "@auth/core";
+import Apple from "@auth/core/providers/apple";
 import Google from "@auth/core/providers/google";
 import { eventHandler, toWebRequest } from "h3";
-import Apple from "next-auth/providers/apple";
 
 export default eventHandler(async (event) =>
   Auth(toWebRequest(event), {
