@@ -1,10 +1,12 @@
 import { Icons } from "@/components/icons";
-import { MobileButton } from "@/components/mobile-button";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 import { auth } from "@acme/auth";
 
 export default async function MobileLoginSuccessPage() {
   const session = await auth();
+  if (!session) return null;
   return (
     <div className="container flex h-screen w-screen flex-col items-center justify-center">
       <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
@@ -17,7 +19,13 @@ export default async function MobileLoginSuccessPage() {
             Click the button to be redirected to the KnowNotes mobile app.
           </p>
         </div>
-        <MobileButton sessionToken={session.sessionToken} />
+        <a
+          href={`knownotes://mobile?session_token=${session.sessionToken}`}
+          className={cn(buttonVariants(), "flex items-center justify-center")}
+        >
+          Continue
+          <Icons.arrowRight className="ml-2 size-4" aria-hidden="true" />
+        </a>{" "}
       </div>
     </div>
   );
