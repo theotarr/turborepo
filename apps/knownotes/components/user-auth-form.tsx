@@ -6,7 +6,7 @@ import { Icons } from "@/components/icons";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils";
+import { absoluteUrl, cn } from "@/lib/utils";
 import { userAuthSchema } from "@/lib/validations/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signIn } from "next-auth/react";
@@ -39,7 +39,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
       await signIn("resend", {
         email: data.email.toLowerCase(),
         redirect: false,
-        callbackUrl: "/dashboard",
+        redirectTo: "/dashboard",
       });
     } catch (error) {
       // If the error is a TypeError, ignore it
@@ -108,7 +108,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
               TiktokPixel.track("CompleteRegistration", {});
             }
             await signIn("google", {
-              callbackUrl: "/dashboard",
+              redirectTo: "/dashboard",
             });
           }}
           type="button"
@@ -129,7 +129,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
               TiktokPixel.track("CompleteRegistration", {});
             }
             await signIn("apple", {
-              callbackUrl: "/dashboard",
+              redirectTo: "/dashboard",
             });
           }}
           type="button"

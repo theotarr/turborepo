@@ -9,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { UserAvatar } from "@/components/user-avatar";
+import { absoluteUrl } from "@/lib/utils";
 import { User } from "next-auth";
 import { signOut } from "next-auth/react";
 
@@ -55,7 +56,7 @@ export function UserAccountNav({ user }: UserAccountNavProps) {
           onSelect={(event) => {
             event.preventDefault();
             signOut({
-              callbackUrl: `${window.location.origin}/login`,
+              redirectTo: absoluteUrl("/login"),
             });
           }}
         >
