@@ -39,7 +39,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
       await signIn("resend", {
         email: data.email.toLowerCase(),
         redirect: false,
-        redirectTo: "/dashboard",
+        redirectTo: absoluteUrl("/dashboard"),
       });
     } catch (error) {
       // If the error is a TypeError, ignore it
@@ -108,7 +108,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
               TiktokPixel.track("CompleteRegistration", {});
             }
             await signIn("google", {
-              redirectTo: "/dashboard",
+              redirectTo: absoluteUrl("/dashboard"),
             });
           }}
           type="button"
@@ -129,7 +129,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
               TiktokPixel.track("CompleteRegistration", {});
             }
             await signIn("apple", {
-              redirectTo: "/dashboard",
+              redirectTo: absoluteUrl("/dashboard"),
             });
           }}
           type="button"

@@ -83,6 +83,10 @@ export const authConfig = {
     }),
   ],
   callbacks: {
+    redirect: ({ url, baseUrl }) => {
+      console.log("redirect", { url, baseUrl });
+      return url;
+    },
     session: (opts) => {
       if (!("user" in opts))
         throw new Error("Unreachable with session strategy.");
