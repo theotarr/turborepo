@@ -129,6 +129,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
               TiktokPixel.track("CompleteRegistration", {});
             }
             await signIn("apple", {
+              redirect: false,
               redirectTo: absoluteUrl("/dashboard"),
             });
           }}
