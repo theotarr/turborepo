@@ -67,9 +67,9 @@ export const authConfig = {
           ?.split("=")[1];
 
         if (isExpoSignin) {
-          const redirectTo = new URL(url);
-          redirectTo.searchParams.set("redirectTo", "/mobile");
-          url = redirectTo.toString();
+          const redirect = new URL(url);
+          redirect.searchParams.set("callbackUrl", `/mobile`);
+          url = redirect.toString();
         }
 
         const resend = new Resend(env.RESEND_API_KEY);
