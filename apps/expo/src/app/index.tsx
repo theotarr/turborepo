@@ -9,12 +9,17 @@ import { Button } from "~/components/ui/button";
 import { Text } from "~/components/ui/text";
 import { NAV_THEME } from "~/lib/constants";
 import { useColorScheme } from "~/lib/theme";
+import { api } from "~/utils/api";
 import { useSignIn, useUser } from "~/utils/auth";
+import { setToken } from "~/utils/session-store";
 
 export default function Page() {
+  const utils = api.useUtils();
+  const { colorScheme } = useColorScheme();
+
   const user = useUser();
   const signIn = useSignIn();
-  const { colorScheme } = useColorScheme();
+  const createMobileUser = api.auth.createMobileUser.useMutation();
 
   if (user) {
     return <Redirect href={"/(dashboard)/dashboard"} />;
@@ -42,12 +47,14 @@ export default function Page() {
           </View>
         </View>
         <View className="w-full gap-2">
-          {/* <AppleAuthentication.AppleAuthenticationButton
+          <AppleAuthentication.AppleAuthenticationButton
             buttonType={
               AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN
             }
             buttonStyle={
-              AppleAuthentication.AppleAuthenticationButtonStyle.BLACK
+              colorScheme === "light"
+                ? AppleAuthentication.AppleAuthenticationButtonStyle.BLACK
+                : AppleAuthentication.AppleAuthenticationButtonStyle.WHITE
             }
             cornerRadius={100}
             style={{
@@ -62,17 +69,30 @@ export default function Page() {
                     AppleAuthentication.AppleAuthenticationScope.EMAIL,
                   ],
                 });
-                console.log(credential);
-                // signed in
+
+                // Signed in. Check to see if the user is new or existing and handle accordingly.
+                const { user: appStoreUserId, email, fullName } = credential;
+                const name = fullName
+                  ? `${fullName.givenName} ${fullName.familyName}`
+                  : undefined;
+                await createMobileUser.mutateAsync({
+                  appStoreUserId,
+                  email: email ?? undefined,
+                  name: name ?? undefined,
+                });
+
+                // Store the app store user ID as then token prefixed with apple_. Then refetch the session to redirect.
+                setToken(`apple_${appStoreUserId}`);
+                utils.auth.getSession.invalidate();
               } catch (e) {
                 if (e.code === "ERR_REQUEST_CANCELED") {
-                  // handle that the user canceled the sign-in flow
+                  // Handle that the user canceled the sign-in flow.
                 } else {
                   // handle other errors
                 }
               }
             }}
-          /> */}
+          />
           <Button
             variant="outline"
             className="flex w-full flex-row gap-2 rounded-full"

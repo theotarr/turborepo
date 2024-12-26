@@ -7,9 +7,9 @@ import {
   ScrollView,
   View,
 } from "react-native";
-import { Link, router, Stack } from "expo-router";
+import { router, Stack } from "expo-router";
 import Superwall from "@superwall/react-native-superwall";
-import { MoveRight, Plus, Settings, XIcon } from "lucide-react-native";
+import { MoveRight, Plus, Settings } from "lucide-react-native";
 
 import type { Lecture } from ".prisma/client";
 import { LectureItem } from "~/components/lecture-item";
@@ -19,6 +19,7 @@ import {
   BottomSheetOpenTrigger,
   BottomSheetView,
 } from "~/components/ui/bottom-sheet";
+import { Button } from "~/components/ui/button";
 import { Text } from "~/components/ui/text";
 import { NAV_THEME } from "~/lib/constants";
 import { useColorScheme } from "~/lib/theme";
@@ -40,7 +41,6 @@ export default function DashboardPage() {
         lastPage.nextCursor,
     },
   );
-
   const user = api.auth.getUser.useQuery();
   const createLecture = api.lecture.create.useMutation();
 
@@ -69,7 +69,6 @@ export default function DashboardPage() {
     if (lectures.hasNextPage) lectures.fetchNextPage();
   };
 
-  if (!lectures.data?.pages) return null;
   if (!user.data) return null;
 
   return (
@@ -92,7 +91,7 @@ export default function DashboardPage() {
         }}
       />
       <View className="h-full w-full px-4 py-6">
-        {showBanner && (
+        {/* {showBanner && (
           <View className="flex items-center justify-center rounded-lg border border-border bg-secondary p-2 pr-6">
             <Text className="text-sm text-secondary-foreground/80">
               For a better experience, use{" "}
@@ -114,7 +113,7 @@ export default function DashboardPage() {
               />
             </Pressable>
           </View>
-        )}
+        )} */}
         <Text className="my-4 text-2xl font-semibold tracking-tighter">
           Lectures
         </Text>
@@ -134,36 +133,51 @@ export default function DashboardPage() {
           }}
           scrollEventThrottle={400}
         >
-          <View className="divide-y divide-border rounded-md border border-border">
-            {lectures.data.pages.map(
-              (page: { items: Lecture[]; nextCursor: string }[]) =>
-                page.items.map((lecture: Lecture) => (
-                  <LectureItem
-                    key={lecture.id}
-                    lecture={lecture}
-                    onLecturePress={() => {
-                      // Check if the user has an active Stripe subscription.
-                      if (
-                        !shouldShowPaywall(
-                          user.data as {
-                            stripeCurrentPeriodEnd?: string | null;
-                            appStoreCurrentPeriodEnd?: string | null;
-                          },
-                        )
-                      ) {
-                        router.replace(`/lecture/${lecture.id}`);
-                        return;
-                      }
-
-                      // If the user doesn't have an active subscription, show the paywall.
-                      void Superwall.shared.register("viewLecture").then(() => {
-                        router.replace(`/lecture/${lecture.id}`);
-                      });
-                    }}
-                  />
-                )),
+          {lectures.data.pages[0]?.items.length === 0 &&
+            !lectures.isFetching && (
+              <View className="mt-6 flex items-center justify-center">
+                <Text className="text-2xl font-medium text-secondary-foreground">
+                  Start a live lecture
+                </Text>
+                <Text className="mt-4 text-sm text-muted-foreground">
+                  Click the plus icon to create a new lecture.
+                </Text>
+              </View>
             )}
-          </View>
+          {lectures.data.pages[0]!.items.length > 0 && (
+            <View className="divide-y divide-border rounded-md border border-border">
+              {lectures.data.pages.map(
+                (page: { items: Lecture[]; nextCursor: string }[]) =>
+                  page.items.map((lecture: Lecture) => (
+                    <LectureItem
+                      key={lecture.id}
+                      lecture={lecture}
+                      onLecturePress={() => {
+                        // Check if the user has an active Stripe subscription.
+                        if (
+                          !shouldShowPaywall(
+                            user.data as {
+                              stripeCurrentPeriodEnd?: string | null;
+                              appStoreCurrentPeriodEnd?: string | null;
+                            },
+                          )
+                        ) {
+                          router.replace(`/lecture/${lecture.id}`);
+                          return;
+                        }
+
+                        // If the user doesn't have an active subscription, show the paywall.
+                        void Superwall.shared
+                          .register("viewLecture")
+                          .then(() => {
+                            router.replace(`/lecture/${lecture.id}`);
+                          });
+                      }}
+                    />
+                  )),
+              )}
+            </View>
+          )}
           {lectures.isFetchingNextPage && (
             <View className="mt-2">
               <ActivityIndicator

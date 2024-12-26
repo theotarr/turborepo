@@ -129,8 +129,9 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
               TiktokPixel.track("CompleteRegistration", {});
             }
             await signIn("apple", {
-              redirect: false,
-              redirectTo: absoluteUrl("/dashboard"),
+              // https://github.com/nextauthjs/next-auth/pull/12068
+              // `redirectTo` doesn't work with `form_post` response mode for Apple OAuth.
+              // redirectTo: "https://auth.knownotes.ai/r/callback/apple",
             });
           }}
           type="button"

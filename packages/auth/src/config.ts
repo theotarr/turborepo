@@ -42,8 +42,8 @@ export const authConfig = {
   },
   providers: [
     Apple({
-      clientId: env.AUTH_APPLE_ID as string,
-      clientSecret: env.AUTH_APPLE_SECRET as string,
+      clientId: env.AUTH_APPLE_ID,
+      clientSecret: env.AUTH_APPLE_SECRET,
     }),
     Google({
       clientId: env.GOOGLE_CLIENT_ID,
@@ -67,9 +67,9 @@ export const authConfig = {
           ?.split("=")[1];
 
         if (isExpoSignin) {
-          const redirectTo = new URL(url);
-          redirectTo.searchParams.set("redirectTo", "/mobile");
-          url = redirectTo.toString();
+          const redirect = new URL(url);
+          redirect.searchParams.set("callbackUrl", `/mobile`);
+          url = redirect.toString();
         }
 
         const resend = new Resend(env.RESEND_API_KEY);
@@ -83,6 +83,84 @@ export const authConfig = {
     }),
   ],
   callbacks: {
+    // Link a user to an OAuth account. Necessary for an Apple user to sign in on web.
+    signIn: async ({ user, account }) => {
+      let dbUser = await db.user.findFirst({
+        where: { email: user.email },
+      });
+
+      // If there's no user in the database, create one.
+      if (!dbUser) {
+        dbUser = await db.user.create({
+          data: { ...user },
+        });
+
+        // No user, hen there is also no account.
+        if (account) {
+          // Check if the account is already linked to another user.
+          const existingAccount = await db.account.findFirst({
+            where: {
+              provider: account.provider,
+              providerAccountId: account.providerAccountId,
+            },
+          });
+
+          if (existingAccount) {
+            throw new Error(
+              "This OAuth account is already linked to another user.",
+            );
+          }
+          await db.account.create({
+            data: {
+              type: account.type,
+              scope: account.scope,
+              token_type: account.token_type,
+              id_token: account.id_token,
+              provider: account.provider,
+              providerAccountId: account.providerAccountId,
+              access_token: account.access_token,
+              refresh_token: account.refresh_token,
+              expires_at: account.expires_at,
+              userId: dbUser.id,
+            },
+          });
+        }
+      } else {
+        if (account) {
+          const dbAccount = await db.account.findFirst({
+            where: {
+              provider: account.provider,
+              providerAccountId: account.providerAccountId,
+            },
+          });
+
+          if (dbAccount) {
+            if (dbAccount.userId !== dbUser.id) {
+              throw new Error(
+                "This OAuth account is already linked to another user.",
+              );
+            }
+            return true;
+          }
+
+          await db.account.create({
+            data: {
+              type: account.type,
+              scope: account.scope,
+              token_type: account.token_type,
+              id_token: account.id_token,
+              provider: account.provider,
+              providerAccountId: account.providerAccountId,
+              access_token: account.access_token,
+              refresh_token: account.refresh_token,
+              expires_at: account.expires_at,
+              userId: dbUser.id,
+            },
+          });
+        }
+      }
+      return true;
+    },
     session: (opts) => {
       if (!("user" in opts))
         throw new Error("Unreachable with session strategy.");
