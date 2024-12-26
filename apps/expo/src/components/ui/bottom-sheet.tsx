@@ -48,11 +48,6 @@ const BottomSheet = React.forwardRef<BottomSheetRef, BottomSheetProps>(
 
 function useBottomSheetContext() {
   const context = React.useContext(BottomSheetContext);
-  if (!context) {
-    throw new Error(
-      "BottomSheet compound components cannot be rendered outside the BottomSheet component",
-    );
-  }
   return context;
 }
 
