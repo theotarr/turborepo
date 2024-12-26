@@ -131,7 +131,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
             await signIn("apple", {
               // https://github.com/nextauthjs/next-auth/pull/12068
               // `redirectTo` doesn't work with `form_post` response mode for Apple OAuth.
-              redirectTo: "https://auth.knownotes.ai/r/callback/apple",
+              // redirectTo: "https://auth.knownotes.ai/r/callback/apple",
             });
           }}
           type="button"
