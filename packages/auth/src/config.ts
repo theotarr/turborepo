@@ -83,18 +83,33 @@ export const authConfig = {
     }),
   ],
   callbacks: {
+    // Link a user to an OAuth account. Necessary for an Apple user to sign in on web.
     signIn: async ({ user, account }) => {
       let dbUser = await db.user.findFirst({
         where: { email: user.email },
       });
 
+      // If there's no user in the database, create one.
       if (!dbUser) {
         dbUser = await db.user.create({
           data: { ...user },
         });
 
-        // If there's no user in the database, then there is also no account.
+        // No user, hen there is also no account.
         if (account) {
+          // Check if the account is already linked to another user.
+          const existingAccount = await db.account.findFirst({
+            where: {
+              provider: account.provider,
+              providerAccountId: account.providerAccountId,
+            },
+          });
+
+          if (existingAccount) {
+            throw new Error(
+              "This OAuth account is already linked to another user.",
+            );
+          }
           await db.account.create({
             data: {
               type: account.type,
@@ -114,12 +129,19 @@ export const authConfig = {
         if (account) {
           const dbAccount = await db.account.findFirst({
             where: {
-              // provider: account.provider,
-              // providerAccountId: account.providerAccountId,
-              userId: dbUser.id,
+              provider: account.provider,
+              providerAccountId: account.providerAccountId,
             },
           });
-          if (dbAccount) return true;
+
+          if (dbAccount) {
+            if (dbAccount.userId !== dbUser.id) {
+              throw new Error(
+                "This OAuth account is already linked to another user.",
+              );
+            }
+            return true;
+          }
 
           await db.account.create({
             data: {
