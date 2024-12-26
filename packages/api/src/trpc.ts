@@ -42,7 +42,29 @@ export const createTRPCContext = async (opts: {
   session: Session | null;
 }) => {
   const authToken = opts.headers.get("Authorization") ?? null;
-  const session = await isomorphicGetSession(opts.headers);
+  let session: Session | null = null;
+  console.log("checking auth token", authToken);
+
+  if (authToken?.startsWith("Bearer apple_")) {
+    console.log("starts with apple_");
+    const appStoreUserId = authToken.replace("Bearer apple_", "");
+    const user = await db.user.findUnique({
+      where: { appStoreUserId },
+      select: { id: true, name: true, email: true, image: true },
+    });
+    if (!user) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: "User not found",
+      });
+    }
+    session = {
+      user,
+      expires: new Date().toISOString(),
+    };
+  } else {
+    session = await isomorphicGetSession(opts.headers);
+  }
 
   const source = opts.headers.get("x-trpc-source") ?? "unknown";
   console.log(">>> tRPC Request from", source, "by", session?.user);

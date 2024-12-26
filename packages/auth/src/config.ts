@@ -42,8 +42,8 @@ export const authConfig = {
   },
   providers: [
     Apple({
-      clientId: env.AUTH_APPLE_ID as string,
-      clientSecret: env.AUTH_APPLE_SECRET as string,
+      clientId: env.AUTH_APPLE_ID,
+      clientSecret: env.AUTH_APPLE_SECRET,
     }),
     Google({
       clientId: env.GOOGLE_CLIENT_ID,
@@ -83,6 +83,62 @@ export const authConfig = {
     }),
   ],
   callbacks: {
+    signIn: async ({ user, account }) => {
+      let dbUser = await db.user.findFirst({
+        where: { email: user.email },
+      });
+
+      if (!dbUser) {
+        dbUser = await db.user.create({
+          data: { ...user },
+        });
+
+        // If there's no user in the database, then there is also no account.
+        if (account) {
+          await db.account.create({
+            data: {
+              type: account.type,
+              scope: account.scope,
+              token_type: account.token_type,
+              id_token: account.id_token,
+              provider: account.provider,
+              providerAccountId: account.providerAccountId,
+              access_token: account.access_token,
+              refresh_token: account.refresh_token,
+              expires_at: account.expires_at,
+              userId: dbUser.id,
+            },
+          });
+        }
+      } else {
+        if (account) {
+          const dbAccount = await db.account.findFirst({
+            where: {
+              // provider: account.provider,
+              // providerAccountId: account.providerAccountId,
+              userId: dbUser.id,
+            },
+          });
+          if (dbAccount) return true;
+
+          await db.account.create({
+            data: {
+              type: account.type,
+              scope: account.scope,
+              token_type: account.token_type,
+              id_token: account.id_token,
+              provider: account.provider,
+              providerAccountId: account.providerAccountId,
+              access_token: account.access_token,
+              refresh_token: account.refresh_token,
+              expires_at: account.expires_at,
+              userId: dbUser.id,
+            },
+          });
+        }
+      }
+      return true;
+    },
     session: (opts) => {
       if (!("user" in opts))
         throw new Error("Unreachable with session strategy.");
