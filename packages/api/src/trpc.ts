@@ -43,10 +43,8 @@ export const createTRPCContext = async (opts: {
 }) => {
   const authToken = opts.headers.get("Authorization") ?? null;
   let session: Session | null = null;
-  console.log("checking auth token", authToken);
 
   if (authToken?.startsWith("Bearer apple_")) {
-    console.log("starts with apple_");
     const appStoreUserId = authToken.replace("Bearer apple_", "");
     const user = await db.user.findUnique({
       where: { appStoreUserId },
