@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Pressable, SafeAreaView, View } from "react-native";
 import { Link, Stack, useRouter } from "expo-router";
+import * as StoreReview from "expo-store-review";
 import { Picker } from "@react-native-picker/picker";
-import { ChevronLeft, LogOut } from "lucide-react-native";
+import { ChevronLeft, LogOut, Plus, Star } from "lucide-react-native";
 
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
@@ -54,6 +55,40 @@ export default function SettingsPage() {
 
       <View className="flex h-full w-full flex-col gap-6 px-4 py-6">
         <View className="flex flex-col">
+          <Text className="text-xl font-semibold text-secondary-foreground">
+            For You
+          </Text>
+          <View className="mt-6 flex flex-col gap-4">
+            <Button
+              variant="secondary"
+              className="flex w-full flex-row items-center gap-2"
+              onPress={async () => {
+                await StoreReview.requestReview();
+              }}
+            >
+              <Star
+                size={16}
+                fill={NAV_THEME[colorScheme].secondaryForeground}
+                color={NAV_THEME[colorScheme].secondaryForeground}
+              />
+              <Text>Give KnowNotes 5 stars</Text>
+            </Button>
+            {/* <Button
+              variant="secondary"
+              className="flex w-full flex-row items-center gap-2"
+              onPress={() => {
+
+              }}
+            >
+              <Plus
+                size={16}
+                color={NAV_THEME[colorScheme].secondaryForeground}
+              />
+              <Text>Inite a friend</Text>
+            </Button> */}
+          </View>
+        </View>
+        <View className="flex flex-col">
           <Label nativeID="theme">Theme</Label>
           <Picker
             selectedValue={colorScheme}
@@ -72,39 +107,50 @@ export default function SettingsPage() {
             <Picker.Item label="Dark" value="dark" />
           </Picker>
         </View>
-        <View className="flex flex-col gap-1.5">
-          <Label nativeID="name">Name</Label>
-          <Input value={name} onChangeText={setName} aria-labelledby="name" />
-        </View>
-        <View className="flex flex-col gap-1.5">
-          <Label nativeID="email">Email</Label>
-          <Input value={email} aria-labelledby="email" aria-disabled />
-          <Text className="mt-2 text-sm text-muted-foreground">
-            Update your email on{" "}
-            <Link
-              className="underline"
-              href="https://knownotes.ai/dashboard/settings"
-            >
-              KnowNotes.ai
-            </Link>
-            .
+        <View className="mt-8">
+          <Text className="mb-6 text-xl font-semibold text-secondary-foreground">
+            Account
           </Text>
-        </View>
-        <View className="items-start">
-          <Button
-            onPress={() => {
-              void signOut().then(() => router.replace("/"));
-            }}
-            variant="ghost"
-            size="sm"
-            className="flex flex-row gap-2"
-          >
-            <LogOut
-              size={16}
-              color={NAV_THEME[colorScheme].secondaryForeground}
-            />
-            <Text className="text-sm">Sign Out</Text>
-          </Button>
+          <View className="flex flex-col gap-6">
+            <View className="flex flex-col gap-1.5">
+              <Label nativeID="name">Name</Label>
+              <Input
+                value={name}
+                onChangeText={setName}
+                aria-labelledby="name"
+              />
+            </View>
+            <View className="flex flex-col gap-1.5">
+              <Label nativeID="email">Email</Label>
+              <Input value={email} aria-labelledby="email" aria-disabled />
+              <Text className="mt-2 text-sm text-muted-foreground">
+                Update your email on{" "}
+                <Link
+                  className="underline"
+                  href="https://knownotes.ai/dashboard/settings"
+                >
+                  KnowNotes.ai
+                </Link>
+                .
+              </Text>
+            </View>
+          </View>
+          <View className="mt-8 items-start">
+            <Button
+              onPress={() => {
+                void signOut().then(() => router.replace("/"));
+              }}
+              variant="ghost"
+              size="sm"
+              className="flex flex-row gap-2"
+            >
+              <LogOut
+                size={16}
+                color={NAV_THEME[colorScheme].secondaryForeground}
+              />
+              <Text className="text-sm">Sign Out</Text>
+            </Button>
+          </View>
         </View>
         <View className="mt-6 flex flex-row justify-end">
           <Button
