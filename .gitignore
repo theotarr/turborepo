@@ -24,6 +24,10 @@ apps/expo/.gitignore
 apps/expo/ios
 apps/expo/android
 
+apps/levely/.gitignore
+apps/levely/ios
+apps/levely/android
+
 # production
 build
 
