@@ -69,6 +69,7 @@ export default function DashboardPage() {
     if (lectures.hasNextPage) lectures.fetchNextPage();
   };
 
+  if (lectures.data === undefined) return null;
   if (!user.data) return null;
 
   return (

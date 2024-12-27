@@ -1,7 +1,8 @@
 import { View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as AppleAuthentication from "expo-apple-authentication";
-import { Redirect, Stack } from "expo-router";
+import { Redirect, Stack, useRouter } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Aperture } from "lucide-react-native";
 
 import { TrustPilot } from "~/components/trust-pilot";
@@ -15,6 +16,7 @@ import { setToken } from "~/utils/session-store";
 
 export default function Page() {
   const utils = api.useUtils();
+  const router = useRouter();
   const { colorScheme } = useColorScheme();
 
   const user = useUser();
@@ -22,7 +24,10 @@ export default function Page() {
   const createMobileUser = api.auth.createMobileUser.useMutation();
 
   if (user) {
-    return <Redirect href={"/(dashboard)/dashboard"} />;
+    void AsyncStorage.getItem("onboardingComplete").then((value) => {
+      if (value === "true") router.replace("/(dashboard)/dashboard");
+    });
+    return <Redirect href={"/onboarding"} />;
   }
 
   return (
