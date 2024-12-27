@@ -1,3 +1,4 @@
+import { Transcript } from "@/types";
 import { parse } from "node-html-parser";
 
 const RE_PATH = /v|e(?:mbed)?|shorts/;
@@ -8,12 +9,6 @@ const ID_LENGTH = 11;
 
 const USER_AGENT =
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.83 Safari/537.36,gzip(gfe)";
-
-export interface TranscriptResponse {
-  text: string;
-  duration: number;
-  start: number;
-}
 
 export interface TranscriptConfig {
   /**
@@ -33,12 +28,12 @@ export class YoutubeTranscriptError extends Error {
  * Fetch transcript from Youtube Video
  * @param {string} videoUrlOrId - Video url or identifier
  * @param {TranscriptConfig} [config]
- * @return {Promise<TranscriptResponse[]>} - If locale available, the localized transcription or default or null.
+ * @return {Promise<Transcript[]>} - If locale available, the localized transcription or default or null.
  */
 export const fetchTranscript = async (
   videoUrlOrId: string,
   config: TranscriptConfig = {},
-): Promise<TranscriptResponse[] | undefined> => {
+): Promise<Transcript[] | undefined> => {
   try {
     const videoId = getVideoId(videoUrlOrId);
 
@@ -70,7 +65,7 @@ const getTranscriptUrl = async (videoId: string, lang?: string) => {
   return getCaptionTrack(body, lang);
 };
 
-const getTranscript = async (url: string): Promise<TranscriptResponse[]> => {
+const getTranscript = async (url: string): Promise<Transcript[]> => {
   const response = await fetch(url);
   const body = await response.text();
   const parsed = parse(body);
@@ -80,7 +75,6 @@ const getTranscript = async (url: string): Promise<TranscriptResponse[]> => {
     return {
       text: e.textContent,
       start: parseFloat(attributes.start),
-      duration: parseFloat(attributes.dur),
     };
   });
 
