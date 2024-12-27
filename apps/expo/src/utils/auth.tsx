@@ -69,7 +69,7 @@ export const useSignOut = () => {
     if (!res.success) return;
     await deleteToken();
     await utils.invalidate();
-    void Superwall.shared.reset(); // Reset Superwall user id.
+    await Superwall.shared.reset(); // Reset Superwall user id.
     router.replace("/");
   };
 };
