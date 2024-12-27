@@ -32,7 +32,7 @@ export default function Page() {
 
   return (
     <SafeAreaView className="bg-background">
-      <Stack.Screen options={{ header: "" }} />
+      <Stack.Screen options={{ title: "" }} />
       <View className="flex h-full w-full flex-col justify-between p-4">
         <View className="flex flex-col items-center gap-4">
           <View className="mb-2 flex flex-row items-center gap-2">
