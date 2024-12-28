@@ -22,3 +22,10 @@ export function formatShortDate(input: string | number): string {
     day: "numeric",
   });
 }
+
+export function formatLectureType(type: string) {
+  return type
+    .toLowerCase()
+    .replace("_", " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+}

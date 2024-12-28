@@ -7,7 +7,7 @@ import { TextClassContext } from "~/components/ui/text";
 import { cn } from "~/lib/utils";
 
 const buttonVariants = cva(
-  "web:ring-offset-background web:transition-colors web:focus-visible:outline-none web:focus-visible:ring-2 web:focus-visible:ring-ring web:focus-visible:ring-offset-2 group flex items-center justify-center rounded-md",
+  "web:ring-offset-background web:transition-colors web:focus-visible:outline-none web:focus-visible:ring-2 web:focus-visible:ring-ring web:focus-visible:ring-offset-2 group flex items-center justify-center rounded-xl",
   {
     variants: {
       variant: {
@@ -15,15 +15,15 @@ const buttonVariants = cva(
         destructive: "web:hover:opacity-90 bg-destructive active:opacity-90",
         outline:
           "web:hover:bg-accent web:hover:text-accent-foreground border border-input bg-background active:bg-accent",
-        secondary: "web:hover:opacity-80 bg-secondary active:opacity-80",
+        secondary: "web:hover:opacity-80 bg-secondary/20 active:opacity-80",
         ghost:
           "web:hover:bg-accent web:hover:text-accent-foreground active:bg-accent",
         link: "web:underline-offset-4 web:hover:underline web:focus:underline",
       },
       size: {
         default: "native:h-12 native:px-5 native:py-3 h-10 px-4 py-2",
-        sm: "h-9 rounded-md px-3",
-        lg: "native:h-14 h-11 rounded-md px-8",
+        sm: "h-9 rounded-lg px-3",
+        lg: "native:h-14 h-11 rounded-2xl px-8",
         icon: "h-10 w-10",
       },
     },
@@ -42,8 +42,7 @@ const buttonTextVariants = cva(
         default: "text-primary-foreground",
         destructive: "text-destructive-foreground",
         outline: "group-active:text-accent-foreground",
-        secondary:
-          "text-secondary-foreground group-active:text-secondary-foreground",
+        secondary: "text-primary group-active:text-primary",
         ghost: "group-active:text-accent-foreground",
         link: "text-primary group-active:underline",
       },

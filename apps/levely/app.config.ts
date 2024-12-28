@@ -20,21 +20,26 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   assetBundlePatterns: ["**/*"],
   ios: {
-    bundleIdentifier: "your.bundle.identifier",
+    bundleIdentifier: "ai.levely.ios",
+    usesAppleSignIn: true,
     supportsTablet: true,
-  },
-  android: {
-    package: "your.bundle.identifier",
-    adaptiveIcon: {
-      foregroundImage: "./assets/icon.png",
-      backgroundColor: "#1F104A",
+    associatedDomains: ["applinks:levely.ai"],
+    config: {
+      usesNonExemptEncryption: false,
     },
   },
-  // extra: {
-  //   eas: {
-  //     projectId: "your-eas-project-id",
-  //   },
-  // },
+  android: {
+    package: "ai.levely.ios",
+    adaptiveIcon: {
+      foregroundImage: "./assets/adaptive-icon.png",
+      backgroundColor: "#FFFFFF",
+    },
+  },
+  extra: {
+    eas: {
+      projectId: "d9ca89f3-c9ca-436e-a31b-0273a7df86cb",
+    },
+  },
   experiments: {
     tsconfigPaths: true,
     typedRoutes: true,
