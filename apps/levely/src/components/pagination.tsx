@@ -5,7 +5,7 @@ import { cn } from "~/lib/utils";
 import { Progress } from "./ui/gradient-progress";
 
 export interface PaginationProps {
-  currentStep: number;
+  currentStepIndex: number;
   totalSteps: number;
   steps: string[];
   progress: number;
@@ -13,7 +13,7 @@ export interface PaginationProps {
 }
 
 export const Pagination = ({
-  currentStep,
+  currentStepIndex,
   totalSteps,
   steps,
   progress,
@@ -24,7 +24,7 @@ export const Pagination = ({
       <View className="flex-row items-center justify-between">
         {/* Completed and current steps */}
         <View className="flex-1 flex-row items-center">
-          {steps.slice(0, currentStep).map((_, index) => (
+          {steps.slice(0, currentStepIndex + 1).map((_, index) => (
             <View
               key={index + 1}
               className="mx-2 flex size-6 items-center justify-center rounded-full bg-foreground"
@@ -36,7 +36,7 @@ export const Pagination = ({
           ))}
           {/* Current step */}
           <Text className="text-base font-semibold">
-            {steps[currentStep - 1]}
+            {steps[currentStepIndex]}
           </Text>
           <View className="mx-4 flex-1">
             <Progress className="h-1" value={progress} />
@@ -44,16 +44,19 @@ export const Pagination = ({
         </View>
         {/* Remaining steps */}
         <View className="flex-row items-center">
-          {Array.from({ length: totalSteps - currentStep }, (_, index) => (
-            <View
-              key={index + currentStep + 1}
-              className="mr-1 flex size-6 items-center justify-center rounded-full bg-foreground"
-            >
-              <Text className="text-sm font-medium text-secondary-foreground">
-                {currentStep + index + 1}
-              </Text>
-            </View>
-          ))}
+          {Array.from(
+            { length: totalSteps - currentStepIndex - 1 },
+            (_, index) => (
+              <View
+                key={index + currentStepIndex + 2}
+                className="mr-1 flex size-6 items-center justify-center rounded-full bg-foreground"
+              >
+                <Text className="text-sm font-medium text-secondary-foreground">
+                  {currentStepIndex + index + 2}
+                </Text>
+              </View>
+            ),
+          )}
         </View>
       </View>
     </View>

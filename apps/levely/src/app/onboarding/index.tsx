@@ -85,13 +85,14 @@ const focusQuestions = [
 
 const sections = [
   { name: "Habits", questions: habitQuestions },
+  { name: "Memorization", questions: [] },
   { name: "Focus", questions: focusQuestions },
-  // Add other sections here with their respective questions
+  { name: "Reading", questions: [] },
+  { name: "Grades", questions: [] },
 ];
 
 export default function Onboarding() {
   const router = useRouter();
-  const [step, setStep] = useState(1);
   const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<
@@ -100,22 +101,22 @@ export default function Onboarding() {
   const [selectedOption, setSelectedOption] = useState<string | undefined>(
     undefined,
   );
-  const progress = sections[currentSectionIndex]?.questions
-    ? ((currentQuestionIndex + 1) /
-        sections[currentSectionIndex].questions.length) *
-      100
-    : 0;
+
+  console.log(answers);
 
   return (
     <SafeAreaView className="bg-background">
       <Stack.Screen
         options={{
           title: "Onboarding",
+          header: () => <></>,
           headerLeft: () => (
             <Button
               onPress={() => {
                 router.replace("/");
               }}
+              variant="secondary"
+              size="sm"
             >
               <Text>Back</Text>
             </Button>
@@ -125,20 +126,26 @@ export default function Onboarding() {
       <View className="h-full w-full">
         <Pagination
           totalSteps={sections.length}
-          currentStep={step}
+          currentStepIndex={currentSectionIndex}
           steps={sections.map((section) => section.name)}
-          progress={progress}
+          progress={
+            sections[currentSectionIndex]?.questions
+              ? ((currentQuestionIndex + 1) /
+                  sections[currentSectionIndex].questions.length) *
+                100
+              : 0
+          }
         />
         <View className="flex h-full justify-around">
           {/* If the current section is either habits or focus questions */}
-          {currentSectionIndex === 0 || 3 ? (
+          {currentSectionIndex === 0 || currentSectionIndex === 2 ? (
             <Question
               question={
-                sections[currentQuestionIndex]?.questions[currentQuestionIndex]
+                sections[currentSectionIndex]?.questions[currentQuestionIndex]
                   ?.question as string
               }
               options={
-                sections[currentQuestionIndex]?.questions[currentQuestionIndex]
+                sections[currentSectionIndex]?.questions[currentQuestionIndex]
                   ?.options as unknown as string[]
               }
               selectedOption={selectedOption}
@@ -154,9 +161,11 @@ export default function Onboarding() {
                 ]);
                 setSelectedOption(option);
 
+                // Check if the current question is the last question in the section
+                // If it is, move to the next section
                 if (
                   currentQuestionIndex ===
-                  (sections[currentSectionIndex]?.questions?.length ?? 0) - 1
+                  sections[currentSectionIndex]?.questions?.length! - 1
                 ) {
                   setTimeout(() => {
                     setCurrentQuestionIndex(0);
@@ -170,12 +179,11 @@ export default function Onboarding() {
               }}
             />
           ) : (
-            <></>
+            <Button onPress={() => setCurrentSectionIndex((prev) => prev + 1)}>
+              <Text>Next</Text>
+            </Button>
           )}
         </View>
-        <Button onPress={() => setStep((prev) => prev + 1)}>
-          <Text>Next</Text>
-        </Button>
       </View>
     </SafeAreaView>
   );
