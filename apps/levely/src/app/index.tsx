@@ -52,7 +52,10 @@ export default function Index() {
           <Text className="text-3xl text-muted-foreground/40">School</Text>.
         </Text>
         <Button onPress={() => router.push("/onboarding")}>
-          <Text>Next</Text>
+          <Text>Onboarding</Text>
+        </Button>
+        <Button onPress={() => router.push("/stats/current")}>
+          <Text>stats</Text>
         </Button>
       </View>
     </SafeAreaView>
