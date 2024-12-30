@@ -213,7 +213,7 @@ export default function Potential() {
         }}
       >
         <Text className="text-center text-lg font-semibold text-primary-foreground">
-          Go to home
+          Lock in...
         </Text>
       </Button>
     </SafeAreaView>

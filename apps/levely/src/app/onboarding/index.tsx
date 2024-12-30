@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
-import { SafeAreaView, View } from "react-native";
+import { Pressable, SafeAreaView, View } from "react-native";
+import { ScrollView } from "react-native-gesture-handler";
 import { Stack, useRouter } from "expo-router";
+import { SymbolView } from "expo-symbols";
 
+import { GradeInput, Subject } from "~/components/grades";
 import { MemorySection } from "~/components/memory";
 import { Pagination } from "~/components/pagination";
 import { Question } from "~/components/question";
@@ -94,7 +97,7 @@ const sections = [
 
 export default function Onboarding() {
   const router = useRouter();
-  const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
+  const [currentSectionIndex, setCurrentSectionIndex] = useState(4);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<
     { question: string; answer: string }[]
@@ -104,6 +107,11 @@ export default function Onboarding() {
   );
   const [memoryProgress, setMemoryProgress] = useState((1 / 3) * 100);
   const [progress, setProgress] = useState(calcStepProgress());
+  const [subjects, setSubjects] = useState<Subject[]>([
+    { id: 0, name: "Calculus", grade: "B-" },
+    { id: 1, name: "Physics", grade: "B-" },
+    { id: 2, name: "Philosophy", grade: "B-" },
+  ]);
 
   function calcStepProgress() {
     if (currentSectionIndex === 1) return memoryProgress;
@@ -122,9 +130,8 @@ export default function Onboarding() {
     setProgress(calcStepProgress());
   }, [currentSectionIndex, currentQuestionIndex, memoryProgress]);
 
-  console.log({ memoryProgress });
-
   console.log(answers);
+  console.log(subjects);
 
   return (
     <SafeAreaView className="bg-background">
@@ -201,6 +208,53 @@ export default function Onboarding() {
                 setCurrentSectionIndex((prev) => prev + 1)
               }
             />
+          ) : currentSectionIndex === 4 ? (
+            <>
+              <Text className="mx-6 mb-4 mt-8 text-2xl font-bold text-secondary-foreground">
+                Add your grades
+              </Text>
+              <Pressable
+                className="absolute right-4 top-4 flex size-16 items-center justify-center rounded-full bg-primary"
+                onPress={() => router.replace("/stats/current")}
+              >
+                <SymbolView
+                  name="arrow.right"
+                  resizeMode="scaleAspectFit"
+                  size={24}
+                  weight="light"
+                  tintColor="white"
+                />
+              </Pressable>
+              <ScrollView className="mx-2">
+                {subjects.map((subject) => (
+                  <GradeInput
+                    key={subject.id}
+                    subject={subject}
+                    initialGrade={subject.grade}
+                    onSubjectChange={(newSubject) => {
+                      setSubjects((prev) =>
+                        prev.map((s) =>
+                          s.id === newSubject.id ? newSubject : s,
+                        ),
+                      );
+                    }}
+                  />
+                ))}
+                <View className="mx-2 mb-16 flex justify-end">
+                  <Button
+                    variant="secondary"
+                    onPress={() => {
+                      setSubjects((prev) => [
+                        ...prev,
+                        { id: prev.length, name: "", grade: "A" },
+                      ]);
+                    }}
+                  >
+                    <Text>Add subject</Text>
+                  </Button>
+                </View>
+              </ScrollView>
+            </>
           ) : (
             <Button onPress={() => setCurrentSectionIndex((prev) => prev + 1)}>
               <Text>Next</Text>
