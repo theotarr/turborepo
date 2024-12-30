@@ -4,7 +4,7 @@ import { Stack } from "expo-router";
 export default function Dashboard() {
   return (
     <SafeAreaView>
-      <Stack.Screen options={{ title: "Dashboard" }} />
+      <Stack.Screen options={{ header: () => <></> }} />
     </SafeAreaView>
   );
 }

@@ -27,56 +27,14 @@ const LIGHT_THEME: Theme = {
   dark: false,
   colors: NAV_THEME.light,
 };
-const DARK_THEME: Theme = {
-  dark: true,
-  colors: NAV_THEME.dark,
-};
-
-// Prevent the splash screen from auto-hiding before getting the color scheme.
-SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const { colorScheme, setColorScheme, isDarkColorScheme } = useColorScheme();
-  const [isColorSchemeLoaded, setIsColorSchemeLoaded] = React.useState(false);
-
-  // Initialize Superwall
-  React.useEffect(() => {
-    const apiKey =
-      Platform.OS === "ios"
-        ? "pk_4c26d917d2debc8d3e77f570082055efc61abb846b7efae4"
-        : "MY_ANDROID_API_KEY";
-    void Superwall.configure(apiKey);
-  }, []);
-
-  React.useEffect(() => {
-    (async () => {
-      const theme = await AsyncStorage.getItem("theme");
-      if (!theme) {
-        AsyncStorage.setItem("theme", colorScheme);
-        setIsColorSchemeLoaded(true);
-        return;
-      }
-      const colorTheme = theme === "dark" ? "dark" : "light";
-      if (colorTheme !== colorScheme) {
-        setColorScheme(colorTheme);
-
-        setIsColorSchemeLoaded(true);
-        return;
-      }
-      setIsColorSchemeLoaded(true);
-    })().finally(() => {
-      void SplashScreen.hideAsync();
-    });
-  }, []);
-
-  if (!isColorSchemeLoaded) return null;
-
   return (
     <TRPCProvider>
       <GestureHandlerRootView>
         <BottomSheetModalProvider>
-          <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
-            <StatusBar style={isDarkColorScheme ? "light" : "dark"} />
+          <ThemeProvider value={LIGHT_THEME}>
+            <StatusBar style="light" />
             <Stack />
           </ThemeProvider>
         </BottomSheetModalProvider>

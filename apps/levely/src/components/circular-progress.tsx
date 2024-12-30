@@ -85,7 +85,7 @@ export const CircularProgress: React.FC<ProgressCircleProps> = ({
             y="50%"
             textAnchor="middle"
             alignmentBaseline="middle"
-            fontSize={radius / 2.5}
+            fontSize={label.length > 3 ? radius / 3 : radius / 2.5}
             fill="#000"
             fontWeight="bold"
           >

@@ -1,13 +1,14 @@
-import { Dimensions, SafeAreaView, View } from "react-native";
+import { Dimensions, SafeAreaView, TouchableOpacity, View } from "react-native";
 import { PanGestureHandler, ScrollView } from "react-native-gesture-handler";
 import Animated, {
   useAnimatedGestureHandler,
   useAnimatedStyle,
   useSharedValue,
   withSpring,
+  withTiming,
 } from "react-native-reanimated";
 import { Stack, useRouter } from "expo-router";
-import { Share } from "lucide-react-native";
+import { SymbolView } from "expo-symbols";
 
 import { StatsPage } from "~/components/stats-page";
 import { Button } from "~/components/ui/button";
@@ -63,6 +64,12 @@ export default function Potential() {
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: translateX.value }],
   }));
+  const dotStyle = (index: number) =>
+    useAnimatedStyle(() => ({
+      opacity: withTiming(currentPage.value === index ? 1 : 0.3, {
+        duration: 300,
+      }),
+    }));
 
   return (
     <SafeAreaView className="flex-1 bg-background">
@@ -172,25 +179,29 @@ export default function Potential() {
               />
             </Animated.View>
           </PanGestureHandler>
-          <Button variant="ghost" className="mb-5 flex-row items-center">
-            <Share size={16} color={NAV_THEME.light.secondaryForeground} />
-            <Text className="ml-2 text-secondary-foreground">
+          <TouchableOpacity className="mb-5 flex-row items-center justify-center">
+            <SymbolView
+              name="square.and.arrow.up"
+              resizeMode="scaleAspectFit"
+              scale="small"
+              weight="medium"
+              tintColor="black"
+            />
+            <Text className="ml-2 text-lg font-medium text-secondary-foreground">
               Share my report
             </Text>
-          </Button>
+          </TouchableOpacity>
         </ScrollView>
       </View>
       <View className="mb-8 mt-4 flex items-center">
         <View className="h-6 w-12 flex-row items-center justify-center rounded-full bg-[#BFBFBF] opacity-[44%]">
-          <View
-            className={`mx-1 size-2 rounded-full ${
-              currentPage.value === 0 ? "bg-black" : "bg-black/30"
-            }`}
+          <Animated.View
+            className="mx-1 size-2 rounded-full bg-black"
+            style={dotStyle(0)}
           />
-          <View
-            className={`mx-1 size-2 rounded-full ${
-              currentPage.value === 1 ? "bg-black" : "bg-black/30"
-            }`}
+          <Animated.View
+            className="mx-1 size-2 rounded-full bg-black"
+            style={dotStyle(1)}
           />
         </View>
       </View>
