@@ -1,15 +1,28 @@
-import React, { FC, useState } from "react";
+import type { MarkerProps } from "@react-native-community/slider";
+import type { FC } from "react";
+import React, { useState } from "react";
 import { Text, TextInput, View } from "react-native";
-import Slider, { MarkerProps } from "@react-native-community/slider";
+import Slider from "@react-native-community/slider";
 
+import type { Subject } from "~/types/types";
 import { NAV_THEME } from "~/lib/constants";
 
-const grades = ["F", "D", "C-", "C", "C+", "B-", "B", "B+", "A-", "A", "A+"];
-export interface Subject {
-  id: number;
-  name: string;
-  grade: string;
-}
+const grades = [
+  "F",
+  "D-",
+  "D",
+  "D+",
+  "C-",
+  "C",
+  "C+",
+  "B-",
+  "B",
+  "B+",
+  "A-",
+  "A",
+  "A+",
+] as const;
+type Grade = (typeof grades)[number];
 
 export const GradeInput = ({
   subject,
@@ -17,7 +30,7 @@ export const GradeInput = ({
   onSubjectChange,
 }: {
   subject: Subject;
-  initialGrade?: string;
+  initialGrade?: Grade;
   onSubjectChange?: (subject: Subject) => void;
 }) => {
   const [grade, setGrade] = useState(grades.indexOf(initialGrade));

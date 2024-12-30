@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Dimensions, SafeAreaView, TouchableOpacity, View } from "react-native";
 import { PanGestureHandler, ScrollView } from "react-native-gesture-handler";
 import Animated, {
@@ -10,9 +11,12 @@ import Animated, {
 import { Stack, useRouter } from "expo-router";
 import { SymbolView } from "expo-symbols";
 
+import type { Subject } from "~/types/types";
 import { StatsPage } from "~/components/stats-page";
 import { Button } from "~/components/ui/button";
 import { Text } from "~/components/ui/text";
+import { getFocus, getGrades, getHabits } from "~/lib/storage";
+import { letterToGpa } from "~/lib/utils";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.3;
@@ -36,6 +40,8 @@ const gradeCategories = [
 
 export default function Current() {
   const router = useRouter();
+  const [gpa, setGpa] = useState(0);
+  const [grades, setGrades] = useState<Subject[]>([]);
   const currentPage = useSharedValue(0);
   const translateX = useSharedValue(-currentPage.value * SCREEN_WIDTH);
 
@@ -70,6 +76,22 @@ export default function Current() {
         duration: 300,
       }),
     }));
+
+  useEffect(() => {
+    async function listStats() {
+      const habits = await getHabits();
+      const focus = await getFocus();
+      const grades = await getGrades();
+
+      setGrades(grades);
+      setGpa(
+        grades.reduce((acc, grade) => acc + letterToGpa(grade.grade), 0) /
+          grades.length,
+      );
+      console.log({ habits, focus, grades });
+    }
+    listStats();
+  }, []);
 
   return (
     <SafeAreaView className="flex-1 bg-background">
@@ -130,40 +152,13 @@ export default function Current() {
               />
               <StatsPage
                 heading="Grades"
-                overall={0.8}
-                overallLabel="80%"
-                stats={[
-                  {
-                    stat: "Math",
-                    label: "B-",
-                    value: 80,
-                  },
-                  {
-                    stat: "Science",
-                    label: "B",
-                    value: 85,
-                  },
-                  {
-                    stat: "English",
-                    label: "C",
-                    value: 75,
-                  },
-                  {
-                    stat: "History",
-                    label: "C-",
-                    value: 70,
-                  },
-                  {
-                    stat: "Art",
-                    label: "A-",
-                    value: 90,
-                  },
-                  {
-                    stat: "Latin",
-                    label: "D",
-                    value: 65,
-                  },
-                ]}
+                overall={gpa / 4}
+                overallLabel={`${gpa.toFixed(2)} GPA`}
+                stats={grades.map((grade) => ({
+                  stat: grade.name,
+                  label: grade.grade,
+                  value: (letterToGpa(grade.grade) / 4) * 100,
+                }))}
               />
             </Animated.View>
           </PanGestureHandler>

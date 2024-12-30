@@ -6,6 +6,7 @@ import { SymbolView } from "expo-symbols";
 
 import { GradientText } from "~/components/ui/gradient-text";
 import { Text } from "~/components/ui/text";
+import { setPersonalInfo } from "~/lib/storage";
 
 export default function Index() {
   const router = useRouter();
@@ -14,12 +15,10 @@ export default function Index() {
   const [major, setMajor] = useState("Computer Science");
   const [school, setSchool] = useState("Harvard");
 
-  // if (user) {
-  //   void AsyncStorage.getItem("onboardingComplete").then((value) => {
-  //     if (value === "true") router.replace("/(dashboard)/dashboard");
-  //   });
-  //   return <Redirect href={"/onboarding"} />;
-  // }
+  async function handleSubmit() {
+    await setPersonalInfo({ name, location: country, major, school });
+    router.replace("/onboarding");
+  }
 
   return (
     <SafeAreaView className="h-full flex-1">
@@ -39,7 +38,7 @@ export default function Index() {
               value={name}
               onChangeText={setName}
               placeholder="name"
-              className="text-3xl font-semibold text-primary"
+              className="text-3xl font-medium text-primary"
             />
           </View>{" "}
           and I'm located in{" "}
@@ -48,7 +47,7 @@ export default function Index() {
               value={country}
               onChangeText={setCountry}
               placeholder="country"
-              className="text-3xl font-semibold text-primary"
+              className="text-3xl font-medium text-primary"
             />
           </View>
           . I study{" "}
@@ -57,7 +56,7 @@ export default function Index() {
               value={major}
               onChangeText={setMajor}
               placeholder="major"
-              className="text-3xl font-semibold text-primary"
+              className="text-3xl font-medium text-primary"
             />
           </View>{" "}
           at{" "}
@@ -66,7 +65,7 @@ export default function Index() {
               value={school}
               onChangeText={setSchool}
               placeholder="school"
-              className="text-3xl font-semibold text-primary"
+              className="text-3xl font-medium text-primary"
             />
           </View>
           .
@@ -78,7 +77,7 @@ export default function Index() {
             school.length > 0 && (
               <Pressable
                 className="absolute -bottom-4 right-4 flex size-16 items-center justify-center rounded-full bg-primary"
-                onPress={() => router.replace("/onboarding")}
+                onPress={handleSubmit}
               >
                 <SymbolView
                   name="arrow.right"

@@ -1,15 +1,23 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Pressable, SafeAreaView, View } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import { Stack, useRouter } from "expo-router";
 import { SymbolView } from "expo-symbols";
 
-import { GradeInput, Subject } from "~/components/grades";
+import type { Question as QuestionType, Subject } from "~/types/types";
+import { GradeInput } from "~/components/grades";
 import { MemorySection } from "~/components/memory";
 import { Pagination } from "~/components/pagination";
 import { Question } from "~/components/question";
 import { Button } from "~/components/ui/button";
 import { Text } from "~/components/ui/text";
+import {
+  getOnboardingComplete,
+  setFocus,
+  setGrades,
+  setHabits,
+  setOnboardingComplete,
+} from "~/lib/storage";
 
 const habitQuestions = [
   {
@@ -97,15 +105,37 @@ const sections = [
 
 export default function Onboarding() {
   const router = useRouter();
-  const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [answers, setAnswers] = useState<
-    { question: string; answer: string }[]
-  >([]);
+
+  useEffect(() => {
+    void (async () => {
+      const hasOnboarded = await getOnboardingComplete();
+      if (hasOnboarded) {
+        router.replace("/stats/current");
+      }
+    })();
+  }, [router]);
+
+  const [sectionIndex, setSectionIndex] = useState(0);
+  const [questionIndex, setQuestionIndex] = useState(0);
+  const [answers, setAnswers] = useState<QuestionType[]>([]);
   const [selectedOption, setSelectedOption] = useState<string | undefined>(
     undefined,
   );
   const [memoryProgress, setMemoryProgress] = useState((1 / 3) * 100);
+
+  const calcStepProgress = useCallback(() => {
+    if (sectionIndex === 1) return memoryProgress;
+
+    const currentSection = sections[sectionIndex];
+    const currentQuestion = currentSection?.questions[questionIndex];
+
+    if (!currentSection || !currentQuestion) {
+      return 0;
+    }
+
+    return ((questionIndex + 1) / currentSection.questions.length) * 100;
+  }, [sectionIndex, questionIndex, memoryProgress]);
+
   const [progress, setProgress] = useState(calcStepProgress());
   const [subjects, setSubjects] = useState<Subject[]>([
     { id: 0, name: "Calculus", grade: "A-" },
@@ -113,25 +143,9 @@ export default function Onboarding() {
     { id: 2, name: "Philosophy", grade: "A-" },
   ]);
 
-  function calcStepProgress() {
-    if (currentSectionIndex === 1) return memoryProgress;
-
-    const currentSection = sections[currentSectionIndex];
-    const currentQuestion = currentSection?.questions[currentQuestionIndex];
-
-    if (!currentSection || !currentQuestion) {
-      return 0;
-    }
-
-    return ((currentQuestionIndex + 1) / currentSection.questions.length) * 100;
-  }
-
   useEffect(() => {
     setProgress(calcStepProgress());
-  }, [currentSectionIndex, currentQuestionIndex, memoryProgress]);
-
-  console.log(answers);
-  console.log(subjects);
+  }, [sectionIndex, questionIndex, memoryProgress, calcStepProgress]);
 
   return (
     <SafeAreaView className="bg-background">
@@ -139,36 +153,25 @@ export default function Onboarding() {
         options={{
           title: "Onboarding",
           header: () => <></>,
-          headerLeft: () => (
-            <Button
-              onPress={() => {
-                router.replace("/");
-              }}
-              variant="secondary"
-              size="sm"
-            >
-              <Text>Back</Text>
-            </Button>
-          ),
         }}
       />
       <View className="h-full w-full">
         <Pagination
           totalSteps={sections.length}
-          currentStepIndex={currentSectionIndex}
+          currentStepIndex={sectionIndex}
           steps={sections.map((section) => section.name)}
           progress={progress}
         />
         <View className="flex h-full justify-around">
           {/* If the current section is either habits or focus questions */}
-          {currentSectionIndex === 0 || currentSectionIndex === 2 ? (
+          {sectionIndex === 0 || sectionIndex === 2 ? (
             <Question
               question={
-                sections[currentSectionIndex]?.questions[currentQuestionIndex]
+                sections[sectionIndex]?.questions[questionIndex]
                   ?.question as string
               }
               options={
-                sections[currentSectionIndex]?.questions[currentQuestionIndex]
+                sections[sectionIndex]?.questions[questionIndex]
                   ?.options as unknown as string[]
               }
               selectedOption={selectedOption}
@@ -176,9 +179,8 @@ export default function Onboarding() {
                 setAnswers((prev) => [
                   ...prev,
                   {
-                    question: sections[currentSectionIndex]?.questions[
-                      currentQuestionIndex
-                    ]?.question as string,
+                    question: sections[sectionIndex]?.questions[questionIndex]
+                      ?.question as string,
                     answer: option,
                   },
                 ]);
@@ -187,35 +189,45 @@ export default function Onboarding() {
                 // Check if the current question is the last question in the section
                 // If it is, move to the next section
                 if (
-                  currentQuestionIndex ===
-                  sections[currentSectionIndex]?.questions?.length! - 1
+                  questionIndex ===
+                  (sections[sectionIndex]?.questions?.length ?? 0) - 1
                 ) {
                   setTimeout(() => {
-                    setCurrentQuestionIndex(0);
-                    setCurrentSectionIndex((prev) => prev + 1);
+                    void (async () => {
+                      // Save answers to storage.
+                      if (sectionIndex === 0) await setHabits(answers);
+                      else await setFocus(answers);
+
+                      // Reset answers and move to next section.
+                      setAnswers([]);
+                      setQuestionIndex(0);
+                      setSectionIndex((prev) => prev + 1);
+                    })();
                   }, 1000);
                 } else {
                   setTimeout(() => {
-                    setCurrentQuestionIndex((prev) => prev + 1);
+                    setQuestionIndex((prev) => prev + 1);
                   }, 1000);
                 }
               }}
             />
-          ) : currentSectionIndex === 1 ? (
+          ) : sectionIndex === 1 ? (
             <MemorySection
               onProgress={setMemoryProgress}
-              onSectionComplete={() =>
-                setCurrentSectionIndex((prev) => prev + 1)
-              }
+              onSectionComplete={() => setSectionIndex((prev) => prev + 1)}
             />
-          ) : currentSectionIndex === 4 ? (
+          ) : sectionIndex === 4 ? (
             <>
               <Text className="mx-6 mb-4 mt-8 text-2xl font-bold text-secondary-foreground">
                 Add your grades
               </Text>
               <Pressable
                 className="absolute right-4 top-4 flex size-16 items-center justify-center rounded-full bg-primary"
-                onPress={() => router.replace("/stats/current")}
+                onPress={async () => {
+                  await setGrades(subjects); // Save grades to storage.
+                  await setOnboardingComplete(); // Mark onboarding as complete.
+                  router.replace("/stats/current");
+                }}
               >
                 <SymbolView
                   name="arrow.right"
@@ -256,7 +268,7 @@ export default function Onboarding() {
               </ScrollView>
             </>
           ) : (
-            <Button onPress={() => setCurrentSectionIndex((prev) => prev + 1)}>
+            <Button onPress={() => setSectionIndex((prev) => prev + 1)}>
               <Text>Next</Text>
             </Button>
           )}

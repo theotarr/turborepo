@@ -8,7 +8,7 @@ export interface Stat {
   label: string;
   value: number;
   improvement?: string;
-  [key: string]: any;
+  className?: string;
 }
 
 export const StatItem = ({
