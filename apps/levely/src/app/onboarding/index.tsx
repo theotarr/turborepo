@@ -2,6 +2,7 @@ import { useState } from "react";
 import { SafeAreaView, View } from "react-native";
 import { Stack, useRouter } from "expo-router";
 
+import { MemorySection } from "~/components/memory";
 import { Pagination } from "~/components/pagination";
 import { Question } from "~/components/question";
 import { Button } from "~/components/ui/button";
@@ -177,6 +178,12 @@ export default function Onboarding() {
                   }, 1000);
                 }
               }}
+            />
+          ) : currentSectionIndex === 1 ? (
+            <MemorySection
+              onSectionComplete={() =>
+                setCurrentSectionIndex((prev) => prev + 1)
+              }
             />
           ) : (
             <Button onPress={() => setCurrentSectionIndex((prev) => prev + 1)}>
