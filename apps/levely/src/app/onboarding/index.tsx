@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { SafeAreaView, View } from "react-native";
 import { Stack, useRouter } from "expo-router";
 
@@ -102,6 +102,27 @@ export default function Onboarding() {
   const [selectedOption, setSelectedOption] = useState<string | undefined>(
     undefined,
   );
+  const [memoryProgress, setMemoryProgress] = useState((1 / 3) * 100);
+  const [progress, setProgress] = useState(calcStepProgress());
+
+  function calcStepProgress() {
+    if (currentSectionIndex === 1) return memoryProgress;
+
+    const currentSection = sections[currentSectionIndex];
+    const currentQuestion = currentSection?.questions[currentQuestionIndex];
+
+    if (!currentSection || !currentQuestion) {
+      return 0;
+    }
+
+    return ((currentQuestionIndex + 1) / currentSection.questions.length) * 100;
+  }
+
+  useEffect(() => {
+    setProgress(calcStepProgress());
+  }, [currentSectionIndex, currentQuestionIndex, memoryProgress]);
+
+  console.log({ memoryProgress });
 
   console.log(answers);
 
@@ -129,13 +150,7 @@ export default function Onboarding() {
           totalSteps={sections.length}
           currentStepIndex={currentSectionIndex}
           steps={sections.map((section) => section.name)}
-          progress={
-            sections[currentSectionIndex]?.questions
-              ? ((currentQuestionIndex + 1) /
-                  sections[currentSectionIndex].questions.length) *
-                100
-              : 0
-          }
+          progress={progress}
         />
         <View className="flex h-full justify-around">
           {/* If the current section is either habits or focus questions */}
@@ -181,6 +196,7 @@ export default function Onboarding() {
             />
           ) : currentSectionIndex === 1 ? (
             <MemorySection
+              onProgress={setMemoryProgress}
               onSectionComplete={() =>
                 setCurrentSectionIndex((prev) => prev + 1)
               }

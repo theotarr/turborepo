@@ -7,8 +7,10 @@ import { CircularProgress } from "./circular-progress";
 import { Text } from "./ui/text";
 
 export function MemorySection({
+  onProgress,
   onSectionComplete,
 }: {
+  onProgress: (progress: number) => void;
   onSectionComplete: () => void;
 }) {
   const [startTime, setStartTime] = useState(Date.now());
@@ -71,9 +73,16 @@ export function MemorySection({
       <Pressable
         className="absolute bottom-24 right-4 flex size-16 items-center justify-center rounded-full bg-primary"
         onPress={() => {
-          if (page === 0) handleContentRead();
-          else if (page === 1) setPage(2);
-          else onSectionComplete();
+          if (page === 0) {
+            handleContentRead();
+            onProgress((2 / 3) * 100);
+          } else if (page === 1) {
+            setPage(2);
+            onProgress(100);
+          } else {
+            onSectionComplete();
+            onProgress(100);
+          }
         }}
       >
         <SymbolView
