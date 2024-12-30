@@ -24,6 +24,7 @@
     "@react-native-masked-view/masked-view": "0.3.1",
     "@react-native-picker/picker": "2.7.5",
     "@react-native-reusables/cli": "^0.1.0",
+    "@react-native-voice/voice": "^3.2.4",
     "@react-navigation/material-top-tabs": "^6.6.14",
     "@rn-primitives/label": "^1.0.4",
     "@rn-primitives/portal": "^1.0.4",

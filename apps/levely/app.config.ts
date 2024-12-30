@@ -24,6 +24,12 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     usesAppleSignIn: true,
     supportsTablet: true,
     associatedDomains: ["applinks:levely.ai"],
+    infoPlist: {
+      NSMicrophoneUsageDescription:
+        "Need microphone access for recording audio",
+      NSSpeechRecognitionUsageDescription:
+        "Need speech recognition access for voice commands",
+    },
     config: {
       usesNonExemptEncryption: false,
     },
@@ -47,6 +53,14 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   plugins: [
     "expo-router",
     "expo-apple-authentication",
+    [
+      "@react-native-voice/voice",
+      {
+        microphonePermission: "Allow Levely to access the microphone",
+        speechRecognitionPermission:
+          "Allow Levely to securely recognize user speech",
+      },
+    ],
     [
       "expo-build-properties",
       {
