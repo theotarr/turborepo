@@ -97,7 +97,7 @@ const sections = [
 
 export default function Onboarding() {
   const router = useRouter();
-  const [currentSectionIndex, setCurrentSectionIndex] = useState(4);
+  const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<
     { question: string; answer: string }[]
@@ -108,9 +108,9 @@ export default function Onboarding() {
   const [memoryProgress, setMemoryProgress] = useState((1 / 3) * 100);
   const [progress, setProgress] = useState(calcStepProgress());
   const [subjects, setSubjects] = useState<Subject[]>([
-    { id: 0, name: "Calculus", grade: "B-" },
-    { id: 1, name: "Physics", grade: "B-" },
-    { id: 2, name: "Philosophy", grade: "B-" },
+    { id: 0, name: "Calculus", grade: "A-" },
+    { id: 1, name: "Physics", grade: "A-" },
+    { id: 2, name: "Philosophy", grade: "A-" },
   ]);
 
   function calcStepProgress() {

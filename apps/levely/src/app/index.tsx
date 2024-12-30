@@ -1,19 +1,18 @@
 import { useState } from "react";
-import { View } from "react-native";
+import { Pressable, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Stack, useRouter } from "expo-router";
+import { SymbolView } from "expo-symbols";
 
-import { Button } from "~/components/ui/button";
-import { GradientInput, GradientText } from "~/components/ui/gradient-text";
-import { Input } from "~/components/ui/input";
+import { GradientText } from "~/components/ui/gradient-text";
 import { Text } from "~/components/ui/text";
 
 export default function Index() {
   const router = useRouter();
-  const [name, setName] = useState("");
-  const [country, setCountry] = useState("");
-  const [major, setMajor] = useState("");
-  const [school, setSchool] = useState("");
+  const [name, setName] = useState("Theo");
+  const [country, setCountry] = useState("NYC");
+  const [major, setMajor] = useState("Computer Science");
+  const [school, setSchool] = useState("Harvard");
 
   // if (user) {
   //   void AsyncStorage.getItem("onboardingComplete").then((value) => {
@@ -23,7 +22,7 @@ export default function Index() {
   // }
 
   return (
-    <SafeAreaView className="bg-background">
+    <SafeAreaView className="h-full flex-1">
       <Stack.Screen options={{ header: () => <></> }} />
       <View className="h-full flex-1 px-5 pt-36">
         <GradientText
@@ -33,30 +32,64 @@ export default function Index() {
           locations={[0, 0.52, 0.78, 0.89, 1]}
           className="text-3xl font-bold text-primary"
         />
-        <Text className="mt-8 h-64 text-3xl text-secondary-foreground">
+        <Text className="mt-8 h-64 max-w-sm text-3xl leading-[1.4] text-secondary-foreground">
           My name is{" "}
-          <Input
-            // value={name}
-            // onChangeText={setName}
-            // height={32}
-            placeholder="name"
-            // className="text-3xl font-medium"
-            // aria-labelledby="name"
-          />{" "}
-          and I'm located at{" "}
-          <Text className="text-3xl text-muted-foreground/40">
-            your country
-          </Text>
+          <View className="flex-row items-end p-0">
+            <TextInput
+              value={name}
+              onChangeText={setName}
+              placeholder="name"
+              className="text-3xl font-semibold text-primary"
+            />
+          </View>{" "}
+          and I'm located in{" "}
+          <View className="flex-row items-end p-0">
+            <TextInput
+              value={country}
+              onChangeText={setCountry}
+              placeholder="country"
+              className="text-3xl font-semibold text-primary"
+            />
+          </View>
           . I study{" "}
-          <Text className="text-3xl text-muted-foreground/40">major</Text> at{" "}
-          <Text className="text-3xl text-muted-foreground/40">School</Text>.
+          <View className="flex-row items-end p-0">
+            <TextInput
+              value={major}
+              onChangeText={setMajor}
+              placeholder="major"
+              className="text-3xl font-semibold text-primary"
+            />
+          </View>{" "}
+          at{" "}
+          <View className="flex-row items-end p-0">
+            <TextInput
+              value={school}
+              onChangeText={setSchool}
+              placeholder="school"
+              className="text-3xl font-semibold text-primary"
+            />
+          </View>
+          .
         </Text>
-        <Button onPress={() => router.push("/onboarding")}>
-          <Text>Onboarding</Text>
-        </Button>
-        <Button onPress={() => router.push("/stats/current")}>
-          <Text>stats</Text>
-        </Button>
+        <View className="h-full">
+          {name.length > 0 &&
+            country.length > 0 &&
+            major.length > 0 &&
+            school.length > 0 && (
+              <Pressable
+                className="absolute -bottom-4 right-4 flex size-16 items-center justify-center rounded-full bg-primary"
+                onPress={() => router.replace("/onboarding")}
+              >
+                <SymbolView
+                  name="arrow.right"
+                  resizeMode="scaleAspectFit"
+                  size={24}
+                  weight="light"
+                  tintColor="white"
+                />
+              </Pressable>
+            )}
+        </View>
       </View>
     </SafeAreaView>
   );
