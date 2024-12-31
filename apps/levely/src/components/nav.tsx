@@ -30,19 +30,19 @@ const navItems = [
     ),
     href: "/daily",
   },
-  {
-    name: "Retake test",
-    icon: (isActive: boolean) => (
-      <SymbolView
-        name="arrow.2.squarepath"
-        resizeMode="scaleAspectFit"
-        size={32}
-        weight="medium"
-        tintColor={isActive ? "#007AFF" : "#999999"} // Active and inactive colors
-      />
-    ),
-    href: "/retake",
-  },
+  // {
+  //   name: "Retake test",
+  //   icon: (isActive: boolean) => (
+  //     <SymbolView
+  //       name="arrow.2.squarepath"
+  //       resizeMode="scaleAspectFit"
+  //       size={32}
+  //       weight="medium"
+  //       tintColor={isActive ? "#007AFF" : "#999999"} // Active and inactive colors
+  //     />
+  //   ),
+  //   href: "/retake",
+  // },
   {
     name: "Account",
     icon: (isActive: boolean) => (
