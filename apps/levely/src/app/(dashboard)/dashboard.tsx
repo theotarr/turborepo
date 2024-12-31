@@ -25,7 +25,7 @@ export default function Dashboard() {
   return (
     <SafeAreaView className="flex-1 bg-background">
       <Stack.Screen options={{ header: () => <></> }} />
-      <View className="mx-4 mt-8 flex-1">
+      <View className="mx-4 flex-1">
         <ScrollView className="flex-1 px-5">
           <DashboardStatsPage
             heading="Overall Stats"

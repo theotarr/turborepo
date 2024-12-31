@@ -162,17 +162,17 @@ export default function Current() {
         onPress={async () => {
           try {
             const storedPotentialStats = await getPotentialStats();
-            // if (!storedPotentialStats && stats) {
-            console.log(grades);
-            const potentialStats = await generatePotentialStats.mutateAsync({
-              questions: [...(await getHabits()), ...(await getFocus())],
-              currentStats: stats,
-              grades,
-            });
-            await setPotentialGrades(potentialStats.grades);
-            delete potentialStats.grades;
-            await setPotentialStats(potentialStats);
-            // }
+            if (!storedPotentialStats && stats) {
+              console.log(grades);
+              const potentialStats = await generatePotentialStats.mutateAsync({
+                questions: [...(await getHabits()), ...(await getFocus())],
+                currentStats: stats,
+                grades,
+              });
+              await setPotentialGrades(potentialStats.grades);
+              delete potentialStats.grades;
+              await setPotentialStats(potentialStats);
+            }
             router.replace("/stats/potential");
           } catch (error) {
             console.error("Failed to generate potential stats:", error);

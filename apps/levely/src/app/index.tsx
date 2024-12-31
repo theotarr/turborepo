@@ -98,13 +98,13 @@ export default function Index() {
             />
           </Pressable>
         </Animated.View>
-        <Button
+        {/* <Button
           onPress={() => {
             router.replace("/dashboard");
           }}
         >
           <Text>Dashboard</Text>
-        </Button>
+        </Button> */}
       </View>
     </SafeAreaView>
   );

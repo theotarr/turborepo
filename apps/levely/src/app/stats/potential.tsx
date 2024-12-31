@@ -9,6 +9,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { Stack, useRouter } from "expo-router";
+import * as StoreReview from "expo-store-review";
 import { SymbolView } from "expo-symbols";
 
 import type { Stats, Subject } from "~/types/types";
@@ -167,7 +168,8 @@ export default function Potential() {
       <Button
         size="lg"
         className="mx-8"
-        onPress={() => {
+        onPress={async () => {
+          await StoreReview.requestReview();
           router.replace("/daily");
         }}
       >
