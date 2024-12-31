@@ -1,3 +1,4 @@
+import type { Href } from "expo-router";
 import { Text, TouchableOpacity, View } from "react-native";
 import { Link, usePathname } from "expo-router";
 import { SymbolView } from "expo-symbols";
@@ -61,12 +62,11 @@ export const NavigationBar = () => {
   const pathname = usePathname();
 
   return (
-    <View className="mb-8 flex-row items-center justify-around border-t border-black/30 bg-background py-2.5">
+    <View className="mb-8 flex-row items-center justify-around border-t border-black/10 bg-background py-2.5">
       {navItems.map((item) => {
         const isActive = pathname === item.href;
-
         return (
-          <Link href={item.href} asChild key={item.name}>
+          <Link href={item.href as Href<string>} asChild key={item.name}>
             <TouchableOpacity
               className="items-center justify-center px-3"
               activeOpacity={0.7}

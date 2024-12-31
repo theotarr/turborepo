@@ -24,7 +24,7 @@ import {
   setPotentialGrades,
   setPotentialStats,
 } from "~/lib/storage";
-import { formatStatsObject, letterToGpa } from "~/lib/utils";
+import { calculateOverall, formatStatsObject, letterToGpa } from "~/lib/utils";
 import { api } from "~/utils/api";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
@@ -79,15 +79,11 @@ export default function Current() {
 
     void (async () => {
       const currentStats = await getStats();
-      const grades = await getGrades();
-
+      if (!currentStats) return;
       setStats(currentStats);
-      setOverall(
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        Object.values(currentStats!).reduce((acc, value) => acc + value, 0) /
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          Object.keys(currentStats!).length,
-      );
+      setOverall(calculateOverall(currentStats));
+
+      const grades = await getGrades();
       setGrades(grades);
       setGpa(
         grades.reduce((acc, grade) => acc + letterToGpa(grade.grade), 0) /

@@ -5,6 +5,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Stack, useRouter } from "expo-router";
 import { SymbolView } from "expo-symbols";
 
+import { Button } from "~/components/ui/button";
 import { GradientText } from "~/components/ui/gradient-text";
 import { Text } from "~/components/ui/text";
 import { setPersonalInfo } from "~/lib/storage";
@@ -97,6 +98,13 @@ export default function Index() {
             />
           </Pressable>
         </Animated.View>
+        <Button
+          onPress={() => {
+            router.replace("/dashboard");
+          }}
+        >
+          <Text>Dashboard</Text>
+        </Button>
       </View>
     </SafeAreaView>
   );

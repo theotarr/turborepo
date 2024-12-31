@@ -79,3 +79,11 @@ export function formatStatsObject(
     };
   });
 }
+
+export function calculateOverall(stats: Stats): number {
+  return (
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    Object.values(stats).reduce((acc, value) => acc + value, 0) /
+    Object.keys(stats).length
+  );
+}
