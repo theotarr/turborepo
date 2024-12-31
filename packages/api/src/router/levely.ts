@@ -6,6 +6,16 @@ import { z } from "zod";
 import { publicProcedure } from "../trpc";
 
 export const levelyRouter = {
+  getTips: publicProcedure
+    .input(
+      z.object({
+        category: z.string(),
+      }),
+    )
+    .query(async ({ input }) => {
+      //   const tips = await getTips(input.category);
+      //   return tips;
+    }),
   generateStats: publicProcedure
     .input(
       z.object({

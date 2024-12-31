@@ -1,6 +1,8 @@
 import type { Href } from "expo-router";
-import React from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import React, { useState } from "react";
+import { Animated, Easing, Text, TouchableOpacity, View } from "react-native";
+import { ScrollView } from "react-native-gesture-handler";
+import Markdown from "react-native-markdown-display";
 import { useRouter } from "expo-router";
 import { SymbolView } from "expo-symbols";
 
@@ -18,9 +20,33 @@ export const TipItem = ({
   link?: string;
 }) => {
   const router = useRouter();
+  const [expanded, setExpanded] = useState(false);
+  const [animation] = useState(new Animated.Value(0));
+
+  const toggleExpand = () => {
+    if (link) {
+      router.replace(link as Href<string>);
+      return;
+    }
+
+    const toValue = expanded ? 0 : 1;
+    Animated.spring(animation, {
+      toValue,
+      useNativeDriver: false,
+      tension: 20, // Lower tension for smoother motion
+    }).start();
+    setExpanded(!expanded);
+  };
+
+  const maxHeight = animation.interpolate({
+    inputRange: [0, 0.5, 1],
+    outputRange: [28, 500, 1000], // Add midpoint for smoother interpolation
+    easing: Easing.bezier(0.4, 0, 0.2, 1), // Add smooth easing curve
+  });
+
   return (
     <TouchableOpacity
-      onPress={() => link && router.replace(link as Href<string>)}
+      onPress={toggleExpand}
       className="rounded-xl bg-foreground p-4"
     >
       <View className="absolute right-4 top-4 flex-row gap-x-1">
@@ -50,9 +76,10 @@ export const TipItem = ({
           {title}
         </Text>
       )}
-      <Text className="mt-2 text-sm text-secondary-foreground">
-        {description}
-      </Text>
+
+      <Animated.View className="overflow-hidden" style={{ maxHeight }}>
+        <Markdown>{description}</Markdown>
+      </Animated.View>
     </TouchableOpacity>
   );
 };

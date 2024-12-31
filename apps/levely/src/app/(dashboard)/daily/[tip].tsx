@@ -4,10 +4,10 @@ import { ScrollView } from "react-native-gesture-handler";
 import { Stack, useGlobalSearchParams } from "expo-router";
 
 import { TipItem } from "~/components/tip-item";
+import { tips as tipsData } from "~/lib/tips";
 
 export default function Tip() {
   const { tip } = useGlobalSearchParams();
-  console.log(tip);
   if (!tip || typeof tip !== "string")
     throw new Error("Unreachable, tip not found.");
 
@@ -18,23 +18,9 @@ export default function Tip() {
       stars: number;
       link?: string;
     }[]
-  >([
-    {
-      title: "The easy way",
-      description: "Focus for hours",
-      stars: 1,
-    },
-    {
-      title: "The medium way",
-      description: "Focus for hours",
-      stars: 2,
-    },
-    {
-      title: "The best way",
-      description: "Focus for hours",
-      stars: 3,
-    },
-  ]);
+  >(tipsData[tip as keyof typeof tipsData]);
+
+  console.log(tips);
 
   return (
     <SafeAreaView className="flex-1 bg-background">
