@@ -1,7 +1,9 @@
 import { redirect } from "next/navigation";
+import { userAgent } from "next/server";
 import { BillingForm } from "@/components/billing-form";
 import { DashboardHeader } from "@/components/header";
 import { DashboardShell } from "@/components/shell";
+import { UserDeleteForm } from "@/components/user-delete-form";
 import { UserNameForm } from "@/components/user-name-form";
 import { stripe } from "@/lib/stripe";
 import { getUserSubscriptionPlan } from "@/lib/subscription";
@@ -75,7 +77,10 @@ export default async function SettingsPage() {
             isCanceled: cancelAtPeriodEnd,
           }}
         />
-        {/* <UserDeleteForm user={{ id: user.id }} /> */}
+        {!subscriptionPlan?.stripeCurrentPeriodEnd ||
+        subscriptionPlan.stripeCurrentPeriodEnd <= new Date() ? (
+          <UserDeleteForm user={{ id: session.user.id }} />
+        ) : null}
       </div>
     </DashboardShell>
   );
