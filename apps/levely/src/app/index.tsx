@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Pressable, TextInput, View } from "react-native";
+import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Stack, useRouter } from "expo-router";
 import { SymbolView } from "expo-symbols";
@@ -7,13 +8,14 @@ import { SymbolView } from "expo-symbols";
 import { GradientText } from "~/components/ui/gradient-text";
 import { Text } from "~/components/ui/text";
 import { setPersonalInfo } from "~/lib/storage";
+import { cn } from "~/lib/utils";
 
 export default function Index() {
   const router = useRouter();
-  const [name, setName] = useState("Theo");
-  const [country, setCountry] = useState("NYC");
-  const [major, setMajor] = useState("Computer Science");
-  const [school, setSchool] = useState("Harvard");
+  const [name, setName] = useState("");
+  const [country, setCountry] = useState("");
+  const [major, setMajor] = useState("");
+  const [school, setSchool] = useState("");
 
   async function handleSubmit() {
     await setPersonalInfo({ name, location: country, major, school });
@@ -70,25 +72,31 @@ export default function Index() {
           </View>
           .
         </Text>
-        <View className="h-full">
-          {name.length > 0 &&
-            country.length > 0 &&
-            major.length > 0 &&
-            school.length > 0 && (
-              <Pressable
-                className="absolute -bottom-4 right-4 flex size-16 items-center justify-center rounded-full bg-primary"
-                onPress={handleSubmit}
-              >
-                <SymbolView
-                  name="arrow.right"
-                  resizeMode="scaleAspectFit"
-                  size={24}
-                  weight="light"
-                  tintColor="white"
-                />
-              </Pressable>
-            )}
-        </View>
+        <Animated.View
+          className={cn(
+            "hidden h-full",
+            name.length > 0 &&
+              country.length > 0 &&
+              major.length > 0 &&
+              school.length > 0 &&
+              "block",
+          )}
+          entering={FadeIn.duration(400)}
+          exiting={FadeOut.duration(400)}
+        >
+          <Pressable
+            className="absolute -bottom-4 right-4 flex size-16 items-center justify-center rounded-full bg-primary"
+            onPress={handleSubmit}
+          >
+            <SymbolView
+              name="arrow.right"
+              resizeMode="scaleAspectFit"
+              size={24}
+              weight="light"
+              tintColor="white"
+            />
+          </Pressable>
+        </Animated.View>
       </View>
     </SafeAreaView>
   );
