@@ -82,7 +82,7 @@ export const GradeInput = ({
       >
         <Text className="text-base font-light">Subject</Text>
         <TextInput
-          className="pb-3.5 pt-2 text-lg"
+          className="w-full pb-3.5 pt-2 text-lg"
           placeholder="Enter subject"
           value={subject.name}
           onChangeText={(text) => onSubjectChange?.({ ...subject, name: text })}
