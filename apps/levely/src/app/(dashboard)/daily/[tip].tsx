@@ -3,15 +3,17 @@ import { SafeAreaView, View } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import { Stack, useGlobalSearchParams } from "expo-router";
 
+import type { Stats } from "~/types/types";
 import { TipItem } from "~/components/tip-item";
 import { tips as tipsData } from "~/lib/tips";
+import { api } from "~/utils/api";
 
 export default function Tip() {
   const { tip } = useGlobalSearchParams();
   if (!tip || typeof tip !== "string")
     throw new Error("Unreachable, tip not found.");
 
-  const [tips, setTips] = useState<
+  const [tips, _] = useState<
     {
       title: string;
       description: string;
@@ -19,8 +21,9 @@ export default function Tip() {
       link?: string;
     }[]
   >(tipsData[tip as keyof typeof tipsData]);
-
-  console.log(tips);
+  const { data: promotions } = api.levely.getToolPromotions.useQuery({
+    category: tip as keyof Stats,
+  });
 
   return (
     <SafeAreaView className="flex-1 bg-background">
@@ -35,6 +38,15 @@ export default function Tip() {
                 stars={tip.stars}
                 description={tip.description}
                 link={tip.link}
+              />
+            ))}
+            {promotions?.map((promo, index) => (
+              <TipItem
+                key={index}
+                title={promo.name}
+                description={promo.description}
+                stars={3}
+                link={promo.link}
               />
             ))}
           </View>

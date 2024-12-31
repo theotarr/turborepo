@@ -5,16 +5,42 @@ import { z } from "zod";
 
 import { publicProcedure } from "../trpc";
 
+const tools = {
+  knownotes: {
+    name: "KnowNotes",
+    description:
+      "KnowNotes transcribes lectures and creates detailed notes, flashcards, and quizzes so you can ace your classes easily.",
+    link: "https://knownotes.ai",
+  },
+  soundscape: {
+    name: "Soundscape",
+    description:
+      "Soundscape creates an environment optimized for productivity, immersing you in soundscapes tailored to boost focus and minimize distractions. Paired with smart tools, Soundscape is your go-to for productivity.",
+    link: "https://apps.apple.com/us/app/soundscape-focus-music-timer/id6480119395",
+  },
+};
+
+const toolMap = {
+  noteTaking: [tools.knownotes],
+  focus: [tools.soundscape],
+  memory: [tools.knownotes],
+  reading: [],
+  habits: [tools.soundscape, tools.knownotes],
+  problemSolving: [],
+  timeManagement: [],
+  productivity: [tools.soundscape],
+};
+
 export const levelyRouter = {
-  getTips: publicProcedure
+  getToolPromotions: publicProcedure
     .input(
       z.object({
         category: z.string(),
       }),
     )
-    .query(async ({ input }) => {
-      //   const tips = await getTips(input.category);
-      //   return tips;
+    .query(({ input }) => {
+      const tools = toolMap[input.category as keyof typeof toolMap];
+      return tools;
     }),
   generateStats: publicProcedure
     .input(

@@ -1,7 +1,6 @@
 import type { Href } from "expo-router";
 import React, { useState } from "react";
 import { Animated, Easing, Text, TouchableOpacity, View } from "react-native";
-import { ScrollView } from "react-native-gesture-handler";
 import Markdown from "react-native-markdown-display";
 import { useRouter } from "expo-router";
 import { SymbolView } from "expo-symbols";
@@ -24,7 +23,7 @@ export const TipItem = ({
   const [animation] = useState(new Animated.Value(0));
 
   const toggleExpand = () => {
-    if (link) {
+    if (expanded && link) {
       router.replace(link as Href<string>);
       return;
     }
@@ -40,7 +39,7 @@ export const TipItem = ({
 
   const maxHeight = animation.interpolate({
     inputRange: [0, 0.5, 1],
-    outputRange: [28, 500, 1000], // Add midpoint for smoother interpolation
+    outputRange: [link ? 36 : 28, 500, 1000], // Add midpoint for smoother interpolation
     easing: Easing.bezier(0.4, 0, 0.2, 1), // Add smooth easing curve
   });
 
@@ -76,7 +75,6 @@ export const TipItem = ({
           {title}
         </Text>
       )}
-
       <Animated.View className="overflow-hidden" style={{ maxHeight }}>
         <Markdown>{description}</Markdown>
       </Animated.View>
