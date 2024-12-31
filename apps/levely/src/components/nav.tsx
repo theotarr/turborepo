@@ -28,7 +28,7 @@ const navItems = [
         tintColor={isActive ? "#007AFF" : "#999999"} // Active and inactive colors
       />
     ),
-    href: "/daily",
+    href: "/dashboard/daily",
   },
   {
     name: "Retake test",
@@ -41,7 +41,7 @@ const navItems = [
         tintColor={isActive ? "#007AFF" : "#999999"} // Active and inactive colors
       />
     ),
-    href: "/retake",
+    href: "/dashboard/retake",
   },
   {
     name: "Account",
@@ -54,7 +54,7 @@ const navItems = [
         tintColor={isActive ? "#007AFF" : "#999999"} // Active and inactive colors
       />
     ),
-    href: "/account",
+    href: "/dashboard/account",
   },
 ];
 

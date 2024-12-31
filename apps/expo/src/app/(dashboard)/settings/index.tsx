@@ -3,7 +3,7 @@ import { ActivityIndicator, Pressable, SafeAreaView, View } from "react-native";
 import { Link, Stack, useRouter } from "expo-router";
 import * as StoreReview from "expo-store-review";
 import { Picker } from "@react-native-picker/picker";
-import { ChevronLeft, LogOut, Plus, Star } from "lucide-react-native";
+import { ChevronLeft, LogOut, Star } from "lucide-react-native";
 
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";

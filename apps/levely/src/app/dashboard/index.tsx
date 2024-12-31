@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { SafeAreaView, View } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
+import { Stack } from "expo-router";
 
 import type { Stat } from "~/components/stat-item";
 import { DashboardStatsPage } from "~/components/stats-page";
@@ -23,6 +24,7 @@ export default function Dashboard() {
 
   return (
     <SafeAreaView className="flex-1 bg-background">
+      <Stack.Screen options={{ header: () => <></> }} />
       <View className="mx-4 mt-8 flex-1">
         <ScrollView className="flex-1 px-5">
           <DashboardStatsPage

@@ -11,12 +11,12 @@ const Input = React.forwardRef<
     <TextInput
       ref={ref}
       className={cn(
-        "web:flex native:h-12 web:w-full web:py-2 native:text-lg native:leading-[1.25] web:ring-offset-background web:focus-visible:outline-none web:focus-visible:ring-2 web:focus-visible:ring-ring web:focus-visible:ring-offset-2 h-10 rounded-md border border-input bg-background px-3 text-base text-foreground file:border-0 file:bg-transparent file:font-medium placeholder:text-muted-foreground/40 lg:text-sm",
+        "web:flex native:h-12 web:w-full web:py-2 native:text-lg native:leading-[1.25] web:ring-offset-background web:focus-visible:outline-none web:focus-visible:ring-2 web:focus-visible:ring-ring web:focus-visible:ring-offset-2 h-10 rounded-md border border-input/20 bg-background px-3 text-base text-secondary-foreground/80 file:border-0 file:bg-transparent file:font-medium placeholder:text-muted-foreground/60 lg:text-sm",
         props.editable === false && "web:cursor-not-allowed opacity-50",
         className,
       )}
       placeholderClassName={cn(
-        "text-muted-foreground/40",
+        "text-muted-foreground/60",
         placeholderClassName,
       )}
       {...props}

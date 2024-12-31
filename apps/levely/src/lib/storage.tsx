@@ -98,3 +98,14 @@ export async function getPotentialGrades(): Promise<Subject[]> {
   if (!grades) return [];
   return JSON.parse(grades) as Subject[];
 }
+
+// Delete Account
+export async function deleteAccount() {
+  await SecureStore.deleteItemAsync(PERSONAL_INFO_KEY);
+  await SecureStore.deleteItemAsync(HABITS_KEY);
+  await SecureStore.deleteItemAsync(FOCUS_KEY);
+  await SecureStore.deleteItemAsync(GRADES_KEY);
+  await SecureStore.deleteItemAsync(CURRENT_STATS_KEY);
+  await SecureStore.deleteItemAsync(POTENTIAL_STATS_KEY);
+  await SecureStore.deleteItemAsync(POTENTIAL_GRADES_KEY);
+}

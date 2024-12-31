@@ -9,7 +9,7 @@ export const NAV_THEME = {
     secondary: "hsl(210, 40%, 96.1%)", // secondary
     secondaryForeground: "hsl(222.2, 47.4%, 11.2%)",
     muted: "hsl(210, 40%, 96.1%)",
-    mutedForeground: "hsl(215.4, 16.3%, 46.9%)",
+    mutedForeground: "hsla(0, 0%, 0%, 0.6)",
     text: "hsl(222.2, 84%, 4.9%)", // foreground
   },
 };
