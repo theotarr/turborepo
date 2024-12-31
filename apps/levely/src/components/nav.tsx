@@ -1,6 +1,6 @@
 import type { Href } from "expo-router";
 import { Text, TouchableOpacity, View } from "react-native";
-import { Link, usePathname } from "expo-router";
+import { usePathname, useRouter } from "expo-router";
 import { SymbolView } from "expo-symbols";
 
 const navItems = [
@@ -28,7 +28,7 @@ const navItems = [
         tintColor={isActive ? "#007AFF" : "#999999"} // Active and inactive colors
       />
     ),
-    href: "/dashboard/daily",
+    href: "/daily",
   },
   {
     name: "Retake test",
@@ -41,7 +41,7 @@ const navItems = [
         tintColor={isActive ? "#007AFF" : "#999999"} // Active and inactive colors
       />
     ),
-    href: "/dashboard/retake",
+    href: "/retake",
   },
   {
     name: "Account",
@@ -54,33 +54,36 @@ const navItems = [
         tintColor={isActive ? "#007AFF" : "#999999"} // Active and inactive colors
       />
     ),
-    href: "/dashboard/account",
+    href: "/account",
   },
 ];
 
 export const NavigationBar = () => {
+  const router = useRouter();
   const pathname = usePathname();
 
   return (
     <View className="mb-8 flex-row items-center justify-around border-t border-black/10 bg-background py-2.5">
       {navItems.map((item) => {
-        const isActive = pathname === item.href;
+        const isActive = pathname.startsWith(item.href);
         return (
-          <Link href={item.href as Href<string>} asChild key={item.name}>
-            <TouchableOpacity
-              className="items-center justify-center px-3"
-              activeOpacity={0.7}
+          <TouchableOpacity
+            key={item.name}
+            className="items-center justify-center px-3"
+            activeOpacity={0.7}
+            onPress={() => {
+              router.replace(item.href as Href<string>);
+            }}
+          >
+            {item.icon(isActive)}
+            <Text
+              className={`mt-1 text-xs font-medium ${
+                isActive ? "text-primary" : "text-[#999999]"
+              }`}
             >
-              {item.icon(isActive)}
-              <Text
-                className={`mt-1 text-xs font-medium ${
-                  isActive ? "text-primary" : "text-[#999999]"
-                }`}
-              >
-                {item.name}
-              </Text>
-            </TouchableOpacity>
-          </Link>
+              {item.name}
+            </Text>
+          </TouchableOpacity>
         );
       })}
     </View>

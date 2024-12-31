@@ -1,18 +1,27 @@
+import type { Href } from "expo-router";
 import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
+import { useRouter } from "expo-router";
 import { SymbolView } from "expo-symbols";
 
+import type { Stats } from "~/types/types";
 import { GradientText } from "./ui/gradient-text";
 
 export const PriorityItem = ({
+  stat,
   title,
   priority,
 }: {
+  stat: keyof Stats;
   title: string;
   priority: string;
 }) => {
+  const router = useRouter();
   return (
-    <TouchableOpacity className="rounded-xl bg-foreground p-4">
+    <TouchableOpacity
+      onPress={() => router.replace(`/daily/${stat}` as Href<string>)}
+      className="rounded-xl bg-foreground p-4"
+    >
       <View className="mb-2 flex-row items-center justify-between">
         <View className="flex-row items-center">
           <SymbolView name="brain.head.profile" size={20} tintColor="#000000" />

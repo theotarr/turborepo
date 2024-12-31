@@ -144,7 +144,7 @@ export default function Onboarding() {
   useEffect(() => {
     void (async () => {
       const hasOnboarded = await getOnboardingComplete();
-      if (hasOnboarded) router.replace("/stats/current");
+      // if (hasOnboarded) router.replace("/stats/current");
     })();
   }, [router]);
 

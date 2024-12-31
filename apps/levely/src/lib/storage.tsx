@@ -101,6 +101,7 @@ export async function getPotentialGrades(): Promise<Subject[]> {
 
 // Delete Account
 export async function deleteAccount() {
+  await SecureStore.deleteItemAsync(ONBOARDING_COMPLETE_KEY);
   await SecureStore.deleteItemAsync(PERSONAL_INFO_KEY);
   await SecureStore.deleteItemAsync(HABITS_KEY);
   await SecureStore.deleteItemAsync(FOCUS_KEY);
