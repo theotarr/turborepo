@@ -21,9 +21,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   assetBundlePatterns: ["**/*"],
   ios: {
     bundleIdentifier: "ai.levely.ios",
-    usesAppleSignIn: true,
     supportsTablet: true,
-    associatedDomains: ["applinks:levely.ai"],
+    // associatedDomains: ["applinks:levely.ai"],
     infoPlist: {
       NSMicrophoneUsageDescription:
         "Need microphone access for recording audio",
@@ -41,18 +40,17 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       backgroundColor: "#FFFFFF",
     },
   },
-  // extra: {
-  //   eas: {
-  //     projectId: "d9ca89f3-c9ca-436e-a31b-0273a7df86cb",
-  //   },
-  // },
+  extra: {
+    eas: {
+      projectId: "ee13eb68-1d02-45bb-a9bc-dbd70fa9efa6",
+    },
+  },
   experiments: {
     tsconfigPaths: true,
     typedRoutes: true,
   },
   plugins: [
     "expo-router",
-    "expo-apple-authentication",
     [
       "@react-native-voice/voice",
       {
