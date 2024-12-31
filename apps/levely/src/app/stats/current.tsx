@@ -11,12 +11,19 @@ import Animated, {
 import { Stack, useRouter } from "expo-router";
 import { SymbolView } from "expo-symbols";
 
-import type { Subject } from "~/types/types";
+import type { Stats, Subject } from "~/types/types";
 import { StatsPage } from "~/components/stats-page";
 import { Button } from "~/components/ui/button";
 import { Text } from "~/components/ui/text";
-import { getFocus, getGrades, getHabits } from "~/lib/storage";
-import { letterToGpa } from "~/lib/utils";
+import {
+  getFocus,
+  getGrades,
+  getHabits,
+  getStats,
+  setPotentialStats,
+} from "~/lib/storage";
+import { formatStatsObject, letterToGpa } from "~/lib/utils";
+import { api } from "~/utils/api";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.3;
@@ -40,8 +47,13 @@ const gradeCategories = [
 
 export default function Current() {
   const router = useRouter();
-  const [gpa, setGpa] = useState(0);
+  const generatePotentialStats =
+    api.levely.generatePotentialStats.useMutation();
+
+  const [stats, setStats] = useState<Stats | null>(null);
+  const [overall, setOverall] = useState(0);
   const [grades, setGrades] = useState<Subject[]>([]);
+  const [gpa, setGpa] = useState(0);
   const currentPage = useSharedValue(0);
   const translateX = useSharedValue(-currentPage.value * SCREEN_WIDTH);
 
@@ -78,19 +90,23 @@ export default function Current() {
     }));
 
   useEffect(() => {
-    async function listStats() {
-      const habits = await getHabits();
-      const focus = await getFocus();
+    if (stats) return;
+    async function setState() {
+      const currentStats = await getStats();
       const grades = await getGrades();
 
+      setStats(currentStats);
+      setOverall(
+        Object.values(currentStats!).reduce((acc, value) => acc + value, 0) /
+          Object.keys(currentStats!).length,
+      );
       setGrades(grades);
       setGpa(
         grades.reduce((acc, grade) => acc + letterToGpa(grade.grade), 0) /
           grades.length,
       );
-      console.log({ habits, focus, grades });
     }
-    listStats();
+    setState();
   }, []);
 
   return (
@@ -115,40 +131,9 @@ export default function Current() {
             >
               <StatsPage
                 heading="Overall Stats"
-                overall={0.73}
-                overallLabel="73%"
-                stats={[
-                  {
-                    stat: "Memory",
-                    label: "80",
-                    value: 80,
-                  },
-                  {
-                    stat: "Focus",
-                    label: "80",
-                    value: 80,
-                  },
-                  {
-                    stat: "Reading",
-                    label: "75",
-                    value: 75,
-                  },
-                  {
-                    stat: "Discipline",
-                    label: "70",
-                    value: 70,
-                  },
-                  {
-                    stat: "Stress Management",
-                    label: "65",
-                    value: 65,
-                  },
-                  {
-                    stat: "Time Management",
-                    label: "85",
-                    value: 85,
-                  },
-                ]}
+                overall={overall / 100}
+                overallLabel={`${overall.toFixed(0)}%`}
+                stats={stats ? formatStatsObject(stats) : []}
               />
               <StatsPage
                 heading="Grades"
@@ -191,7 +176,12 @@ export default function Current() {
       <Button
         size="lg"
         className="mx-8"
-        onPress={() => {
+        onPress={async () => {
+          const potentialStats = await generatePotentialStats.mutateAsync({
+            questions: [...(await getHabits()), ...(await getFocus())],
+            currentStats: stats,
+          });
+          await setPotentialStats(potentialStats);
           router.replace("/stats/potential");
         }}
       >

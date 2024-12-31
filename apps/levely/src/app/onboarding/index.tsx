@@ -17,7 +17,9 @@ import {
   setGrades,
   setHabits,
   setOnboardingComplete,
+  setStats,
 } from "~/lib/storage";
+import { api } from "~/utils/api";
 
 const habitQuestions = [
   {
@@ -103,17 +105,15 @@ const sections = [
   { name: "Grades", questions: [] },
 ];
 
+const defaultSubjects = [
+  { id: 0, name: "Calculus", grade: "A-" },
+  { id: 1, name: "Physics", grade: "A-" },
+  { id: 2, name: "Philosophy", grade: "A-" },
+] as Subject[];
+
 export default function Onboarding() {
   const router = useRouter();
-
-  useEffect(() => {
-    void (async () => {
-      const hasOnboarded = await getOnboardingComplete();
-      if (hasOnboarded) {
-        router.replace("/stats/current");
-      }
-    })();
-  }, [router]);
+  const generateStatsMutation = api.levely.generateStats.useMutation();
 
   const [sectionIndex, setSectionIndex] = useState(0);
   const [questionIndex, setQuestionIndex] = useState(0);
@@ -124,28 +124,29 @@ export default function Onboarding() {
   const [memoryProgress, setMemoryProgress] = useState((1 / 3) * 100);
 
   const calcStepProgress = useCallback(() => {
+    // If the user is on the memory section, return the memory progress.
     if (sectionIndex === 1) return memoryProgress;
-
+    // If the user is on the habits or focus section, return the progress based on the number of questions answered.
     const currentSection = sections[sectionIndex];
     const currentQuestion = currentSection?.questions[questionIndex];
-
-    if (!currentSection || !currentQuestion) {
-      return 0;
-    }
-
+    if (!currentSection || !currentQuestion) return 0;
     return ((questionIndex + 1) / currentSection.questions.length) * 100;
   }, [sectionIndex, questionIndex, memoryProgress]);
 
   const [progress, setProgress] = useState(calcStepProgress());
-  const [subjects, setSubjects] = useState<Subject[]>([
-    { id: 0, name: "Calculus", grade: "A-" },
-    { id: 1, name: "Physics", grade: "A-" },
-    { id: 2, name: "Philosophy", grade: "A-" },
-  ]);
+  const [subjects, setSubjects] = useState<Subject[]>(defaultSubjects);
 
   useEffect(() => {
     setProgress(calcStepProgress());
   }, [sectionIndex, questionIndex, memoryProgress, calcStepProgress]);
+
+  // If the user has already onboarded, redirect to the stats page.
+  useEffect(() => {
+    void (async () => {
+      const hasOnboarded = await getOnboardingComplete();
+      if (hasOnboarded) router.replace("/stats/current");
+    })();
+  }, [router]);
 
   return (
     <SafeAreaView className="bg-background">
@@ -197,9 +198,7 @@ export default function Onboarding() {
                       // Save answers to storage.
                       if (sectionIndex === 0) await setHabits(answers);
                       else await setFocus(answers);
-
-                      // Reset answers and move to next section.
-                      setAnswers([]);
+                      // Move to next section.
                       setQuestionIndex(0);
                       setSectionIndex((prev) => prev + 1);
                     })();
@@ -223,19 +222,32 @@ export default function Onboarding() {
               </Text>
               <Pressable
                 className="absolute right-4 top-4 flex size-16 items-center justify-center rounded-full bg-primary"
+                disabled={generateStatsMutation.isLoading}
                 onPress={async () => {
-                  await setGrades(subjects); // Save grades to storage.
-                  await setOnboardingComplete(); // Mark onboarding as complete.
-                  router.replace("/stats/current");
+                  try {
+                    await setGrades(subjects);
+                    const stats = await generateStatsMutation.mutateAsync({
+                      questions: answers,
+                    });
+                    await setStats(stats);
+                    await setOnboardingComplete();
+                    router.replace("/stats/current");
+                  } catch (error) {
+                    console.error("Failed to generate stats:", error);
+                  }
                 }}
               >
-                <SymbolView
-                  name="arrow.right"
-                  resizeMode="scaleAspectFit"
-                  size={24}
-                  weight="light"
-                  tintColor="white"
-                />
+                {generateStatsMutation.isLoading ? (
+                  <View className="h-6 w-6 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                ) : (
+                  <SymbolView
+                    name="arrow.right"
+                    resizeMode="scaleAspectFit"
+                    size={24}
+                    weight="light"
+                    tintColor="white"
+                  />
+                )}
               </Pressable>
               <ScrollView className="mx-2">
                 {subjects.map((subject) => (

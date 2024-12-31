@@ -35,8 +35,10 @@ export const CircularProgress: React.FC<ProgressCircleProps> = ({
     const adjustedRadius = radius - strokeWidth / 2;
     const circumferenceValue = 2 * Math.PI * adjustedRadius;
     setCircumference(circumferenceValue);
-  }, [radius]);
-  const strokeDashoffset = circumference * (1 - progress);
+  }, [radius, strokeWidth]);
+
+  const cappedProgress = Math.min(progress, 1); // Cap progress at 1 (100%)
+  const strokeDashoffset = circumference * (1 - cappedProgress);
 
   return (
     <View style={{ aspectRatio: 1, width: radius * 2 }}>
@@ -85,7 +87,14 @@ export const CircularProgress: React.FC<ProgressCircleProps> = ({
             y="50%"
             textAnchor="middle"
             alignmentBaseline="middle"
-            fontSize={label.length > 3 ? radius / 3 : radius / 2.5}
+            fontSize={
+              // Smaller font for longer labels
+              label.length > 5
+                ? radius / 3.25
+                : label.length > 3
+                  ? radius / 3
+                  : radius / 2.5
+            }
             fill="#000"
             fontWeight="bold"
           >

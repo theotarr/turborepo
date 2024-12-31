@@ -29,3 +29,14 @@ export type Grade =
   | "A-"
   | "A"
   | "A+";
+
+export interface Stats {
+  memory: number;
+  reading: number;
+  focus: number;
+  habits: number;
+  problemSolving: number;
+  timeManagement: number;
+  productivity: number;
+  noteTaking: number;
+}

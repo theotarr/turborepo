@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Dimensions, SafeAreaView, TouchableOpacity, View } from "react-native";
 import { PanGestureHandler, ScrollView } from "react-native-gesture-handler";
 import Animated, {
@@ -10,35 +11,23 @@ import Animated, {
 import { Stack, useRouter } from "expo-router";
 import { SymbolView } from "expo-symbols";
 
+import type { Stats } from "~/types/types";
 import { StatsPage } from "~/components/stats-page";
 import { Button } from "~/components/ui/button";
 import { Text } from "~/components/ui/text";
-import { NAV_THEME } from "~/lib/constants";
+import { getPotentialStats, getStats } from "~/lib/storage";
+import { formatStatsObject } from "~/lib/utils";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.3;
-
-const statCategories = [
-  "Memory",
-  "Focus",
-  "Reading",
-  "Discipline",
-  "Stress Management",
-  "Time Management",
-];
-const gradeCategories = [
-  "Math",
-  "Science",
-  "English",
-  "History",
-  "Art",
-  "Latin",
-];
 
 export default function Potential() {
   const router = useRouter();
   const currentPage = useSharedValue(0);
   const translateX = useSharedValue(-currentPage.value * SCREEN_WIDTH);
+  const [stats, setStats] = useState<Stats | null>(null);
+  const [potentialStats, setPotentialStats] = useState<Stats | null>(null);
+  const [potentialGrades, setPotentialGrades] = useState<null>(null);
 
   const panGestureHandler = useAnimatedGestureHandler({
     onStart: (_, context) => {
@@ -61,15 +50,39 @@ export default function Potential() {
       });
     },
   });
+
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: translateX.value }],
   }));
-  const dotStyle = (index: number) =>
-    useAnimatedStyle(() => ({
-      opacity: withTiming(currentPage.value === index ? 1 : 0.3, {
-        duration: 300,
-      }),
-    }));
+
+  const firstDotStyle = useAnimatedStyle(() => ({
+    opacity: withTiming(currentPage.value === 0 ? 1 : 0.3, {
+      duration: 300,
+    }),
+  }));
+
+  const secondDotStyle = useAnimatedStyle(() => ({
+    opacity: withTiming(currentPage.value === 1 ? 1 : 0.3, {
+      duration: 300,
+    }),
+  }));
+
+  useEffect(() => {
+    if (stats || potentialStats) return;
+
+    async function setState() {
+      const stats = await getStats();
+      const potentialStats = await getPotentialStats();
+      // const potentialGrades = await getPotentialGrades();
+      setStats(stats);
+      setPotentialStats(potentialStats);
+      // setPotentialGrades(potentialGrades);
+    }
+    setState();
+  }, []);
+
+  if (!stats || !potentialStats) return null;
+  console.log("potential", formatStatsObject(stats, potentialStats));
 
   return (
     <SafeAreaView className="flex-1 bg-background">
@@ -95,44 +108,7 @@ export default function Potential() {
                 heading="Potential Stats"
                 overall={0.95}
                 overallLabel="95%"
-                stats={[
-                  {
-                    stat: "Memory",
-                    label: "90",
-                    value: 90,
-                    improvement: "15%",
-                  },
-                  {
-                    stat: "Focus",
-                    label: "92",
-                    value: 92,
-                    improvement: "12%",
-                  },
-                  {
-                    stat: "Reading",
-                    label: "88",
-                    value: 88,
-                    improvement: "13%",
-                  },
-                  {
-                    stat: "Discipline",
-                    label: "80",
-                    value: 80,
-                    improvement: "10%",
-                  },
-                  {
-                    stat: "Stress Management",
-                    label: "75",
-                    value: 75,
-                    improvement: "10%",
-                  },
-                  {
-                    stat: "Time Management",
-                    label: "95",
-                    value: 95,
-                    improvement: "10%",
-                  },
-                ]}
+                stats={formatStatsObject(stats, potentialStats)}
               />
               <StatsPage
                 heading="Potential Grades"
@@ -197,11 +173,11 @@ export default function Potential() {
         <View className="h-6 w-12 flex-row items-center justify-center rounded-full bg-[#BFBFBF] opacity-[44%]">
           <Animated.View
             className="mx-1 size-2 rounded-full bg-black"
-            style={dotStyle(0)}
+            style={firstDotStyle}
           />
           <Animated.View
             className="mx-1 size-2 rounded-full bg-black"
-            style={dotStyle(1)}
+            style={secondDotStyle}
           />
         </View>
       </View>
@@ -213,7 +189,7 @@ export default function Potential() {
         }}
       >
         <Text className="text-center text-lg font-semibold text-primary-foreground">
-          Lock in...
+          How can I improve?
         </Text>
       </Button>
     </SafeAreaView>
