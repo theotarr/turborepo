@@ -21,6 +21,7 @@ import {
   getHabits,
   getPotentialStats,
   getStats,
+  setPotentialGrades,
   setPotentialStats,
 } from "~/lib/storage";
 import { formatStatsObject, letterToGpa } from "~/lib/utils";
@@ -29,27 +30,10 @@ import { api } from "~/utils/api";
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.3;
 
-const statCategories = [
-  "Memory",
-  "Focus",
-  "Reading",
-  "Discipline",
-  "Stress Management",
-  "Time Management",
-];
-const gradeCategories = [
-  "Math",
-  "Science",
-  "English",
-  "History",
-  "Art",
-  "Latin",
-];
-
 export default function Current() {
   const router = useRouter();
   const generatePotentialStats =
-    api.levely.generatePotentialStats.useMutation();
+    api.levely.generatePotentialStatsAndGrades.useMutation();
 
   const [stats, setStats] = useState<Stats | null>(null);
   const [overall, setOverall] = useState(0);
@@ -92,13 +76,16 @@ export default function Current() {
 
   useEffect(() => {
     if (stats) return;
-    async function setState() {
+
+    void (async () => {
       const currentStats = await getStats();
       const grades = await getGrades();
 
       setStats(currentStats);
       setOverall(
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         Object.values(currentStats!).reduce((acc, value) => acc + value, 0) /
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           Object.keys(currentStats!).length,
       );
       setGrades(grades);
@@ -106,8 +93,7 @@ export default function Current() {
         grades.reduce((acc, grade) => acc + letterToGpa(grade.grade), 0) /
           grades.length,
       );
-    }
-    setState();
+    })();
   }, []);
 
   return (
@@ -180,13 +166,17 @@ export default function Current() {
         onPress={async () => {
           try {
             const storedPotentialStats = await getPotentialStats();
-            if (!storedPotentialStats && stats) {
-              const potentialStats = await generatePotentialStats.mutateAsync({
-                questions: [...(await getHabits()), ...(await getFocus())],
-                currentStats: stats,
-              });
-              await setPotentialStats(potentialStats);
-            }
+            // if (!storedPotentialStats && stats) {
+            console.log(grades);
+            const potentialStats = await generatePotentialStats.mutateAsync({
+              questions: [...(await getHabits()), ...(await getFocus())],
+              currentStats: stats,
+              grades,
+            });
+            await setPotentialGrades(potentialStats.grades);
+            delete potentialStats.grades;
+            await setPotentialStats(potentialStats);
+            // }
             router.replace("/stats/potential");
           } catch (error) {
             console.error("Failed to generate potential stats:", error);

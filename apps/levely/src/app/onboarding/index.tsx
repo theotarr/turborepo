@@ -75,7 +75,7 @@ const focusQuestions = [
   {
     question:
       "How easily do you lose focus when working on a challenging task?",
-    options: ["Very easily", "Somewhat easily", "Rarely", "Never"],
+    options: ["Very easily", "Somewhat easily", "Not easily", "Never"],
   },
   {
     question:

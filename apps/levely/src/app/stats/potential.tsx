@@ -11,12 +11,17 @@ import Animated, {
 import { Stack, useRouter } from "expo-router";
 import { SymbolView } from "expo-symbols";
 
-import type { Stats } from "~/types/types";
+import type { Stats, Subject } from "~/types/types";
 import { StatsPage } from "~/components/stats-page";
 import { Button } from "~/components/ui/button";
 import { Text } from "~/components/ui/text";
-import { getPotentialStats, getStats } from "~/lib/storage";
-import { formatStatsObject } from "~/lib/utils";
+import {
+  getGrades,
+  getPotentialGrades,
+  getPotentialStats,
+  getStats,
+} from "~/lib/storage";
+import { formatStatsObject, letterToGpa } from "~/lib/utils";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.3;
@@ -25,9 +30,12 @@ export default function Potential() {
   const router = useRouter();
   const currentPage = useSharedValue(0);
   const translateX = useSharedValue(-currentPage.value * SCREEN_WIDTH);
+  const [potentialOverall, setPotentialOverall] = useState(0);
+  const [potentialGpa, setPotentialGpa] = useState(0);
   const [stats, setStats] = useState<Stats | null>(null);
   const [potentialStats, setPotentialStats] = useState<Stats | null>(null);
-  const [potentialGrades, setPotentialGrades] = useState<null>(null);
+  const [grades, setGrades] = useState<Subject[]>([]);
+  const [potentialGrades, setPotentialGrades] = useState<Subject[]>([]);
 
   const panGestureHandler = useAnimatedGestureHandler({
     onStart: (_, context) => {
@@ -70,19 +78,31 @@ export default function Potential() {
   useEffect(() => {
     if (stats || potentialStats) return;
 
-    async function setState() {
+    void (async () => {
       const stats = await getStats();
+      const grades = await getGrades();
       const potentialStats = await getPotentialStats();
-      // const potentialGrades = await getPotentialGrades();
+      const potentialGrades = await getPotentialGrades();
       setStats(stats);
+      setGrades(grades);
       setPotentialStats(potentialStats);
-      // setPotentialGrades(potentialGrades);
-    }
-    setState();
+      setPotentialGrades(potentialGrades);
+      setPotentialOverall(
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        Object.values(potentialStats!).reduce((acc, value) => acc + value, 0) /
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          Object.keys(potentialStats!).length,
+      );
+      setPotentialGpa(
+        potentialGrades.reduce(
+          (acc, grade) => acc + letterToGpa(grade.grade),
+          0,
+        ) / potentialGrades.length,
+      );
+    })();
   }, []);
 
   if (!stats || !potentialStats) return null;
-  console.log("potential", formatStatsObject(stats, potentialStats));
 
   return (
     <SafeAreaView className="flex-1 bg-background">
@@ -106,52 +126,20 @@ export default function Potential() {
             >
               <StatsPage
                 heading="Potential Stats"
-                overall={0.95}
-                overallLabel="95%"
+                overall={potentialOverall / 100}
+                overallLabel={`${potentialOverall.toFixed(0)}%`}
                 stats={formatStatsObject(stats, potentialStats)}
               />
               <StatsPage
                 heading="Potential Grades"
-                overall={0.85}
-                overallLabel="85%"
-                stats={[
-                  {
-                    stat: "Math",
-                    label: "A-",
-                    value: 90,
-                    improvement: "B+",
-                  },
-                  {
-                    stat: "Science",
-                    label: "A",
-                    value: 93,
-                    improvement: "B+",
-                  },
-                  {
-                    stat: "English",
-                    label: "B",
-                    value: 85,
-                    improvement: "C+",
-                  },
-                  {
-                    stat: "History",
-                    label: "B-",
-                    value: 80,
-                    improvement: "C",
-                  },
-                  {
-                    stat: "Art",
-                    label: "A+",
-                    value: 97,
-                    improvement: "A",
-                  },
-                  {
-                    stat: "Latin",
-                    label: "C",
-                    value: 75,
-                    improvement: "D+",
-                  },
-                ]}
+                overall={potentialGpa / 4}
+                overallLabel={`${potentialGpa.toFixed(2)} GPA`}
+                stats={potentialGrades.map((grade) => ({
+                  stat: grade.name,
+                  label: grade.grade,
+                  value: (letterToGpa(grade.grade) / 4) * 100,
+                  improvement: grades.find((g) => g.name === grade.name)?.grade,
+                }))}
               />
             </Animated.View>
           </PanGestureHandler>

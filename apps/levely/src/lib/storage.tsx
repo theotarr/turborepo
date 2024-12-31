@@ -4,9 +4,9 @@ import type { PersonalInfo, Question, Stats, Subject } from "~/types/types";
 
 const PERSONAL_INFO_KEY = "personal_info";
 const HABITS_KEY = "habits";
-const MEMORY_KEY = "memory";
+// const MEMORY_KEY = "memory";
 const FOCUS_KEY = "focus";
-const READING_KEY = "reading";
+// const READING_KEY = "reading";
 const GRADES_KEY = "grades";
 const ONBOARDING_COMPLETE_KEY = "onboarding_complete";
 const CURRENT_STATS_KEY = "current_stats";
@@ -86,4 +86,15 @@ export async function getPotentialStats(): Promise<Stats | null> {
   const stats = await SecureStore.getItemAsync(POTENTIAL_STATS_KEY);
   if (!stats) return null;
   return JSON.parse(stats) as Stats;
+}
+
+// Potential Grades
+export async function setPotentialGrades(grades: Subject[]) {
+  const gradesString = JSON.stringify(grades);
+  await SecureStore.setItemAsync(POTENTIAL_GRADES_KEY, gradesString);
+}
+export async function getPotentialGrades(): Promise<Subject[]> {
+  const grades = await SecureStore.getItemAsync(POTENTIAL_GRADES_KEY);
+  if (!grades) return [];
+  return JSON.parse(grades) as Subject[];
 }

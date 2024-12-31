@@ -32,13 +32,13 @@ export const levelyRouter = {
           productivity: z.number(),
           noteTaking: z.number(),
         }),
-        prompt: `Based on these questions and answers, give the user a score from 0 to 100 for each category. Be very specific, and favor ratings with weird values.
+        prompt: `Based on these questions and answers, give the user a score from 0 to 100 for each category. Give ratings with weird values, do not round to 5/10s.
         ${questions.map((q) => `Question: ${q.question}\nAnswer: ${q.answer}`).join("\n")}`,
       });
       console.log("Stats:", JSON.stringify(object, null, 2));
       return object;
     }),
-  generatePotentialStats: publicProcedure
+  generatePotentialStatsAndGrades: publicProcedure
     .input(
       z.object({
         questions: z.array(
@@ -57,10 +57,17 @@ export const levelyRouter = {
           productivity: z.number(),
           noteTaking: z.number(),
         }),
+        grades: z.array(
+          z.object({
+            id: z.union([z.string(), z.number()]),
+            name: z.string(),
+            grade: z.string(),
+          }),
+        ),
       }),
     )
     .mutation(async ({ input }) => {
-      const { questions, currentStats } = input;
+      const { questions, currentStats, grades } = input;
       const { object } = await generateObject({
         temperature: 1,
         model: openai("gpt-3.5-turbo"),
@@ -73,8 +80,14 @@ export const levelyRouter = {
           timeManagement: z.number(),
           productivity: z.number(),
           noteTaking: z.number(),
+          grades: z.array(
+            z.object({
+              name: z.string(),
+              grade: z.string(),
+            }),
+          ),
         }),
-        prompt: `Based on these questions and answers and current stats about the user, give a list of the potential stats that the user could improve on (inflate the stats so that they are very high in the high 80s and 90s).
+        prompt: `Based on these questions and answers and current stats about the user, generate a list of potential stats and grades that the student could improve. Inflate the stats and grades into the high 80s and 90s, and A/A+. Give ratings with weird values, do not round to 5/10s.
         ${questions.map((q) => `Question: ${q.question}\nAnswer: ${q.answer}`).join("\n")}
         
         Current Stats:
@@ -85,7 +98,10 @@ export const levelyRouter = {
         Problem Solving: ${currentStats.problemSolving}
         Time Management: ${currentStats.timeManagement}
         Productivity: ${currentStats.productivity}
-        Note Taking: ${currentStats.noteTaking}`,
+        Note Taking: ${currentStats.noteTaking}
+        
+        Current Grades:
+        ${grades.map((g) => `${g.name}: ${g.grade}`).join("\n")}`,
       });
       console.log("Potential Stats:", JSON.stringify(object, null, 2));
       return object;
