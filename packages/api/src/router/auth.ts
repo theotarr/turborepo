@@ -64,4 +64,9 @@ export const authRouter = {
         });
       }
     }),
+  delete: protectedProcedure.mutation(async ({ ctx }) => {
+    return await ctx.db.user.delete({
+      where: { id: ctx.session.user.id },
+    });
+  }),
 } satisfies TRPCRouterRecord;

@@ -60,7 +60,6 @@ export default function SettingsPage() {
           </Text>
           <View className="mt-6 flex flex-col gap-4">
             <Button
-              variant="secondary"
               className="flex w-full flex-row items-center gap-2"
               onPress={async () => {
                 await StoreReview.requestReview();
@@ -68,10 +67,10 @@ export default function SettingsPage() {
             >
               <Star
                 size={16}
-                fill={NAV_THEME[colorScheme].secondaryForeground}
-                color={NAV_THEME[colorScheme].secondaryForeground}
+                fill={NAV_THEME[colorScheme].primaryForeground}
+                color={NAV_THEME[colorScheme].primaryForeground}
               />
-              <Text>Give KnowNotes 5 stars</Text>
+              <Text className="font-semibold">Give KnowNotes 5 stars</Text>
             </Button>
             {/* <Button
               variant="secondary"
@@ -88,7 +87,8 @@ export default function SettingsPage() {
             </Button> */}
           </View>
         </View>
-        <View className="flex flex-col">
+
+        <View className="mt-4 flex flex-col">
           <Label nativeID="theme">Theme</Label>
           <Picker
             selectedValue={colorScheme}
@@ -107,11 +107,12 @@ export default function SettingsPage() {
             <Picker.Item label="Dark" value="dark" />
           </Picker>
         </View>
+
         <View className="mt-8">
-          <Text className="mb-6 text-xl font-semibold text-secondary-foreground">
+          <Text className="text-xl font-semibold text-secondary-foreground">
             Account
           </Text>
-          <View className="flex flex-col gap-6">
+          <View className="mt-4 flex flex-col gap-6">
             <View className="flex flex-col gap-1.5">
               <Label nativeID="name">Name</Label>
               <Input
@@ -123,8 +124,8 @@ export default function SettingsPage() {
             <View className="flex flex-col gap-1.5">
               <Label nativeID="email">Email</Label>
               <Input value={email} aria-labelledby="email" aria-disabled />
-              <Text className="mt-2 text-sm text-muted-foreground">
-                Update your email on{" "}
+              <Text className="mx-1.5 mt-1 text-sm text-muted-foreground">
+                Update email or delete your account on{" "}
                 <Link
                   className="underline"
                   href="https://knownotes.ai/dashboard/settings"
