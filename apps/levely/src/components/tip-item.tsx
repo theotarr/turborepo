@@ -32,15 +32,15 @@ export const TipItem = ({
     Animated.spring(animation, {
       toValue,
       useNativeDriver: false,
-      tension: 20, // Lower tension for smoother motion
+      tension: 20,
     }).start();
     setExpanded(!expanded);
   };
 
   const maxHeight = animation.interpolate({
     inputRange: [0, 0.5, 1],
-    outputRange: [link ? 36 : 28, 500, 1000], // Add midpoint for smoother interpolation
-    easing: Easing.bezier(0.4, 0, 0.2, 1), // Add smooth easing curve
+    outputRange: [32, 500, 1000],
+    easing: Easing.bezier(0.4, 0, 0.2, 1),
   });
 
   return (
@@ -49,7 +49,6 @@ export const TipItem = ({
       className="rounded-xl bg-foreground p-4"
     >
       <View className="absolute right-4 top-4 flex-row gap-x-1">
-        {/* eslint-disable-next-line @typescript-eslint/no-unsafe-assignment */}
         {[...Array(stars)].map((_, i) => (
           <SymbolView
             key={i}
@@ -76,7 +75,17 @@ export const TipItem = ({
         </Text>
       )}
       <Animated.View className="overflow-hidden" style={{ maxHeight }}>
-        <Markdown>{description}</Markdown>
+        {expanded ? (
+          <Markdown>{description}</Markdown>
+        ) : (
+          <Text
+            numberOfLines={1}
+            ellipsizeMode="tail"
+            className="text-secondary-foreground"
+          >
+            {description}
+          </Text>
+        )}
       </Animated.View>
     </TouchableOpacity>
   );

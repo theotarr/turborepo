@@ -44,7 +44,7 @@ export const GradeInput = ({
     function calcMargin() {
       // If left of center, add margin to the left
       const midpoint = grades.length / 2;
-      const multiplier = 0.5; // Adjust this value to control the steepness of the parabola
+      const multiplier = 0.3; // Adjust this value to control the steepness of the parabola
 
       if (grade < midpoint) {
         return {
