@@ -72,6 +72,7 @@ export const NavigationBar = () => {
             className="items-center justify-center px-3"
             activeOpacity={0.7}
             onPress={() => {
+              if (item.href === pathname) return;
               router.replace(item.href as Href<string>);
             }}
           >

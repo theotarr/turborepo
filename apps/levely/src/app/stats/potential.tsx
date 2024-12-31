@@ -21,7 +21,7 @@ import {
   getPotentialStats,
   getStats,
 } from "~/lib/storage";
-import { formatStatsObject, letterToGpa } from "~/lib/utils";
+import { calculateOverall, formatStatsObject, letterToGpa } from "~/lib/utils";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.3;
@@ -87,12 +87,7 @@ export default function Potential() {
       setGrades(grades);
       setPotentialStats(potentialStats);
       setPotentialGrades(potentialGrades);
-      setPotentialOverall(
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        Object.values(potentialStats!).reduce((acc, value) => acc + value, 0) /
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          Object.keys(potentialStats!).length,
-      );
+      setPotentialOverall(calculateOverall(potentialStats!));
       setPotentialGpa(
         potentialGrades.reduce(
           (acc, grade) => acc + letterToGpa(grade.grade),
@@ -100,7 +95,7 @@ export default function Potential() {
         ) / potentialGrades.length,
       );
     })();
-  }, []);
+  }, [potentialStats, stats]);
 
   if (!stats || !potentialStats) return null;
 
@@ -173,7 +168,7 @@ export default function Potential() {
         size="lg"
         className="mx-8"
         onPress={() => {
-          router.replace("/dashboard");
+          router.replace("/daily");
         }}
       >
         <Text className="text-center text-lg font-semibold text-primary-foreground">
