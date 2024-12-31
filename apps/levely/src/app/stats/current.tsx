@@ -19,6 +19,7 @@ import {
   getFocus,
   getGrades,
   getHabits,
+  getPotentialStats,
   getStats,
   setPotentialStats,
 } from "~/lib/storage";
@@ -177,12 +178,19 @@ export default function Current() {
         size="lg"
         className="mx-8"
         onPress={async () => {
-          const potentialStats = await generatePotentialStats.mutateAsync({
-            questions: [...(await getHabits()), ...(await getFocus())],
-            currentStats: stats,
-          });
-          await setPotentialStats(potentialStats);
-          router.replace("/stats/potential");
+          try {
+            const storedPotentialStats = await getPotentialStats();
+            if (!storedPotentialStats && stats) {
+              const potentialStats = await generatePotentialStats.mutateAsync({
+                questions: [...(await getHabits()), ...(await getFocus())],
+                currentStats: stats,
+              });
+              await setPotentialStats(potentialStats);
+            }
+            router.replace("/stats/potential");
+          } catch (error) {
+            console.error("Failed to generate potential stats:", error);
+          }
         }}
       >
         <Text className="text-center text-lg font-semibold text-primary-foreground">
