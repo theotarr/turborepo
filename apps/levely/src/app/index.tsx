@@ -5,9 +5,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Stack, useRouter } from "expo-router";
 import { SymbolView } from "expo-symbols";
 
-import { Button } from "~/components/ui/button";
 import { GradientText } from "~/components/ui/gradient-text";
 import { Text } from "~/components/ui/text";
+import { NAV_THEME } from "~/lib/constants";
 import { setPersonalInfo } from "~/lib/storage";
 import { cn } from "~/lib/utils";
 
@@ -34,45 +34,58 @@ export default function Index() {
           locations={[0, 0.52, 0.78, 0.89, 1]}
           className="text-3xl font-bold text-primary"
         />
-        <Text className="mt-8 h-64 max-w-sm text-3xl leading-[1.4] text-secondary-foreground">
-          My name is{" "}
-          <View className="flex-row items-end p-0">
+        <View className="mt-8 h-64 flex-row flex-wrap items-center">
+          <View className="flex-row items-center">
+            <Text className="text-3xl leading-[1.4] text-secondary-foreground">
+              My name is{" "}
+            </Text>
             <TextInput
               value={name}
               onChangeText={setName}
               placeholder="name"
-              className="text-3xl font-medium text-primary"
+              placeholderTextColor={NAV_THEME.light.placeholder}
+              className="text-3xl font-medium italic text-primary"
             />
-          </View>{" "}
-          and I'm located in{" "}
-          <View className="flex-row items-end p-0">
-            <TextInput
-              value={country}
-              onChangeText={setCountry}
-              placeholder="country"
-              className="text-3xl font-medium text-primary"
-            />
+            <Text className="text-3xl leading-[1.4] text-secondary-foreground">
+              {" "}
+              and I'm{" "}
+            </Text>
           </View>
-          . I study{" "}
-          <View className="flex-row items-end p-0">
-            <TextInput
-              value={major}
-              onChangeText={setMajor}
-              placeholder="major"
-              className="text-3xl font-medium text-primary"
-            />
-          </View>{" "}
-          at{" "}
-          <View className="flex-row items-end p-0">
-            <TextInput
-              value={school}
-              onChangeText={setSchool}
-              placeholder="school"
-              className="text-3xl font-medium text-primary"
-            />
-          </View>
-          .
-        </Text>
+          <Text className="text-3xl leading-[1.4] text-secondary-foreground">
+            located in{" "}
+          </Text>
+          <TextInput
+            value={country}
+            onChangeText={setCountry}
+            placeholder="country/city"
+            placeholderTextColor={NAV_THEME.light.placeholder}
+            className="text-3xl font-medium italic text-primary"
+          />
+          <Text className="text-3xl leading-[1.4] text-secondary-foreground">
+            . I study{" "}
+          </Text>
+          <TextInput
+            value={major}
+            onChangeText={setMajor}
+            placeholder="major"
+            placeholderTextColor={NAV_THEME.light.placeholder}
+            className="text-3xl font-medium italic text-primary"
+          />
+          <Text className="text-3xl leading-[1.4] text-secondary-foreground">
+            {" "}
+            at{" "}
+          </Text>
+          <TextInput
+            value={school}
+            onChangeText={setSchool}
+            placeholder="school"
+            placeholderTextColor={NAV_THEME.light.placeholder}
+            className="text-3xl font-medium italic text-primary"
+          />
+          <Text className="text-3xl leading-[1.4] text-secondary-foreground">
+            .
+          </Text>
+        </View>
         <Animated.View
           className={cn(
             "hidden h-full",
@@ -98,13 +111,6 @@ export default function Index() {
             />
           </Pressable>
         </Animated.View>
-        {/* <Button
-          onPress={() => {
-            router.replace("/dashboard");
-          }}
-        >
-          <Text>Dashboard</Text>
-        </Button> */}
       </View>
     </SafeAreaView>
   );

@@ -11,5 +11,6 @@ export const NAV_THEME = {
     muted: "hsl(210, 40%, 96.1%)",
     mutedForeground: "hsla(0, 0%, 0%, 0.6)",
     text: "hsl(222.2, 84%, 4.9%)", // foreground
+    placeholder: "hsla(0, 0%, 0%, 0.4)",
   },
 };
