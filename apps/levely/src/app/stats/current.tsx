@@ -12,6 +12,7 @@ import { Stack, useRouter } from "expo-router";
 import { SymbolView } from "expo-symbols";
 
 import type { Stats, Subject } from "~/types/types";
+import { ShareReport } from "~/components/share-report";
 import { StatsPage } from "~/components/stats-page";
 import { Button } from "~/components/ui/button";
 import { Text } from "~/components/ui/text";
@@ -130,18 +131,7 @@ export default function Current() {
               />
             </Animated.View>
           </PanGestureHandler>
-          <TouchableOpacity className="mb-5 flex-row items-center justify-center">
-            <SymbolView
-              name="square.and.arrow.up"
-              resizeMode="scaleAspectFit"
-              scale="small"
-              weight="medium"
-              tintColor="black"
-            />
-            <Text className="ml-2 text-lg font-medium text-secondary-foreground">
-              Share my report
-            </Text>
-          </TouchableOpacity>
+          <ShareReport className="mb-5" />
         </ScrollView>
       </View>
       <View className="mb-8 mt-4 flex items-center">

@@ -11,6 +11,7 @@ import { Stack } from "expo-router";
 import { SymbolView } from "expo-symbols";
 
 import type { Stats } from "~/types/types";
+import { ShareReport } from "~/components/share-report";
 import { DashboardStatsPage } from "~/components/stats-page";
 import { Text } from "~/components/ui/text";
 import { getPotentialStats, getStats } from "~/lib/storage";
@@ -101,18 +102,7 @@ export default function Dashboard() {
           />
         </Animated.View>
       </PanGestureHandler>
-      <TouchableOpacity className="mb-5 flex-row items-center justify-center">
-        <SymbolView
-          name="square.and.arrow.up"
-          resizeMode="scaleAspectFit"
-          scale="small"
-          weight="medium"
-          tintColor="black"
-        />
-        <Text className="ml-2 text-lg font-medium text-secondary-foreground">
-          Share my report
-        </Text>
-      </TouchableOpacity>
+      <ShareReport className="mb-5" />
     </SafeAreaView>
   );
 }
