@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Dimensions, SafeAreaView, TouchableOpacity } from "react-native";
+import { Dimensions, SafeAreaView } from "react-native";
 import { PanGestureHandler } from "react-native-gesture-handler";
 import Animated, {
   useAnimatedGestureHandler,
@@ -8,12 +8,10 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated";
 import { Stack } from "expo-router";
-import { SymbolView } from "expo-symbols";
 
 import type { Stats } from "~/types/types";
 import { ShareReport } from "~/components/share-report";
 import { DashboardStatsPage } from "~/components/stats-page";
-import { Text } from "~/components/ui/text";
 import { getPotentialStats, getStats } from "~/lib/storage";
 import { calculateOverall, formatStatsObject } from "~/lib/utils";
 

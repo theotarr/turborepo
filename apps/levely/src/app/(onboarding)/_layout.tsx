@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { View } from "react-native";
 import { Stack, useRouter } from "expo-router";
 
 import { getOnboardingComplete } from "~/lib/storage";
@@ -13,5 +14,15 @@ export default function OnboardingLayout() {
     })();
   }, [router]);
 
-  return <Stack />;
+  return (
+    <View className="h-full flex-1">
+      <Stack.Screen
+        options={{
+          title: "Onboarding",
+          header: () => <></>,
+        }}
+      />
+      <Stack />
+    </View>
+  );
 }

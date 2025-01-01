@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Dimensions, SafeAreaView, TouchableOpacity, View } from "react-native";
+import { Dimensions, SafeAreaView, View } from "react-native";
 import { PanGestureHandler, ScrollView } from "react-native-gesture-handler";
 import Animated, {
   useAnimatedGestureHandler,
@@ -10,7 +10,6 @@ import Animated, {
 } from "react-native-reanimated";
 import { Stack, useRouter } from "expo-router";
 import * as StoreReview from "expo-store-review";
-import { SymbolView } from "expo-symbols";
 
 import type { Stats, Subject } from "~/types/types";
 import { ShareReport } from "~/components/share-report";
