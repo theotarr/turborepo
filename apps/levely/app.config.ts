@@ -28,6 +28,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         "Need microphone access for recording audio",
       NSSpeechRecognitionUsageDescription:
         "Need speech recognition access for voice commands",
+      NSPhotoLibraryUsageDescription:
+        "Need photo library access for uploading images",
     },
     config: {
       usesNonExemptEncryption: false,
