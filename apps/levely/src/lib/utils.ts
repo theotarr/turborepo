@@ -99,3 +99,10 @@ export function numberToOrdinal(n: number): string {
           : "th";
   return `${n}${suffix}`;
 }
+
+export function camelCaseToTitle(str: string): string {
+  return str
+    .replace(/([A-Z])/g, " $1")
+    .replace(/^./, (str) => str.toUpperCase())
+    .trim();
+}
