@@ -14,12 +14,12 @@ import { cn } from "~/lib/utils";
 export default function Index() {
   const router = useRouter();
   const [name, setName] = useState("");
-  const [country, setCountry] = useState("");
+  const [location, setLocation] = useState("");
   const [major, setMajor] = useState("");
   const [school, setSchool] = useState("");
 
   async function handleSubmit() {
-    await setPersonalInfo({ name, location: country, major, school });
+    await setPersonalInfo({ name, location, major, school });
     router.replace("/onboarding");
   }
 
@@ -55,8 +55,8 @@ export default function Index() {
             located in{" "}
           </Text>
           <TextInput
-            value={country}
-            onChangeText={setCountry}
+            value={location}
+            onChangeText={setLocation}
             placeholder="country/city"
             placeholderTextColor={NAV_THEME.light.placeholder}
             className="text-3xl font-medium italic text-primary"
@@ -90,7 +90,7 @@ export default function Index() {
           className={cn(
             "hidden h-full",
             name.length > 0 &&
-              country.length > 0 &&
+              location.length > 0 &&
               major.length > 0 &&
               school.length > 0 &&
               "block",

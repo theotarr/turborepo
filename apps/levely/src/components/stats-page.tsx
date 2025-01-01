@@ -48,7 +48,7 @@ export const StatsPage = ({
           scrollEnabled={false}
           numColumns={2}
           keyExtractor={(_, index) => index.toString()}
-          contentContainerClassName="w-full items-center"
+          contentContainerClassName="w-full"
           renderItem={({ item, index }) => (
             <View className={cn("w-[45%]", index % 2 === 0 ? "mr-2" : "ml-2")}>
               <StatItem
@@ -98,7 +98,7 @@ export const DashboardStatsPage = ({
         scrollEnabled={false}
         numColumns={2}
         keyExtractor={(_, index) => index.toString()}
-        contentContainerClassName="w-full items-center"
+        contentContainerClassName="w-full"
         renderItem={({ item, index }) => (
           <View
             className={cn(
