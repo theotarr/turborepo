@@ -153,7 +153,6 @@ export default function Current() {
           try {
             const storedPotentialStats = await getPotentialStats();
             if (!storedPotentialStats && stats) {
-              console.log(grades);
               const potentialStats = await generatePotentialStats.mutateAsync({
                 questions: [...(await getHabits()), ...(await getFocus())],
                 currentStats: stats,
