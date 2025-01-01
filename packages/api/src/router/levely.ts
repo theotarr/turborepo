@@ -68,11 +68,19 @@ export const levelyRouter = {
           productivity: z.number(),
           noteTaking: z.number(),
         }),
-        prompt: `Based on these questions and answers, give the user a score from 0 to 100 for each category. Give ratings with weird values, do not round to 5/10s.
+        prompt: `Based on these questions and answers, give the user a score from 0 to 100 for each category.
         ${questions.map((q) => `Question: ${q.question}\nAnswer: ${q.answer}`).join("\n")}`,
       });
-      console.log("Stats:", JSON.stringify(object, null, 2));
-      return object;
+
+      // For each stat, subtract a random number between 0 and 4
+      const stats = Object.fromEntries(
+        Object.entries(object).map(([key, value]) => [
+          key,
+          value - Math.ceil(Math.random() * 4),
+        ]),
+      );
+
+      return stats;
     }),
   generatePotentialStatsAndGrades: publicProcedure
     .input(
