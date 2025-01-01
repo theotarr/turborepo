@@ -70,15 +70,17 @@ export const DashboardStatsPage = ({
   overall,
   overallLabel,
   stats,
+  className,
 }: {
   heading: string;
   overall: number;
   overallLabel: string;
   stats: Stat[];
+  className?: string;
 }) => (
-  <View style={{ width: SCREEN_WIDTH - 56 }} className="py-5">
-    <View className="mb-6 rounded-xl bg-foreground px-4 py-3 pb-6">
-      <Text className="mb-8 text-xl font-medium text-secondary-foreground">
+  <View style={{ width: SCREEN_WIDTH - 64 }} className={cn("py-4", className)}>
+    <View className="mb-4 rounded-xl bg-foreground px-4 py-3 pb-6">
+      <Text className="mb-4 text-xl font-medium text-secondary-foreground">
         {heading}
       </Text>
       <View className="flex items-center">
@@ -90,7 +92,7 @@ export const DashboardStatsPage = ({
         />
       </View>
     </View>
-    <View className="mb-8 flex items-center justify-center">
+    <View className="flex items-center justify-center">
       <FlatList
         data={stats}
         scrollEnabled={false}
@@ -109,6 +111,7 @@ export const DashboardStatsPage = ({
               label={item.label}
               value={item.value}
               improvement={item.improvement}
+              className="mb-0"
             />
           </View>
         )}
