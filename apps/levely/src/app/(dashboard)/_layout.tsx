@@ -7,7 +7,7 @@ import { NavigationBar } from "~/components/nav";
 export default function DashboardLayout() {
   return (
     <View className="h-full flex-1">
-      <Stack.Screen options={{ header: () => <></> }} />
+      <Stack.Screen options={{ headerShown: false }} />
       <Stack />
       <NavigationBar />
     </View>

@@ -69,7 +69,7 @@ export default function Dashboard() {
 
   return (
     <SafeAreaView className="flex-1 bg-background">
-      <Stack.Screen options={{ header: () => <></> }} />
+      <Stack.Screen options={{ headerShown: false }} />
       <PanGestureHandler onGestureEvent={panGestureHandler}>
         <Animated.View
           className="flex flex-row justify-between"

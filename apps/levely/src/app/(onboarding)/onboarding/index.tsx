@@ -19,97 +19,8 @@ import {
   setOnboardingComplete,
   setStats,
 } from "~/lib/storage";
+import { defaultSubjects, sections } from "~/lib/tests";
 import { api } from "~/utils/api";
-
-const habitQuestions = [
-  {
-    question: "How much do you study each week?",
-    options: ["Less than 1 hour", "1-5 hours", "6-10 hours", "10+ hours"],
-  },
-  {
-    question:
-      "How much time do you spend on your phone daily (non-essential use)?",
-    options: [
-      "Less than 2 hours",
-      "2-4 hours",
-      "4-6 hours",
-      "More than 6 hours",
-    ],
-  },
-  {
-    question:
-      "How many hours do you work out or engage in physical activity weekly?",
-    options: [
-      "Less than 1 hour",
-      "1-3 hours",
-      "4-6 hours",
-      "More than 6 hours",
-    ],
-  },
-  {
-    question: "How many hours of sleep do you get each night?",
-    options: [
-      "Less than 5 hours",
-      "5-6 hours",
-      "7-8 hours",
-      "More than 8 hours",
-    ],
-  },
-] as const;
-
-const focusQuestions = [
-  {
-    question: "How often do you work without getting distracted?",
-    options: ["Never", "Rarely", "Sometimes", "Always"],
-  },
-  {
-    question:
-      "How long can you stay fully focused on a single task without becoming distracted?",
-    options: [
-      "Less than 10 minutes",
-      "10-30 minutes",
-      "30-60 minutes",
-      "More than 60 minutes",
-    ],
-  },
-  {
-    question:
-      "How easily do you lose focus when working on a challenging task?",
-    options: ["Very easily", "Somewhat easily", "Not easily", "Never"],
-  },
-  {
-    question:
-      "How well do you manage intrusive thoughts or worries while working?",
-    options: ["Not at all", "Somewhat", "Well", "Very well"],
-  },
-  {
-    question:
-      "What percentage of your planned tasks do you typically complete in a day?",
-    options: ["Less than 30%", "30-70%", "70-100%"],
-  },
-  {
-    question: "Do you regularly postpone tasks to the next day?",
-    options: ["Often", "Sometimes", "Rarely"],
-  },
-  {
-    question: "Do you take breaks to recharge during the day?",
-    options: ["Never", "Occasionally", "Frequently"],
-  },
-] as const;
-
-const sections = [
-  { name: "Habits", questions: habitQuestions },
-  { name: "Memorization", questions: [] },
-  { name: "Focus", questions: focusQuestions },
-  { name: "Reading", questions: [] },
-  { name: "Grades", questions: [] },
-];
-
-const defaultSubjects = [
-  { id: 0, name: "Calculus", grade: "A-" },
-  { id: 1, name: "Physics", grade: "A-" },
-  { id: 2, name: "Philosophy", grade: "A-" },
-] as Subject[];
 
 export default function Onboarding() {
   const router = useRouter();
@@ -150,12 +61,7 @@ export default function Onboarding() {
 
   return (
     <SafeAreaView className="bg-background">
-      <Stack.Screen
-        options={{
-          title: "Onboarding",
-          header: () => <></>,
-        }}
-      />
+      <Stack.Screen options={{ headerShown: false }} />
       <View className="h-full w-full">
         <Pagination
           totalSteps={sections.length}

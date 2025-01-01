@@ -16,27 +16,10 @@ export default function OnboardingLayout() {
     })();
   }, [router]);
 
-  if (isLoading)
-    return (
-      <View className="h-full flex-1 bg-background">
-        <Stack.Screen
-          options={{
-            title: "Onboarding",
-            header: () => <></>,
-          }}
-        />
-      </View>
-    );
-
   return (
-    <View className="h-full flex-1">
-      <Stack.Screen
-        options={{
-          title: "Onboarding",
-          header: () => <></>,
-        }}
-      />
-      <Stack />
+    <View className="h-full flex-1 bg-background">
+      <Stack.Screen options={{ headerShown: false }} />
+      {!isLoading && <Stack />}
     </View>
   );
 }

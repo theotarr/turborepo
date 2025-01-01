@@ -25,7 +25,7 @@ export default function Daily() {
 
   return (
     <SafeAreaView className="flex-1 bg-background">
-      <Stack.Screen options={{ header: () => <></> }} />
+      <Stack.Screen options={{ headerShown: false }} />
       <View className="mx-4 mt-8 flex-1">
         <ScrollView>
           <View className="flex-col gap-y-4">

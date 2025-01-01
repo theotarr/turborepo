@@ -25,7 +25,7 @@ export default function Index() {
 
   return (
     <SafeAreaView className="h-full flex-1">
-      <Stack.Screen options={{ header: () => <></> }} />
+      <Stack.Screen options={{ headerShown: false }} />
       <View className="h-full flex-1 px-5 pt-36">
         <GradientText
           text="Hello, who are you?"

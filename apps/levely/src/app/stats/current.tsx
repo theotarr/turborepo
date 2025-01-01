@@ -94,12 +94,7 @@ export default function Current() {
 
   return (
     <SafeAreaView className="flex-1 bg-background">
-      <Stack.Screen
-        options={{
-          title: "Dashboard",
-          header: () => <></>,
-        }}
-      />
+      <Stack.Screen options={{ headerShown: false }} />
       <View className="mx-4 mt-8 flex-1 rounded-xl bg-foreground">
         <ScrollView className="flex-1">
           <PanGestureHandler onGestureEvent={panGestureHandler}>

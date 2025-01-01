@@ -33,7 +33,7 @@ export default function Account() {
 
   return (
     <SafeAreaView className="flex-1 bg-background">
-      <Stack.Screen options={{ header: () => <></> }} />
+      <Stack.Screen options={{ headerShown: false }} />
       <View className="mx-4 mt-8 flex-1 flex-col gap-8">
         <View className="flex-col gap-4">
           <Text className="text-2xl font-medium text-secondary-foreground">
