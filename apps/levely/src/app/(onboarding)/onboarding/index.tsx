@@ -222,7 +222,7 @@ export default function Onboarding() {
               </Text>
               <Pressable
                 className="absolute right-4 top-4 flex size-16 items-center justify-center rounded-full bg-primary"
-                disabled={generateStatsMutation.isLoading}
+                disabled={generateStatsMutation.isPending}
                 onPress={async () => {
                   try {
                     await setGrades(subjects);
@@ -237,17 +237,13 @@ export default function Onboarding() {
                   }
                 }}
               >
-                {generateStatsMutation.isLoading ? (
-                  <View className="h-6 w-6 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                ) : (
-                  <SymbolView
-                    name="arrow.right"
-                    resizeMode="scaleAspectFit"
-                    size={24}
-                    weight="light"
-                    tintColor="white"
-                  />
-                )}
+                <SymbolView
+                  name="arrow.right"
+                  resizeMode="scaleAspectFit"
+                  size={24}
+                  weight="light"
+                  tintColor="white"
+                />
               </Pressable>
               <ScrollView className="mx-2">
                 {subjects.map((subject) => (

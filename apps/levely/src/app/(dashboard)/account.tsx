@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Alert, SafeAreaView, View } from "react-native";
+import { ActivityIndicator, Alert, SafeAreaView, View } from "react-native";
 import { Stack, useRouter } from "expo-router";
 import * as StoreReview from "expo-store-review";
 import { SymbolView } from "expo-symbols";
@@ -9,13 +9,15 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Text } from "~/components/ui/text";
 import { NAV_THEME } from "~/lib/constants";
-import { deleteAccount, getPersonalInfo } from "~/lib/storage";
+import { deleteAccount, getPersonalInfo, setPersonalInfo } from "~/lib/storage";
 
 export default function Account() {
   const router = useRouter();
   const [name, setName] = useState("");
   const [location, setLocation] = useState("");
   const [school, setSchool] = useState("");
+  const [major, setMajor] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     void (async () => {
@@ -24,6 +26,7 @@ export default function Account() {
         setName(info.name);
         setLocation(info.location);
         setSchool(info.school);
+        setMajor(info.major);
       }
     })();
   }, []);
@@ -38,9 +41,7 @@ export default function Account() {
           </Text>
           <View className="flex-row gap-2">
             <Button
-              onPress={async () => {
-                await StoreReview.requestReview();
-              }}
+              onPress={async () => await StoreReview.requestReview()}
               className="flex-row items-center gap-2"
             >
               <SymbolView name="star.fill" size={16} tintColor="white" />
@@ -79,6 +80,31 @@ export default function Account() {
               placeholder="Enter your school"
             />
           </View>
+          <View className="flex-col gap-1.5">
+            <Label nativeID="major">Major</Label>
+            <Input
+              nativeID="major"
+              value={major}
+              onChangeText={setMajor}
+              placeholder="Enter your major"
+            />
+          </View>
+          <Button
+            onPress={async () => {
+              setIsLoading(true);
+              await new Promise((resolve) => setTimeout(resolve, 400));
+              await setPersonalInfo({ name, location, school, major });
+              setIsLoading(false);
+            }}
+            className="mt-4 flex-row items-center gap-2"
+            disabled={isLoading}
+            variant="secondary"
+          >
+            {isLoading && (
+              <ActivityIndicator size="small" color={NAV_THEME.light.primary} />
+            )}
+            <Text>Save</Text>
+          </Button>
           <Button
             onPress={() => {
               Alert.alert(
@@ -104,7 +130,7 @@ export default function Account() {
             }}
             variant="ghost"
             size="sm"
-            className="mt-4 w-40 flex-row items-center gap-2"
+            className="mt-6 w-40 flex-row items-center gap-2"
           >
             <SymbolView
               name="trash"
