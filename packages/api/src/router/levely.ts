@@ -75,9 +75,9 @@ export const levelyRouter = {
       const stats = Object.fromEntries(
         Object.entries(object).map(([key, value]) => [
           key,
-          // If the value is a multiple of 5 or 10, subtract a random number between 0 and 4 to make it more interesting
-          value % 5 === 0 || value % 10 === 0
-            ? value - Math.ceil(Math.random() * 4)
+          // If the value is a multiple of 5 or 10 and greater than 5, subtract a random number between 0 and 2 to make it more interesting
+          (value % 5 === 0 || value % 10 === 0) && value > 5
+            ? value - Math.floor(Math.random() * 2)
             : value,
         ]),
       );
