@@ -56,7 +56,6 @@ export const levelyRouter = {
     .mutation(async ({ input }) => {
       const { questions } = input;
       const { object } = await generateObject({
-        temperature: 1,
         model: openai("gpt-3.5-turbo"),
         schema: z.object({
           memory: z.number(),
