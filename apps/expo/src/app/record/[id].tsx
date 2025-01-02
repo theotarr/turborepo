@@ -138,7 +138,22 @@ export default function Record() {
     }
   }
 
-  if (!lecture) return null;
+  if (!lecture)
+    return (
+      <Stack.Screen
+        options={{
+          title: "Live Lecture",
+          headerLeft: () => (
+            <Pressable onPress={() => router.back()}>
+              <ChevronLeft
+                color={NAV_THEME[colorScheme].secondaryForeground}
+                size={16}
+              />
+            </Pressable>
+          ),
+        }}
+      />
+    );
 
   return (
     <SafeAreaView className="my-0 bg-muted py-0">

@@ -3,6 +3,7 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
+  Pressable,
   SafeAreaView,
   View,
 } from "react-native";
@@ -13,7 +14,6 @@ import { Aperture, ChevronLeft } from "lucide-react-native";
 import { ChatForm } from "~/components/chat-form";
 import { ChatMessage } from "~/components/chat-message";
 import { MessageIdeas } from "~/components/message-ideas";
-import { Button } from "~/components/ui/button";
 import { NAV_THEME } from "~/lib/constants";
 import { useColorScheme } from "~/lib/theme";
 import { api } from "~/utils/api";
@@ -66,20 +66,36 @@ export default function Lecture() {
     ]);
   };
 
-  if (!lecture) return null;
+  if (!lecture)
+    return (
+      <Stack.Screen
+        options={{
+          headerLeft: () => (
+            <Pressable onPress={() => router.back()}>
+              <ChevronLeft
+                className="m-0 p-0"
+                color={NAV_THEME[colorScheme].secondaryForeground}
+                size={20}
+              />
+            </Pressable>
+          ),
+          headerTitle: "Chat",
+        }}
+      />
+    );
 
   return (
     <SafeAreaView className="w-full flex-1 bg-background">
       <Stack.Screen
         options={{
           headerLeft: () => (
-            <Button variant="link" onPress={() => router.back()}>
+            <Pressable onPress={() => router.back()}>
               <ChevronLeft
                 className="m-0 p-0"
                 color={NAV_THEME[colorScheme].secondaryForeground}
                 size={20}
               />
-            </Button>
+            </Pressable>
           ),
           headerTitle: "Chat",
         }}

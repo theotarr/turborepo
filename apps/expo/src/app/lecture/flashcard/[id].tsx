@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
-import { ActivityIndicator, SafeAreaView, View } from "react-native";
+import { ActivityIndicator, Pressable, SafeAreaView, View } from "react-native";
 import { Stack, useGlobalSearchParams, useRouter } from "expo-router";
 import { ChevronLeft } from "lucide-react-native";
 
 import { FlashcardDeck } from "~/components/flashcard";
-import { Button } from "~/components/ui/button";
 import { Text } from "~/components/ui/text";
 import { NAV_THEME } from "~/lib/constants";
 import { useColorScheme } from "~/lib/theme";
@@ -58,25 +57,40 @@ export default function Lecture() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  if (!lecture) return null;
+  if (!lecture)
+    return (
+      <Stack.Screen
+        options={{
+          headerLeft: () => (
+            <Pressable onPress={() => router.back()}>
+              <ChevronLeft
+                className="m-0 p-0"
+                color={NAV_THEME[colorScheme].secondaryForeground}
+                size={20}
+              />
+            </Pressable>
+          ),
+          headerTitle: "Flashcards",
+        }}
+      />
+    );
 
   return (
     <SafeAreaView className="w-full flex-1 bg-background">
       <Stack.Screen
         options={{
           headerLeft: () => (
-            <Button variant="link" onPress={() => router.back()}>
+            <Pressable onPress={() => router.back()}>
               <ChevronLeft
                 className="m-0 p-0"
                 color={NAV_THEME[colorScheme].secondaryForeground}
                 size={20}
               />
-            </Button>
+            </Pressable>
           ),
           headerTitle: "Flashcards",
         }}
       />
-
       <View className="flex-1 items-center justify-center">
         {isLoadingFlashcards && flashcards.length === 0 ? (
           <View className="flex flex-col gap-4">

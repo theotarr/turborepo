@@ -1,13 +1,7 @@
 import { ActivityIndicator, SafeAreaView, View } from "react-native";
 import { WebView } from "react-native-webview";
 import { Stack, useGlobalSearchParams, useRouter } from "expo-router";
-import {
-  ChevronLeft,
-  GalleryVerticalEnd,
-  // Languages,
-  Sparkles,
-  // TextIcon,
-} from "lucide-react-native";
+import { ChevronLeft, GalleryVerticalEnd, Sparkles } from "lucide-react-native";
 
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -25,16 +19,23 @@ export default function Lecture() {
   if (!id || typeof id !== "string") throw new Error("unreachable");
   const { data: lecture } = api.lecture.byId.useQuery({ id });
 
-  if (!lecture) return null;
+  if (!lecture)
+    return (
+      <Stack.Screen
+        options={{
+          headerShown: false,
+        }}
+      />
+    );
 
   return (
     <SafeAreaView className="relative flex-1 bg-background">
+      <Stack.Screen
+        options={{
+          headerShown: false,
+        }}
+      />
       <View className="flex-1 p-4">
-        <Stack.Screen
-          options={{
-            headerShown: false,
-          }}
-        />
         <View className="flex flex-row items-center gap-4">
           <Button
             variant="link"

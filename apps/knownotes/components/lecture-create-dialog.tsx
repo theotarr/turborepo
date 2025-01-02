@@ -197,7 +197,7 @@ export function LectureCreateDialog({
           <DialogTitle>New Lecture</DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
             {/* Create a new lecture, or import a Youtube video or an audio file. */}
-            Create a new lecture or import a Youtube video.
+            Create a new lecture, or import a Youtube video or an audio file.
           </DialogDescription>
         </DialogHeader>
         <Tabs

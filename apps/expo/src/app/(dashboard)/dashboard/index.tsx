@@ -30,7 +30,6 @@ export default function DashboardPage() {
   const { colorScheme } = useColorScheme();
   const [isLoading, setIsLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  const [showBanner, setShowBanner] = useState(true);
 
   const lectures = api.lecture.infiniteLectures.useInfiniteQuery(
     {
@@ -66,11 +65,26 @@ export default function DashboardPage() {
   }
 
   const handleLoadMore = () => {
-    if (lectures.hasNextPage) lectures.fetchNextPage();
+    if (lectures.hasNextPage) void lectures.fetchNextPage();
   };
 
-  if (lectures.data === undefined) return null;
-  if (!user.data) return null;
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+  if (lectures.data === undefined || !user.data)
+    return (
+      <Stack.Screen
+        options={{
+          title: "Dashboard",
+          headerRight: () => (
+            <Pressable onPress={() => router.push("/(dashboard)/settings")}>
+              <Settings
+                size={20}
+                color={NAV_THEME[colorScheme].secondaryForeground}
+              />
+            </Pressable>
+          ),
+        }}
+      />
+    );
 
   return (
     <SafeAreaView className="bg-background">
@@ -88,29 +102,6 @@ export default function DashboardPage() {
         }}
       />
       <View className="h-full w-full px-4 py-6">
-        {/* {showBanner && (
-          <View className="flex items-center justify-center rounded-lg border border-border bg-secondary p-2 pr-6">
-            <Text className="text-sm text-secondary-foreground/80">
-              For a better experience, use{" "}
-              <Link
-                className="underline"
-                href={"https://knownotes.ai/dashboard"}
-              >
-                Knownotes web
-              </Link>{" "}
-              on your computer.
-            </Text>
-            <Pressable
-              onPress={() => setShowBanner(false)}
-              className="absolute right-4"
-            >
-              <XIcon
-                size={16}
-                color={NAV_THEME[colorScheme].secondaryForeground}
-              />
-            </Pressable>
-          </View>
-        )} */}
         <Text className="my-4 text-2xl font-semibold tracking-tighter">
           Lectures
         </Text>
@@ -191,8 +182,14 @@ export default function DashboardPage() {
             </Pressable>
           </BottomSheetOpenTrigger>
           <BottomSheetContent>
-            <BottomSheetView className="gap-6">
-              <Pressable
+            <BottomSheetView className="gap-6 px-6">
+              <Text className="text-2xl font-semibold text-secondary-foreground">
+                New Lecture
+              </Text>
+              <Button
+                size="lg"
+                variant="secondary"
+                className="w-full flex-row items-center justify-between"
                 onPress={async () => {
                   if (
                     !shouldShowPaywall(
@@ -213,16 +210,12 @@ export default function DashboardPage() {
                     });
                 }}
               >
-                <View className="flex flex-row items-center justify-between rounded bg-muted px-4 py-3">
-                  <Text className="text-base font-medium text-secondary-foreground/80">
-                    Live Lecture
-                  </Text>
-                  <MoveRight
-                    color={NAV_THEME[colorScheme].secondaryForeground}
-                    size={16}
-                  />
-                </View>
-              </Pressable>
+                <Text>Live Lecture</Text>
+                <MoveRight
+                  color={NAV_THEME[colorScheme].secondaryForeground}
+                  size={20}
+                />
+              </Button>
             </BottomSheetView>
           </BottomSheetContent>
         </BottomSheet>
