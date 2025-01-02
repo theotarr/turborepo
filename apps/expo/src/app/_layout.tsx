@@ -33,7 +33,7 @@ const DARK_THEME: Theme = {
 };
 
 // Prevent the splash screen from auto-hiding before getting the color scheme.
-SplashScreen.preventAutoHideAsync();
+void SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const { colorScheme, setColorScheme, isDarkColorScheme } = useColorScheme();
@@ -49,10 +49,10 @@ export default function RootLayout() {
   }, []);
 
   React.useEffect(() => {
-    (async () => {
+    void (async () => {
       const theme = await AsyncStorage.getItem("theme");
       if (!theme) {
-        AsyncStorage.setItem("theme", colorScheme);
+        void AsyncStorage.setItem("theme", colorScheme);
         setIsColorSchemeLoaded(true);
         return;
       }
@@ -67,6 +67,7 @@ export default function RootLayout() {
     })().finally(() => {
       void SplashScreen.hideAsync();
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (!isColorSchemeLoaded) return null;
