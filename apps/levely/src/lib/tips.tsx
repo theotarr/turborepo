@@ -146,7 +146,59 @@ Finally, celebrate your progress, no matter how small. Recognizing and rewarding
       stars: 2,
     },
   ],
-  problemSolving: [],
+  problemSolving: [
+    {
+      title: "The easy method",
+      description: `A quick and efficient process for solving problems under time constraints
+
+**1. Restate the Problem Clearly**
+- Reframe the problem in simple terms
+- Focus on:
+  - What am I solving?
+  - What is the goal?
+
+**2. Break It Down**
+- Separate into small parts:
+  - What do I know?
+  - What do I need to find?
+- Simplify by removing unnecessary details or approximating variables
+
+**3. Follow a Systematic Process**
+- Input → Process → Output
+- Think:
+  - What do I have?
+  - What action should I take? 
+  - What result do I need?
+
+**4. Test Your First Idea**
+- Pick a starting point and act
+- Even if incomplete, testing reveals new directions`,
+      stars: 1,
+    },
+    {
+      title: "The best method",
+      description: `
+A structured and thorough process for solving complex problems:
+
+**1. Understand the Problem**
+- Rewrite it in your own words and identify the goal clearly
+- Ask: What does a solution look like?
+
+**2. Decompose Systematically**
+- Knowns vs Unknowns: List what you have and what's missing
+- Sub-Problems: Break it into steps that build toward the solution
+
+**3. Apply Specific Strategies**
+- Simplify: Replace messy variables with placeholders or ignore less relevant details
+- Analogies: Recall similar problems you've solved before and adapt their solutions
+- Visualize: Draw diagrams or flowcharts to organize your thoughts
+
+**4. Test and Verify**
+- Check edge cases and stress-test the solution
+- Reflect: What worked well? What can I improve for next time?`,
+      stars: 2,
+    },
+  ],
   productivity: [
     {
       title: "The easy method",
@@ -236,7 +288,9 @@ export async function getHighestPriorities(): Promise<
 > {
   const stats = await getStats();
   if (!stats) return [];
-  const sortedStats = Object.entries(stats).sort((a, b) => b[1] - a[1]);
+
+  //   Sort stats from lowest to highest.
+  const sortedStats = Object.entries(stats).sort((a, b) => a[1] - b[1]);
   return sortedStats.slice(0, 3).map(([key]) => ({
     stat: key as keyof Stats,
     title: priorities[key as keyof Stats],

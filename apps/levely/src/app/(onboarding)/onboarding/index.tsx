@@ -32,7 +32,7 @@ export default function Onboarding() {
   const router = useRouter();
   const generateStatsMutation = api.levely.generateStats.useMutation();
 
-  const [sectionIndex, setSectionIndex] = useState(1);
+  const [sectionIndex, setSectionIndex] = useState(0);
   const [questionIndex, setQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<QuestionType[]>([]);
   const [selectedOption, setSelectedOption] = useState<string | undefined>(
