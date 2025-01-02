@@ -24,12 +24,10 @@ export default function Page() {
   const createMobileUser = api.auth.createMobileUser.useMutation();
 
   if (user) {
-    // void AsyncStorage.getItem("onboardingComplete").then((value) => {
-    //   if (value === "true") router.replace("/(dashboard)/dashboard");
-    // });
-    // return <Redirect href={"/onboarding"} />;
-    // Skip onboarding for now
-    return <Redirect href={"/dashboard"} />;
+    void AsyncStorage.getItem("onboardingComplete").then((value) => {
+      if (value === "true") router.replace("/(dashboard)/dashboard");
+    });
+    return <Redirect href={"/onboarding"} />;
   }
 
   return (
