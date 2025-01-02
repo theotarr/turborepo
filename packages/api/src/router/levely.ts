@@ -51,23 +51,23 @@ export const levelyRouter = {
             answer: z.string(),
           }),
         ),
+        memory: z.number(),
+        reading: z.number(),
       }),
     )
     .mutation(async ({ input }) => {
-      const { questions } = input;
+      const { questions, memory, reading } = input;
       const { object } = await generateObject({
         model: openai("gpt-3.5-turbo"),
         schema: z.object({
-          memory: z.number(),
-          reading: z.number(),
-          focus: z.number(),
-          habits: z.number(),
-          problemSolving: z.number(),
-          timeManagement: z.number(),
-          productivity: z.number(),
-          noteTaking: z.number(),
+          focus: z.number().min(0).max(100),
+          habits: z.number().min(0).max(100),
+          problemSolving: z.number().min(0).max(100),
+          timeManagement: z.number().min(0).max(100),
+          productivity: z.number().min(0).max(100),
+          noteTaking: z.number().min(0).max(100),
         }),
-        prompt: `Based on these questions and answers, give the user a score from 0 to 100 for each category.
+        prompt: `Based on these questions and answers and the user's memory accuracy and reading speed, give the user a score from 0 to 100 for each category.
         ${questions.map((q) => `Question: ${q.question}\nAnswer: ${q.answer}`).join("\n")}`,
       });
 
@@ -77,10 +77,13 @@ export const levelyRouter = {
           key,
           // If the value is a multiple of 5 or 10 and greater than 5, subtract a random number between 0 and 2 to make it more interesting
           (value % 5 === 0 || value % 10 === 0) && value > 5
-            ? value - Math.floor(Math.random() * 2)
+            ? value - Math.ceil(Math.random() * 2)
             : value,
         ]),
       );
+      // Add the memory and reading scores to the stats.
+      stats.memory = memory;
+      stats.reading = reading;
 
       return stats;
     }),
@@ -118,14 +121,14 @@ export const levelyRouter = {
         temperature: 1,
         model: openai("gpt-3.5-turbo"),
         schema: z.object({
-          memory: z.number(),
-          reading: z.number(),
-          focus: z.number(),
-          habits: z.number(),
-          problemSolving: z.number(),
-          timeManagement: z.number(),
-          productivity: z.number(),
-          noteTaking: z.number(),
+          memory: z.number().min(0).max(100),
+          reading: z.number().min(0).max(100),
+          focus: z.number().min(0).max(100),
+          habits: z.number().min(0).max(100),
+          problemSolving: z.number().min(0).max(100),
+          timeManagement: z.number().min(0).max(100),
+          productivity: z.number().min(0).max(100),
+          noteTaking: z.number().min(0).max(100),
           grades: z.array(
             z.object({
               name: z.string(),

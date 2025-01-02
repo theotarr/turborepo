@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
-import { Pressable, SafeAreaView, View } from "react-native";
+import { SafeAreaView, TouchableOpacity, View } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import { Stack, useRouter } from "expo-router";
 import { SymbolView } from "expo-symbols";
 
-import type { Question as QuestionType, Subject } from "~/types/types";
+import type { Question as QuestionType, Stats, Subject } from "~/types/types";
 import { GradeInput } from "~/components/grades";
 import { MemorySection } from "~/components/memory";
 import { Pagination } from "~/components/pagination";
@@ -12,21 +12,27 @@ import { Question } from "~/components/question";
 import { Button } from "~/components/ui/button";
 import { Text } from "~/components/ui/text";
 import {
-  getOnboardingComplete,
+  getMemoryAccuracy,
+  getMemoryScore,
   setFocus,
   setGrades,
   setHabits,
   setOnboardingComplete,
   setStats,
 } from "~/lib/storage";
-import { defaultSubjects, sections } from "~/lib/tests";
+import {
+  calcMemoryScore,
+  calcReadingScore,
+  defaultSubjects,
+  sections,
+} from "~/lib/tests";
 import { api } from "~/utils/api";
 
 export default function Onboarding() {
   const router = useRouter();
   const generateStatsMutation = api.levely.generateStats.useMutation();
 
-  const [sectionIndex, setSectionIndex] = useState(0);
+  const [sectionIndex, setSectionIndex] = useState(1);
   const [questionIndex, setQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<QuestionType[]>([]);
   const [selectedOption, setSelectedOption] = useState<string | undefined>(
@@ -51,14 +57,6 @@ export default function Onboarding() {
     setProgress(calcStepProgress());
   }, [sectionIndex, questionIndex, memoryProgress, calcStepProgress]);
 
-  // If the user has already onboarded, redirect to the stats page.
-  useEffect(() => {
-    void (async () => {
-      const hasOnboarded = await getOnboardingComplete();
-      if (hasOnboarded) router.replace("/stats/current");
-    })();
-  }, [router]);
-
   return (
     <SafeAreaView className="bg-background">
       <Stack.Screen options={{ headerShown: false }} />
@@ -74,8 +72,7 @@ export default function Onboarding() {
           {sectionIndex === 0 || sectionIndex === 2 ? (
             <Question
               question={
-                sections[sectionIndex]?.questions[questionIndex]
-                  ?.question as string
+                sections[sectionIndex]?.questions[questionIndex]?.question!
               }
               options={
                 sections[sectionIndex]?.questions[questionIndex]
@@ -86,8 +83,9 @@ export default function Onboarding() {
                 setAnswers((prev) => [
                   ...prev,
                   {
-                    question: sections[sectionIndex]?.questions[questionIndex]
-                      ?.question as string,
+                    question:
+                      sections[sectionIndex]?.questions[questionIndex]
+                        ?.question!,
                     answer: option,
                   },
                 ]);
@@ -121,12 +119,12 @@ export default function Onboarding() {
               onProgress={setMemoryProgress}
               onSectionComplete={() => setSectionIndex((prev) => prev + 1)}
             />
-          ) : sectionIndex === 4 ? (
+          ) : sectionIndex === 3 ? (
             <>
               <Text className="mx-6 mb-4 mt-8 text-2xl font-bold text-secondary-foreground">
                 Add your grades
               </Text>
-              <Pressable
+              <TouchableOpacity
                 className="absolute right-4 top-4 flex size-16 items-center justify-center rounded-full bg-primary"
                 disabled={generateStatsMutation.isPending}
                 onPress={async () => {
@@ -134,8 +132,19 @@ export default function Onboarding() {
                     await setGrades(subjects);
                     const stats = await generateStatsMutation.mutateAsync({
                       questions: answers,
+                      memory: calcMemoryScore(
+                        await getMemoryAccuracy(),
+                        calcReadingScore(
+                          await getMemoryScore(),
+                          await getMemoryAccuracy(),
+                        ),
+                      ),
+                      reading: calcReadingScore(
+                        await getMemoryScore(),
+                        await getMemoryAccuracy(),
+                      ),
                     });
-                    await setStats(stats);
+                    await setStats(stats as unknown as Stats);
                     await setOnboardingComplete();
                     router.replace("/stats/current");
                   } catch (error) {
@@ -150,7 +159,7 @@ export default function Onboarding() {
                   weight="light"
                   tintColor="white"
                 />
-              </Pressable>
+              </TouchableOpacity>
               <ScrollView className="mx-2">
                 {subjects.map((subject) => (
                   <GradeInput
@@ -181,11 +190,7 @@ export default function Onboarding() {
                 </View>
               </ScrollView>
             </>
-          ) : (
-            <Button onPress={() => setSectionIndex((prev) => prev + 1)}>
-              <Text>Next</Text>
-            </Button>
-          )}
+          ) : null}
         </View>
       </View>
     </SafeAreaView>

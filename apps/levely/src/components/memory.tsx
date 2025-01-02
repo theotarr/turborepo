@@ -1,9 +1,17 @@
 import { useState } from "react";
-import { Pressable, View } from "react-native";
-import { TextInput } from "react-native-gesture-handler";
+import { View } from "react-native";
 import { SymbolView } from "expo-symbols";
 
+import { setMemoryAccuracy, setMemoryScore } from "~/lib/storage";
+import {
+  calcReadingSpeed,
+  getReadingSpeedPercentile,
+  readingPassgage,
+  readingQuestions,
+} from "~/lib/tests";
 import { CircularProgress } from "./circular-progress";
+import { Question } from "./question";
+import { Button } from "./ui/button";
 import { Text } from "./ui/text";
 
 export function MemorySection({
@@ -13,86 +21,153 @@ export function MemorySection({
   onProgress: (progress: number) => void;
   onSectionComplete: () => void;
 }) {
-  const [startTime, setStartTime] = useState(Date.now());
   const [page, setPage] = useState(0);
-  const [userInput, setUserInput] = useState("");
+  const [questionIndex, setQuestionIndex] = useState(0);
+  const [startTime, setStartTime] = useState(Date.now());
+  const [endTime, setEndTime] = useState(Date.now());
+  const timeElapsed = endTime - startTime;
+  const [answers, setAnswers] = useState<string[]>([]);
+  const [accuracy, setAccuracy] = useState(0);
+  const [correctAnswers, setCorrectAnswers] = useState(0);
+  const [selectedOption, setSelectedOption] = useState<string | undefined>(
+    undefined,
+  );
+
+  const handleStart = () => {
+    setStartTime(Date.now());
+    setPage(1);
+    onProgress((1 / 4) * 100);
+  };
 
   const handleContentRead = () => {
-    setPage(1);
-    const endTime = Date.now();
-    const timeTakenMs = endTime - startTime;
-    console.log(`Time taken: ${timeTakenMs} ms`);
+    setPage(2);
+    setEndTime(Date.now());
+    onProgress((2 / 4) * 100);
   };
+
+  function calcAccuracy(answers: string[]) {
+    let correct = 0;
+    for (let i = 0; i < readingQuestions.length; i++) {
+      if (answers[i] === readingQuestions[i]?.correctAnswer) {
+        correct++;
+      }
+    }
+
+    setCorrectAnswers(correct);
+    setAccuracy(correct / readingQuestions.length);
+  }
 
   return (
     <View className="flex h-full justify-around p-4">
-      {page === 2 ? (
+      {page === 0 ? (
         <View className="flex items-center justify-center">
-          <Text className="mb-8 text-3xl font-semibold text-secondary-foreground">
-            Amazing job!
+          <Text className="mb-8 max-w-[18rem] text-center text-2xl font-bold text-secondary-foreground">
+            Let's test your memory and reading speed.
           </Text>
-          <CircularProgress
-            radius={75}
-            strokeWidth={18}
-            progress={1}
-            label="100%"
-          />
+          <Button onPress={handleStart}>
+            <Text>Start</Text>
+          </Button>
         </View>
       ) : page === 1 ? (
         <View>
           <Text className="mb-6 text-2xl font-bold text-secondary-foreground">
-            Write down everything you remember...
+            Read this as fast as you can.
           </Text>
-          <TextInput
-            placeholder="Type here..."
-            className="p-4 text-xl text-secondary-foreground"
-            numberOfLines={6}
-            multiline={true}
-            onChangeText={setUserInput}
-          />
+          <Text className="text-lg text-secondary-foreground">
+            {readingPassgage}
+          </Text>
+          <View className="mt-6 flex-row items-center justify-center">
+            <Button
+              onPress={handleContentRead}
+              className="w-36 flex-row items-center gap-x-2"
+            >
+              <SymbolView name="stopwatch" size={16} tintColor="white" />
+              <Text>Stop timer</Text>
+            </Button>
+          </View>
         </View>
-      ) : (
-        <View>
-          <Text className="mb-6 text-2xl font-bold text-secondary-foreground">
-            Lets test your memory. Read this text only once
-          </Text>
-          <Text className="text-lg text-muted-foreground/70">
-            Korem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eu
-            turpis molestie, dictum est a, mattis tellus. Sed dignissim, metus
-            nec fringilla accumsan, risus sem sollicitudin lacus, ut interdum
-            tellus elit sed risus. Maecenas eget condimentum velit, sit amet
-            feugiat lectus. Class aptent taciti sociosqu ad litora torquent per
-            conubia nostra, per inceptos himenaeos. Praesent auctor purus luctus
-            enim egestas, ac scelerisque ante pulvinar. Donec ut rhoncus ex.
-            Suspendisse ac rhoncus nisl, eu tempor urna. Curabitur vel bibendum
-            lorem. Morbi convallis convallis diam sit amet lacinia. Aliquam in
-            elementum tellus.
-          </Text>
-        </View>
-      )}
-      <Pressable
-        className="absolute bottom-24 right-4 flex size-16 items-center justify-center rounded-full bg-primary"
-        onPress={() => {
-          if (page === 0) {
-            handleContentRead();
-            onProgress((2 / 3) * 100);
-          } else if (page === 1) {
-            setPage(2);
-            onProgress(100);
-          } else {
-            onSectionComplete();
-            onProgress(100);
-          }
-        }}
-      >
-        <SymbolView
-          name="arrow.right"
-          resizeMode="scaleAspectFit"
-          size={24}
-          weight="light"
-          tintColor="white"
+      ) : page === 2 ? (
+        <Question
+          question={readingQuestions[questionIndex]?.question ?? ""}
+          options={readingQuestions[questionIndex]?.options ?? []}
+          selectedOption={selectedOption}
+          onSelect={(option) => {
+            calcAccuracy([...answers, option]); // Pass in the last answer, since state has not updated yet.
+            setSelectedOption(option);
+            setAnswers((prev) => [...prev, option]);
+
+            if (questionIndex === readingQuestions.length - 1) {
+              setTimeout(() => {
+                onProgress((3 / 4) * 100);
+                setPage(3);
+              }, 1000);
+            } else {
+              setTimeout(() => {
+                setQuestionIndex((prev) => prev + 1);
+              }, 1000);
+            }
+          }}
         />
-      </Pressable>
+      ) : page === 3 ? (
+        <View className="flex items-center justify-center">
+          <Text className="mb-8 max-w-sm text-center text-xl text-secondary-foreground">
+            You got {correctAnswers} out of {readingQuestions.length} questions
+            correct
+          </Text>
+          <CircularProgress
+            progress={accuracy}
+            radius={80}
+            strokeWidth={20}
+            label={`${accuracy * 100}%`}
+          />
+          <Button
+            className="mt-8"
+            onPress={() => {
+              onProgress((4 / 4) * 100);
+              setPage(4);
+            }}
+          >
+            <Text>Continue</Text>
+          </Button>
+        </View>
+      ) : page === 4 ? (
+        <View className="flex items-center justify-center">
+          <Text className="mb-8 max-w-sm text-center text-xl text-secondary-foreground">
+            Your reading speed is{" "}
+            {calcReadingSpeed(readingPassgage, timeElapsed)} WPM
+          </Text>
+          <CircularProgress
+            progress={Math.round(
+              (readingPassgage.split(" ").length / (timeElapsed / 1000)) * 60,
+            )}
+            radius={80}
+            strokeWidth={20}
+            label={`${Math.round(
+              calcReadingSpeed(readingPassgage, timeElapsed),
+            )}`}
+          />
+          <Text className="mt-8 max-w-[16rem] text-center text-xl text-secondary-foreground">
+            {getReadingSpeedPercentile(
+              calcReadingSpeed(readingPassgage, timeElapsed),
+            )}
+          </Text>
+          <Button
+            className="mt-4"
+            onPress={async () => {
+              console.log("correctAnswers", correctAnswers);
+              console.log("accuracy", accuracy);
+
+              await setMemoryScore(
+                calcReadingSpeed(readingPassgage, timeElapsed),
+              );
+              await setMemoryAccuracy(accuracy * 100);
+              onSectionComplete();
+            }}
+          >
+            <Text>Continue</Text>
+          </Button>
+        </View>
+      ) : null}
     </View>
   );
 }

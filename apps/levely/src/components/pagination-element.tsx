@@ -9,7 +9,6 @@ import Animated, {
 } from "react-native-reanimated";
 
 import { NAV_THEME } from "~/lib/constants";
-import { useColorScheme } from "~/lib/theme";
 
 interface Props {
   length: number;
@@ -17,7 +16,6 @@ interface Props {
 }
 
 export const PaginationElement = ({ length, x }: Props) => {
-  const { colorScheme } = useColorScheme();
   const { width: SCREEN_WIDTH } = useWindowDimensions();
 
   const PaginationComponent = useCallback(({ index }: { index: number }) => {
@@ -41,9 +39,9 @@ export const PaginationElement = ({ length, x }: Props) => {
           (index + 1) * SCREEN_WIDTH,
         ],
         [
-          NAV_THEME[colorScheme].secondary,
-          NAV_THEME[colorScheme].primary,
-          NAV_THEME[colorScheme].secondary,
+          NAV_THEME.light.secondary,
+          NAV_THEME.light.primary,
+          NAV_THEME.light.secondary,
         ],
       );
 

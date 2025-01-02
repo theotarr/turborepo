@@ -2,13 +2,6 @@ import React, { useEffect, useState } from "react";
 import { View } from "react-native";
 import Svg, {
   Circle,
-  Defs,
-  FeComposite,
-  FeGaussianBlur,
-  FeMerge,
-  FeMergeNode,
-  FeOffset,
-  Filter,
   LinearGradient,
   Stop,
   Text as SvgText,
@@ -19,7 +12,7 @@ import { NAV_THEME } from "~/lib/constants";
 interface ProgressCircleProps {
   radius: number;
   strokeWidth: number;
-  progress: number; // Should be a value between 0 and 1
+  progress: number; // A value between 0 and 1
   label?: string;
 }
 

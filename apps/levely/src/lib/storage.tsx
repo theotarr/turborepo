@@ -4,9 +4,9 @@ import type { PersonalInfo, Question, Stats, Subject } from "~/types/types";
 
 const PERSONAL_INFO_KEY = "personal_info";
 const HABITS_KEY = "habits";
-// const MEMORY_KEY = "memory";
+const MEMORY_KEY = "memory";
+const MEMORY_ACCURACY_KEY = "memory_accuracy";
 const FOCUS_KEY = "focus";
-// const READING_KEY = "reading";
 const GRADES_KEY = "grades";
 const ONBOARDING_COMPLETE_KEY = "onboarding_complete";
 const CURRENT_STATS_KEY = "current_stats";
@@ -42,6 +42,24 @@ export async function getHabits(): Promise<Question[]> {
   const habits = await SecureStore.getItemAsync(HABITS_KEY);
   if (!habits) return [];
   return JSON.parse(habits) as Question[];
+}
+
+// Memory score
+export async function setMemoryScore(score: number) {
+  await SecureStore.setItemAsync(MEMORY_KEY, score.toString());
+}
+export async function getMemoryScore(): Promise<number> {
+  const score = await SecureStore.getItemAsync(MEMORY_KEY);
+  if (!score) return 0;
+  return parseFloat(score);
+}
+export async function setMemoryAccuracy(accuracy: number) {
+  await SecureStore.setItemAsync(MEMORY_ACCURACY_KEY, accuracy.toString());
+}
+export async function getMemoryAccuracy(): Promise<number> {
+  const accuracy = await SecureStore.getItemAsync(MEMORY_ACCURACY_KEY);
+  if (!accuracy) return 0;
+  return parseFloat(accuracy);
 }
 
 // Focus questions
@@ -105,6 +123,8 @@ export async function deleteAccount() {
   await SecureStore.deleteItemAsync(PERSONAL_INFO_KEY);
   await SecureStore.deleteItemAsync(HABITS_KEY);
   await SecureStore.deleteItemAsync(FOCUS_KEY);
+  await SecureStore.deleteItemAsync(MEMORY_KEY);
+  await SecureStore.deleteItemAsync(MEMORY_ACCURACY_KEY);
   await SecureStore.deleteItemAsync(GRADES_KEY);
   await SecureStore.deleteItemAsync(CURRENT_STATS_KEY);
   await SecureStore.deleteItemAsync(POTENTIAL_STATS_KEY);
