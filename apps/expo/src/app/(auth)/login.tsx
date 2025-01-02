@@ -1,8 +1,7 @@
 import { View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as AppleAuthentication from "expo-apple-authentication";
-import { Redirect, Stack, useRouter } from "expo-router";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Stack } from "expo-router";
 import { Aperture } from "lucide-react-native";
 
 import { TrustPilot } from "~/components/trust-pilot";
@@ -11,26 +10,15 @@ import { Text } from "~/components/ui/text";
 import { NAV_THEME } from "~/lib/constants";
 import { useColorScheme } from "~/lib/theme";
 import { api } from "~/utils/api";
-import { useSignIn, useUser } from "~/utils/auth";
+import { useSignIn } from "~/utils/auth";
 import { setToken } from "~/utils/session-store";
 
 export default function Page() {
   const utils = api.useUtils();
-  const router = useRouter();
   const { colorScheme } = useColorScheme();
 
-  const user = useUser();
   const signIn = useSignIn();
   const createMobileUser = api.auth.createMobileUser.useMutation();
-
-  if (user) {
-    // void AsyncStorage.getItem("onboardingComplete").then((value) => {
-    //   if (value === "true") router.replace("/(dashboard)/dashboard");
-    // });
-    // return <Redirect href={"/onboarding"} />;
-    // Skip onboarding for now
-    return <Redirect href={"/dashboard"} />;
-  }
 
   return (
     <SafeAreaView className="bg-background">

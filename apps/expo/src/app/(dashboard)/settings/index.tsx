@@ -3,6 +3,7 @@ import { ActivityIndicator, Pressable, SafeAreaView, View } from "react-native";
 import { Link, Stack, useRouter } from "expo-router";
 import * as StoreReview from "expo-store-review";
 import { Picker } from "@react-native-picker/picker";
+import Superwall from "@superwall/react-native-superwall";
 import { ChevronLeft, LogOut, Star } from "lucide-react-native";
 
 import { Button } from "~/components/ui/button";
@@ -13,8 +14,10 @@ import { NAV_THEME } from "~/lib/constants";
 import { useColorScheme } from "~/lib/theme";
 import { api } from "~/utils/api";
 import { useSignOut } from "~/utils/auth";
+import { deleteToken } from "~/utils/session-store";
 
 export default function SettingsPage() {
+  const utils = api.useUtils();
   const router = useRouter();
   const { colorScheme, setColorScheme } = useColorScheme();
   const user = api.auth.getUser.useQuery();
@@ -138,9 +141,7 @@ export default function SettingsPage() {
           </View>
           <View className="mt-8 items-start">
             <Button
-              onPress={() => {
-                void signOut().then(() => router.replace("/"));
-              }}
+              onPress={async () => await signOut()}
               variant="ghost"
               size="sm"
               className="flex flex-row gap-2"
