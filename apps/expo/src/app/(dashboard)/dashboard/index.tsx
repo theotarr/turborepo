@@ -133,7 +133,7 @@ export default function DashboardPage() {
               </View>
             )}
           {lectures.data.pages[0]!.items.length > 0 && (
-            <View className="divide-y divide-border rounded-md border border-border">
+            <View className="flex-col gap-y-2">
               {lectures.data.pages.map(
                 (page: { items: Lecture[]; nextCursor: string }[]) =>
                   page.items.map((lecture: Lecture) => (

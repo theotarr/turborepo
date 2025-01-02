@@ -1,8 +1,11 @@
 import type { Course, Lecture } from "@prisma/client";
 import React from "react";
-import { View } from "react-native";
+import { Pressable, View } from "react-native";
+import { ChevronRight } from "lucide-react-native";
 
 import { Text } from "~/components/ui/text";
+import { NAV_THEME } from "~/lib/constants";
+import { useColorScheme } from "~/lib/theme";
 import { formatLectureType, formatShortDate } from "~/lib/utils";
 import { Badge } from "./ui/badge";
 
@@ -14,13 +17,15 @@ interface LectureItemProps {
 }
 
 export function LectureItem({ lecture, onLecturePress }: LectureItemProps) {
+  const { colorScheme } = useColorScheme();
+
   return (
-    <View className="group flex w-full flex-row items-center justify-between p-4 hover:bg-muted/50">
+    <Pressable
+      onPress={onLecturePress}
+      className="group flex w-full flex-row items-center justify-between rounded-xl border border-border p-4"
+    >
       <View className="grid gap-1">
-        <Text
-          onPress={onLecturePress}
-          className="line-clamp-1 truncate font-semibold hover:underline"
-        >
+        <Text className="line-clamp-1 truncate font-semibold hover:underline">
           {lecture.title}
         </Text>
         <View className="flex flex-row space-x-2 text-sm text-muted-foreground">
@@ -34,11 +39,15 @@ export function LectureItem({ lecture, onLecturePress }: LectureItemProps) {
           )}
         </View>
       </View>
-      <View className="flex flex-row items-center space-x-4">
+      <View className="flex flex-row items-center gap-x-4">
         <Text className="text-xs text-muted-foreground">
           {formatShortDate(lecture.updatedAt.toDateString())}
         </Text>
+        <ChevronRight
+          size={16}
+          color={NAV_THEME[colorScheme].mutedForeground}
+        />
       </View>
-    </View>
+    </Pressable>
   );
 }
