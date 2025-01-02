@@ -52,7 +52,7 @@ export default function DashboardPage() {
     try {
       const lecture = await createLecture.mutateAsync({});
       setIsLoading(false);
-      router.replace(`/record/${lecture.id}`);
+      router.push(`/record/${lecture.id}`);
     } catch (error) {
       console.error(error);
       alert("Failed to create lecture");
@@ -80,7 +80,7 @@ export default function DashboardPage() {
           headerRight: () => (
             <Pressable
               onPress={() => {
-                router.replace("/(dashboard)/settings");
+                router.push("/(dashboard)/settings");
               }}
             >
               <Settings
@@ -163,7 +163,7 @@ export default function DashboardPage() {
                             },
                           )
                         ) {
-                          router.replace(`/lecture/${lecture.id}`);
+                          router.push(`/lecture/${lecture.id}`);
                           return;
                         }
 
@@ -171,7 +171,7 @@ export default function DashboardPage() {
                         void Superwall.shared
                           .register("viewLecture")
                           .then(() => {
-                            router.replace(`/lecture/${lecture.id}`);
+                            router.push(`/lecture/${lecture.id}`);
                           });
                       }}
                     />

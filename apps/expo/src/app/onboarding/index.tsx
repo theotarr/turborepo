@@ -101,7 +101,7 @@ export default function App() {
               />
               <Button
                 className="w-12"
-                disabled={createCourseMutation.isLoading}
+                disabled={createCourseMutation.isPending}
                 onPress={async () => {
                   if (!course || course.length === 0) return;
 
@@ -109,10 +109,10 @@ export default function App() {
                     name: course,
                   });
                   setCourse("");
-                  utils.auth.getUser.invalidate();
+                  await utils.auth.getUser.invalidate();
                 }}
               >
-                {createCourseMutation.isLoading ? (
+                {createCourseMutation.isPending ? (
                   <ActivityIndicator
                     size="small"
                     color={NAV_THEME[colorScheme].primaryForeground}

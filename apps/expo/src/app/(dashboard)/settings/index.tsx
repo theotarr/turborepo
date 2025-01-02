@@ -42,11 +42,7 @@ export default function SettingsPage() {
         options={{
           title: "Settings",
           headerLeft: () => (
-            <Pressable
-              onPress={() => {
-                router.replace("/(dashboard)/dashboard");
-              }}
-            >
+            <Pressable onPress={() => router.back()}>
               <ChevronLeft
                 size={20}
                 color={NAV_THEME[colorScheme].secondaryForeground}

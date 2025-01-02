@@ -39,9 +39,11 @@ export default function Lecture() {
           <Button
             variant="link"
             className="size-6"
-            onPress={() => {
-              router.replace("/(dashboard)/dashboard");
-            }}
+            onPress={() =>
+              router.canGoBack()
+                ? router.back()
+                : router.replace("/(dashboard)/dashboard")
+            }
           >
             <ChevronLeft
               className="m-0 p-0"
@@ -75,7 +77,7 @@ export default function Lecture() {
           <Button
             variant="secondary"
             className="flex flex-row gap-2 rounded-full"
-            onPress={() => router.replace(`/lecture/chat/${lecture.id}`)}
+            onPress={() => router.push(`/lecture/chat/${lecture.id}`)}
           >
             <Sparkles
               size={16}
@@ -86,7 +88,7 @@ export default function Lecture() {
           <Button
             variant="secondary"
             className="flex flex-row gap-2 rounded-full"
-            onPress={() => router.replace(`/lecture/flashcard/${lecture.id}`)}
+            onPress={() => router.push(`/lecture/flashcard/${lecture.id}`)}
           >
             <GalleryVerticalEnd
               size={16}
@@ -105,17 +107,6 @@ export default function Lecture() {
             />
             <Text>Quiz</Text>
           </Button>
-          {/* <Button
-              variant="secondary"
-              className="flex flex-row gap-2 rounded-full"
-              onPress={() => router.replace(`/lecture/flashcard/${lecture.id}`)}
-            >
-              <TextIcon
-                size={16}
-                color={NAV_THEME[colorScheme].secondaryForeground}
-              />
-              <Text>Transcript</Text>
-            </Button> */}
         </View>
         <WebView
           originWhitelist={["*"]}

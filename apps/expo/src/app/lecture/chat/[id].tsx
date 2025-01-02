@@ -73,12 +73,7 @@ export default function Lecture() {
       <Stack.Screen
         options={{
           headerLeft: () => (
-            <Button
-              variant="link"
-              onPress={() => {
-                router.replace(`/lecture/${id}`);
-              }}
-            >
+            <Button variant="link" onPress={() => router.back()}>
               <ChevronLeft
                 className="m-0 p-0"
                 color={NAV_THEME[colorScheme].secondaryForeground}
