@@ -78,11 +78,7 @@ export default function DashboardPage() {
         options={{
           title: "Dashboard",
           headerRight: () => (
-            <Pressable
-              onPress={() => {
-                router.push("/(dashboard)/settings");
-              }}
-            >
+            <Pressable onPress={() => router.push("/(dashboard)/settings")}>
               <Settings
                 size={20}
                 color={NAV_THEME[colorScheme].secondaryForeground}

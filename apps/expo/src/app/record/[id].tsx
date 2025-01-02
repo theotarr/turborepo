@@ -146,12 +146,12 @@ export default function Record() {
         options={{
           title: "Live Lecture",
           headerLeft: () => (
-            <Button variant="ghost" onPress={() => router.back()}>
+            <Pressable onPress={() => router.back()}>
               <ChevronLeft
                 color={NAV_THEME[colorScheme].secondaryForeground}
                 size={16}
               />
-            </Button>
+            </Pressable>
           ),
         }}
       />
