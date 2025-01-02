@@ -8,8 +8,8 @@ import { Text } from "./ui/text";
 export function ShareReport({ className }: { className?: string }) {
   async function handleShare() {
     const result = await Share.share({
-      message: `Check out my Levely report!`,
-      url: `https://levely.app`, // TODO: Add share url or App Store link
+      message: `Check out my Levely study scores!`,
+      //   url: `https://levely.app`, // TODO: Add share url or App Store link
     });
     if (result.action === Share.sharedAction) {
       if (result.activityType) {
