@@ -1,12 +1,7 @@
 import { ActivityIndicator, SafeAreaView, View } from "react-native";
 import { WebView } from "react-native-webview";
 import { Stack, useGlobalSearchParams, useRouter } from "expo-router";
-import {
-  ChevronLeft,
-  EllipsisVertical,
-  GalleryVerticalEnd,
-  Sparkles,
-} from "lucide-react-native";
+import { ChevronLeft, GalleryVerticalEnd, Sparkles } from "lucide-react-native";
 
 import { LectureOperations } from "~/components/lecture-operations";
 import { Badge } from "~/components/ui/badge";
@@ -64,13 +59,7 @@ export default function Lecture() {
               <Text className="text-2xl font-semibold tracking-tight">
                 {lecture.title}
               </Text>
-              <View className="mt-1 flex flex-row gap-2">
-                <Badge>
-                  <Text>
-                    {lecture.type.substring(0, 1) +
-                      lecture.type.toLowerCase().substring(1)}
-                  </Text>
-                </Badge>
+              <View className="mt-1 flex flex-row gap-x-2">
                 {lecture.course && (
                   <Badge>
                     <Text>{lecture.course.name}</Text>
