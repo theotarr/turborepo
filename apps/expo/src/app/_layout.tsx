@@ -7,6 +7,7 @@ import { SplashScreen, Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ThemeProvider } from "@react-navigation/native";
+import { PortalHost } from "@rn-primitives/portal";
 import Superwall from "@superwall/react-native-superwall";
 
 import { NAV_THEME } from "~/lib/constants";
@@ -79,6 +80,7 @@ export default function RootLayout() {
           <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
             <StatusBar style={isDarkColorScheme ? "light" : "dark"} />
             <Stack />
+            <PortalHost />
           </ThemeProvider>
         </BottomSheetModalProvider>
       </GestureHandlerRootView>

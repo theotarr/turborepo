@@ -86,6 +86,9 @@ export const lectureRouter = {
         where: {
           userId: ctx.session.user.id,
         },
+        include: {
+          course: true,
+        },
         cursor: cursor ? { id: cursor } : undefined,
         orderBy: { updatedAt: "desc" },
       });
@@ -110,6 +113,35 @@ export const lectureRouter = {
           transcript: [],
           userId: ctx.session.user.id,
           courseId: input.courseId ?? undefined,
+        },
+      });
+    }),
+  update: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        title: z.string().optional(),
+        courseId: z.string().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      if (!(await verifyCurrentUserHasAccessToLecture(ctx, input.id)))
+        throw new Error("User does not have access to the lecture.");
+
+      // If the courseId is being updated, verify the user has access to the course.
+      if (input.courseId) {
+        const course = await ctx.db.course.findUnique({
+          where: { id: input.courseId, userId: ctx.session.user.id },
+        });
+        if (!course)
+          throw new Error("User does not have access to the course.");
+      }
+
+      return ctx.db.lecture.update({
+        where: { id: input.id },
+        data: {
+          title: input.title,
+          courseId: input.courseId,
         },
       });
     }),

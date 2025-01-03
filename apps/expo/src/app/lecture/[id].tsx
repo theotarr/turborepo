@@ -1,8 +1,14 @@
 import { ActivityIndicator, SafeAreaView, View } from "react-native";
 import { WebView } from "react-native-webview";
 import { Stack, useGlobalSearchParams, useRouter } from "expo-router";
-import { ChevronLeft, GalleryVerticalEnd, Sparkles } from "lucide-react-native";
+import {
+  ChevronLeft,
+  EllipsisVertical,
+  GalleryVerticalEnd,
+  Sparkles,
+} from "lucide-react-native";
 
+import { LectureOperations } from "~/components/lecture-operations";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Text } from "~/components/ui/text";
@@ -18,8 +24,9 @@ export default function Lecture() {
   const { id } = useGlobalSearchParams();
   if (!id || typeof id !== "string") throw new Error("unreachable");
   const { data: lecture } = api.lecture.byId.useQuery({ id });
+  const { data: courses } = api.course.list.useQuery();
 
-  if (!lecture)
+  if (!lecture || !courses)
     return (
       <Stack.Screen
         options={{
@@ -36,42 +43,56 @@ export default function Lecture() {
         }}
       />
       <View className="flex-1 p-4">
-        <View className="flex flex-row items-center gap-4">
-          <Button
-            variant="link"
-            className="size-6"
-            onPress={() =>
-              router.canGoBack()
-                ? router.back()
-                : router.replace("/(dashboard)/dashboard")
-            }
-          >
-            <ChevronLeft
-              className="m-0 p-0"
-              color={NAV_THEME[colorScheme].secondaryForeground}
-              size={20}
-            />
-          </Button>
-          <View>
-            <Text className="text-2xl font-semibold tracking-tight">
-              {lecture.title}
-            </Text>
-            <View className="mt-1 flex flex-row gap-2">
-              <Badge>
-                <Text>
-                  {lecture.type.substring(0, 1) +
-                    lecture.type.toLowerCase().substring(1)}
-                </Text>
-              </Badge>
-              {lecture.course && (
+        <View className="flex w-full flex-row items-center justify-between">
+          <View className="flex-row items-center gap-x-4">
+            <Button
+              variant="link"
+              className="size-6"
+              onPress={() =>
+                router.canGoBack()
+                  ? router.back()
+                  : router.replace("/(dashboard)/dashboard")
+              }
+            >
+              <ChevronLeft
+                className="m-0 p-0"
+                color={NAV_THEME[colorScheme].secondaryForeground}
+                size={20}
+              />
+            </Button>
+            <View>
+              <Text className="text-2xl font-semibold tracking-tight">
+                {lecture.title}
+              </Text>
+              <View className="mt-1 flex flex-row gap-2">
                 <Badge>
-                  <Text>{lecture.course.name}</Text>
+                  <Text>
+                    {lecture.type.substring(0, 1) +
+                      lecture.type.toLowerCase().substring(1)}
+                  </Text>
                 </Badge>
-              )}
-              <Badge variant="secondary">
-                <Text>{formatShortDate(lecture.createdAt.getTime())}</Text>
-              </Badge>
+                {lecture.course && (
+                  <Badge>
+                    <Text>{lecture.course.name}</Text>
+                  </Badge>
+                )}
+                <Badge variant="secondary">
+                  <Text>{formatShortDate(lecture.createdAt.getTime())}</Text>
+                </Badge>
+              </View>
             </View>
+          </View>
+          <View>
+            <LectureOperations
+              lecture={
+                lecture as {
+                  id: string;
+                  title: string;
+                  courseId?: string;
+                }
+              }
+              courses={courses as { id: string; name: string }[]}
+            />
           </View>
         </View>
         <View className="mt-6 flex flex-row flex-wrap gap-4">

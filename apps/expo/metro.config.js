@@ -18,6 +18,14 @@ const config = withTurborepoManagedCache(
 // https://github.com/expo/expo/issues/26926
 config.resolver.unstable_enablePackageExports = true;
 
+// XXX: Fix import.meta not being supported
+// https://github.com/pmndrs/zustand/discussions/1967
+config.resolver.unstable_conditionNames = [
+  "browser",
+  "require",
+  "react-native",
+];
+
 module.exports = config;
 
 /**

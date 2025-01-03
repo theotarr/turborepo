@@ -1,4 +1,3 @@
-import type { Course, Lecture } from "@prisma/client";
 import React from "react";
 import { Pressable, View } from "react-native";
 import { ChevronRight } from "lucide-react-native";
@@ -10,8 +9,17 @@ import { formatLectureType, formatShortDate } from "~/lib/utils";
 import { Badge } from "./ui/badge";
 
 interface LectureItemProps {
-  lecture: Lecture & {
-    course?: Course | null;
+  lecture: {
+    id: string;
+    title: string;
+    type: string;
+    updatedAt: Date;
+    courseId: string;
+  } & {
+    course?: {
+      id: string;
+      name: string;
+    };
   };
   onLecturePress?: () => void;
 }
@@ -28,7 +36,7 @@ export function LectureItem({ lecture, onLecturePress }: LectureItemProps) {
         <Text className="line-clamp-1 truncate font-semibold hover:underline">
           {lecture.title}
         </Text>
-        <View className="flex flex-row space-x-2 text-sm text-muted-foreground">
+        <View className="flex flex-row gap-x-2 text-sm text-muted-foreground">
           <Badge variant="secondary">
             <Text>{formatLectureType(lecture.type)}</Text>
           </Badge>

@@ -36,8 +36,8 @@ export default function DashboardPage() {
       limit: 20,
     },
     {
-      getNextPageParam: (lastPage: { nextCursor: string }) =>
-        lastPage.nextCursor,
+      getNextPageParam: (lastPage: { nextCursor: string | undefined }) =>
+        lastPage.nextCursor ?? undefined,
     },
   );
   const user = api.auth.getUser.useQuery();
@@ -68,7 +68,6 @@ export default function DashboardPage() {
     if (lectures.hasNextPage) void lectures.fetchNextPage();
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   if (lectures.data === undefined || !user.data)
     return (
       <Stack.Screen
@@ -132,7 +131,7 @@ export default function DashboardPage() {
                 </Text>
               </View>
             )}
-          {lectures.data.pages[0]!.items.length > 0 && (
+          {lectures.data.pages[0]?.items.length > 0 && (
             <View className="flex-col gap-y-2">
               {lectures.data.pages.map(
                 (page: { items: Lecture[]; nextCursor: string }[]) =>
