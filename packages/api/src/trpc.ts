@@ -50,14 +50,20 @@ export const createTRPCContext = async (opts: {
       where: { appStoreUserId },
       select: { id: true, name: true, email: true, image: true },
     });
+
+    // Disable this check for mobile users.
+    // This will trigger when a mobile user signs in with Apple.
     if (!user) {
-      throw new TRPCError({
-        code: "UNAUTHORIZED",
-        message: "User not found",
+      console.log("No user found with appStoreUserId", {
+        appStoreUserId,
       });
+      // throw new TRPCError({
+      //   code: "UNAUTHORIZED",
+      //   message: "User not found",
+      // });
     }
     session = {
-      user,
+      user: user ?? { id: "unknown" },
       expires: new Date().toISOString(),
     };
   } else {
