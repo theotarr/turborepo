@@ -94,6 +94,7 @@ export default function DashboardPage() {
     return (
       <Stack.Screen
         options={{
+          headerLeft: () => <></>,
           title: "Dashboard",
           headerRight: () => (
             <Pressable onPress={() => router.push("/(dashboard)/settings")}>
