@@ -150,6 +150,7 @@ export default function Record() {
       <View className="flex h-full flex-col justify-between bg-background">
         <View className="flex-1 p-4">
           <LectureHeader
+            showBackButton={false}
             lecture={
               lecture as {
                 id: string;
@@ -170,7 +171,7 @@ export default function Record() {
             />
           </View>
         </View>
-        <View className="flex h-72 items-center justify-center bg-muted py-4">
+        <View className="-mb-10 flex h-80 items-center justify-center bg-muted pb-12 pt-6">
           <Text className="mb-2 text-center text-2xl font-semibold text-secondary-foreground">
             {isRecording
               ? "Recording your lecture"

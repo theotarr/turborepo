@@ -24,31 +24,38 @@ interface LectureHeaderProps {
     id: string;
     name: string;
   }[];
+  showBackButton?: boolean;
 }
 
-export function LectureHeader({ lecture, courses }: LectureHeaderProps) {
+export function LectureHeader({
+  lecture,
+  courses,
+  showBackButton = true,
+}: LectureHeaderProps) {
   const router = useRouter();
   const { colorScheme } = useColorScheme();
 
   return (
     <View className="flex w-full flex-row items-center justify-between">
       <View className="flex-row items-center gap-x-4">
-        <Button
-          variant="link"
-          className="size-6"
-          onPress={() =>
-            router.canGoBack()
-              ? router.back()
-              : router.replace("/(dashboard)/dashboard")
-          }
-        >
-          <ChevronLeft
-            className="m-0 p-0"
-            color={NAV_THEME[colorScheme].secondaryForeground}
-            size={20}
-          />
-        </Button>
-        <View>
+        {showBackButton && (
+          <Button
+            variant="link"
+            className="size-6"
+            onPress={() =>
+              router.canGoBack()
+                ? router.back()
+                : router.replace("/(dashboard)/dashboard")
+            }
+          >
+            <ChevronLeft
+              className="m-0 p-0"
+              color={NAV_THEME[colorScheme].secondaryForeground}
+              size={20}
+            />
+          </Button>
+        )}
+        <View className={showBackButton ? "" : "ml-4"}>
           <Text className="text-2xl font-semibold tracking-tight">
             {lecture.title}
           </Text>
