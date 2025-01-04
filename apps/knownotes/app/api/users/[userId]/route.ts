@@ -99,6 +99,11 @@ export async function DELETE(
       return new Response(null, { status: 403 });
     if (!session || !session?.user) return new Response(null, { status: 403 });
 
+    console.log("Deleting user", {
+      id: session.user.id,
+      email: session.user.email,
+    });
+
     // Delete the user.
     await db.user.delete({
       where: {
@@ -106,12 +111,12 @@ export async function DELETE(
       },
     });
 
-    // Remove the user from the Resend Audience.
-    session.user.email &&
-      (await resend.contacts.remove({
-        email: session.user.email,
-        audienceId: USER_AUDIENCE_ID,
-      }));
+    // // Remove the user from the Resend Audience.
+    // session.user.email &&
+    //   (await resend.contacts.remove({
+    //     email: session.user.email,
+    //     audienceId: USER_AUDIENCE_ID,
+    //   }));
 
     return new Response(null, { status: 200 });
   } catch (error) {
