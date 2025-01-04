@@ -9,7 +9,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { Link, Stack, useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { ArrowRight, Plus } from "lucide-react-native";
+import { ArrowLeft, ArrowRight, Plus } from "lucide-react-native";
 
 import ListItem from "~/components/onboarding-item";
 import { PaginationElement } from "~/components/pagination-element";
@@ -86,6 +86,39 @@ export default function App() {
       ),
     },
     {
+      text: "Sync across devices",
+      content: (
+        <View>
+          <View className="flex flex-col items-center gap-4">
+            <View className="flex flex-row items-center justify-center gap-4">
+              <View className="flex flex-col items-center">
+                <View className="h-28 w-16 rounded-2xl bg-muted p-2">
+                  <View className="h-full w-full rounded-lg bg-background" />
+                </View>
+                <Text className="mt-2 text-sm font-medium">Mobile</Text>
+              </View>
+              <View className="flex flex-col items-center justify-center gap-2">
+                <View className="flex flex-row gap-1">
+                  <ArrowRight size={24} className="text-muted-foreground" />
+                  <ArrowLeft size={24} className="text-muted-foreground" />
+                </View>
+                <Text className="text-sm text-muted-foreground">Sync</Text>
+              </View>
+              <View className="flex flex-col items-center">
+                <View className="h-24 w-32 rounded-2xl bg-muted p-2">
+                  <View className="h-full w-full rounded-lg bg-background" />
+                </View>
+                <Text className="mt-2 text-sm font-medium">Web</Text>
+              </View>
+            </View>
+            <Text className="mt-4 text-center text-lg text-muted-foreground">
+              Record lectures on your phone and access your notes anywhere
+            </Text>
+          </View>
+        </View>
+      ),
+    },
+    {
       text: "What courses are you taking?",
       content: (
         <View className="flex flex-col justify-center">
@@ -104,7 +137,6 @@ export default function App() {
                 disabled={createCourseMutation.isPending}
                 onPress={async () => {
                   if (!course || course.length === 0) return;
-
                   await createCourseMutation.mutateAsync({
                     name: course,
                   });
