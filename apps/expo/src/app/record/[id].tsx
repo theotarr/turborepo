@@ -1,6 +1,6 @@
 import type { StopwatchTimerMethods } from "react-native-animated-stopwatch-timer";
 import { useRef, useState } from "react";
-import { Pressable, SafeAreaView, View } from "react-native";
+import { Pressable, SafeAreaView, TextInput, View } from "react-native";
 import Animated, {
   interpolate,
   useAnimatedStyle,
@@ -11,32 +11,31 @@ import Animated, {
 import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from "expo-av";
 import * as FileSystem from "expo-file-system";
 import { Stack, useGlobalSearchParams, useRouter } from "expo-router";
-import { Aperture, ChevronLeft } from "lucide-react-native";
 
+import { LectureHeader } from "~/components/lecture-header";
 import Stopwatch from "~/components/stopwatch-timer";
 import { Button } from "~/components/ui/button";
 import { Text } from "~/components/ui/text";
-import { NAV_THEME } from "~/lib/constants";
 import { getAudioConfig } from "~/lib/get-audio-recording";
-import { useColorScheme } from "~/lib/theme";
 import { cn } from "~/lib/utils";
 import { api } from "~/utils/api";
 
 export default function Record() {
   const router = useRouter();
   const { id } = useGlobalSearchParams();
-  const { colorScheme } = useColorScheme();
   if (!id || typeof id !== "string") throw new Error("Lecture ID is required");
+  const { data: user } = api.auth.getUser.useQuery();
   const { data: lecture } = api.lecture.byId.useQuery({ id });
+
   const liveMobileMutation = api.lecture.liveMobile.useMutation();
 
+  const [notes, setNotes] = useState("");
   const [recording, setRecording] = useState<Audio.Recording | undefined>();
   const [isRecording, setIsRecording] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [permissionResponse, requestPermission] = Audio.usePermissions();
   const metering = useSharedValue(-100);
   const stopwatchTimerRef = useRef<StopwatchTimerMethods>(null);
-
   const animatedMic = useAnimatedStyle(() => ({
     width: withTiming(isRecording ? "60%" : "100%"),
     borderRadius: withTiming(isRecording ? 5 : 35),
@@ -143,45 +142,33 @@ export default function Record() {
     }
   }
 
-  if (!lecture)
-    return (
-      <Stack.Screen
-        options={{
-          title: "Live Lecture",
-          headerLeft: () => (
-            <Pressable onPress={() => router.back()}>
-              <ChevronLeft
-                color={NAV_THEME[colorScheme].secondaryForeground}
-                size={16}
-              />
-            </Pressable>
-          ),
-        }}
-      />
-    );
+  if (!lecture) return <Stack.Screen options={{ headerShown: false }} />;
 
   return (
-    <SafeAreaView className="my-0 bg-muted py-0">
-      <Stack.Screen
-        options={{
-          title: "Live Lecture",
-          headerLeft: () => (
-            <Pressable onPress={() => router.back()}>
-              <ChevronLeft
-                color={NAV_THEME[colorScheme].secondaryForeground}
-                size={16}
-              />
-            </Pressable>
-          ),
-        }}
-      />
-      {/* <GlowingWaves /> */}
+    <SafeAreaView className="my-0 py-0">
+      <Stack.Screen options={{ headerShown: false }} />
       <View className="flex h-full flex-col justify-between bg-background">
-        <View className="mx-auto mt-8 flex flex-row items-center rounded-full bg-foreground px-5 py-3">
-          <Aperture color={NAV_THEME[colorScheme].background} size={26} />
-          <Text className="ml-2.5 text-2xl font-bold tracking-tighter text-secondary">
-            KnowNotes.ai
-          </Text>
+        <View className="flex-1 p-4">
+          <LectureHeader
+            lecture={
+              lecture as {
+                id: string;
+                title: string;
+                createdAt: Date;
+              }
+            }
+            courses={user?.courses ?? []}
+          />
+          <View className="mx-2 mt-6 flex-1">
+            <TextInput
+              className="h-full w-full bg-background p-4 text-xl text-foreground"
+              multiline
+              placeholder="Jot down anything that stands out, and we'll enhance it..."
+              textAlignVertical="top"
+              value={notes}
+              onChangeText={setNotes}
+            />
+          </View>
         </View>
         <View className="flex h-72 items-center justify-center bg-muted py-4">
           <Text className="mb-2 text-center text-2xl font-semibold text-secondary-foreground">

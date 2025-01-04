@@ -3,6 +3,7 @@ import { WebView } from "react-native-webview";
 import { Stack, useGlobalSearchParams, useRouter } from "expo-router";
 import { ChevronLeft, GalleryVerticalEnd, Sparkles } from "lucide-react-native";
 
+import { LectureHeader } from "~/components/lecture-header";
 import { LectureOperations } from "~/components/lecture-operations";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -38,52 +39,25 @@ export default function Lecture() {
         }}
       />
       <View className="flex-1 p-4">
-        <View className="flex w-full flex-row items-center justify-between">
-          <View className="flex-row items-center gap-x-4">
-            <Button
-              variant="link"
-              className="size-6"
-              onPress={() =>
-                router.canGoBack()
-                  ? router.back()
-                  : router.replace("/(dashboard)/dashboard")
-              }
-            >
-              <ChevronLeft
-                className="m-0 p-0"
-                color={NAV_THEME[colorScheme].secondaryForeground}
-                size={20}
-              />
-            </Button>
-            <View>
-              <Text className="text-2xl font-semibold tracking-tight">
-                {lecture.title}
-              </Text>
-              <View className="mt-1 flex flex-row gap-x-2">
-                {lecture.course && (
-                  <Badge>
-                    <Text>{lecture.course.name}</Text>
-                  </Badge>
-                )}
-                <Badge variant="secondary">
-                  <Text>{formatShortDate(lecture.createdAt.getTime())}</Text>
-                </Badge>
-              </View>
-            </View>
-          </View>
-          <View>
-            <LectureOperations
-              lecture={
-                lecture as {
-                  id: string;
-                  title: string;
-                  courseId?: string;
-                }
-              }
-              courses={courses as { id: string; name: string }[]}
-            />
-          </View>
-        </View>
+        <LectureHeader
+          lecture={
+            lecture as {
+              id: string;
+              title: string;
+              courseId?: string;
+              course?: {
+                name: string;
+              };
+              createdAt: Date;
+            }
+          }
+          courses={
+            courses as {
+              id: string;
+              name: string;
+            }[]
+          }
+        />
         <View className="mt-6 flex flex-row flex-wrap gap-4">
           <Button
             variant="secondary"
