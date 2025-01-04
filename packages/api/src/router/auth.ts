@@ -61,10 +61,18 @@ export const authRouter = {
       const user = await ctx.db.user.findFirst({
         where: { appStoreUserId },
       });
+      console.log("Found existing user with appStoreUserId", {
+        appStoreUserId,
+        user,
+      });
       if (user) return user;
 
       // Otherwise, create the user.
       if (email) {
+        console.log("Creating user with email", {
+          email,
+          name,
+        });
         return await ctx.db.user.create({
           data: {
             appStoreUserId,
@@ -72,6 +80,8 @@ export const authRouter = {
             name,
           },
         });
+      } else {
+        console.log("No user email provided, cannot create user.");
       }
     }),
   delete: protectedProcedure.mutation(async ({ ctx }) => {
