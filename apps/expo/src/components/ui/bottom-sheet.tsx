@@ -18,9 +18,7 @@ import {
 } from "@gorhom/bottom-sheet";
 import { useTheme } from "@react-navigation/native";
 import * as Slot from "@rn-primitives/slot";
-import { X } from "lucide-react-native";
 
-import { NAV_THEME } from "~/lib/constants";
 import { useColorScheme } from "~/lib/theme";
 import { cn } from "~/lib/utils";
 import { Button } from "./button";
@@ -72,7 +70,6 @@ const BottomSheetContent = React.forwardRef<
     {
       enablePanDownToClose = true,
       enableDynamicSizing = true,
-      index = 0,
       backdropProps,
       backgroundStyle,
       android_keyboardInputMode = "adjustResize",
@@ -90,7 +87,7 @@ const BottomSheetContent = React.forwardRef<
         return {} as BottomSheetModalMethods;
       }
       return sheetRef.current;
-    }, [sheetRef.current]);
+    }, [sheetRef]);
 
     const renderBackdrop = React.useCallback(
       (props: BottomSheetBackdropProps) => {
@@ -121,7 +118,7 @@ const BottomSheetContent = React.forwardRef<
           />
         );
       },
-      [backdropProps, colors],
+      [backdropProps, isDarkColorScheme],
     );
 
     return (
@@ -252,20 +249,43 @@ const BottomSheetFlatList = React.forwardRef<
   );
 });
 
+type BottomSheetDismissButtonRef = React.ElementRef<typeof Button>;
+type BottomSheetDismissButtonProps = React.ComponentPropsWithoutRef<
+  typeof Button
+> & {
+  variant?: React.ComponentPropsWithoutRef<typeof Button>["variant"];
+  children?: React.ReactNode;
+};
+const BottomSheetDismissButton = React.forwardRef<
+  BottomSheetDismissButtonRef,
+  BottomSheetDismissButtonProps
+>(({ className, variant, children, onPress, ...props }, ref) => {
+  const { dismiss } = useBottomSheetModal();
+  function close(ev: GestureResponderEvent) {
+    onPress?.(ev);
+    console.log("close");
+    if (Keyboard.isVisible()) Keyboard.dismiss();
+    dismiss();
+  }
+  return (
+    <Button
+      ref={ref}
+      onPress={close}
+      variant={variant}
+      className={cn("pr-4", className)}
+      {...props}
+    >
+      {children}
+    </Button>
+  );
+});
+
 type BottomSheetHeaderRef = React.ElementRef<typeof View>;
 type BottomSheetHeaderProps = React.ComponentPropsWithoutRef<typeof View>;
 const BottomSheetHeader = React.forwardRef<
   BottomSheetHeaderRef,
   BottomSheetHeaderProps
 >(({ className, children, ...props }, ref) => {
-  const { colorScheme } = useColorScheme();
-  const { dismiss } = useBottomSheetModal();
-  function close() {
-    if (Keyboard.isVisible()) {
-      Keyboard.dismiss();
-    }
-    dismiss();
-  }
   return (
     <View
       ref={ref}
@@ -276,9 +296,7 @@ const BottomSheetHeader = React.forwardRef<
       {...props}
     >
       {children}
-      <Button onPress={close} variant="ghost" className="pr-4">
-        <X color={NAV_THEME[colorScheme].secondaryForeground} size={20} />
-      </Button>
+      <BottomSheetDismissButton />
     </View>
   );
 });
@@ -336,6 +354,7 @@ export {
   BottomSheetFlatList,
   BottomSheetFooter,
   BottomSheetHeader,
+  BottomSheetDismissButton,
   BottomSheetOpenTrigger,
   BottomSheetTextInput,
   BottomSheetView,

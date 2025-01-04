@@ -12,7 +12,17 @@ export const authRouter = {
   getUser: protectedProcedure.query(async ({ ctx }) => {
     return await ctx.db.user.findUnique({
       where: { id: ctx.session.user.id },
-      include: { courses: true },
+      include: {
+        courses: {
+          include: {
+            _count: {
+              select: {
+                lectures: true,
+              },
+            },
+          },
+        },
+      },
     });
   }),
   update: protectedProcedure
