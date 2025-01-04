@@ -88,7 +88,7 @@ export function LectureOperations({
           />
         </Pressable>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-48">
+      <DropdownMenuContent className="w-36">
         <Animated.View
           entering={FadeIn.duration(200)}
           exiting={FadeOut.duration(200)}
