@@ -1,6 +1,12 @@
 import type { StopwatchTimerMethods } from "react-native-animated-stopwatch-timer";
 import { useRef, useState } from "react";
-import { Pressable, SafeAreaView, TextInput, View } from "react-native";
+import {
+  ActivityIndicator,
+  Pressable,
+  SafeAreaView,
+  TextInput,
+  View,
+} from "react-native";
 import Animated, {
   interpolate,
   useAnimatedStyle,
@@ -27,7 +33,7 @@ export default function Record() {
   const { data: user } = api.auth.getUser.useQuery();
   const { data: lecture } = api.lecture.byId.useQuery({ id });
 
-  const liveMobileMutation = api.lecture.liveMobile.useMutation();
+  const transcribeAudio = api.lecture.liveMobile.useMutation();
 
   const [notes, setNotes] = useState("");
   const [recording, setRecording] = useState<Audio.Recording | undefined>();
@@ -112,16 +118,15 @@ export default function Record() {
   async function transcribeRecording() {
     if (!lecture) return;
 
-    console.log("Stopping recording...");
     setIsRecording(false);
     setIsTranscribing(true);
     stopwatchTimerRef.current?.pause();
 
     try {
       await recording?.stopAndUnloadAsync();
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: false,
-      });
+      // await Audio.setAudioModeAsync({
+      //   allowsRecordingIOS: false,
+      // });
       const recordingUri = recording?.getURI();
       if (!recordingUri) throw new Error("No recording URI");
       const uri = await FileSystem.readAsStringAsync(recordingUri, {
@@ -129,7 +134,7 @@ export default function Record() {
       });
       const audioConfig = getAudioConfig();
 
-      await liveMobileMutation.mutateAsync({
+      await transcribeAudio.mutateAsync({
         lectureId: lecture.id,
         audioUrl: uri,
         config: audioConfig,
@@ -203,11 +208,14 @@ export default function Record() {
           </Pressable>
           <View className="mt-6">
             <Button
-              className="w-56 rounded-full"
+              className="w-56 flex-row items-center gap-x-2 rounded-full"
               size="lg"
               onPress={transcribeRecording}
               disabled={!recording || isTranscribing}
             >
+              {isTranscribing && (
+                <ActivityIndicator size="small" color="white" />
+              )}
               <Text>Generate Notes</Text>
             </Button>
           </View>
