@@ -190,9 +190,16 @@ export function LectureOperations({
                   {
                     text: "Delete",
                     style: "destructive",
-                    onPress: async () => {
-                      await deleteLecture.mutateAsync(lecture.id);
-                      router.replace("/(dashboard)/dashboard");
+                    onPress: () => {
+                      void (async () => {
+                        await deleteLecture.mutateAsync(lecture.id);
+                        await utils.lecture.infiniteLectures.invalidate();
+                      })();
+
+                      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+                      router.canGoBack()
+                        ? router.back()
+                        : router.replace("/(dashboard)/dashboard");
                     },
                   },
                 ],
