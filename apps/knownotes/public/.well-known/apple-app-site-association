@@ -10,8 +10,7 @@
         "paths": [
           "/mobile",
           "/lecture/*",
-          "/dashboard",
-          "/login"
+          "/dashboard"
         ]
       }
     ]
