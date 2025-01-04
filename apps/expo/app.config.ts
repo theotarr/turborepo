@@ -27,6 +27,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     infoPlist: {
       NSMicrophoneUsageDescription:
         "Need microphone access for recording audio",
+      UIBackgroundModes: ["audio"],
     },
     config: {
       usesNonExemptEncryption: false,
