@@ -57,6 +57,9 @@ export default function DashboardPage() {
         lastPage.nextCursor ?? undefined,
     },
   );
+  const filteredLectures = lectures.data?.pages[0]?.items.filter(
+    (lecture) => !courseFilter || lecture.courseId === courseFilter.courseId,
+  );
 
   const createLecture = api.lecture.create.useMutation();
   const createCourse = api.course.create.useMutation();
@@ -159,11 +162,7 @@ export default function DashboardPage() {
                       {user.data.courses.map((course) => (
                         <BottomSheetDismissButton
                           key={course.id}
-                          variant={
-                            courseFilter?.courseId === course.id
-                              ? "default"
-                              : "outline"
-                          }
+                          variant="outline"
                           className="mb-2 w-full flex-row items-center justify-between rounded-lg"
                           onPress={() =>
                             setCourseFilter({
@@ -258,18 +257,17 @@ export default function DashboardPage() {
             }}
             scrollEventThrottle={400}
           >
-            {lectures.data.pages[0]?.items.length === 0 &&
-              !lectures.isFetching && (
-                <EmptyPlaceholder>
-                  <EmptyPlaceholder.Icon icon={Plus} size={24} />
-                  <EmptyPlaceholder.Title>
-                    {courseFilter ? "This course is empty" : "No lectures yet"}
-                  </EmptyPlaceholder.Title>
-                  <EmptyPlaceholder.Description className="max-w-[280px]">
-                    Create a new lecture by clicking the plus button below.
-                  </EmptyPlaceholder.Description>
-                </EmptyPlaceholder>
-              )}
+            {filteredLectures?.length === 0 && !lectures.isFetching && (
+              <EmptyPlaceholder>
+                <EmptyPlaceholder.Icon icon={Plus} size={24} />
+                <EmptyPlaceholder.Title>
+                  {courseFilter ? "This course is empty" : "No lectures yet"}
+                </EmptyPlaceholder.Title>
+                <EmptyPlaceholder.Description className="max-w-[280px]">
+                  Create a new lecture by clicking the plus button below.
+                </EmptyPlaceholder.Description>
+              </EmptyPlaceholder>
+            )}
             {lectures.data.pages[0].items.length > 0 && (
               <View className="flex-col gap-y-2">
                 {lectures.data.pages.map(

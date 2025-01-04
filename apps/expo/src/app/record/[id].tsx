@@ -124,20 +124,18 @@ export default function Record() {
 
     try {
       await recording?.stopAndUnloadAsync();
-      // await Audio.setAudioModeAsync({
-      //   allowsRecordingIOS: false,
-      // });
       const recordingUri = recording?.getURI();
       if (!recordingUri) throw new Error("No recording URI");
-      const uri = await FileSystem.readAsStringAsync(recordingUri, {
+
+      const audioUrl = await FileSystem.readAsStringAsync(recordingUri, {
         encoding: FileSystem.EncodingType.Base64,
       });
-      const audioConfig = getAudioConfig();
+      const config = getAudioConfig();
 
       await transcribeAudio.mutateAsync({
         lectureId: lecture.id,
-        audioUrl: uri,
-        config: audioConfig,
+        audioUrl,
+        config,
       });
 
       // Redirect to the lecture notes page.
