@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { router, Stack } from "expo-router";
 import Superwall from "@superwall/react-native-superwall";
-import { MoveRight, Plus, Settings } from "lucide-react-native";
+import { Mic, MoveRight, Plus, Settings } from "lucide-react-native";
 
 import type { Lecture } from ".prisma/client";
 import { EmptyPlaceholder } from "~/components/empty-placeholder";
@@ -335,7 +335,7 @@ export default function DashboardPage() {
               <BottomSheetDismissButton
                 size="lg"
                 variant="secondary"
-                className="w-full flex-row items-center justify-between"
+                className="w-full flex-row items-center justify-between px-4"
                 onPress={async () => {
                   if (
                     !shouldShowPaywall(
@@ -356,7 +356,13 @@ export default function DashboardPage() {
                     });
                 }}
               >
-                <Text>Live Lecture</Text>
+                <View className="flex-row items-center gap-x-4">
+                  <Mic
+                    size={20}
+                    color={NAV_THEME[colorScheme].secondaryForeground}
+                  />
+                  <Text>Record Audio</Text>
+                </View>
                 <MoveRight
                   color={NAV_THEME[colorScheme].secondaryForeground}
                   size={20}
