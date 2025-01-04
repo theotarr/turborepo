@@ -331,7 +331,7 @@ export default function DashboardPage() {
               <Text className="text-2xl font-semibold text-secondary-foreground">
                 New Lecture
               </Text>
-              <Button
+              <BottomSheetDismissButton
                 size="lg"
                 variant="secondary"
                 className="w-full flex-row items-center justify-between"
@@ -360,7 +360,7 @@ export default function DashboardPage() {
                   color={NAV_THEME[colorScheme].secondaryForeground}
                   size={20}
                 />
-              </Button>
+              </BottomSheetDismissButton>
             </BottomSheetView>
           </BottomSheetContent>
         </BottomSheet>
