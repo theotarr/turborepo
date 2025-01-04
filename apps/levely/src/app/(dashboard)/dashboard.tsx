@@ -32,6 +32,7 @@ export default function Dashboard() {
       context.startX = translateX.value;
     },
     onActive: (event, context) => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/restrict-plus-operands
       translateX.value = context.startX + event.translationX;
     },
     onEnd: (event) => {

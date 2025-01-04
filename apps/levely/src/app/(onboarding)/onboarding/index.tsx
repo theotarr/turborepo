@@ -71,9 +71,7 @@ export default function Onboarding() {
           {/* If the current section is either habits or focus questions */}
           {sectionIndex === 0 || sectionIndex === 2 ? (
             <Question
-              question={
-                sections[sectionIndex]?.questions[questionIndex]?.question!
-              }
+              question={sections[sectionIndex]?.questions[questionIndex]?.question!}
               options={
                 sections[sectionIndex]?.questions[questionIndex]
                   ?.options as unknown as string[]

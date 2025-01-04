@@ -98,7 +98,8 @@ export default function Potential() {
     })();
   }, [potentialStats, stats]);
 
-  if (!stats || !potentialStats) return null;
+  if (!stats || !potentialStats)
+    return <Stack.Screen options={{ headerShown: false }} />;
 
   return (
     <SafeAreaView className="flex-1 bg-background">

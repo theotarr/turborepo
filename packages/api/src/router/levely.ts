@@ -5,6 +5,16 @@ import { z } from "zod";
 
 import { publicProcedure } from "../trpc";
 
+type StatsKey =
+  | "memory"
+  | "reading"
+  | "focus"
+  | "habits"
+  | "problemSolving"
+  | "timeManagement"
+  | "productivity"
+  | "noteTaking";
+
 const tools = {
   knownotes: {
     name: "KnowNotes",
@@ -152,6 +162,15 @@ export const levelyRouter = {
         Current Grades:
         ${grades.map((g) => `${g.name}: ${g.grade}`).join("\n")}`,
       });
+
+      // Sometimes GPT-3.5-turbo will generate stats that are lower than the current stats.
+      // Check to see if the potential stats are at least the same as the current stats.
+      for (const [key, value] of Object.entries(object)) {
+        if (key === "grades" || typeof value !== "number") continue;
+        if (value < currentStats[key as StatsKey])
+          object[key as StatsKey] = currentStats[key as StatsKey];
+      }
+
       console.log("Potential Stats:", JSON.stringify(object, null, 2));
       return object;
     }),
