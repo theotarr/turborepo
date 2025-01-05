@@ -1,7 +1,12 @@
-import { ActivityIndicator, SafeAreaView, View } from "react-native";
+import { ActivityIndicator, SafeAreaView, Share, View } from "react-native";
 import { WebView } from "react-native-webview";
 import { Stack, useGlobalSearchParams, useRouter } from "expo-router";
-import { ChevronLeft, GalleryVerticalEnd, Sparkles } from "lucide-react-native";
+import {
+  ChevronLeft,
+  GalleryVerticalEnd,
+  Share2,
+  Sparkles,
+} from "lucide-react-native";
 
 import { LectureHeader } from "~/components/lecture-header";
 import { LectureOperations } from "~/components/lecture-operations";
@@ -84,6 +89,22 @@ export default function Lecture() {
           <Button
             variant="secondary"
             className="flex flex-row gap-2 rounded-full"
+            onPress={async () => {
+              await Share.share({
+                message: `Hey check out my notes on ${lecture.title}`,
+                url: `https://knownotes.ai/share/${lecture.id}?ref=ios`,
+              });
+            }}
+          >
+            <Share2
+              size={16}
+              color={NAV_THEME[colorScheme].secondaryForeground}
+            />
+            <Text>Share</Text>
+          </Button>
+          {/* <Button
+            variant="secondary"
+            className="flex flex-row gap-2 rounded-full"
             onPress={() => alert("Not implemented")}
           >
             <GalleryVerticalEnd
@@ -91,7 +112,7 @@ export default function Lecture() {
               color={NAV_THEME[colorScheme].secondaryForeground}
             />
             <Text>Quiz</Text>
-          </Button>
+          </Button> */}
         </View>
         <WebView
           originWhitelist={["*"]}
