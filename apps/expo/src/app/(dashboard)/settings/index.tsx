@@ -1,9 +1,15 @@
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Pressable, SafeAreaView, View } from "react-native";
+import {
+  ActivityIndicator,
+  Pressable,
+  SafeAreaView,
+  Share,
+  View,
+} from "react-native";
 import { Link, Stack, useRouter } from "expo-router";
 import * as StoreReview from "expo-store-review";
 import { Picker } from "@react-native-picker/picker";
-import { ChevronLeft, LogOut, Star } from "lucide-react-native";
+import { ChevronLeft, LogOut, Plus, Star } from "lucide-react-native";
 
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
@@ -56,6 +62,7 @@ export default function SettingsPage() {
           </Text>
           <View className="mt-6 flex flex-col gap-4">
             <Button
+              variant="secondary"
               className="flex w-full flex-row items-center gap-2"
               onPress={async () => {
                 await StoreReview.requestReview();
@@ -63,24 +70,27 @@ export default function SettingsPage() {
             >
               <Star
                 size={16}
-                fill={NAV_THEME[colorScheme].primaryForeground}
-                color={NAV_THEME[colorScheme].primaryForeground}
+                fill={NAV_THEME[colorScheme].secondaryForeground}
+                color={NAV_THEME[colorScheme].secondaryForeground}
               />
               <Text className="font-semibold">Give KnowNotes 5 stars</Text>
             </Button>
-            {/* <Button
+            <Button
               variant="secondary"
               className="flex w-full flex-row items-center gap-2"
-              onPress={() => {
-
-              }}
+              onPress={async () =>
+                await Share.share({
+                  message: "Hey you have to try this",
+                  url: "https://knownotes.ai?ref=ios",
+                })
+              }
             >
               <Plus
                 size={16}
                 color={NAV_THEME[colorScheme].secondaryForeground}
               />
-              <Text>Inite a friend</Text>
-            </Button> */}
+              <Text>Invite a friend</Text>
+            </Button>
           </View>
         </View>
 
