@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ActivityIndicator, Alert, Pressable, View } from "react-native";
+import { ActivityIndicator, Alert, Pressable, Share, View } from "react-native";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 import { useRouter } from "expo-router";
 import { EllipsisVertical } from "lucide-react-native";
@@ -17,6 +17,7 @@ import {
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
@@ -176,13 +177,25 @@ export function LectureOperations({
             entering={FadeIn.duration(200)}
             exiting={FadeOut.duration(200)}
           >
-            <DropdownMenuItem
-              onPress={() => setOpen(true)}
-              closeOnPress={false}
-              className="w-full"
-            >
-              <Text>Edit</Text>
-            </DropdownMenuItem>
+            <DropdownMenuGroup>
+              <DropdownMenuItem
+                onPress={() => setOpen(true)}
+                closeOnPress={false}
+                className="w-full"
+              >
+                <Text>Edit</Text>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onPress={async () => {
+                  await Share.share({
+                    message: `Hey check out my notes on ${lecture.title}`,
+                    url: `https://knownotes.ai/share/${lecture.id}?ref=ios`,
+                  });
+                }}
+              >
+                <Text>Share notes</Text>
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onPress={() => {

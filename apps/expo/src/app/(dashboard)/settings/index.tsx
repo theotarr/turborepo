@@ -3,6 +3,7 @@ import {
   ActivityIndicator,
   Pressable,
   SafeAreaView,
+  ScrollView,
   Share,
   View,
 } from "react-native";
@@ -54,8 +55,7 @@ export default function SettingsPage() {
           ),
         }}
       />
-
-      <View className="flex h-full w-full flex-col gap-6 px-4 py-6">
+      <ScrollView className="flex h-full w-full flex-col gap-6 px-4 py-6">
         <View className="flex flex-col">
           <Text className="text-xl font-semibold text-secondary-foreground">
             For You
@@ -175,7 +175,7 @@ export default function SettingsPage() {
             <Text>Save</Text>
           </Button>
         </View>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
