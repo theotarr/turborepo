@@ -6,7 +6,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   name: "Levely",
   slug: "levely",
   scheme: "levely",
-  version: "0.1.2",
+  version: "0.1.3",
   orientation: "portrait",
   icon: "./assets/icon.png",
   userInterfaceStyle: "automatic",
