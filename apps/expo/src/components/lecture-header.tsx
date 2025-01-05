@@ -1,8 +1,11 @@
-import { View } from "react-native";
+import { Pressable, View } from "react-native";
 import { useRouter } from "expo-router";
 import { ChevronLeft } from "lucide-react-native";
 
-import { LectureOperations } from "~/components/lecture-operations";
+import {
+  LectureOperations,
+  useEditLectureDialogStore,
+} from "~/components/lecture-operations";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Text } from "~/components/ui/text";
@@ -34,6 +37,7 @@ export function LectureHeader({
 }: LectureHeaderProps) {
   const router = useRouter();
   const { colorScheme } = useColorScheme();
+  const { setOpen } = useEditLectureDialogStore();
 
   return (
     <View className="flex w-full flex-row items-center justify-between">
@@ -60,12 +64,18 @@ export function LectureHeader({
             {lecture.title}
           </Text>
           <View className="mt-1 flex flex-row gap-x-2">
-            {lecture.course && (
+            {lecture.course ? (
               <Badge>
                 <Text>{lecture.course.name}</Text>
               </Badge>
+            ) : (
+              <Badge variant="secondary">
+                <Pressable className="w-full" onPress={() => setOpen(true)}>
+                  <Text>Add to course</Text>
+                </Pressable>
+              </Badge>
             )}
-            <Badge variant="secondary">
+            <Badge variant="outline">
               <Text>{formatShortDate(lecture.createdAt.getTime())}</Text>
             </Badge>
           </View>

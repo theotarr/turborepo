@@ -277,6 +277,9 @@ importers:
       superjson:
         specifier: 2.2.1
         version: 2.2.1
+      zustand:
+        specifier: ^4.4.7
+        version: 4.5.5(@types/react@18.3.9)(react@18.3.1)
     devDependencies:
       '@acme/api':
         specifier: workspace:*
