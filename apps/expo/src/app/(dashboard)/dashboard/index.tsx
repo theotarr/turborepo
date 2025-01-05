@@ -299,9 +299,9 @@ export default function DashboardPage() {
                             // If the user doesn't have an active subscription, show the paywall.
                             void Superwall.shared
                               .register("viewLecture")
-                              .then(() => {
-                                router.push(`/lecture/${lecture.id}`);
-                              });
+                              .then(() =>
+                                router.push(`/lecture/${lecture.id}`),
+                              );
                           }}
                         />
                       );

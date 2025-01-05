@@ -9,6 +9,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { Link, Stack, useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Superwall from "@superwall/react-native-superwall";
 import { ArrowLeft, ArrowRight, Plus } from "lucide-react-native";
 
 import ListItem from "~/components/onboarding-item";
@@ -20,6 +21,7 @@ import { Text } from "~/components/ui/text";
 import { NAV_THEME } from "~/lib/constants";
 import { useColorScheme } from "~/lib/theme";
 import { api } from "~/utils/api";
+import { shouldShowPaywall } from "~/utils/subscription";
 
 export default function App() {
   const utils = api.useUtils();
@@ -192,7 +194,7 @@ export default function App() {
 
   return (
     <SafeAreaView className="flex-1">
-      <Stack.Screen options={{ header: () => <></> }} />
+      <Stack.Screen options={{ headerShown: false }} />
       <Animated.FlatList
         ref={flatListRef}
         onScroll={scrollHandle}
@@ -213,7 +215,19 @@ export default function App() {
           onPress={async () => {
             if (flatListIndex === pages.length - 1) {
               await AsyncStorage.setItem("onboardingComplete", "true");
-              router.replace("/(dashboard)/dashboard");
+
+              if (
+                shouldShowPaywall(
+                  user.data as {
+                    stripeCurrentPeriodEnd?: string | null;
+                    appStoreCurrentPeriodEnd?: string | null;
+                  },
+                )
+              )
+                void Superwall.shared.register("onboarding").then(() => {
+                  router.replace("/(dashboard)/dashboard");
+                });
+              else router.replace("/(dashboard)/dashboard");
               return;
             }
 
