@@ -9,7 +9,7 @@ export function ShareReport({ className }: { className?: string }) {
   async function handleShare() {
     const result = await Share.share({
       message: `Check out my Levely study scores!`,
-      //   url: `https://levely.app`, // TODO: Add share url or App Store link
+      url: `https://apps.apple.com/us/app/levely/id6740011673`,
     });
     if (result.action === Share.sharedAction) {
       if (result.activityType) {

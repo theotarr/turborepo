@@ -20,7 +20,7 @@ const tools = {
     name: "KnowNotes",
     description:
       "KnowNotes transcribes lectures and creates detailed notes, flashcards, and quizzes so you can ace your classes easily.",
-    link: "https://knownotes.ai",
+    link: "https://apps.apple.com/us/app/knownotes-ai-note-taker/id6739503513",
   },
   soundscape: {
     name: "Soundscape",
