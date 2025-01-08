@@ -10,13 +10,15 @@ import PrincetonLogo from "@/assets/images/institutions/princeton.png";
 import StanfordLogo from "@/assets/images/institutions/stanford.png";
 import YaleLogo from "@/assets/images/institutions/yale.png";
 import { FaqArray } from "@/components/faq";
-import { FeatureGrid, PrimaryFeatures } from "@/components/features";
+import { PrimaryFeatures } from "@/components/features";
 import { PricingCard } from "@/components/pricing";
 import { ReviewGrid } from "@/components/testimonials";
 import { TrustPilot } from "@/components/trust-pilot";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { InfiniteMovingCards } from "@/components/ui/infinite-scroll";
 import { absoluteUrl, cn } from "@/lib/utils";
+
+import { auth } from "@acme/auth";
 
 const title = "KnowNotes";
 const description =
@@ -136,6 +138,8 @@ const institutionImages = [
 ];
 
 export default async function IndexPage() {
+  const session = await auth();
+
   return (
     <>
       <section className="space-y-6 pb-8 pt-6 md:pb-12 md:pt-10 lg:pb-20 lg:pt-24">
@@ -152,17 +156,19 @@ export default async function IndexPage() {
           </p>
           <div className="mt-4 flex flex-col items-center justify-center">
             <Link
-              href="/login"
+              href={session ? "/dashboard" : "/login"}
               className={cn(
                 buttonVariants({ size: "lg", variant: "shadow" }),
                 "h-12 w-56 rounded-lg text-base font-semibold",
               )}
             >
-              Get Started
+              {session ? "Dashboard" : "Get Started"}
             </Link>
-            <p className="mt-2 text-sm text-muted-foreground">
-              No credit card required
-            </p>
+            {session ? null : (
+              <p className="mt-2 text-sm text-muted-foreground">
+                No credit card required
+              </p>
+            )}
           </div>
           <div className="relative mt-12 flex flex-col items-center justify-center sm:mt-16">
             <p className="text-secondary-foreground/8 text-lg font-bold uppercase sm:text-xl">
