@@ -17,6 +17,10 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   updates: {
     fallbackToCacheTimeout: 0,
+    url: "https://u.expo.dev/d9ca89f3-c9ca-436e-a31b-0273a7df86cb",
+  },
+  runtimeVersion: {
+    policy: "appVersion",
   },
   assetBundlePatterns: ["**/*"],
   ios: {
@@ -52,6 +56,12 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   plugins: [
     "expo-router",
     "expo-apple-authentication",
+    [
+      "expo-updates",
+      {
+        username: "theotarr",
+      },
+    ],
     [
       "expo-build-properties",
       {
