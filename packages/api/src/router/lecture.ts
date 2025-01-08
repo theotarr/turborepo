@@ -206,6 +206,7 @@ export const lectureRouter = {
       z.object({
         lectureId: z.string().min(1),
         audioUrl: z.string(),
+        notes: z.string().optional(),
         config: z.object({
           encoding: z.string(),
           sampleRateHertz: z.number(),
@@ -249,7 +250,7 @@ export const lectureRouter = {
       // Update the lecture transcript.
       await ctx.db.lecture.update({
         where: { id: input.lectureId },
-        data: { transcript: transcript },
+        data: { transcript }, // TODO: Add notes to the lecture. We have to convert them to Tiptap JSON.
       });
 
       // Generate Markdown notes for the lecture.
@@ -287,8 +288,9 @@ export const lectureRouter = {
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      const { lectureId } = input;
       const lecture = await ctx.db.lecture.findUnique({
-        where: { id: input.lectureId, userId: ctx.session.user.id },
+        where: { id: lectureId, userId: ctx.session.user.id },
       });
       if (!lecture) throw new Error("Lecture not found");
 
@@ -314,12 +316,59 @@ export const lectureRouter = {
       // Create flashcards in the database.
       await ctx.db.flashcard.createMany({
         data: object.flashcards.map(({ term, definition }) => ({
-          lectureId: input.lectureId,
+          lectureId,
           term,
           definition,
         })),
       });
 
       return object.flashcards;
+    }),
+  createQuiz: protectedProcedure
+    .input(
+      z.object({
+        lectureId: z.string().min(1),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { lectureId } = input;
+      const lecture = await ctx.db.lecture.findUnique({
+        where: { id: lectureId, userId: ctx.session.user.id },
+      });
+      if (!lecture) throw new Error("Lecture not found");
+
+      const { object } = await generateObject({
+        model: openai("gpt-4o"),
+        schema: z.object({
+          questions: z.array(
+            z.object({
+              question: z.string(),
+              choices: z.array(z.string()),
+              answerIndex: z.number(),
+            }),
+          ),
+        }),
+        system: `\
+    You are an expert in generating quiz questions.
+    You are provided with a transcript of a lecture.
+    Your goal is to make questions covering as many topics from the lecture as possible.
+    The \`answerIndex\` is the index (0-indexed) of the correct answer in the \`choices\` array.`,
+        prompt: `\
+    Transcript:
+    ${formatTranscript(lecture.transcript as unknown as Transcript[])}`,
+      });
+      console.log("Generated questions:", object);
+
+      // Save the questions in the database.
+      await ctx.db.question.createMany({
+        data: object.questions.map(({ question, choices, answerIndex }) => ({
+          lectureId,
+          question,
+          choices,
+          answerIndex,
+        })),
+      });
+
+      return object.questions;
     }),
 } satisfies TRPCRouterRecord;

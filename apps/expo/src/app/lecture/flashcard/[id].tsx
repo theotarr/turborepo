@@ -9,7 +9,7 @@ import { NAV_THEME } from "~/lib/constants";
 import { useColorScheme } from "~/lib/theme";
 import { api } from "~/utils/api";
 
-export default function Lecture() {
+export default function LectureFlashcards() {
   const router = useRouter();
   const { colorScheme } = useColorScheme();
 

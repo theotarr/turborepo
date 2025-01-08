@@ -1,21 +1,19 @@
-import { ActivityIndicator, SafeAreaView, Share, View } from "react-native";
+import {
+  ActivityIndicator,
+  SafeAreaView,
+  ScrollView,
+  Share,
+  View,
+} from "react-native";
 import { WebView } from "react-native-webview";
 import { Stack, useGlobalSearchParams, useRouter } from "expo-router";
-import {
-  ChevronLeft,
-  GalleryVerticalEnd,
-  Share2,
-  Sparkles,
-} from "lucide-react-native";
+import { GalleryVerticalEnd, Share2, Sparkles } from "lucide-react-native";
 
 import { LectureHeader } from "~/components/lecture-header";
-import { LectureOperations } from "~/components/lecture-operations";
-import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Text } from "~/components/ui/text";
 import { NAV_THEME } from "~/lib/constants";
 import { useColorScheme } from "~/lib/theme";
-import { formatShortDate } from "~/lib/utils";
 import { api } from "~/utils/api";
 import { getBaseUrl } from "~/utils/base-url";
 
@@ -63,10 +61,10 @@ export default function Lecture() {
             }[]
           }
         />
-        <View className="mt-6 flex flex-row flex-wrap gap-4">
+        <ScrollView className="mt-6 max-h-16" horizontal={true}>
           <Button
             variant="secondary"
-            className="flex flex-row gap-2 rounded-full"
+            className="mr-2 flex flex-row gap-2 rounded-full"
             onPress={() => router.push(`/lecture/chat/${lecture.id}`)}
           >
             <Sparkles
@@ -77,7 +75,7 @@ export default function Lecture() {
           </Button>
           <Button
             variant="secondary"
-            className="flex flex-row gap-2 rounded-full"
+            className="mr-2 flex flex-row gap-2 rounded-full"
             onPress={() => router.push(`/lecture/flashcard/${lecture.id}`)}
           >
             <GalleryVerticalEnd
@@ -85,6 +83,17 @@ export default function Lecture() {
               color={NAV_THEME[colorScheme].secondaryForeground}
             />
             <Text>Flashcards</Text>
+          </Button>
+          <Button
+            variant="secondary"
+            className="mr-2 flex flex-row gap-2 rounded-full"
+            onPress={() => router.push(`/lecture/quiz/${lecture.id}`)}
+          >
+            <Sparkles
+              size={16}
+              color={NAV_THEME[colorScheme].secondaryForeground}
+            />
+            <Text>Quiz</Text>
           </Button>
           <Button
             variant="secondary"
@@ -102,18 +111,7 @@ export default function Lecture() {
             />
             <Text>Share</Text>
           </Button>
-          {/* <Button
-            variant="secondary"
-            className="flex flex-row gap-2 rounded-full"
-            onPress={() => alert("Not implemented")}
-          >
-            <GalleryVerticalEnd
-              size={16}
-              color={NAV_THEME[colorScheme].secondaryForeground}
-            />
-            <Text>Quiz</Text>
-          </Button> */}
-        </View>
+        </ScrollView>
         <WebView
           originWhitelist={["*"]}
           style={{ backgroundColor: "transparent", marginTop: 8 }}
