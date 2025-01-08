@@ -11,6 +11,8 @@ export const NAV_THEME = {
     muted: "hsl(210, 40%, 96.1%)",
     mutedForeground: "hsl(215.4, 16.3%, 46.9%)",
     text: "hsl(222.2, 84%, 4.9%)", // foreground
+    destructive: "hsl(0, 84.2%, 60.2%)",
+    destructiveForeground: "hsl(210, 40%, 98%)",
   },
   dark: {
     background: "hsl(222.2, 84%, 4.9%)", // background
@@ -24,5 +26,7 @@ export const NAV_THEME = {
     muted: "hsl(217.2, 32.6%, 17.5%)",
     mutedForeground: "hsl(215, 20.2%, 65.1%)",
     text: "hsl(210, 40%, 98%)", // foreground
+    destructive: "hsl(0, 62.8%, 30.6%)",
+    destructiveForeground: "hsl(210, 40%, 98%)",
   },
 };
