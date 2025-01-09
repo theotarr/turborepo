@@ -17,17 +17,17 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   updates: {
     fallbackToCacheTimeout: 0,
+    url: "https://u.expo.dev/ee13eb68-1d02-45bb-a9bc-dbd70fa9efa6",
+  },
+  runtimeVersion: {
+    policy: "appVersion",
   },
   assetBundlePatterns: ["**/*"],
   ios: {
     bundleIdentifier: "ai.levely.ios",
     supportsTablet: true,
-    // associatedDomains: ["applinks:levely.ai"],
+    // associatedDomains: ["applinks:levely.app"],
     infoPlist: {
-      NSMicrophoneUsageDescription:
-        "Need microphone access for recording audio",
-      NSSpeechRecognitionUsageDescription:
-        "Need speech recognition access for voice commands",
       NSPhotoLibraryUsageDescription:
         "Need photo library access for uploading images",
     },
