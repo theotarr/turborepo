@@ -1,5 +1,4 @@
 import { redirect } from "next/navigation";
-// import { getUserSubscriptionPlan } from "@/lib/subscription";
 import { MainNav } from "@/components/main-nav";
 import { PaymentDialog } from "@/components/payment-dialog";
 import { SidebarDesktop } from "@/components/sidebar-desktop";

@@ -26,7 +26,6 @@ import {
 } from "@/components/ui/popover";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
-import { fetchTranscript, getVideoId, getVideoInfo } from "@/lib/youtube";
 import { Course } from "@prisma/client";
 import { DialogDescription } from "@radix-ui/react-dialog";
 import { createBrowserClient } from "@supabase/ssr";
@@ -82,49 +81,32 @@ export function LectureCreateDialog({
       router.refresh();
     } else if (tab === "youtube") {
       // For Youtube videos, we need to create a lecture and then redirect to the lecture page.
-      const videoId = getVideoId(videoUrl);
-      if (!videoId) {
-        setIsLoading(false);
-        toast.error("Invalid Youtube video URL.");
-        return;
-      }
-
-      const title = await getVideoInfo(videoId);
-      const transcript = await fetchTranscript(videoId);
-
-      if (!transcript) {
-        setIsLoading(false);
-        toast.error(
-          "We're sorry, YouTube is currently blocking us from downloading your video. We're working on a fix!",
-        );
-        return;
-      }
-
       const response = await fetch(`/api/transcribe/youtube`, {
         method: "POST",
         body: JSON.stringify({
-          videoId,
-          transcript,
-          title,
+          videoUrl,
           courseId: selectedCourseId,
         }),
       });
-
       const data = await response.json();
 
-      // if (response.status !== 200) {
-      //   if (response.status === 404 && data === "No transcript found") {
-      //     toast.error(
-      //       "We're sorry, YouTube is currently blocking us from downloading your video. We're working on a fix!",
-      //     );
-      //   } else {
-      //     toast.error(
-      //       "Failed to download your video. Check if the Youtube video has a transcript.",
-      //     );
-      //   }
-      //   setIsLoading(false);
-      //   return;
-      // }
+      if (response.status !== 200) {
+        if (response.status === 404 && data === "No transcript found") {
+          toast.error(
+            "We're sorry, YouTube is currently blocking us from downloading your video. We're working on a fix!",
+          );
+        }
+        // else if (response.status === 403) {
+        //   toast.error("Pro plan required");
+        // }
+        else {
+          toast.error(
+            "Failed to download your video. Make sure the video has a transcript.",
+          );
+        }
+        setIsLoading(false);
+        return;
+      }
 
       window.location.href = `/lecture/${data.id}`;
     } else if (tab === "audio") {

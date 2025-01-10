@@ -24,10 +24,14 @@ const nextConfig = {
   eslint: { ignoreDuringBuilds: true },
   typescript: { ignoreBuildErrors: true },
   webpack: (config) => {
-    config.experiments = {
-      ...config.experiments,
-      topLevelAwait: true,
-    };
+    (config.resolve = {
+      ...config.resolve,
+      mainFields: ["browser", "main", "module"],
+    }),
+      (config.experiments = {
+        ...config.experiments,
+        topLevelAwait: true,
+      });
     return config;
   },
   images: {

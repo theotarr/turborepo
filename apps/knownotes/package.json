@@ -24,7 +24,6 @@
     "@acme/validators": "workspace:*",
     "@ai-sdk/openai": "^0.0.32",
     "@deepgram/sdk": "^3.3.1",
-    "@distube/ytdl-core": "^4.14.4",
     "@dqbd/tiktoken": "^1.0.7",
     "@formkit/auto-animate": "^0.7.0",
     "@hookform/resolvers": "^3.9.0",
@@ -150,8 +149,6 @@
     "tiptap-markdown": "^0.8.8",
     "use-debounce": "^10.0.0",
     "uuid": "^9.0.1",
-    "youtube-transcript": "^1.2.1",
-    "youtubei": "^1.5.4",
     "zod": "^3.22.4",
     "zustand": "^4.4.7"
   },

@@ -20,6 +20,7 @@ export const env = createEnv({
     GOOGLE_CLIENT_ID: z.string().min(1),
     GOOGLE_CLIENT_SECRET: z.string().min(1),
     CRON_SECRET: z.string().min(1),
+    APIFY_API_TOKEN: z.string().min(1),
   },
   client: {
     NEXT_PUBLIC_APP_URL: z.string().min(1),
@@ -49,5 +50,6 @@ export const env = createEnv({
     CRON_SECRET: process.env.CRON_SECRET,
     NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,
     NEXT_PUBLIC_POSTHOG_HOST: process.env.NEXT_PUBLIC_POSTHOG_HOST,
+    APIFY_API_TOKEN: process.env.APIFY_API_TOKEN,
   },
 });
