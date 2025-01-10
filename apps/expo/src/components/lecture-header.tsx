@@ -17,6 +17,7 @@ interface LectureHeaderProps {
   lecture: {
     id: string;
     title: string;
+    type: "YOUTUBE" | "AUDIO" | "LIVE";
     courseId?: string;
     course?: {
       name: string;
@@ -60,7 +61,7 @@ export function LectureHeader({
           </Button>
         )}
         <View className={showBackButton ? "" : "ml-4"}>
-          <Text className="text-2xl font-semibold tracking-tight">
+          <Text className="pr-16 text-2xl font-semibold tracking-tight">
             {lecture.title}
           </Text>
           <View className="mt-1 flex flex-row gap-x-2">
@@ -73,6 +74,11 @@ export function LectureHeader({
                 <Pressable className="w-full" onPress={() => setOpen(true)}>
                   <Text>Add to course</Text>
                 </Pressable>
+              </Badge>
+            )}
+            {lecture.type === "YOUTUBE" && (
+              <Badge variant="secondary">
+                <Text>Youtube</Text>
               </Badge>
             )}
             <Badge variant="outline">

@@ -47,6 +47,7 @@ export default function Lecture() {
             lecture as {
               id: string;
               title: string;
+              type: "YOUTUBE" | "AUDIO" | "LIVE";
               courseId?: string;
               course?: {
                 name: string;

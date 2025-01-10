@@ -158,6 +158,7 @@ export default function Record() {
               lecture as {
                 id: string;
                 title: string;
+                type: "YOUTUBE" | "AUDIO" | "LIVE";
                 createdAt: Date;
               }
             }

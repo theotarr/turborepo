@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { router, Stack } from "expo-router";
 import Superwall from "@superwall/react-native-superwall";
-import { Mic, MoveRight, Plus, Settings } from "lucide-react-native";
+import { Mic, MoveRight, Plus, Settings, Youtube } from "lucide-react-native";
 
 import type { Lecture } from ".prisma/client";
 import { EmptyPlaceholder } from "~/components/empty-placeholder";
@@ -37,7 +37,7 @@ import { api } from "~/utils/api";
 import { shouldShowPaywall } from "~/utils/subscription";
 
 export default function DashboardPage() {
-  const utils = api.useContext();
+  const utils = api.useUtils();
   const { colorScheme } = useColorScheme();
   const [isLoading, setIsLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -47,35 +47,55 @@ export default function DashboardPage() {
   } | null>(null);
   const [isCourseDialogOpen, setIsCourseDialogOpen] = useState(false);
   const [courseName, setCourseName] = useState("");
+  const [isYoutubeDialogOpen, setIsYoutubeDialogOpen] = useState(false);
+  const [videoUrl, setVideoUrl] = useState("");
   const user = api.auth.getUser.useQuery();
   const lectures = api.lecture.infiniteLectures.useInfiniteQuery(
     {
       limit: 20,
+      courseId: courseFilter?.courseId ?? undefined,
     },
     {
       getNextPageParam: (lastPage: { nextCursor: string | undefined }) =>
         lastPage.nextCursor ?? undefined,
     },
   );
-  const filteredLectures = lectures.data?.pages[0]?.items.filter(
-    (lecture) => !courseFilter || lecture.courseId === courseFilter.courseId,
-  );
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+  const filteredLectures = lectures.data
+    ? lectures.data.pages[0]?.items.filter(
+        (lecture) =>
+          !courseFilter || lecture.courseId === courseFilter.courseId,
+      )
+    : [];
 
   const createLecture = api.lecture.create.useMutation();
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+  const createYoutubeLecture = api.lecture.createYoutube.useMutation();
   const createCourse = api.course.create.useMutation();
 
-  async function handleCreateLecture() {
+  async function handleCreateLecture(type: "live" | "audio" | "youtube") {
     if (isLoading) return;
     setIsLoading(true);
 
     // Create a new lecture, then forward to the record page.
     try {
-      const lecture = await createLecture.mutateAsync({});
-      setIsLoading(false);
-      router.push(`/record/${lecture.id}`);
+      if (type === "live") {
+        const lecture = await createLecture.mutateAsync({});
+        router.push(`/record/${lecture.id}`);
+      } else if (type === "youtube") {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+        const lecture = (await createYoutubeLecture.mutateAsync({
+          videoUrl,
+        })) as { id: string };
+        router.push(`/lecture/${lecture.id}`);
+      }
     } catch (error) {
       console.error(error);
       alert("Failed to create lecture");
+    } finally {
+      setIsLoading(false);
+      setIsYoutubeDialogOpen(false);
+      setVideoUrl("");
     }
   }
 
@@ -90,6 +110,7 @@ export default function DashboardPage() {
   };
 
   if (
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     lectures.data === undefined ||
     lectures.data.pages.length === 0 ||
     !user.data
@@ -175,19 +196,15 @@ export default function DashboardPage() {
                             {course.name}
                           </Text>
                           <Text className="font-base text-sm text-muted-foreground">
-                            {/* @ts-expect-error - _count is not expected */}
                             {course._count.lectures > 1
-                              ? // @ts-expect-error - _count is not expected
-                                `${course._count.lectures} lectures`
-                              : // @ts-expect-error - _count is not expected
-                                course._count.lectures === 0
+                              ? `${course._count.lectures} lectures`
+                              : course._count.lectures === 0
                                 ? "No lectures"
                                 : "1 lecture"}
                           </Text>
                         </BottomSheetDismissButton>
                       ))}
                     </ScrollView>
-
                     <BottomSheetDismissButton
                       onPress={() => setIsCourseDialogOpen(true)}
                       className="w-full"
@@ -223,7 +240,6 @@ export default function DashboardPage() {
                         courseId: course.id,
                         name: course.name,
                       });
-
                       setCourseName("");
                       setIsCourseDialogOpen(false);
                     }}
@@ -272,7 +288,7 @@ export default function DashboardPage() {
               <View className="flex-col gap-y-2">
                 {lectures.data.pages.map(
                   (page: { items: Lecture[]; nextCursor: string }[]) =>
-                    page.items.map((lecture: Lecture) => {
+                    page.items.map((lecture) => {
                       if (
                         courseFilter &&
                         lecture.courseId !== courseFilter.courseId
@@ -343,14 +359,14 @@ export default function DashboardPage() {
                       },
                     )
                   ) {
-                    await handleCreateLecture();
+                    await handleCreateLecture("live");
                     return;
                   }
 
                   void Superwall.shared
                     .register("createLecture")
                     .then(async () => {
-                      await handleCreateLecture();
+                      await handleCreateLecture("live");
                     });
                 }}
               >
@@ -366,10 +382,79 @@ export default function DashboardPage() {
                   size={20}
                 />
               </BottomSheetDismissButton>
+              <BottomSheetDismissButton
+                size="lg"
+                variant="secondary"
+                className="w-full flex-row items-center justify-between px-4"
+                onPress={() => setIsYoutubeDialogOpen(true)}
+              >
+                <View className="flex-row items-center gap-x-4">
+                  <Youtube
+                    size={20}
+                    color={NAV_THEME[colorScheme].secondaryForeground}
+                  />
+                  <Text>Youtube</Text>
+                </View>
+                <MoveRight
+                  color={NAV_THEME[colorScheme].secondaryForeground}
+                  size={20}
+                />
+              </BottomSheetDismissButton>
             </BottomSheetView>
           </BottomSheetContent>
         </BottomSheet>
       </View>
+      <Dialog open={isYoutubeDialogOpen} onOpenChange={setIsYoutubeDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add Youtube Lecture</DialogTitle>
+            <DialogDescription>
+              Enter a Youtube video URL to create a lecture from it.
+            </DialogDescription>
+          </DialogHeader>
+          <View className="gap-4">
+            <View>
+              <Text className="mb-2 text-sm font-medium">Youtube URL</Text>
+              <Input
+                value={videoUrl}
+                onChangeText={setVideoUrl}
+                placeholder="https://youtube.com/watch?v=..."
+              />
+            </View>
+            <Button
+              onPress={async () => {
+                if (
+                  !shouldShowPaywall(
+                    user.data as {
+                      stripeCurrentPeriodEnd?: string | null;
+                      appStoreCurrentPeriodEnd?: string | null;
+                    },
+                  )
+                ) {
+                  await handleCreateLecture("youtube");
+                  return;
+                }
+
+                void Superwall.shared
+                  .register("createLecture")
+                  .then(async () => {
+                    await handleCreateLecture("youtube");
+                  });
+              }}
+              className="w-full flex-row items-center gap-x-2"
+              disabled={isLoading}
+            >
+              {isLoading && (
+                <ActivityIndicator
+                  size="small"
+                  color={NAV_THEME[colorScheme].primaryForeground}
+                />
+              )}
+              <Text>Create</Text>
+            </Button>
+          </View>
+        </DialogContent>
+      </Dialog>
     </SafeAreaView>
   );
 }

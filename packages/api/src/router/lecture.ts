@@ -8,6 +8,7 @@ import type { Transcript } from "@acme/validators";
 import { CreateLectureSchema, formatTranscript } from "@acme/validators";
 
 import type { CtxType } from "../trpc";
+import { getVideoId, getVideoTranscript } from "../lib/youtube";
 import { protectedProcedure, publicProcedure } from "../trpc";
 
 // eslint-disable-next-line turbo/no-undeclared-env-vars
@@ -22,6 +23,27 @@ async function verifyCurrentUserHasAccessToLecture(
   });
   if (!lecture) return false;
   return true;
+}
+
+async function generateLectureNotes(transcript: Transcript[]) {
+  // Generate Markdown notes for the lecture.
+  const { text } = await generateText({
+    model: openai("gpt-4o"),
+    system: `\
+      You are an expert in taking detailed, concise, and easy-to-understand notes.
+      You are provided with a transcript of a lecture.
+      Turn the lecture transcript into detailed and comprehensive notes.
+      Here are some guidelines to follow when formatting notes:
+      1. Create concise, easy-to-understand advanced bullet-point notes.
+      2. Include only essential information. Remove any irrelevant details.
+      3. Bold vocabulary terms and key concepts, underline important information.
+      4. Respond using Markdown syntax (bold/underline/italics, bullet points, numbered lists, headings).
+      5. Use headings to organize information into categories (default to h3).`,
+    prompt: `\
+      Transcript:
+      ${formatTranscript(transcript)}`,
+  });
+  return text;
 }
 
 export const lectureRouter = {
@@ -75,6 +97,7 @@ export const lectureRouter = {
       z.object({
         limit: z.number().min(1).max(100).nullish(),
         cursor: z.string().nullish(),
+        courseId: z.string().nullish(),
       }),
     )
     .query(async ({ ctx, input }) => {
@@ -85,6 +108,7 @@ export const lectureRouter = {
         take: limit + 1,
         where: {
           userId: ctx.session.user.id,
+          ...(input.courseId ? { courseId: input.courseId } : {}),
         },
         include: {
           course: true,
@@ -174,7 +198,8 @@ export const lectureRouter = {
 
       const estimatedTokens =
         lecture.transcript
-          // @ts-ignore
+          // @ts-expect-error - Non-null assertion.
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-return
           .map((t) => t.text)
           .join(" ")
           .split(" ").length * 2;
@@ -253,24 +278,7 @@ export const lectureRouter = {
         data: { transcript }, // TODO: Add notes to the lecture. We have to convert them to Tiptap JSON.
       });
 
-      // Generate Markdown notes for the lecture.
-      const { text } = await generateText({
-        model: openai("gpt-4o"),
-        system: `\
-      You are an expert in taking detailed, concise, and easy-to-understand notes.
-      You are provided with a transcript of a lecture.
-      Turn the lecture transcript into detailed and comprehensive notes.
-      Here are some guidelines to follow when formatting notes:
-      1. Create concise, easy-to-understand advanced bullet-point notes.
-      2. Include only essential information. Remove any irrelevant details.
-      3. Bold vocabulary terms and key concepts, underline important information.
-      4. Respond using Markdown syntax (bold/underline/italics, bullet points, numbered lists, headings).
-      5. Use headings to organize information into categories (default to h3).`,
-        prompt: `\
-      Transcript:
-      ${formatTranscript(transcript)}`,
-      });
-
+      const text = await generateLectureNotes(transcript);
       console.log("Generated notes:", text);
 
       // Update the lecture with the generated notes.
@@ -280,6 +288,52 @@ export const lectureRouter = {
       });
 
       return { transcript, notes: text };
+    }),
+  createYoutube: protectedProcedure
+    .input(
+      z.object({
+        videoUrl: z.string(),
+        courseId: z.string().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { videoUrl, courseId } = input;
+      if (courseId) {
+        const course = await ctx.db.course.findUnique({
+          where: {
+            id: courseId,
+          },
+        });
+        if (!course || course.userId !== ctx.session.user.id)
+          return new Response(JSON.stringify("Course not found"), {
+            status: 404,
+          });
+      }
+
+      const id = getVideoId(videoUrl);
+      if (!id) throw new Error("Invalid video URL");
+
+      console.log(`Fetching transcript for video ${id}...`);
+      const { title, transcript } = await getVideoTranscript(id);
+
+      console.log("Generating notes...");
+      const text = await generateLectureNotes(transcript);
+      console.log("Notes generated:", text);
+
+      // Create a lecture with the transcript and title.
+      return await ctx.db.lecture.create({
+        data: {
+          type: "YOUTUBE",
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+          title: title ?? "Youtube Video",
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
+          transcript: transcript as any,
+          userId: ctx.session.user.id,
+          ...(courseId ? { courseId } : {}),
+          markdownNotes: text,
+          enhancedNotes: text,
+        },
+      });
     }),
   createFlashcards: protectedProcedure
     .input(
