@@ -342,7 +342,7 @@ export default function DashboardPage() {
             </Pressable>
           </BottomSheetOpenTrigger>
           <BottomSheetContent>
-            <BottomSheetView className="gap-6 px-6">
+            <BottomSheetView className="gap-4 px-6">
               <Text className="text-2xl font-semibold text-secondary-foreground">
                 New Lecture
               </Text>
