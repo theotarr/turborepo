@@ -41,17 +41,14 @@ export async function POST(req: Request) {
   if (!videoId)
     return new Response(JSON.stringify("Invalid video URL"), { status: 400 });
 
-  console.log(`Fetching transcript for video ${videoId}...`);
-  const transcript = await getVideoTranscript(videoId);
-
+  console.log(`Scraping video ${videoId}...`);
+  const { title, transcript } = await getVideoTranscript(videoId);
   if (!transcript)
     return new Response(JSON.stringify("Failed to fetch transcript"), {
       status: 500,
     });
 
-  console.log("Fetching video info...");
-  const title = await getVideoInfo(videoId);
-
+  // Create the lecture in the DB.
   const data = {
     type: "YOUTUBE" as LectureType,
     title: title ?? "Youtube Video",
@@ -60,8 +57,6 @@ export async function POST(req: Request) {
     ...(courseId ? { courseId } : {}), // TODO: Look into why not providing the `courseId` will cause the course to be set to null and throw an error.
     youtubeVideoId: videoId as string,
   };
-
-  // Create the lecture in the DB.
   const lecture = await db.lecture.create({ data });
   if (!lecture)
     return new Response(JSON.stringify("Failed to create lecture"), {
