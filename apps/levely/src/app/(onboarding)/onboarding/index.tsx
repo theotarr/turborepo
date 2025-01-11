@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import {
+  ImageBackground,
   KeyboardAvoidingView,
   Platform,
   SafeAreaView,
@@ -64,9 +65,12 @@ export default function Onboarding() {
   }, [sectionIndex, questionIndex, memoryProgress, calcStepProgress]);
 
   return (
-    <SafeAreaView className="bg-background">
-      <Stack.Screen options={{ headerShown: false }} />
-      <View className="h-full w-full">
+    <ImageBackground
+      source={require("../../../../assets/background.png")}
+      className="flex-1"
+    >
+      <SafeAreaView className="flex-1">
+        <Stack.Screen options={{ headerShown: false }} />
         <Pagination
           totalSteps={sections.length}
           currentStepIndex={sectionIndex}
@@ -115,6 +119,7 @@ export default function Onboarding() {
                   }, 1000);
                 } else {
                   setTimeout(() => {
+                    setSelectedOption(undefined);
                     setQuestionIndex((prev) => prev + 1);
                   }, 1000);
                 }
@@ -207,7 +212,7 @@ export default function Onboarding() {
             </View>
           ) : null}
         </View>
-      </View>
-    </SafeAreaView>
+      </SafeAreaView>
+    </ImageBackground>
   );
 }

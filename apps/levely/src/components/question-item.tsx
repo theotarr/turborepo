@@ -34,8 +34,8 @@ export const QuestionItem = ({
       ]}
     >
       <Pressable onPress={onSelect} className={className}>
-        <View className="rounded-xl bg-foreground px-4 py-3">
-          <Text className="text-base font-medium text-secondary-foreground">
+        <View className="rounded-xl bg-foreground px-[18px] py-4">
+          <Text className="text-[17px] font-medium leading-[22px] text-secondary-foreground">
             {text}
           </Text>
         </View>

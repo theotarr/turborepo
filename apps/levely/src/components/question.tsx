@@ -21,7 +21,10 @@ export const Question = ({
 }: QuestionProps) => {
   return (
     <View className={cn("p-4", className)}>
-      <Text className="mb-6 text-2xl font-bold text-secondary-foreground">
+      <Text
+        style={{ fontSize: 28, lineHeight: 34 }}
+        className="mb-6 font-bold text-secondary-foreground"
+      >
         {question}
       </Text>
       {options.map((option, index) => (
