@@ -96,6 +96,16 @@ export default function Index() {
             <Text className="mt-12 text-center text-xl leading-[25px] text-secondary-foreground">
               Welcome to Levely
             </Text>
+            <View className="mt-12 flex items-center">
+              <Image
+                style={{
+                  width: 295,
+                  height: 221,
+                  resizeMode: "contain",
+                }}
+                source={require("../../../assets/app-store.png")}
+              />
+            </View>
           </View>
           <View className="flex items-center">
             <Button onPress={() => setStep(1)}>
