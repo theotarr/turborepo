@@ -1,11 +1,17 @@
 import { useCallback, useEffect, useState } from "react";
-import { SafeAreaView, TouchableOpacity, View } from "react-native";
+import {
+  KeyboardAvoidingView,
+  Platform,
+  SafeAreaView,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import { Stack, useRouter } from "expo-router";
 import { SymbolView } from "expo-symbols";
 
 import type { Question as QuestionType, Stats, Subject } from "~/types/types";
-import { GradeInput } from "~/components/grades";
+import { GradeInput } from "~/components/grade-input";
 import { MemorySection } from "~/components/memory";
 import { Pagination } from "~/components/pagination";
 import { Question } from "~/components/question";
@@ -71,7 +77,9 @@ export default function Onboarding() {
           {/* If the current section is either habits or focus questions */}
           {sectionIndex === 0 || sectionIndex === 2 ? (
             <Question
-              question={sections[sectionIndex]?.questions[questionIndex]?.question!}
+              question={
+                sections[sectionIndex]?.questions[questionIndex]?.question!
+              }
               options={
                 sections[sectionIndex]?.questions[questionIndex]
                   ?.options as unknown as string[]
@@ -118,7 +126,7 @@ export default function Onboarding() {
               onSectionComplete={() => setSectionIndex((prev) => prev + 1)}
             />
           ) : sectionIndex === 3 ? (
-            <>
+            <View className="h-full flex-1 flex-col items-start">
               <Text className="mx-6 mb-4 mt-8 text-2xl font-bold text-secondary-foreground">
                 Add your grades
               </Text>
@@ -158,36 +166,45 @@ export default function Onboarding() {
                   tintColor="white"
                 />
               </TouchableOpacity>
-              <ScrollView className="mx-2">
-                {subjects.map((subject) => (
-                  <GradeInput
-                    key={subject.id}
-                    subject={subject}
-                    initialGrade={subject.grade}
-                    onSubjectChange={(newSubject) => {
-                      setSubjects((prev) =>
-                        prev.map((s) =>
-                          s.id === newSubject.id ? newSubject : s,
-                        ),
-                      );
-                    }}
-                  />
-                ))}
-                <View className="mx-2 mb-16 flex justify-end">
-                  <Button
-                    variant="secondary"
-                    onPress={() => {
-                      setSubjects((prev) => [
-                        ...prev,
-                        { id: prev.length, name: "", grade: "A" },
-                      ]);
-                    }}
-                  >
-                    <Text>Add subject</Text>
-                  </Button>
-                </View>
-              </ScrollView>
-            </>
+              <KeyboardAvoidingView
+                behavior={Platform.OS === "ios" ? "padding" : "height"}
+                keyboardVerticalOffset={Platform.OS === "ios" ? 140 : 120}
+              >
+                <ScrollView
+                  className="mx-2"
+                  contentContainerStyle={{ paddingBottom: 64 }} // Add extra padding at bottom
+                  keyboardShouldPersistTaps="handled"
+                >
+                  {subjects.map((subject) => (
+                    <GradeInput
+                      key={subject.id}
+                      subject={subject}
+                      initialGrade={subject.grade}
+                      onSubjectChange={(newSubject) => {
+                        setSubjects((prev) =>
+                          prev.map((s) =>
+                            s.id === newSubject.id ? newSubject : s,
+                          ),
+                        );
+                      }}
+                    />
+                  ))}
+                  <View className="mx-2 mb-16 flex justify-end">
+                    <Button
+                      variant="secondary"
+                      onPress={() => {
+                        setSubjects((prev) => [
+                          ...prev,
+                          { id: prev.length, name: "", grade: "A" },
+                        ]);
+                      }}
+                    >
+                      <Text>Add subject</Text>
+                    </Button>
+                  </View>
+                </ScrollView>
+              </KeyboardAvoidingView>
+            </View>
           ) : null}
         </View>
       </View>
