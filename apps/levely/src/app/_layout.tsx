@@ -1,6 +1,5 @@
 import "@bacons/text-decoder/install";
 
-import type { Theme } from "@react-navigation/native";
 import * as React from "react";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -19,11 +18,6 @@ export {
   ErrorBoundary,
 } from "expo-router";
 
-const LIGHT_THEME: Theme = {
-  dark: false,
-  colors: NAV_THEME.light,
-};
-
 export default function RootLayout() {
   return (
     <TRPCProvider>
@@ -33,28 +27,18 @@ export default function RootLayout() {
           host: "https://us.i.posthog.com",
           enableSessionReplay: true,
           sessionReplayConfig: {
-            // Whether text inputs are masked. Default is true.
-            // Password inputs are always masked regardless
-            maskAllTextInputs: true,
-            // Whether images are masked. Default is true.
-            maskAllImages: true,
-            // Capture logs automatically. Default is true.
-            // Android only (Native Logcat only)
-            captureLog: true,
-            // Whether network requests are captured in recordings. Default is true
-            // Only metric-like data like speed, size, and response code are captured.
-            // No data is captured from the request or response body.
-            // iOS only
-            captureNetworkTelemetry: true,
-            // Deboucer delay used to reduce the number of snapshots captured and reduce performance impact. Default is 500ms
-            androidDebouncerDelayMs: 500,
-            // Deboucer delay used to reduce the number of snapshots captured and reduce performance impact. Default is 1000ms
-            iOSdebouncerDelayMs: 1000,
+            maskAllTextInputs: false,
+            maskAllImages: false,
           },
         }}
       >
         <GestureHandlerRootView>
-          <ThemeProvider value={LIGHT_THEME}>
+          <ThemeProvider
+            value={{
+              dark: false,
+              colors: NAV_THEME.light,
+            }}
+          >
             <StatusBar style="light" />
             <Stack />
           </ThemeProvider>
