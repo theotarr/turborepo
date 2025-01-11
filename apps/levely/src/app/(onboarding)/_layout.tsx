@@ -17,7 +17,7 @@ export default function OnboardingLayout() {
   }, [router]);
 
   return (
-    <View className="h-full flex-1 bg-background">
+    <View className="flex-1">
       <Stack.Screen options={{ headerShown: false }} />
       {!isLoading && <Stack />}
     </View>
