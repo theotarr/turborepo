@@ -9,6 +9,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ThemeProvider } from "@react-navigation/native";
 import { PortalHost } from "@rn-primitives/portal";
 import Superwall from "@superwall/react-native-superwall";
+import { PostHogProvider } from "posthog-react-native";
 
 import { NAV_THEME } from "~/lib/constants";
 import { useColorScheme } from "~/lib/theme";
@@ -75,15 +76,27 @@ export default function RootLayout() {
 
   return (
     <TRPCProvider>
-      <GestureHandlerRootView>
-        <BottomSheetModalProvider>
-          <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
-            <StatusBar style={isDarkColorScheme ? "light" : "dark"} />
-            <Stack />
-            <PortalHost />
-          </ThemeProvider>
-        </BottomSheetModalProvider>
-      </GestureHandlerRootView>
+      <PostHogProvider
+        apiKey="phc_uGg696hoHiBtBzNUOewiFEpiIBwrsl7T9UdLeK6xmkz"
+        options={{
+          host: "https://us.i.posthog.com",
+          enableSessionReplay: true,
+          sessionReplayConfig: {
+            maskAllTextInputs: false,
+            maskAllImages: false,
+          },
+        }}
+      >
+        <GestureHandlerRootView>
+          <BottomSheetModalProvider>
+            <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
+              <StatusBar style={isDarkColorScheme ? "light" : "dark"} />
+              <Stack />
+              <PortalHost />
+            </ThemeProvider>
+          </BottomSheetModalProvider>
+        </GestureHandlerRootView>
+      </PostHogProvider>
     </TRPCProvider>
   );
 }
