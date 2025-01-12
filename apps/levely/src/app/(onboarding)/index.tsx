@@ -88,7 +88,7 @@ export default function Index() {
               <Text className="mt-12 text-center text-xl leading-[25px] text-secondary-foreground">
                 Welcome to Levely
               </Text>
-              <View className="mt-12 flex items-center">
+              <View className="mt-12 flex items-center justify-center">
                 <Image
                   style={{
                     width: 295,
@@ -112,7 +112,7 @@ export default function Index() {
           <Animated.View
             entering={SlideInRight.duration(500)}
             exiting={SlideOutLeft.duration(500)}
-            className={`mx-12 h-full flex-1 flex-col py-12 ${step !== 1 ? "hidden" : ""}`}
+            className="mx-12 h-full flex-1 flex-col py-12"
           >
             <Text className="text-4xl font-bold leading-tight text-secondary-foreground">
               Discover your personalized
@@ -125,16 +125,16 @@ export default function Index() {
               start={{ x: 0, y: 0 }}
               end={{ x: 0.25, y: 0 }}
             />
-            <View className="mt-12 flex-1 border-b border-border/20">
-              <Image
-                style={{
-                  width: 310,
-                  height: 497,
-                  resizeMode: "cover",
-                  flex: 1,
-                }}
-                source={require("~/../assets/current.png")}
-              />
+            <View className="mt-12 flex-1">
+              <View className="flex-1 items-center border-b border-border/20">
+                <Image
+                  style={{
+                    width: 316,
+                    flex: 1,
+                  }}
+                  source={require("~/../assets/current.png")}
+                />
+              </View>
             </View>
             <View className="mt-6 flex items-center">
               <Button onPress={() => setStep(2)}>
@@ -160,16 +160,16 @@ export default function Index() {
               start={{ x: 0, y: 0 }}
               end={{ x: 0.25, y: 0 }}
             />
-            <View className="mt-12 flex-1 border-b border-border/20">
-              <Image
-                style={{
-                  width: 310,
-                  height: 497,
-                  resizeMode: "cover",
-                  flex: 1,
-                }}
-                source={require("~/../assets/potential.png")}
-              />
+            <View className="mt-12 flex-1">
+              <View className="flex-1 items-center border-b border-border/20">
+                <Image
+                  style={{
+                    width: 316,
+                    flex: 1,
+                  }}
+                  source={require("~/../assets/potential.png")}
+                />
+              </View>
             </View>
             <View className="mt-6 flex items-center">
               <Button onPress={() => setStep(3)}>
@@ -195,16 +195,16 @@ export default function Index() {
               start={{ x: 0, y: 0 }}
               end={{ x: 0.25, y: 0 }}
             />
-            <View className="mt-12 flex-1 border-b border-border/20">
-              <Image
-                style={{
-                  width: 310,
-                  height: 497,
-                  resizeMode: "cover",
-                  flex: 1,
-                }}
-                source={require("~/../assets/tips.png")}
-              />
+            <View className="mt-12 flex-1">
+              <View className="flex-1 flex-col items-center border-b border-border/20">
+                <Image
+                  style={{
+                    width: 316,
+                    flex: 1,
+                  }}
+                  source={require("~/../assets/tips.png")}
+                />
+              </View>
             </View>
             <View className="mt-6 flex items-center">
               <Button
