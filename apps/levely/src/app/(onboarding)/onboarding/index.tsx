@@ -77,7 +77,7 @@ export default function Onboarding() {
           steps={sections.map((section) => section.name)}
           progress={progress}
         />
-        <View className="flex h-full justify-around">
+        <View className="mt-16 flex h-full">
           {/* If the current section is either habits or focus questions */}
           {sectionIndex === 0 || sectionIndex === 2 ? (
             <Question

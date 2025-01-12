@@ -23,7 +23,7 @@ export const Question = ({
     <View className={cn("p-4", className)}>
       <Text
         style={{ fontSize: 28, lineHeight: 34 }}
-        className="mb-6 font-bold text-secondary-foreground"
+        className="mb-6 max-w-xs font-bold text-secondary-foreground"
       >
         {question}
       </Text>
