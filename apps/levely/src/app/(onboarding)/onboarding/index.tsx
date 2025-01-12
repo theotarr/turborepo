@@ -113,6 +113,7 @@ export default function Onboarding() {
                       if (sectionIndex === 0) await setHabits(answers);
                       else await setFocus(answers);
                       // Move to next section.
+                      setSelectedOption(undefined);
                       setQuestionIndex(0);
                       setSectionIndex((prev) => prev + 1);
                     })();
