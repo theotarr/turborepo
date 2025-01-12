@@ -37,7 +37,6 @@ export default function Index() {
       <SafeAreaView className="flex-1">
         <Stack.Screen options={{ headerShown: false }} />
         <Animated.View
-          entering={FadeIn.duration(500)}
           exiting={FadeOut.duration(500)}
           className={`h-full flex-1 flex-col justify-between px-4 pb-24 pt-32 ${step !== 0 ? "hidden" : ""}`}
         >
