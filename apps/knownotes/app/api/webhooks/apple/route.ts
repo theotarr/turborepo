@@ -24,11 +24,8 @@ export async function POST(req: Request) {
 
   // Decode the signedPayload from App Store
   const signedPayload = body.signedPayload;
-  if (!signedPayload) {
+  if (!signedPayload)
     throw new Error("Missing signedPayload in the request body.");
-  }
-
-  console.log("SignedPayload:", signedPayload);
 
   const signedPayloadBody = signedPayload
     .replace(/-/g, "+")
@@ -57,8 +54,6 @@ export async function POST(req: Request) {
   const transactionId = transactionInfo.originalTransactionId;
   console.log("User ID:", userId);
   console.log("Transaction ID:", transactionId);
-
-  return new Response(null, { status: 200 });
 
   try {
     // Process the notificationType and update the subscription
