@@ -4,6 +4,7 @@ import {
   Alert,
   ImageBackground,
   SafeAreaView,
+  Share,
   View,
 } from "react-native";
 import { Stack, useRouter } from "expo-router";
@@ -49,21 +50,49 @@ export default function Account() {
             <Text className="text-2xl font-medium text-secondary-foreground">
               For you
             </Text>
-            <View className="flex-row gap-2">
+            <View className="flex-col gap-y-4">
               <Button
+                variant="secondary"
                 onPress={async () => await StoreReview.requestReview()}
                 className="flex-row items-center gap-2"
               >
-                <SymbolView name="star.fill" size={16} tintColor="white" />
+                <SymbolView
+                  name="star.fill"
+                  size={16}
+                  resizeMode="scaleAspectFit"
+                  tintColor={NAV_THEME.light.secondaryForeground}
+                />
                 <Text>Give Levely 5 Stars</Text>
+              </Button>
+              <Button
+                variant="secondary"
+                onPress={async () => {
+                  await Share.share({
+                    message: `Check out my Levely study scores!`,
+                    url: `https://apps.apple.com/us/app/levely/id6740011673`,
+                  });
+                }}
+                className="flex-row items-center gap-2"
+              >
+                <SymbolView
+                  name="square.and.arrow.up"
+                  size={16}
+                  resizeMode="scaleAspectFit"
+                  tintColor={NAV_THEME.light.secondaryForeground}
+                />
+                <Text>Share Levely</Text>
               </Button>
             </View>
           </View>
-          <View className="flex-col gap-4">
+          <View className="flex-col gap-2">
             <Text className="text-2xl font-medium text-secondary-foreground">
-              Account
+              Data
             </Text>
-            <View className="flex-col gap-1.5">
+            <Text className="text-sm text-muted-foreground/60">
+              All your data is stored locally on your device. Deleting your
+              account will remove all your data from the app.
+            </Text>
+            {/* <View className="flex-col gap-1.5">
               <Label nativeID="name">Name</Label>
               <Input
                 nativeID="name"
@@ -117,12 +146,12 @@ export default function Account() {
                 />
               )}
               <Text>Save</Text>
-            </Button>
+            </Button> */}
             <Button
               onPress={() => {
                 Alert.alert(
                   "Delete Account",
-                  "Are you sure you want to delete your account?",
+                  "Are you sure you want to delete your account? This action is irreversible.",
                   [
                     {
                       text: "Cancel",
@@ -143,7 +172,7 @@ export default function Account() {
               }}
               variant="ghost"
               size="sm"
-              className="mt-6 w-40 flex-row items-center gap-2"
+              className="w-40 flex-row items-center gap-2"
             >
               <SymbolView
                 name="trash"
