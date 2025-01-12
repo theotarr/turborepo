@@ -285,8 +285,8 @@ export default async function CollegePage({ params }: CollegePageProps) {
           Ready for no notes?
         </h2>
         <p className="mx-auto max-w-lg text-center leading-normal text-muted-foreground sm:text-xl sm:leading-relaxed">
-          Get your personalized AI assistant with KnowNotes today and never
-          stress about taking notes and studying again.
+          Get your personalized AI assistant and never stress about taking notes
+          and studying again.
         </p>
         <div className="flex justify-center pt-6">
           <Link href="/register">
