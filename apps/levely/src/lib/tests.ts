@@ -65,10 +65,6 @@ export const focusQuestions = [
     options: ["0-25%", "25-50%", "50-75%", "75-100%"],
   },
   {
-    question: "Do you regularly postpone tasks to the next day?",
-    options: ["Often", "Sometimes", "Rarely", "Never"],
-  },
-  {
     question: "Do you take breaks to recharge during the day?",
     options: ["Often", "Sometimes", "Rarely", "Never"],
   },
