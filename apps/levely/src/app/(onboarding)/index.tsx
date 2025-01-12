@@ -31,7 +31,7 @@ export default function Index() {
 
   return (
     <ImageBackground
-      source={require("../../../assets/background.png")}
+      source={require("~/../assets/background.png")}
       style={{ flex: 1, height: "100%", width: "100%" }}
     >
       <SafeAreaView className="flex-1">
@@ -103,7 +103,7 @@ export default function Index() {
                   height: 221,
                   resizeMode: "contain",
                 }}
-                source={require("../../../assets/app-store.png")}
+                source={require("~/../assets/app-store.png")}
               />
             </View>
           </View>
@@ -140,7 +140,7 @@ export default function Index() {
                 resizeMode: "cover",
                 flex: 1,
               }}
-              source={require("../../../assets/current.png")}
+              source={require("~/../assets/current.png")}
             />
           </View>
           <View className="mt-6 flex items-center">
@@ -174,7 +174,7 @@ export default function Index() {
                 resizeMode: "cover",
                 flex: 1,
               }}
-              source={require("../../../assets/potential.png")}
+              source={require("~/../assets/potential.png")}
             />
           </View>
           <View className="mt-6 flex items-center">
@@ -208,7 +208,7 @@ export default function Index() {
                 resizeMode: "cover",
                 flex: 1,
               }}
-              source={require("../../../assets/tips.png")}
+              source={require("~/../assets/tips.png")}
             />
           </View>
           <View className="mt-6 flex items-center">

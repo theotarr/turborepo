@@ -102,7 +102,7 @@ export default function Potential() {
     return <Stack.Screen options={{ headerShown: false }} />;
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
+    <SafeAreaView className="flex-1">
       <Stack.Screen options={{ headerShown: false }} />
       <View className="mx-4 mt-8 flex-1 rounded-xl bg-foreground">
         <ScrollView className="flex-1">

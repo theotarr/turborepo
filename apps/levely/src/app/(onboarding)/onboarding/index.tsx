@@ -66,7 +66,7 @@ export default function Onboarding() {
 
   return (
     <ImageBackground
-      source={require("../../../../assets/background.png")}
+      source={require("~/../assets/background.png")}
       className="flex-1"
     >
       <SafeAreaView className="flex-1">

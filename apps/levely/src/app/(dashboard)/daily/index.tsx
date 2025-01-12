@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { SafeAreaView, View } from "react-native";
+import { ImageBackground, SafeAreaView, View } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import { Stack } from "expo-router";
 
@@ -24,22 +24,27 @@ export default function Daily() {
   }, []);
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
-      <Stack.Screen options={{ headerShown: false }} />
-      <View className="mx-4 mt-8 flex-1">
-        <ScrollView>
-          <View className="flex-col gap-y-4">
-            {priorities.map((priority, index) => (
-              <PriorityItem
-                key={index}
-                stat={priority.stat}
-                title={priority.title}
-                priority={`${numberToOrdinal(index + 1)} priority`}
-              />
-            ))}
-          </View>
-        </ScrollView>
-      </View>
-    </SafeAreaView>
+    <ImageBackground
+      source={require("~/../assets/background.png")}
+      className="flex-1"
+    >
+      <SafeAreaView className="flex-1">
+        <Stack.Screen options={{ headerShown: false }} />
+        <View className="mx-4 mt-8 flex-1">
+          <ScrollView>
+            <View className="flex-col gap-y-4">
+              {priorities.map((priority, index) => (
+                <PriorityItem
+                  key={index}
+                  stat={priority.stat}
+                  title={priority.title}
+                  priority={`${numberToOrdinal(index + 1)} priority`}
+                />
+              ))}
+            </View>
+          </ScrollView>
+        </View>
+      </SafeAreaView>
+    </ImageBackground>
   );
 }

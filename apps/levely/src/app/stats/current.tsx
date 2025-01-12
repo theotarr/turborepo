@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Dimensions, SafeAreaView, View } from "react-native";
+import { Dimensions, ImageBackground, SafeAreaView, View } from "react-native";
 import { PanGestureHandler, ScrollView } from "react-native-gesture-handler";
 import Animated, {
   useAnimatedGestureHandler,
@@ -96,82 +96,89 @@ export default function Current() {
   }, []);
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
-      <Stack.Screen options={{ headerShown: false }} />
-      <View className="mx-4 mt-8 flex-1 rounded-xl bg-foreground">
-        <ScrollView className="flex-1">
-          <PanGestureHandler onGestureEvent={panGestureHandler}>
-            <Animated.View
-              className="flex flex-row justify-between px-5"
-              style={[
-                {
-                  width: 2 * SCREEN_WIDTH,
-                },
-                animatedStyle,
-              ]}
-            >
-              <StatsPage
-                heading="Overall Stats"
-                overall={overall / 100}
-                overallLabel={`${overall.toFixed(0)}%`}
-                stats={stats ? formatStatsObject(stats) : []}
-              />
-              <StatsPage
-                heading="Grades"
-                overall={gpa / 4}
-                overallLabel={`${gpa.toFixed(2)} GPA`}
-                stats={grades.map((grade) => ({
-                  stat: grade.name,
-                  label: grade.grade,
-                  value: (letterToGpa(grade.grade) / 4) * 100,
-                }))}
-              />
-            </Animated.View>
-          </PanGestureHandler>
-          <ShareReport className="mb-5" />
-        </ScrollView>
-      </View>
-      <View className="mb-8 mt-4 flex items-center">
-        <View className="h-6 w-12 flex-row items-center justify-center rounded-full bg-[#BFBFBF] opacity-[44%]">
-          <Animated.View
-            className="mx-1 size-2 rounded-full bg-black"
-            style={dotStyle(0)}
-          />
-          <Animated.View
-            className="mx-1 size-2 rounded-full bg-black"
-            style={dotStyle(1)}
-          />
+    <ImageBackground
+      source={require("~/../assets/background.png")}
+      className="flex-1"
+    >
+      <SafeAreaView className="flex-1">
+        <Stack.Screen options={{ headerShown: false }} />
+        <View className="mx-4 mt-8 flex-1 rounded-xl bg-foreground">
+          <ScrollView className="flex-1">
+            <PanGestureHandler onGestureEvent={panGestureHandler}>
+              <Animated.View
+                className="flex flex-row justify-between px-5"
+                style={[
+                  {
+                    width: 2 * SCREEN_WIDTH,
+                  },
+                  animatedStyle,
+                ]}
+              >
+                <StatsPage
+                  heading="Overall Stats"
+                  overall={overall / 100}
+                  overallLabel={`${overall.toFixed(0)}%`}
+                  stats={stats ? formatStatsObject(stats) : []}
+                />
+                <StatsPage
+                  heading="Grades"
+                  overall={gpa / 4}
+                  overallLabel={`${gpa.toFixed(2)} GPA`}
+                  stats={grades.map((grade) => ({
+                    stat: grade.name,
+                    label: grade.grade,
+                    value: (letterToGpa(grade.grade) / 4) * 100,
+                  }))}
+                />
+              </Animated.View>
+            </PanGestureHandler>
+            <ShareReport className="mb-5" />
+          </ScrollView>
         </View>
-      </View>
-      <Button
-        size="lg"
-        className="mx-8"
-        onPress={async () => {
-          try {
-            const storedPotentialStats = await getPotentialStats();
-            if (!storedPotentialStats && stats) {
-              const potentialStats = await generatePotentialStats.mutateAsync({
-                questions: [...(await getHabits()), ...(await getFocus())],
-                currentStats: stats,
-                grades,
-              });
-              // @ts-expect-error - id: string is missing from the type
-              await setPotentialGrades(potentialStats.grades);
-              // @ts-expect-error - TODO: Fix this
-              delete potentialStats.grades;
-              await setPotentialStats(potentialStats);
+        <View className="mb-8 mt-4 flex items-center">
+          <View className="h-6 w-12 flex-row items-center justify-center rounded-full bg-[#BFBFBF] opacity-[44%]">
+            <Animated.View
+              className="mx-1 size-2 rounded-full bg-black"
+              style={dotStyle(0)}
+            />
+            <Animated.View
+              className="mx-1 size-2 rounded-full bg-black"
+              style={dotStyle(1)}
+            />
+          </View>
+        </View>
+        <Button
+          size="lg"
+          className="mx-8"
+          onPress={async () => {
+            try {
+              const storedPotentialStats = await getPotentialStats();
+              if (!storedPotentialStats && stats) {
+                const potentialStats = await generatePotentialStats.mutateAsync(
+                  {
+                    questions: [...(await getHabits()), ...(await getFocus())],
+                    currentStats: stats,
+                    grades,
+                  },
+                );
+                // @ts-expect-error - id: string is missing from the type
+                await setPotentialGrades(potentialStats.grades);
+                // @ts-expect-error - TODO: Fix this
+                delete potentialStats.grades;
+                await setPotentialStats(potentialStats);
+              }
+              router.replace("/stats/potential");
+            } catch (error) {
+              console.error("Failed to generate potential stats:", error);
             }
-            router.replace("/stats/potential");
-          } catch (error) {
-            console.error("Failed to generate potential stats:", error);
-          }
-        }}
-        disabled={generatePotentialStats.isPending}
-      >
-        <Text className="text-center text-lg font-semibold text-primary-foreground">
-          See your potential
-        </Text>
-      </Button>
-    </SafeAreaView>
+          }}
+          disabled={generatePotentialStats.isPending}
+        >
+          <Text className="text-center text-lg font-semibold text-primary-foreground">
+            See your potential
+          </Text>
+        </Button>
+      </SafeAreaView>
+    </ImageBackground>
   );
 }

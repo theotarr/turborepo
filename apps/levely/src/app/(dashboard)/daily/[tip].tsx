@@ -1,5 +1,10 @@
 import { useState } from "react";
-import { SafeAreaView, TouchableOpacity, View } from "react-native";
+import {
+  ImageBackground,
+  SafeAreaView,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import { Link, Stack, useGlobalSearchParams, useRouter } from "expo-router";
 import { SymbolView } from "expo-symbols";
@@ -29,49 +34,54 @@ export default function Tip() {
   });
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
-      <Stack.Screen
-        options={{
-          title: camelCaseToTitle(tip),
-          headerLeft: () => (
-            <TouchableOpacity
-              onPress={() => router.replace("/daily")}
-              className="flex-row items-center"
-            >
-              <SymbolView
-                name="chevron.left"
-                size={16}
-                resizeMode="scaleAspectFit"
-                tintColor="black"
-              />
-            </TouchableOpacity>
-          ),
-        }}
-      />
-      <View className="mx-4 mt-8 flex-1">
-        <ScrollView>
-          <View className="flex-col gap-y-4">
-            {tips.map((tip, index) => (
-              <TipItem
-                key={index}
-                title={tip.title}
-                stars={tip.stars}
-                description={tip.description}
-                link={tip.link}
-              />
-            ))}
-            {promotions?.map((promo, index) => (
-              <TipItem
-                key={index}
-                title={promo.name}
-                description={promo.description}
-                stars={3}
-                link={promo.link}
-              />
-            ))}
-          </View>
-        </ScrollView>
-      </View>
-    </SafeAreaView>
+    <ImageBackground
+      source={require("~/../assets/background.png")}
+      className="flex-1"
+    >
+      <SafeAreaView className="flex-1">
+        <Stack.Screen
+          options={{
+            title: camelCaseToTitle(tip),
+            headerLeft: () => (
+              <TouchableOpacity
+                onPress={() => router.replace("/daily")}
+                className="flex-row items-center"
+              >
+                <SymbolView
+                  name="chevron.left"
+                  size={16}
+                  resizeMode="scaleAspectFit"
+                  tintColor="black"
+                />
+              </TouchableOpacity>
+            ),
+          }}
+        />
+        <View className="mx-4 mt-8 flex-1">
+          <ScrollView>
+            <View className="flex-col gap-y-4">
+              {tips.map((tip, index) => (
+                <TipItem
+                  key={index}
+                  title={tip.title}
+                  stars={tip.stars}
+                  description={tip.description}
+                  link={tip.link}
+                />
+              ))}
+              {promotions?.map((promo, index) => (
+                <TipItem
+                  key={index}
+                  title={promo.name}
+                  description={promo.description}
+                  stars={3}
+                  link={promo.link}
+                />
+              ))}
+            </View>
+          </ScrollView>
+        </View>
+      </SafeAreaView>
+    </ImageBackground>
   );
 }

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Dimensions, SafeAreaView } from "react-native";
+import { Dimensions, ImageBackground, SafeAreaView } from "react-native";
 import { PanGestureHandler } from "react-native-gesture-handler";
 import Animated, {
   useAnimatedGestureHandler,
@@ -69,39 +69,44 @@ export default function Dashboard() {
   }, []);
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
-      <Stack.Screen options={{ headerShown: false }} />
-      <PanGestureHandler onGestureEvent={panGestureHandler}>
-        <Animated.View
-          className="flex flex-row justify-between"
-          style={[
-            {
-              width: 2 * SCREEN_WIDTH,
-            },
-            animatedStyle,
-          ]}
-        >
-          <DashboardStatsPage
-            heading="Overall Stats"
-            overall={overall / 100}
-            overallLabel={`${overall.toFixed(0)}%`}
-            stats={stats ? formatStatsObject(stats) : []}
-            className="ml-9"
-          />
-          <DashboardStatsPage
-            heading="Potential Stats"
-            overall={potentialOverall / 100}
-            overallLabel={`${potentialOverall.toFixed(0)}%`}
-            stats={
-              potentialStats && stats
-                ? formatStatsObject(stats, potentialStats)
-                : []
-            }
-            className="mr-9"
-          />
-        </Animated.View>
-      </PanGestureHandler>
-      <ShareReport className="mb-5" />
-    </SafeAreaView>
+    <ImageBackground
+      source={require("~/../assets/background.png")}
+      className="flex-1"
+    >
+      <SafeAreaView className="flex-1">
+        <Stack.Screen options={{ headerShown: false }} />
+        <PanGestureHandler onGestureEvent={panGestureHandler}>
+          <Animated.View
+            className="flex flex-row justify-between"
+            style={[
+              {
+                width: 2 * SCREEN_WIDTH,
+              },
+              animatedStyle,
+            ]}
+          >
+            <DashboardStatsPage
+              heading="Overall Stats"
+              overall={overall / 100}
+              overallLabel={`${overall.toFixed(0)}%`}
+              stats={stats ? formatStatsObject(stats) : []}
+              className="ml-9"
+            />
+            <DashboardStatsPage
+              heading="Potential Stats"
+              overall={potentialOverall / 100}
+              overallLabel={`${potentialOverall.toFixed(0)}%`}
+              stats={
+                potentialStats && stats
+                  ? formatStatsObject(stats, potentialStats)
+                  : []
+              }
+              className="mr-9"
+            />
+          </Animated.View>
+        </PanGestureHandler>
+        <ShareReport className="mb-5" />
+      </SafeAreaView>
+    </ImageBackground>
   );
 }

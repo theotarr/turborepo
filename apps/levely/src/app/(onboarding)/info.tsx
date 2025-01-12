@@ -11,7 +11,7 @@ import { NAV_THEME } from "~/lib/constants";
 import { setPersonalInfo } from "~/lib/storage";
 import { cn } from "~/lib/utils";
 
-export default function Index() {
+export default function PersonalInfo() {
   const router = useRouter();
   const [name, setName] = useState("");
   const [location, setLocation] = useState("");
@@ -24,12 +24,11 @@ export default function Index() {
   }
 
   return (
-    <SafeAreaView className="flex-1">
-      <ImageBackground
-        source={require("../../../assets/background.png")}
-        style={{ flex: 1, height: "100%", width: "100%" }}
-        // className="h-full flex-1 bg-background"
-      >
+    <ImageBackground
+      source={require("~/../assets/background.png")}
+      className="flex-1"
+    >
+      <SafeAreaView className="flex-1">
         <Stack.Screen options={{ headerShown: false }} />
         <View className="h-full flex-1 px-5 pt-36">
           <GradientText
@@ -117,7 +116,7 @@ export default function Index() {
             </Pressable>
           </Animated.View>
         </View>
-      </ImageBackground>
-    </SafeAreaView>
+      </SafeAreaView>
+    </ImageBackground>
   );
 }
