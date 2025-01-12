@@ -249,18 +249,35 @@ export default async function IndexPage() {
           Get your personalized AI assistant and never stress about taking notes
           and studying again
         </p>
-        <div className="flex flex-col items-center justify-center gap-4 pt-6">
-          <Link href="/register">
-            <Button
-              variant="shadow"
-              className="h-14 w-72 rounded-lg text-xl font-semibold"
-            >
-              Get started{" "}
-              <span className="ml-2 text-lg font-medium text-primary-foreground/80">
-                -- it&apos;s free
-              </span>
-            </Button>
-          </Link>
+        <div className="flex flex-col items-center justify-center gap-6 pt-6">
+          <div className="flex flex-col items-center rounded-xl bg-primary/5 p-3 ring-1 ring-inset ring-primary/10">
+            <Image
+              src="/qrcode.png"
+              alt="QR Code"
+              width={184}
+              height={184}
+              className="mb-2 rounded-xl"
+            />
+            <p className="text-xl font-semibold tracking-tight text-secondary-foreground">
+              Scan on iPhone
+            </p>
+          </div>
+          <div className="text-lg font-semibold tracking-tight text-muted-foreground">
+            OR
+          </div>
+          <div className="flex flex-col items-center gap-4">
+            <Link href="/register">
+              <Button
+                variant="shadow"
+                className="h-14 w-72 rounded-lg text-lg font-semibold"
+              >
+                Continue on Web
+                <span className="ml-2 text-lg font-medium text-primary-foreground/80">
+                  -- it&apos;s free
+                </span>
+              </Button>
+            </Link>
+          </div>
         </div>
       </section>
     </>
