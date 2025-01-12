@@ -1,7 +1,8 @@
+import { useEffect } from "react";
 import { View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as AppleAuthentication from "expo-apple-authentication";
-import { Redirect, Stack, useRouter } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Aperture } from "lucide-react-native";
 
@@ -11,7 +12,7 @@ import { Text } from "~/components/ui/text";
 import { NAV_THEME } from "~/lib/constants";
 import { useColorScheme } from "~/lib/theme";
 import { api } from "~/utils/api";
-import { useSignIn, useUser } from "~/utils/auth";
+import { useSignIn } from "~/utils/auth";
 import { setToken } from "~/utils/session-store";
 
 export default function Page() {
@@ -19,16 +20,19 @@ export default function Page() {
   const router = useRouter();
   const { colorScheme } = useColorScheme();
 
-  const user = useUser();
   const signIn = useSignIn();
+  const { isLoading, data: session } = api.auth.getSession.useQuery();
   const createMobileUser = api.auth.createMobileUser.useMutation();
 
-  if (user) {
-    void AsyncStorage.getItem("onboardingComplete").then((value) => {
-      if (value === "true") router.replace("/(dashboard)/dashboard");
-    });
-    return <Redirect href={"/onboarding"} />;
-  }
+  useEffect(() => {
+    if (session)
+      void AsyncStorage.getItem("onboardingComplete").then((value) => {
+        if (value === "true") router.replace("/(dashboard)/dashboard");
+        else router.replace("/onboarding");
+      });
+  }, [router, session]);
+
+  if (isLoading || session) return <Stack.Screen options={{ title: "" }} />;
 
   return (
     <SafeAreaView className="bg-background">
