@@ -25,7 +25,7 @@ import {
 import { calculateOverall, formatStatsObject, letterToGpa } from "~/lib/utils";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
-const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.3;
+const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.1;
 
 export default function Potential() {
   const router = useRouter();
@@ -53,10 +53,7 @@ export default function Potential() {
           currentPage.value += 1;
         }
       }
-      translateX.value = withSpring(-currentPage.value * SCREEN_WIDTH, {
-        damping: 10,
-        stiffness: 120,
-      });
+      translateX.value = withSpring(-currentPage.value * SCREEN_WIDTH);
     },
   });
 
@@ -104,7 +101,7 @@ export default function Potential() {
   return (
     <SafeAreaView className="flex-1">
       <Stack.Screen options={{ headerShown: false }} />
-      <View className="mx-4 mt-8 flex-1 rounded-xl bg-foreground">
+      <View className="mx-4 mt-4 flex-1 rounded-xl bg-foreground">
         <ScrollView className="flex-1">
           <PanGestureHandler onGestureEvent={panGestureHandler}>
             <Animated.View
@@ -135,10 +132,10 @@ export default function Potential() {
               />
             </Animated.View>
           </PanGestureHandler>
-          <ShareReport className="mb-5" />
         </ScrollView>
       </View>
-      <View className="mb-8 mt-4 flex items-center">
+      <View className="my-6 flex items-center">
+        <ShareReport className="mb-4" />
         <View className="h-6 w-12 flex-row items-center justify-center rounded-full bg-[#BFBFBF] opacity-[44%]">
           <Animated.View
             className="mx-1 size-2 rounded-full bg-black"

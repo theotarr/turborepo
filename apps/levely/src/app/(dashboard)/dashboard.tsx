@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { Dimensions, ImageBackground, SafeAreaView } from "react-native";
+import { Dimensions, ImageBackground, SafeAreaView, View } from "react-native";
 import { PanGestureHandler } from "react-native-gesture-handler";
 import Animated, {
   useAnimatedGestureHandler,
   useAnimatedStyle,
   useSharedValue,
   withSpring,
+  withTiming,
 } from "react-native-reanimated";
 import { Stack } from "expo-router";
 
@@ -16,7 +17,7 @@ import { getPotentialStats, getStats } from "~/lib/storage";
 import { calculateOverall, formatStatsObject } from "~/lib/utils";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
-const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.3;
+const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.1;
 
 export default function Dashboard() {
   const [stats, setStats] = useState<Stats | null>(null);
@@ -43,16 +44,21 @@ export default function Dashboard() {
           currentPage.value += 1;
         }
       }
-      translateX.value = withSpring(-currentPage.value * SCREEN_WIDTH, {
-        damping: 10,
-        stiffness: 120,
-      });
+      translateX.value = withSpring(-currentPage.value * SCREEN_WIDTH);
     },
   });
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: translateX.value }],
   }));
+
+  const dotStyle = (index: number) =>
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useAnimatedStyle(() => ({
+      opacity: withTiming(currentPage.value === index ? 1 : 0.3, {
+        duration: 300,
+      }),
+    }));
 
   useEffect(() => {
     void (async () => {
@@ -105,7 +111,19 @@ export default function Dashboard() {
             />
           </Animated.View>
         </PanGestureHandler>
-        <ShareReport className="mb-5" />
+        <View className="my-6 flex items-center">
+          <ShareReport className="mb-5" />
+          <View className="h-6 w-12 flex-row items-center justify-center rounded-full bg-[#BFBFBF] opacity-[44%]">
+            <Animated.View
+              className="mx-1 size-2 rounded-full bg-black"
+              style={dotStyle(0)}
+            />
+            <Animated.View
+              className="mx-1 size-2 rounded-full bg-black"
+              style={dotStyle(1)}
+            />
+          </View>
+        </View>
       </SafeAreaView>
     </ImageBackground>
   );
