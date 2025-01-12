@@ -77,7 +77,7 @@ const ListItem = ({ item, index, x }: Props) => {
     >
       <Animated.View style={rnContentStyle}>{item.content}</Animated.View>
       <Animated.Text
-        className="text-3xl font-semibold leading-tight tracking-tight"
+        className="text-3xl font-semibold leading-tight tracking-tight text-secondary-foreground"
         style={[rnTextStyle]}
       >
         {item.text}
