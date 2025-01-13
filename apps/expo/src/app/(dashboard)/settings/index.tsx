@@ -113,8 +113,7 @@ export default function SettingsPage() {
             <Picker.Item label="Dark" value="dark" />
           </Picker>
         </View>
-
-        <View className="mt-8">
+        <View>
           <Text className="text-xl font-semibold text-secondary-foreground">
             Account
           </Text>
@@ -142,7 +141,16 @@ export default function SettingsPage() {
               </Text>
             </View>
           </View>
-          <View className="mt-8 items-start">
+          <View className="mt-6 flex-col items-start gap-y-4">
+            <Link
+              href="https://knownotes.ai/privacy"
+              className="mx-2 underline"
+            >
+              <Text className="text-muted-foreground">Privacy Policy</Text>
+            </Link>
+            <Link href="https://knownotes.ai/terms" className="mx-2 underline">
+              <Text className="text-muted-foreground">Terms</Text>
+            </Link>
             <Button
               onPress={async () => await signOut()}
               variant="ghost"
