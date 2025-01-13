@@ -101,8 +101,14 @@ export default function App() {
               </View>
               <View className="flex flex-col items-center justify-center gap-2">
                 <View className="flex flex-row gap-1">
-                  <ArrowRight size={24} className="text-muted-foreground" />
-                  <ArrowLeft size={24} className="text-muted-foreground" />
+                  <ArrowRight
+                    size={24}
+                    color={NAV_THEME[colorScheme].mutedForeground}
+                  />
+                  <ArrowLeft
+                    size={24}
+                    color={NAV_THEME[colorScheme].mutedForeground}
+                  />
                 </View>
                 <Text className="text-sm text-muted-foreground">Sync</Text>
               </View>
