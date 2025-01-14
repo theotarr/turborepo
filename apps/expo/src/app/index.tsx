@@ -4,6 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import * as AppleAuthentication from "expo-apple-authentication";
 import { Stack, useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Superwall from "@superwall/react-native-superwall";
 import { Aperture } from "lucide-react-native";
 
 import { TrustPilot } from "~/components/trust-pilot";
@@ -25,11 +26,17 @@ export default function Page() {
   const createMobileUser = api.auth.createMobileUser.useMutation();
 
   useEffect(() => {
-    if (session)
+    if (session) {
+      // Identify the user in Superwall.
+      // This id ends up being the appAccountToken in Apple webhooks.
+      void Superwall.shared.identify(session.user.id);
+      void Superwall.shared.setUserAttributes(session.user);
+
       void AsyncStorage.getItem("onboardingComplete").then((value) => {
         if (value === "true") router.replace("/(dashboard)/dashboard");
         else router.replace("/onboarding");
       });
+    }
   }, [router, session]);
 
   if (isLoading || session) return <Stack.Screen options={{ title: "" }} />;
