@@ -115,7 +115,7 @@ export default function Index() {
             className="mx-12 h-full flex-1 flex-col py-12"
           >
             <Text className="text-4xl font-bold leading-tight text-secondary-foreground">
-              Discover your personalized
+              Discover your
             </Text>
             <GradientText
               className="text-4xl font-bold leading-tight"

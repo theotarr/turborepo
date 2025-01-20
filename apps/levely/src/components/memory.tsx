@@ -58,9 +58,9 @@ export function MemorySection({
   }
 
   return (
-    <View className="flex h-full justify-around p-4">
+    <View className="flex h-full">
       {page === 0 ? (
-        <View className="flex items-center justify-center">
+        <View className="flex items-center justify-center p-4">
           <Text className="mb-8 max-w-[18rem] text-center text-2xl font-bold text-secondary-foreground">
             Let's test your memory and reading speed.
           </Text>
@@ -69,7 +69,7 @@ export function MemorySection({
           </Button>
         </View>
       ) : page === 1 ? (
-        <View>
+        <View className="p-4">
           <Text className="mb-6 text-2xl font-bold text-secondary-foreground">
             Read this as fast as you can.
           </Text>
@@ -109,7 +109,7 @@ export function MemorySection({
           }}
         />
       ) : page === 3 ? (
-        <View className="flex items-center justify-center">
+        <View className="flex items-center justify-center p-4">
           <Text className="mb-8 max-w-sm text-center text-xl text-secondary-foreground">
             You got {correctAnswers} out of {readingQuestions.length} questions
             correct
