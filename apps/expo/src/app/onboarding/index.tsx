@@ -229,11 +229,12 @@ export default function App() {
                     appStoreCurrentPeriodEnd?: string | null;
                   },
                 )
-              )
+              ) {
+                if (user.data?.id) await Superwall.shared.identify(user.data.id)
                 void Superwall.shared.register("onboarding").then(() => {
                   router.replace("/(dashboard)/dashboard");
                 });
-              else router.replace("/(dashboard)/dashboard");
+              } else router.replace("/(dashboard)/dashboard");
               return;
             }
 
