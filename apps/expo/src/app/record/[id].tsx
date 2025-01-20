@@ -2,12 +2,18 @@ import type { StopwatchTimerMethods } from "react-native-animated-stopwatch-time
 import { useRef, useState } from "react";
 import {
   ActivityIndicator,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
   Pressable,
   SafeAreaView,
   TextInput,
+  TouchableOpacity,
   View,
 } from "react-native";
 import Animated, {
+  FadeIn,
+  FadeOut,
   interpolate,
   useAnimatedStyle,
   useSharedValue,
@@ -17,17 +23,23 @@ import Animated, {
 import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from "expo-av";
 import * as FileSystem from "expo-file-system";
 import { Stack, useGlobalSearchParams, useRouter } from "expo-router";
+import { Aperture, ArrowDown } from "lucide-react-native";
 
 import { LectureHeader } from "~/components/lecture-header";
 import Stopwatch from "~/components/stopwatch-timer";
 import { Button } from "~/components/ui/button";
 import { Text } from "~/components/ui/text";
+import { NAV_THEME } from "~/lib/constants";
 import { getAudioConfig } from "~/lib/get-audio-recording";
+import { useColorScheme } from "~/lib/theme";
+import { useKeyboardVisible } from "~/lib/use-keyboard-visible";
 import { cn } from "~/lib/utils";
 import { api } from "~/utils/api";
 
 export default function Record() {
   const router = useRouter();
+  const { colorScheme } = useColorScheme();
+  const isKeyboardVisible = useKeyboardVisible();
   const { id } = useGlobalSearchParams();
   if (!id || typeof id !== "string") throw new Error("Lecture ID is required");
   const { data: user } = api.auth.getUser.useQuery();
@@ -164,7 +176,11 @@ export default function Record() {
             }
             courses={user?.courses ?? []}
           />
-          <View className="mx-2 mt-6 flex-1">
+          <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            className="mx-2 mt-6 flex-1"
+            keyboardVerticalOffset={120}
+          >
             <TextInput
               className="h-full w-full bg-background p-4 text-xl text-foreground"
               multiline
@@ -173,6 +189,34 @@ export default function Record() {
               value={notes}
               onChangeText={setNotes}
             />
+            {isKeyboardVisible && (
+              <Animated.View
+                entering={FadeIn}
+                exiting={FadeOut}
+                className="items-end justify-end"
+              >
+                <TouchableOpacity
+                  className="mt-2 rounded-full bg-muted p-2.5"
+                  onPress={() => Keyboard.dismiss()}
+                >
+                  <ArrowDown
+                    size={24}
+                    color={NAV_THEME[colorScheme].secondaryForeground}
+                  />
+                </TouchableOpacity>
+              </Animated.View>
+            )}
+          </KeyboardAvoidingView>
+        </View>
+        <View className="mb-4 w-full flex-row items-center justify-center">
+          <View className="flex-row items-center justify-center gap-x-2 rounded-full bg-muted p-3.5">
+            <Aperture
+              size={28}
+              color={NAV_THEME[colorScheme].secondaryForeground}
+            />
+            <Text className="text-2xl font-bold tracking-tighter">
+              KnowNotes
+            </Text>
           </View>
         </View>
         <View className="-mb-10 flex h-80 items-center justify-center bg-muted pb-12 pt-6">

@@ -1,6 +1,6 @@
 import { Pressable, View } from "react-native";
 import { useRouter } from "expo-router";
-import { ChevronLeft } from "lucide-react-native";
+import { Aperture, ChevronLeft } from "lucide-react-native";
 
 import {
   LectureOperations,
@@ -11,7 +11,7 @@ import { Button } from "~/components/ui/button";
 import { Text } from "~/components/ui/text";
 import { NAV_THEME } from "~/lib/constants";
 import { useColorScheme } from "~/lib/theme";
-import { formatShortDate } from "~/lib/utils";
+import { cn, formatShortDate } from "~/lib/utils";
 
 interface LectureHeaderProps {
   lecture: {
@@ -29,19 +29,26 @@ interface LectureHeaderProps {
     name: string;
   }[];
   showBackButton?: boolean;
+  className?: string;
 }
 
 export function LectureHeader({
   lecture,
   courses,
   showBackButton = true,
+  className,
 }: LectureHeaderProps) {
   const router = useRouter();
   const { colorScheme } = useColorScheme();
   const { setOpen } = useEditLectureDialogStore();
 
   return (
-    <View className="flex w-full flex-row items-center justify-between">
+    <View
+      className={cn(
+        "flex w-full flex-row items-center justify-between",
+        className,
+      )}
+    >
       <View className="flex-row items-center gap-x-4">
         {showBackButton && (
           <Button
