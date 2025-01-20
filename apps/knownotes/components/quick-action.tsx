@@ -78,7 +78,7 @@ export function QuickAudioUpload() {
       description="Upload an audio file to get transcribed, notes, and a custom AI-tutor for that video."
       onClick={() => {
         setOpen(true);
-        setTab("audio");
+        setTab("file");
       }}
     />
   );

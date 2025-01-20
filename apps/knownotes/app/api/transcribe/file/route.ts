@@ -2,9 +2,12 @@ import fs from "fs";
 import { env } from "@/env";
 import { db } from "@/lib/db";
 import { embedTranscripts } from "@/lib/embeddings";
+import { verifyCurrentUserHasAccessToCourse } from "@/lib/lecture/actions";
 import { supabase } from "@/lib/supabase";
 import { Transcript } from "@/types";
 import { createClient } from "@deepgram/sdk";
+import { fileTypeFromBuffer } from "file-type";
+import PDFParser from "pdf2json";
 
 import { auth } from "@acme/auth";
 
@@ -20,18 +23,10 @@ export async function POST(req: Request) {
   const fileId = formData.get("fileId") as string;
   const courseId =
     (formData.get("courseId") as string | undefined) ?? undefined;
-
   if (!fileId) return new Response("No file ID provided", { status: 400 });
-
-  if (courseId) {
-    const course = await db.course.findUnique({
-      where: {
-        id: courseId,
-      },
-    });
-    if (!course || course.userId !== session.user.id)
+  if (courseId)
+    if (!verifyCurrentUserHasAccessToCourse(courseId))
       return new Response("Course not found", { status: 404 });
-  }
 
   // Download the file from the storage bucket.
   const { data, error } = await supabase.storage
@@ -60,33 +55,61 @@ export async function POST(req: Request) {
       : `/tmp/${fileId}`;
   await fs.promises.writeFile(filePath, buffer);
 
+  const fileType = await fileTypeFromBuffer(buffer);
+  const type = fileType?.ext === "pdf" ? "PDF" : "AUDIO_FILE";
+
   let transcript: Transcript[] = [];
 
-  try {
-    const { result, error } = await deepgram.listen.prerecorded.transcribeFile(
-      fs.readFileSync(filePath),
-      {
-        model: "nova-2",
-        punctuate: true,
-        smart_formatting: true,
-        paragraphs: true,
-        tag: ["knownotes-file-upload"],
-      },
-    );
-    if (error) throw new Error(error.message);
+  if (type === "AUDIO_FILE") {
+    console.log("Transcribing audio file...");
+    try {
+      const { result, error } =
+        await deepgram.listen.prerecorded.transcribeFile(
+          fs.readFileSync(filePath),
+          {
+            model: "nova-2",
+            punctuate: true,
+            smart_formatting: true,
+            paragraphs: true,
+            tag: ["knownotes-file-upload"],
+          },
+        );
+      if (error) throw new Error(error.message);
 
-    transcript =
-      result.results.channels[0].alternatives[0].paragraphs?.paragraphs?.map(
-        (p) => {
-          const paragraphText = p.sentences?.map((s) => s.text).join(" ");
-          return {
-            start: p.start,
-            text: paragraphText,
-          };
-        },
-      ) ?? [];
-  } catch (error) {
-    console.error(error);
+      transcript =
+        result.results.channels[0].alternatives[0].paragraphs?.paragraphs?.map(
+          (p) => {
+            const paragraphText = p.sentences?.map((s) => s.text).join(" ");
+            return {
+              start: p.start,
+              text: paragraphText,
+            };
+          },
+        ) ?? [];
+    } catch (error) {
+      console.error(error);
+    }
+  } else {
+    // Parse the PDF file.
+    console.log("Parsing PDF file...");
+    const pdfParser = new PDFParser(null, true);
+    let parsedText = "";
+
+    const parsePdfPromise = new Promise<void>((resolve, reject) => {
+      pdfParser.on("pdfParser_dataError", (errData) => {
+        console.error(errData.parserError);
+        reject(errData.parserError);
+      });
+      pdfParser.on("pdfParser_dataReady", () => {
+        parsedText = pdfParser.getRawTextContent();
+        transcript = [{ start: 0, text: parsedText }];
+        resolve();
+      });
+
+      pdfParser.parseBuffer(buffer);
+    });
+
+    await parsePdfPromise;
   }
 
   fs.unlink(filePath, () => {}); // Delete the audio file after the transcription is done.
@@ -97,7 +120,7 @@ export async function POST(req: Request) {
 
   const lecture = await db.lecture.create({
     data: {
-      type: "AUDIO_FILE",
+      type,
       title: "Untitled Lecture", // TODO: Generate a lecture name based on the notes/lecture content.
       transcript: transcript as any,
       userId: session.user.id,

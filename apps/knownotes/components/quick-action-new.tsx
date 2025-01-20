@@ -104,7 +104,7 @@ export function QuickAudioUpload() {
       primary={true}
       onClick={() => {
         setOpen(true);
-        setTab("audio");
+        setTab("file");
       }}
     />
   );

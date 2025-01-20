@@ -39,8 +39,8 @@ import { Input } from "./ui/input";
 export const useLectureCreateDialogStore = create<{
   open: boolean;
   setOpen: (open: boolean) => void;
-  tab: "live" | "audio" | "youtube";
-  setTab: (tab: "live" | "audio" | "youtube") => void;
+  tab: "live" | "file" | "youtube";
+  setTab: (tab: "live" | "file" | "youtube") => void;
   selectedCourseId: string;
   setSelectedCourseId: (id: string) => void;
 }>((set) => ({
@@ -70,7 +70,7 @@ export function LectureCreateDialog({
   const [coursePopoverOpen, setCoursePopoverOpen] = useState(false);
   const [videoUrl, setVideoUrl] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const audioFileRef = useRef<HTMLInputElement>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const onSubmit = async () => {
     setIsLoading(true);
@@ -109,15 +109,15 @@ export function LectureCreateDialog({
       }
 
       window.location.href = `/lecture/${data.id}`;
-    } else if (tab === "audio") {
+    } else if (tab === "file") {
       // check if the user has uploaded a file
-      if (!audioFileRef.current?.files?.length) {
+      if (!fileRef.current?.files?.length) {
         setIsLoading(false);
-        toast.error("Please upload an audio file.");
+        toast.error("Please upload a file.");
         return;
       }
       // Upload the file to the Supabase `audio` bucket
-      const file = audioFileRef.current.files[0];
+      const file = fileRef.current.files[0];
       const fileId = uuidv1();
       const supabase = createBrowserClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL as string,
@@ -154,8 +154,6 @@ export function LectureCreateDialog({
 
       const { id } = await response.json();
       window.location.href = `/lecture/${id}`;
-      // router.push(`/lecture/${id}`)
-      // router.refresh()
     }
     setIsLoading(false);
   };
@@ -178,8 +176,8 @@ export function LectureCreateDialog({
         <DialogHeader>
           <DialogTitle>New Lecture</DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
-            {/* Create a new lecture, or import a Youtube video or an audio file. */}
-            Create a new lecture, or import a Youtube video or an audio file.
+            Create a new lecture, or import a Youtube video or a file (pdf, mp3,
+            wav, etc.).
           </DialogDescription>
         </DialogHeader>
         <Tabs
@@ -200,12 +198,8 @@ export function LectureCreateDialog({
               >
                 Youtube Video
               </TabsTrigger>
-              <TabsTrigger
-                disabled={isLoading}
-                className="w-full"
-                value="audio"
-              >
-                Audio File
+              <TabsTrigger disabled={isLoading} className="w-full" value="file">
+                File
               </TabsTrigger>
             </TabsList>
           </div>
@@ -230,24 +224,18 @@ export function LectureCreateDialog({
               </p>
             </div>
           </TabsContent>
-          <TabsContent value="audio">
+          <TabsContent value="file">
             <div className="grid gap-2">
-              <Label htmlFor="audioFile">Audio File</Label>
-              <input
-                className={cn(
-                  buttonVariants({
-                    variant: "outline",
-                  }),
-                  `col-span-3 file:mr-5 file:rounded-md file:border file:bg-transparent file:px-3 file:py-1 file:text-xs file:font-medium file:text-secondary-foreground file:shadow-none file:outline-none file:ring-0 hover:file:cursor-pointer hover:file:bg-primary/10 hover:file:text-primary`,
-                )}
-                id="audioFile"
-                ref={audioFileRef}
+              <Label htmlFor="audioFile">File</Label>
+              <Input
+                id="file"
                 type="file"
-                accept="audio/*"
+                ref={fileRef}
+                accept="audio/*,application/pdf"
               />
               <p className="text-sm text-muted-foreground">
-                Upload an audio file in any format. We&apos;ll transcribe it,
-                generate notes, and create an AI chat bot for it.
+                Upload a file in PDF or any audio format. We&apos;ll generate
+                notes and create an AI tutor for it.
               </p>
             </div>
           </TabsContent>
