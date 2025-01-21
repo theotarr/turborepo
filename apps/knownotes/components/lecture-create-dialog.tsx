@@ -131,16 +131,16 @@ export function LectureCreateDialog({
       if (error) {
         console.error(error);
         setIsLoading(false);
-        toast.error("Failed to upload the audio file.");
+        toast.error("Failed to upload the file.");
         return;
       }
-      toast.success("Audio file uploaded successfully.");
+      toast.success("File uploaded successfully.");
 
       const formData = new FormData();
       formData.append("fileId", fileId);
       formData.append("courseId", selectedCourseId);
 
-      // Send a request to the server to transcribe the audio file.
+      // Send a request to the server to transcribe the file.
       const response = await fetch(`/api/transcribe/file`, {
         method: "POST",
         body: formData,
@@ -148,7 +148,7 @@ export function LectureCreateDialog({
 
       if (!response.ok) {
         setIsLoading(false);
-        toast.error("Failed to transcribe the audio file. Please try again.");
+        toast.error("Failed to parse the file. Please try again.");
         return;
       }
 
