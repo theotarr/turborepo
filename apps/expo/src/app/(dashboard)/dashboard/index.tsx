@@ -165,15 +165,26 @@ export default function DashboardPage() {
               onOpenChange={setIsCourseDialogOpen}
             >
               <BottomSheet>
-                <BottomSheetOpenTrigger asChild>
+                {user.data.courses.length === 0 ? (
                   <Button
                     size="sm"
                     variant="secondary"
                     className="rounded-full"
+                    onPress={() => setIsCourseDialogOpen(true)}
                   >
-                    <Text>View courses</Text>
+                    <Text>Add course</Text>
                   </Button>
-                </BottomSheetOpenTrigger>
+                ) : (
+                  <BottomSheetOpenTrigger asChild>
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      className="rounded-full"
+                    >
+                      <Text>View courses</Text>
+                    </Button>
+                  </BottomSheetOpenTrigger>
+                )}
                 <BottomSheetContent>
                   <BottomSheetView className="gap-6 px-6">
                     <Text className="text-2xl font-semibold text-secondary-foreground">
