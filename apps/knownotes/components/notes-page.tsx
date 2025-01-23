@@ -1,13 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import { sendGAEvent } from "@/lib/analytics";
 import { updateLecture } from "@/lib/lecture/actions";
 import { generateEnhancedNotes } from "@/lib/lecture/notes";
 import { cn, formatDate } from "@/lib/utils";
@@ -152,9 +150,18 @@ export function NotesPage({ lecture, courses }: NotesPageProps) {
   const debouncedLectureTitle = useDebouncedCallback(async (title: string) => {
     setSaveStatus("Saving...");
     try {
+      const tempElement = document.createElement("div");
+      tempElement.innerHTML = title;
+      const plainTextTitle =
+        tempElement.textContent || tempElement.innerText || ""; // Remove HTML tags from the title.
+      console.log(plainTextTitle);
+
+      // Update the title and description metadata of the lecture.
+      document.title = plainTextTitle;
+
       await updateLecture({
         lectureId: lecture.id,
-        title,
+        title: plainTextTitle,
       });
       setSaveStatus("Saved");
     } catch (err) {
@@ -198,11 +205,6 @@ export function NotesPage({ lecture, courses }: NotesPageProps) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  // Update the title metadata of the page when the lecture title is updated.
-  useEffect(() => {
-    document.title = lectureTitle;
-  }, [lectureTitle]);
 
   // Save the new transcript in the DB.
   useEffect(() => {
