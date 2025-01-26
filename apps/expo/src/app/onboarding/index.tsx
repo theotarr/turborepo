@@ -221,6 +221,7 @@ export default function App() {
           onPress={async () => {
             if (flatListIndex === pages.length - 1) {
               await AsyncStorage.setItem("onboardingComplete", "true");
+              if (user.data?.id) await Superwall.shared.identify(user.data.id);
 
               if (
                 shouldShowPaywall(
@@ -230,7 +231,6 @@ export default function App() {
                   },
                 )
               ) {
-                if (user.data?.id) await Superwall.shared.identify(user.data.id)
                 void Superwall.shared.register("onboarding").then(() => {
                   router.replace("/(dashboard)/dashboard");
                 });
