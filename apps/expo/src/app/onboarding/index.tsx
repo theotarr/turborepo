@@ -36,7 +36,7 @@ export default function App() {
       content: React.ReactNode;
     }>
   >();
-  const user = api.auth.getUser.useQuery();
+  const { data: user } = api.auth.getUser.useQuery();
   const createCourseMutation = api.course.create.useMutation();
   const onViewableItemsChanged = useCallback(
     ({ viewableItems }: { viewableItems: ViewToken[] }) => {
@@ -171,7 +171,7 @@ export default function App() {
             each course.
           </Text>
           <ScrollView className="mt-8 flex h-96 flex-col gap-2">
-            {user.data?.courses.map((course) => (
+            {user?.courses.map((course) => (
               <View
                 key={course.id}
                 className="mb-2 flex flex-row items-center justify-between gap-2 rounded border border-border p-2.5"
@@ -221,21 +221,24 @@ export default function App() {
           onPress={async () => {
             if (flatListIndex === pages.length - 1) {
               await AsyncStorage.setItem("onboardingComplete", "true");
-              if (user.data?.id) await Superwall.shared.identify(user.data.id);
+              if (user) {
+                await Superwall.shared.identify(user.id);
 
-              if (
-                shouldShowPaywall(
-                  user.data as {
-                    stripeCurrentPeriodEnd?: string | null;
-                    appStoreCurrentPeriodEnd?: string | null;
-                  },
+                if (
+                  shouldShowPaywall(
+                    user as {
+                      stripeCurrentPeriodEnd?: string | null;
+                      appStoreCurrentPeriodEnd?: string | null;
+                    },
+                  )
                 )
-              ) {
-                void Superwall.shared.register("onboarding").then(() => {
-                  router.replace("/(dashboard)/dashboard");
-                });
-              } else router.replace("/(dashboard)/dashboard");
-              return;
+                  void Superwall.shared.register("onboarding").then(() => {
+                    router.replace("/(dashboard)/dashboard");
+                  });
+
+                router.replace("/(dashboard)/dashboard");
+                return;
+              }
             }
 
             flatListRef.current?.scrollToIndex({
