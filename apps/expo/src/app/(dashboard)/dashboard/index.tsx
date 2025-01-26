@@ -7,9 +7,18 @@ import {
   ScrollView,
   View,
 } from "react-native";
+import * as DocumentPicker from "expo-document-picker";
+import * as Haptics from "expo-haptics";
 import { router, Stack } from "expo-router";
 import Superwall from "@superwall/react-native-superwall";
-import { Mic, MoveRight, Plus, Settings, Youtube } from "lucide-react-native";
+import {
+  File,
+  Mic,
+  MoveRight,
+  Plus,
+  Settings,
+  Youtube,
+} from "lucide-react-native";
 
 import type { Lecture } from ".prisma/client";
 import { EmptyPlaceholder } from "~/components/empty-placeholder";
@@ -46,6 +55,7 @@ export default function DashboardPage() {
     name: string;
   } | null>(null);
   const [isCourseDialogOpen, setIsCourseDialogOpen] = useState(false);
+  const [file, setFile] = useState(null);
   const [courseName, setCourseName] = useState("");
   const [isYoutubeDialogOpen, setIsYoutubeDialogOpen] = useState(false);
   const [videoUrl, setVideoUrl] = useState("");
@@ -107,6 +117,17 @@ export default function DashboardPage() {
 
   const handleLoadMore = () => {
     if (lectures.hasNextPage) void lectures.fetchNextPage();
+  };
+
+  const pickDocument = async () => {
+    const result = await DocumentPicker.getDocumentAsync({
+      type: "*/*", // You can specify the file types you want to allow
+      copyToCacheDirectory: true,
+    });
+
+    if (result.type === "success") {
+      setFile(result);
+    }
   };
 
   if (
@@ -180,6 +201,11 @@ export default function DashboardPage() {
                       size="sm"
                       variant="secondary"
                       className="rounded-full"
+                      onPress={() => {
+                        void Haptics.impactAsync(
+                          Haptics.ImpactFeedbackStyle.Medium,
+                        );
+                      }}
                     >
                       <Text>View courses</Text>
                     </Button>
@@ -348,7 +374,12 @@ export default function DashboardPage() {
         </View>
         <BottomSheet>
           <BottomSheetOpenTrigger asChild>
-            <Pressable className="absolute -top-16 right-8 z-10 w-auto rounded-full bg-primary p-4">
+            <Pressable
+              className="absolute -top-16 right-8 z-10 w-auto rounded-full bg-primary p-4"
+              onPress={() => {
+                void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+              }}
+            >
               <Plus color={NAV_THEME[colorScheme].background} size={30} />
             </Pressable>
           </BottomSheetOpenTrigger>
@@ -404,7 +435,25 @@ export default function DashboardPage() {
                     size={20}
                     color={NAV_THEME[colorScheme].secondaryForeground}
                   />
-                  <Text>Youtube</Text>
+                  <Text>Youtube video</Text>
+                </View>
+                <MoveRight
+                  color={NAV_THEME[colorScheme].secondaryForeground}
+                  size={20}
+                />
+              </BottomSheetDismissButton>
+              <BottomSheetDismissButton
+                size="lg"
+                variant="secondary"
+                className="w-full flex-row items-center justify-between px-4"
+                onPress={pickDocument}
+              >
+                <View className="flex-row items-center gap-x-4">
+                  <File
+                    size={20}
+                    color={NAV_THEME[colorScheme].secondaryForeground}
+                  />
+                  <Text>Upload File</Text>
                 </View>
                 <MoveRight
                   color={NAV_THEME[colorScheme].secondaryForeground}
