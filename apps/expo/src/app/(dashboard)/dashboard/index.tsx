@@ -7,6 +7,7 @@ import {
   ScrollView,
   View,
 } from "react-native";
+import appsFlyer from "react-native-appsflyer";
 import * as DocumentPicker from "expo-document-picker";
 import * as Haptics from "expo-haptics";
 import { router, Stack } from "expo-router";
@@ -70,7 +71,7 @@ export default function DashboardPage() {
         lastPage.nextCursor ?? undefined,
     },
   );
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+
   const filteredLectures = lectures.data
     ? lectures.data.pages[0]?.items.filter(
         (lecture) =>
@@ -79,7 +80,7 @@ export default function DashboardPage() {
     : [];
 
   const createLecture = api.lecture.create.useMutation();
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+
   const createYoutubeLecture = api.lecture.createYoutube.useMutation();
   const createCourse = api.course.create.useMutation();
 
@@ -93,7 +94,6 @@ export default function DashboardPage() {
         const lecture = await createLecture.mutateAsync({});
         router.push(`/record/${lecture.id}`);
       } else if (type === "youtube") {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
         const lecture = (await createYoutubeLecture.mutateAsync({
           videoUrl,
         })) as { id: string };
@@ -131,7 +131,6 @@ export default function DashboardPage() {
   };
 
   if (
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     lectures.data === undefined ||
     lectures.data.pages.length === 0 ||
     !user.data
@@ -177,7 +176,10 @@ export default function DashboardPage() {
             <Button
               size="sm"
               className="rounded-full"
-              onPress={() => setCourseFilter(null)}
+              onPress={() => {
+                void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                setCourseFilter(null);
+              }}
             >
               <Text>{courseFilter ? courseFilter.name : "All lectures"}</Text>
             </Button>
@@ -376,8 +378,9 @@ export default function DashboardPage() {
           <BottomSheetOpenTrigger asChild>
             <Pressable
               className="absolute -top-16 right-8 z-10 w-auto rounded-full bg-primary p-4"
-              onPress={() => {
+              onPress={async () => {
                 void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                await appsFlyer.logEvent("open_lecture_create", {});
               }}
             >
               <Plus color={NAV_THEME[colorScheme].background} size={30} />
@@ -442,7 +445,7 @@ export default function DashboardPage() {
                   size={20}
                 />
               </BottomSheetDismissButton>
-              <BottomSheetDismissButton
+              {/* <BottomSheetDismissButton
                 size="lg"
                 variant="secondary"
                 className="w-full flex-row items-center justify-between px-4"
@@ -459,7 +462,7 @@ export default function DashboardPage() {
                   color={NAV_THEME[colorScheme].secondaryForeground}
                   size={20}
                 />
-              </BottomSheetDismissButton>
+              </BottomSheetDismissButton> */}
             </BottomSheetView>
           </BottomSheetContent>
         </BottomSheet>
