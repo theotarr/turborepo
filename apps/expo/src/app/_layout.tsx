@@ -3,6 +3,7 @@ import "@bacons/text-decoder/install";
 import type { Theme } from "@react-navigation/native";
 import * as React from "react";
 import { Platform } from "react-native";
+import appsFlyer from "react-native-appsflyer";
 import { SplashScreen, Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -41,13 +42,26 @@ export default function RootLayout() {
   const { colorScheme, setColorScheme, isDarkColorScheme } = useColorScheme();
   const [isColorSchemeLoaded, setIsColorSchemeLoaded] = React.useState(false);
 
-  // Initialize Superwall
+  // Initialize Superwall and AppsFlyer
   React.useEffect(() => {
     const apiKey =
       Platform.OS === "ios"
         ? "pk_4c26d917d2debc8d3e77f570082055efc61abb846b7efae4"
         : "MY_ANDROID_API_KEY";
     void Superwall.configure(apiKey);
+
+    appsFlyer.initSdk(
+      {
+        appId: "id6739503513",
+        devKey: "XQ89PLX7avzrytvHTtAuqE",
+        isDebug: true,
+        onInstallConversionDataListener: true, // Optional
+        onDeepLinkListener: true, // Optional
+        timeToWaitForATTUserAuthorization: 10, // For iOS 14.5
+      },
+      (result) => console.log(result),
+      (error) => console.error(error),
+    );
   }, []);
 
   React.useEffect(() => {

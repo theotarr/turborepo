@@ -71,5 +71,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         },
       },
     ],
+    ["react-native-appsflyer", {}],
   ],
 });

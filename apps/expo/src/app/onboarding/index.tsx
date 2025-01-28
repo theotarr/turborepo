@@ -1,6 +1,7 @@
 import type { ViewToken } from "react-native";
 import React, { useCallback, useState } from "react";
 import { ActivityIndicator, Image, SafeAreaView, View } from "react-native";
+import appsFlyer from "react-native-appsflyer";
 import { ScrollView } from "react-native-gesture-handler";
 import Animated, {
   useAnimatedRef,
@@ -220,7 +221,10 @@ export default function App() {
           className="rounded-full"
           onPress={async () => {
             if (flatListIndex === pages.length - 1) {
+              // Mark onboarding as complete. Send the analytics event to AppsFlyer.
               await AsyncStorage.setItem("onboardingComplete", "true");
+              await appsFlyer.logEvent("af_onboarding_completion", {});
+
               if (user) {
                 await Superwall.shared.identify(user.id);
 
@@ -232,9 +236,17 @@ export default function App() {
                     },
                   )
                 )
-                  void Superwall.shared.register("onboarding").then(() => {
-                    router.replace("/(dashboard)/dashboard");
-                  });
+                  void Superwall.shared
+                    .register("onboarding")
+                    .then(async (data) => {
+                      console.log({ data });
+                      await appsFlyer.logEvent("af_subscribe", {
+                        af_currency: "USD",
+                        af_projected_revenue: 99.99,
+                        price_id: "yearly_99.99",
+                      });
+                      router.replace("/(dashboard)/dashboard");
+                    });
 
                 router.replace("/(dashboard)/dashboard");
                 return;
@@ -250,7 +262,6 @@ export default function App() {
             <Text className="mr-2">Continue</Text>
             <ArrowRight
               color={NAV_THEME[colorScheme].primaryForeground}
-              // fill={NAV_THEME[colorScheme].primaryForeground}
               size={16}
             />
           </View>

@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { View } from "react-native";
+import appsFlyer from "react-native-appsflyer";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as AppleAuthentication from "expo-apple-authentication";
 import { Stack, useRouter } from "expo-router";
@@ -28,7 +29,7 @@ export default function Page() {
   useEffect(() => {
     if (session) {
       // Identify the user in Superwall.
-      // This id ends up being the appAccountToken in Apple webhooks.
+      // This id ends up being the `appAccountToken` in Apple webhooks.
       void Superwall.shared.identify(session.user.id);
       void Superwall.shared.setUserAttributes(session.user);
 
@@ -98,6 +99,9 @@ export default function Page() {
 
               // Store the app store user ID as then token prefixed with apple_. Then refetch the session to redirect.
               setToken(`apple_${appStoreUserId}`);
+              await appsFlyer.logEvent("af_login", {
+                af_registration_method: "apple",
+              });
               await utils.auth.getSession.invalidate();
             }}
           />
@@ -105,7 +109,12 @@ export default function Page() {
             variant="outline"
             className="flex w-full flex-row gap-2 rounded-full"
             size="lg"
-            onPress={() => signIn()}
+            onPress={async () => {
+              await signIn();
+              await appsFlyer.logEvent("af_login", {
+                af_registration_method: "web",
+              });
+            }}
           >
             <Aperture
               size={20}
