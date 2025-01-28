@@ -7,6 +7,7 @@ import {
   Share,
   View,
 } from "react-native";
+import appsFlyer from "react-native-appsflyer";
 import { Link, Stack, useRouter } from "expo-router";
 import * as StoreReview from "expo-store-review";
 import { Picker } from "@react-native-picker/picker";
@@ -65,6 +66,7 @@ export default function SettingsPage() {
               variant="secondary"
               className="flex w-full flex-row items-center gap-2"
               onPress={async () => {
+                await appsFlyer.logEvent("review", {});
                 await StoreReview.requestReview();
               }}
             >
@@ -78,12 +80,13 @@ export default function SettingsPage() {
             <Button
               variant="secondary"
               className="flex w-full flex-row items-center gap-2"
-              onPress={async () =>
+              onPress={async () => {
+                await appsFlyer.logEvent("invite_friend", {});
                 await Share.share({
                   message: "Hey you have to try this",
-                  url: "https://knownotes.ai?ref=ios",
-                })
-              }
+                  url: "https://apps.apple.com/us/app/knownotes-ai-note-taker/id6739503513",
+                });
+              }}
             >
               <Plus
                 size={16}
