@@ -22,6 +22,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from "expo-av";
 import * as FileSystem from "expo-file-system";
+import * as Haptics from "expo-haptics";
 import { Stack, useGlobalSearchParams, useRouter } from "expo-router";
 import { Aperture, ArrowDown } from "lucide-react-native";
 
@@ -85,7 +86,7 @@ export default function Record() {
     try {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
       if (permissionResponse?.status !== "granted") {
-        console.log("Requesting permission...");
+        console.log("[Record] Requesting permission...");
         await requestPermission();
       }
 
@@ -99,24 +100,24 @@ export default function Record() {
         playThroughEarpieceAndroid: false,
       });
 
-      console.log("Starting recording...");
+      console.log("[Record] Starting recording...");
       const { recording } = await Audio.Recording.createAsync(
         Audio.RecordingOptionsPresets.HIGH_QUALITY,
       );
       setRecording(recording);
       stopwatchTimerRef.current?.play();
-      console.log("Recording started");
+      console.log("[Record] Recording started");
 
       recording.setOnRecordingStatusUpdate((status) => {
         metering.value = status.metering ?? -100;
       });
     } catch (err) {
-      console.error("Failed to start recording", err);
+      console.error("[Record] Failed to start recording", err);
     }
   }
 
   async function pauseRecording() {
-    console.log("Pausing recording...");
+    console.log("[Record]Pausing recording...");
     setIsRecording(false);
     stopwatchTimerRef.current?.pause();
 
@@ -137,7 +138,7 @@ export default function Record() {
     try {
       await recording?.stopAndUnloadAsync();
       const recordingUri = recording?.getURI();
-      if (!recordingUri) throw new Error("No recording URI");
+      if (!recordingUri) throw new Error("[Record] No recording URI");
 
       const audioUrl = await FileSystem.readAsStringAsync(recordingUri, {
         encoding: FileSystem.EncodingType.Base64,
@@ -153,7 +154,7 @@ export default function Record() {
       // Redirect to the lecture notes page.
       router.replace(`/lecture/${lecture.id}`);
     } catch (e) {
-      console.error(e);
+      console.error("[Record] Failed to transcribe recording", e);
     }
   }
 
@@ -234,7 +235,11 @@ export default function Record() {
             />
           </Text>
           <Pressable
-            onPress={isRecording ? pauseRecording : startRecording}
+            onPress={async () => {
+              void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+              if (isRecording) await pauseRecording();
+              else await startRecording();
+            }}
             className="relative flex size-[4.5rem] items-center justify-center rounded-full border-4 border-border"
           >
             <Animated.View
