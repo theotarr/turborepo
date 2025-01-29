@@ -127,13 +127,19 @@ export function LectureOperations({
                   <SelectContent className="w-64">
                     <SelectGroup>
                       <SelectLabel>Courses</SelectLabel>
-                      {courses.map((course) => (
-                        <SelectItem
-                          key={course.id}
-                          value={course.id}
-                          label={course.name}
-                        />
-                      ))}
+                      {courses.length > 0 ? (
+                        courses.map((course) => (
+                          <SelectItem
+                            key={course.id}
+                            value={course.id}
+                            label={course.name}
+                          />
+                        ))
+                      ) : (
+                        <Text className="py-2 pl-10 text-base font-medium text-secondary-foreground/70">
+                          No courses
+                        </Text>
+                      )}
                     </SelectGroup>
                   </SelectContent>
                 </Select>

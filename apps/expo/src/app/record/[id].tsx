@@ -117,7 +117,7 @@ export default function Record() {
   }
 
   async function pauseRecording() {
-    console.log("[Record]Pausing recording...");
+    console.log("[Record] Pausing recording...");
     setIsRecording(false);
     stopwatchTimerRef.current?.pause();
 
