@@ -21,6 +21,8 @@ import "../globals.css";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 
+import { MySuperwallDelegate } from "~/lib/superwall-delegate";
+
 export {
   // Catch any errors thrown by the Layout component.
   ErrorBoundary,
@@ -39,16 +41,22 @@ const DARK_THEME: Theme = {
 void SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
+  const delegate = new MySuperwallDelegate();
   const { colorScheme, setColorScheme, isDarkColorScheme } = useColorScheme();
   const [isColorSchemeLoaded, setIsColorSchemeLoaded] = React.useState(false);
 
   // Initialize Superwall and AppsFlyer
   React.useEffect(() => {
-    const apiKey =
-      Platform.OS === "ios"
-        ? "pk_4c26d917d2debc8d3e77f570082055efc61abb846b7efae4"
-        : "MY_ANDROID_API_KEY";
-    void Superwall.configure(apiKey);
+    const setupSuperwall = async () => {
+      const apiKey =
+        Platform.OS === "ios"
+          ? "pk_4c26d917d2debc8d3e77f570082055efc61abb846b7efae4"
+          : "MY_ANDROID_API_KEY";
+      await Superwall.configure(apiKey);
+      Superwall.shared.setDelegate(delegate);
+    };
+
+    setupSuperwall();
 
     appsFlyer.initSdk(
       {

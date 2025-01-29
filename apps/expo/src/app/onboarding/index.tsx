@@ -236,17 +236,9 @@ export default function App() {
                     },
                   )
                 )
-                  void Superwall.shared
-                    .register("onboarding")
-                    .then(async (data) => {
-                      console.log({ data });
-                      await appsFlyer.logEvent("af_subscribe", {
-                        af_currency: "USD",
-                        af_projected_revenue: 99.99,
-                        price_id: "yearly_99.99",
-                      });
-                      router.replace("/(dashboard)/dashboard");
-                    });
+                  void Superwall.shared.register("onboarding").then(() => {
+                    router.replace("/(dashboard)/dashboard");
+                  });
 
                 router.replace("/(dashboard)/dashboard");
                 return;
