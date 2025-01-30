@@ -22,12 +22,12 @@ export class MySuperwallDelegate extends SuperwallDelegate {
         console.log("[Superwall] appOpen event");
         break;
 
-      case EventType.deviceAttributes:
-        console.log(
-          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-          `[Superwall] deviceAttributes event: ${eventInfo.event.deviceAttributes}`,
-        );
-        break;
+      // case EventType.deviceAttributes:
+      //   console.log(
+      //     // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+      //     `[Superwall] deviceAttributes event: ${eventInfo.event.deviceAttributes}`,
+      //   );
+      //   break;
 
       case EventType.transactionComplete:
         // Report to AppsFlyer.
