@@ -6,7 +6,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   name: "KnowNotes",
   slug: "knownotes",
   scheme: "knownotes",
-  version: "0.1.7",
+  version: "0.1.8",
   orientation: "portrait",
   icon: "./assets/icon.png",
   userInterfaceStyle: "automatic",
@@ -24,7 +24,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   assetBundlePatterns: ["**/*"],
   ios: {
-    buildNumber: "2",
     bundleIdentifier: "ai.knownotes.ios",
     usesAppleSignIn: true,
     supportsTablet: true,
