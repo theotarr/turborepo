@@ -27,12 +27,17 @@ export default function Page() {
   const createMobileUser = api.auth.createMobileUser.useMutation();
 
   useEffect(() => {
-    if (session) {
+    const identifyUser = async () => {
       // Identify the user in Superwall.
       // This id ends up being the `appAccountToken` in Apple webhooks.
-      void Superwall.shared.identify(session.user.id);
-      void Superwall.shared.setUserAttributes(session.user);
+      if (session) {
+        await Superwall.shared.identify(session.user.id);
+        await Superwall.shared.setUserAttributes(session.user);
+      }
+    };
 
+    if (session) {
+      void identifyUser();
       void AsyncStorage.getItem("onboardingComplete").then((value) => {
         if (value === "true") router.replace("/(dashboard)/dashboard");
         else router.replace("/onboarding");

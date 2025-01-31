@@ -8,6 +8,7 @@ import Animated, {
   useAnimatedScrollHandler,
   useSharedValue,
 } from "react-native-reanimated";
+import * as Haptics from "expo-haptics";
 import { Link, Stack, useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Superwall from "@superwall/react-native-superwall";
@@ -214,12 +215,16 @@ export default function App() {
         renderItem={renderItem}
         showsHorizontalScrollIndicator={false}
         onViewableItemsChanged={onViewableItemsChanged}
+        onScrollEndDrag={() =>
+          void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
+        }
       />
       <View className="flex flex-row items-center justify-between px-6">
         <PaginationElement length={pages.length} x={x} />
         <Button
           className="rounded-full"
           onPress={async () => {
+            void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             if (flatListIndex === pages.length - 1) {
               // Mark onboarding as complete. Send the analytics event to AppsFlyer.
               await AsyncStorage.setItem("onboardingComplete", "true");
