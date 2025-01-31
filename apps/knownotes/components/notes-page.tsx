@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/resizable";
 import { updateLecture } from "@/lib/lecture/actions";
 import { generateEnhancedNotes } from "@/lib/lecture/notes";
-import { cn, formatDate } from "@/lib/utils";
+import { cn, formatDate, formatLectureType } from "@/lib/utils";
 import { Transcript } from "@/types";
 import { Course, Lecture, Message } from "@prisma/client";
 import { Editor as EditorType, JSONContent } from "@tiptap/core";
@@ -154,10 +154,7 @@ export function NotesPage({ lecture, courses }: NotesPageProps) {
       tempElement.innerHTML = title;
       const plainTextTitle =
         tempElement.textContent || tempElement.innerText || ""; // Remove HTML tags from the title.
-      console.log(plainTextTitle);
-
-      // Update the title and description metadata of the lecture.
-      document.title = plainTextTitle;
+      document.title = plainTextTitle; // Update title metadata.
 
       await updateLecture({
         lectureId: lecture.id,
@@ -377,6 +374,9 @@ export function NotesPage({ lecture, courses }: NotesPageProps) {
                     <></>
                   )}
                   <Badge className="mt-[0.165rem]" variant="secondary">
+                    {formatLectureType(lecture.type)}
+                  </Badge>
+                  <Badge className="mt-[0.165rem]" variant="outline">
                     {formatDate(lecture.createdAt as unknown as string)}
                   </Badge>
                 </div>
