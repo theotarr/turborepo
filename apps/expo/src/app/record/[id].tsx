@@ -2,6 +2,8 @@ import type { StopwatchTimerMethods } from "react-native-animated-stopwatch-time
 import { useRef, useState } from "react";
 import { ActivityIndicator, Pressable, SafeAreaView, View } from "react-native";
 import Animated, {
+  FadeIn,
+  FadeOut,
   interpolate,
   useAnimatedStyle,
   useSharedValue,
@@ -14,7 +16,7 @@ import * as Haptics from "expo-haptics";
 import { Stack, useGlobalSearchParams, useRouter } from "expo-router";
 import { Aperture } from "lucide-react-native";
 
-import { LectureHeader } from "~/components/lecture-header";
+import { LectureOperations } from "~/components/lecture-operations";
 import Stopwatch from "~/components/stopwatch-timer";
 import { Button } from "~/components/ui/button";
 import { Text } from "~/components/ui/text";
@@ -149,30 +151,28 @@ export default function Record() {
     <SafeAreaView className="my-0 py-0">
       <Stack.Screen options={{ headerShown: false }} />
       <View className="flex h-full flex-col justify-between bg-background">
-        <View className="flex-1 p-4">
-          <LectureHeader
-            showBackButton={false}
-            lecture={
-              lecture as {
-                id: string;
-                title: string;
-                type: "YOUTUBE" | "AUDIO" | "LIVE";
-                createdAt: Date;
-              }
-            }
+        <View className="flex-1 px-6 py-4">
+          <View className="flex-row items-center justify-center">
+            <View className="flex-row items-center gap-x-2">
+              <Aperture
+                size={24}
+                color={NAV_THEME[colorScheme].secondaryForeground}
+              />
+              <Text className="text-xl font-bold tracking-tighter">
+                KnowNotes
+              </Text>
+            </View>
+          </View>
+        </View>
+        <View className="absolute right-3 top-3">
+          <LectureOperations
+            lecture={{
+              id: lecture.id,
+              title: lecture.title,
+              courseId: lecture.courseId ?? undefined,
+            }}
             courses={user?.courses ?? []}
           />
-        </View>
-        <View className="mb-4 w-full flex-row items-center justify-center">
-          <View className="flex-row items-center justify-center gap-x-2 rounded-full bg-muted p-3.5">
-            <Aperture
-              size={28}
-              color={NAV_THEME[colorScheme].secondaryForeground}
-            />
-            <Text className="text-2xl font-bold tracking-tighter">
-              KnowNotes
-            </Text>
-          </View>
         </View>
         <View className="-mb-10 flex h-80 items-center justify-center bg-muted pb-12 pt-6">
           <Text className="mb-2 text-center text-2xl font-semibold text-secondary-foreground">
@@ -194,7 +194,7 @@ export default function Record() {
               if (isRecording) await pauseRecording();
               else await startRecording();
             }}
-            className="relative flex size-[4.5rem] items-center justify-center rounded-full border-4 border-border"
+            className="relative flex size-[5rem] items-center justify-center rounded-full border-4 border-border"
           >
             <Animated.View
               style={[animatedMic]}
@@ -208,18 +208,24 @@ export default function Record() {
               className="absolute -z-10 rounded-full bg-primary/40"
             />
           </Pressable>
-          <View className="mt-6">
-            <Button
-              className="w-56 flex-row items-center gap-x-2 rounded-full"
-              size="lg"
-              onPress={transcribeRecording}
-              disabled={!recording || isTranscribing}
-            >
-              {isTranscribing && (
-                <ActivityIndicator size="small" color="white" />
-              )}
-              <Text>Generate Notes</Text>
-            </Button>
+          <View className="flex w-full items-center">
+            {recording && (
+              <Animated.View entering={FadeIn} exiting={FadeOut}>
+                <Button
+                  className="mt-6 w-96 rounded-full"
+                  size="lg"
+                  onPress={transcribeRecording}
+                  disabled={isTranscribing}
+                >
+                  <View className="flex-row items-center gap-x-2">
+                    {isTranscribing && (
+                      <ActivityIndicator size="small" color="white" />
+                    )}
+                    <Text>Transcribe & Summarize</Text>
+                  </View>
+                </Button>
+              </Animated.View>
+            )}
           </View>
         </View>
       </View>
