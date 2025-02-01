@@ -18,12 +18,14 @@ import { api } from "~/utils/api";
 import { getBaseUrl } from "~/utils/base-url";
 
 export default function Lecture() {
+  const utils = api.useUtils();
   const router = useRouter();
   const { colorScheme } = useColorScheme();
   const { id } = useGlobalSearchParams();
   if (!id || typeof id !== "string") throw new Error("unreachable");
   const { data: lecture } = api.lecture.byId.useQuery({ id });
   const { data: courses } = api.course.list.useQuery();
+  const generateNotes = api.lecture.generateNotes.useMutation();
 
   if (!lecture || !courses)
     return (
@@ -113,27 +115,51 @@ export default function Lecture() {
             <Text>Share</Text>
           </Button>
         </ScrollView>
-        <WebView
-          originWhitelist={["*"]}
-          style={{ backgroundColor: "transparent", marginTop: 8 }}
-          source={{
-            uri: `${getBaseUrl()}/native-notes/lecture/${lecture.id}?theme=${colorScheme}`,
-          }}
-          startInLoadingState={true}
-          renderLoading={() => (
-            <View className="absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2">
-              <View className="flex flex-col items-center gap-2">
-                <ActivityIndicator
-                  color={NAV_THEME[colorScheme].secondaryForeground}
-                  size="small"
-                />
-                <Text className="text-sm text-muted-foreground">
-                  Loading notes...
-                </Text>
+        {lecture.enhancedNotes || lecture.markdownNotes ? (
+          <WebView
+            originWhitelist={["*"]}
+            style={{ backgroundColor: "transparent", marginTop: 8 }}
+            source={{
+              uri: `${getBaseUrl()}/native-notes/lecture/${lecture.id}?theme=${colorScheme}`,
+            }}
+            startInLoadingState={true}
+            renderLoading={() => (
+              <View className="absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2">
+                <View className="flex flex-col items-center gap-2">
+                  <ActivityIndicator
+                    color={NAV_THEME[colorScheme].secondaryForeground}
+                    size="small"
+                  />
+                  <Text className="text-sm text-muted-foreground">
+                    Loading notes...
+                  </Text>
+                </View>
               </View>
-            </View>
-          )}
-        />
+            )}
+          />
+        ) : (
+          <View className="w-full flex-1 items-center justify-end pb-8">
+            <Button
+              variant="default"
+              size="lg"
+              className="flex w-full flex-row items-center gap-x-2 rounded-full"
+              onPress={async () => {
+                await generateNotes.mutateAsync({ lectureId: lecture.id });
+                await utils.lecture.byId.invalidate({ id: lecture.id });
+              }}
+              disabled={generateNotes.isPending}
+            >
+              {generateNotes.isPending ? (
+                <ActivityIndicator size="small" color="white" />
+              ) : (
+                <Sparkles size={20} color="white" />
+              )}
+              <Text className="text-lg font-medium text-white">
+                Generate Notes
+              </Text>
+            </Button>
+          </View>
+        )}
       </View>
     </SafeAreaView>
   );

@@ -425,4 +425,23 @@ export const lectureRouter = {
 
       return object.questions;
     }),
+  generateNotes: protectedProcedure
+    .input(z.object({ lectureId: z.string().min(1) }))
+    .mutation(async ({ ctx, input }) => {
+      const { lectureId } = input;
+      const lecture = await ctx.db.lecture.findUnique({
+        where: { id: lectureId, userId: ctx.session.user.id },
+      });
+      if (!lecture) throw new Error("Lecture not found");
+
+      const text = await generateLectureNotes(
+        lecture.transcript as unknown as Transcript[],
+      );
+      console.log("Generated notes:", text);
+      // Update the lecture with the generated notes.
+      return await ctx.db.lecture.update({
+        where: { id: lectureId },
+        data: { enhancedNotes: text, markdownNotes: text },
+      });
+    }),
 } satisfies TRPCRouterRecord;
