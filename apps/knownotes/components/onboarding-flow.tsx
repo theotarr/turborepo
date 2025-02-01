@@ -24,10 +24,10 @@ export function Onboarding({ courses, className, ...props }: OnboardingProps) {
       className={cn("flex w-full flex-col items-center space-y-6", className)}
       {...props}
     >
+      <Icons.logo className="mx-autosize-8" />
       {step === 0 ? (
         <div className="w-full sm:w-[350px]">
           <div className="flex flex-col space-y-2 text-center">
-            <Icons.logo className="mx-auto h-8 w-8" />
             <h1 className="text-2xl font-semibold tracking-tight">
               Add your courses
             </h1>
@@ -38,11 +38,36 @@ export function Onboarding({ courses, className, ...props }: OnboardingProps) {
           </div>
           <AddCoursesForm courses={courses} />
         </div>
+      ) : step === 1 ? (
+        <>
+          <div className="flex flex-col space-y-2 text-center">
+            <div className="max-w-[350px]">
+              <h1 className="text-2xl font-semibold tracking-tight">
+                Download our app
+              </h1>
+              <p className="text-sm text-muted-foreground">
+                Sync your notes to your phone. Scan the QR code below to
+                download our app.
+              </p>
+            </div>
+          </div>
+          <div className="flex flex-col items-center rounded-xl bg-primary/5 p-3 ring-1 ring-inset ring-primary/10">
+            <Image
+              src="/qrcode.png"
+              alt="QR Code"
+              width={184}
+              height={184}
+              className="mb-2 rounded-xl"
+            />
+            <p className="text-xl font-semibold tracking-tight text-secondary-foreground">
+              Scan on iPhone
+            </p>
+          </div>
+        </>
       ) : (
         <>
           <div className="flex flex-col space-y-2 text-center">
             <div className="max-w-[350px]">
-              <Icons.logo className="mx-auto h-8 w-8" />
               <h1 className="text-2xl font-semibold tracking-tight">
                 Tutorial
               </h1>
@@ -52,11 +77,6 @@ export function Onboarding({ courses, className, ...props }: OnboardingProps) {
               </p>
             </div>
           </div>
-          {/* <video
-            autoPlay
-            className="w-[680px] rounded-lg shadow-lg"
-            src="https://www.loom.com/share/5f1fbb33b9a44d5ab2d61928d30af528?sid=94a40531-7cf3-48e4-826b-655bd32ee8be"
-          /> */}
           <div>
             <Link
               target="_blank"
@@ -77,7 +97,7 @@ export function Onboarding({ courses, className, ...props }: OnboardingProps) {
         className={cn("w-full", step > 0 && "max-w-[350px]")}
         variant={step < 2 ? "secondary" : "default"}
         onClick={() =>
-          step < 1 ? setStep((prev) => prev + 1) : router.push("/dashboard")
+          step < 2 ? setStep((prev) => prev + 1) : router.push("/dashboard")
         }
       >
         Continue
