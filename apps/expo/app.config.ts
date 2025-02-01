@@ -43,6 +43,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       foregroundImage: "./assets/adaptive-icon.png",
       backgroundColor: "#FFFFFF",
     },
+    permissions: ["WAKE_LOCK"],
   },
   extra: {
     eas: {

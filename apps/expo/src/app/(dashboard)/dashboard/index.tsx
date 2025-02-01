@@ -170,7 +170,7 @@ export default function DashboardPage() {
       <View className="h-full w-full px-4 py-6">
         <View className="h-full w-full">
           <Text className="text-2xl font-semibold tracking-tighter">
-            Lectures
+            My notes
           </Text>
           <View className="mb-4 mt-4 flex-row items-center gap-x-2">
             <Button
@@ -181,7 +181,7 @@ export default function DashboardPage() {
                 setCourseFilter(null);
               }}
             >
-              <Text>{courseFilter ? courseFilter.name : "All lectures"}</Text>
+              <Text>{courseFilter ? courseFilter.name : "All notes"}</Text>
             </Button>
             <Dialog
               open={isCourseDialogOpen}
@@ -257,7 +257,7 @@ export default function DashboardPage() {
                 <DialogHeader>
                   <DialogTitle>Create Course</DialogTitle>
                   <DialogDescription>
-                    Add a new course to organize your lectures.
+                    Add a new course to organize your notes and lectures.
                   </DialogDescription>
                 </DialogHeader>
                 <View className="gap-4">
@@ -319,7 +319,7 @@ export default function DashboardPage() {
                   {courseFilter ? "This course is empty" : "No lectures yet"}
                 </EmptyPlaceholder.Title>
                 <EmptyPlaceholder.Description className="max-w-[280px]">
-                  Create a new lecture by clicking the plus button below.
+                  Create a new note by clicking the plus button below.
                 </EmptyPlaceholder.Description>
               </EmptyPlaceholder>
             )}
@@ -389,7 +389,7 @@ export default function DashboardPage() {
           <BottomSheetContent>
             <BottomSheetView className="gap-4 px-6">
               <Text className="text-2xl font-semibold text-secondary-foreground">
-                New Lecture
+                New Note
               </Text>
               <BottomSheetDismissButton
                 size="lg"
