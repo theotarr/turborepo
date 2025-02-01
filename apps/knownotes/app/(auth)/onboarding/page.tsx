@@ -20,11 +20,6 @@ export default async function OnboardingPage() {
     },
   });
 
-  // // If the user already has courses, redirect them to the dashboard.
-  // if (courses.length > 0) {
-  //   return redirect("/dashboard")
-  // }
-
   return (
     <div className="container flex h-screen w-screen flex-col items-center justify-center">
       <div className="lg:p-8">
