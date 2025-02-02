@@ -1,13 +1,18 @@
+import fs from "fs";
 import type { TRPCRouterRecord } from "@trpc/server";
 import { openai } from "@ai-sdk/openai";
 import { createClient } from "@deepgram/sdk";
 import { generateObject, generateText } from "ai";
+import { fileTypeFromBuffer } from "file-type";
 import { z } from "zod";
 
 import type { Transcript } from "@acme/validators";
 import { CreateLectureSchema, formatTranscript } from "@acme/validators";
 
 import type { CtxType } from "../trpc";
+import { parsePdf } from "../lib/file";
+import { embedTranscripts, supabase } from "../lib/supabase";
+import { formatDeepgramTranscript } from "../lib/utils";
 import { getVideoId, getVideoTranscript } from "../lib/youtube";
 import { protectedProcedure, publicProcedure } from "../trpc";
 
@@ -443,5 +448,117 @@ export const lectureRouter = {
         where: { id: lectureId },
         data: { enhancedNotes: text, markdownNotes: text },
       });
+    }),
+  uploadFile: protectedProcedure
+    .input(
+      z.object({
+        fileId: z.string(),
+        courseId: z.string().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { fileId, courseId } = input;
+
+      // Verify the user has access to the course.
+      if (courseId) {
+        const course = await ctx.db.course.findFirst({
+          where: { id: courseId, userId: ctx.session.user.id },
+        });
+        if (!course)
+          throw new Error("User does not have access to the course.");
+      }
+
+      // Download the file from the storage bucket.
+      const filePath = `${ctx.session.user.id}/${fileId}`;
+      const { data, error: downloadError } = await supabase.storage
+        .from("audio")
+        .download(filePath);
+
+      if (downloadError) {
+        console.error(downloadError);
+        // Delete the file from the storage bucket if it failed to download.
+        // Make the user try again.
+        const { error: removeFileError } = await supabase.storage
+          .from("audio")
+          .remove([filePath]);
+        if (removeFileError) console.error(removeFileError);
+
+        throw new Error("Failed to download file");
+      }
+
+      // Data is a Blob, so we need to convert it to a File.
+      // Assume the file size is not too large since there is a bucket size limit.
+      const blob = data;
+      const buffer = Buffer.from(await blob.arrayBuffer());
+
+      // Write the file to /tmp or the current working directory in development.
+      const path =
+        process.env.NODE_ENV === "development"
+          ? `${process.cwd()}/${fileId}`
+          : `/tmp/${fileId}`;
+      await fs.promises.writeFile(path, buffer);
+      try {
+        // Get the file type.
+        const fileType = await fileTypeFromBuffer(buffer);
+        if (!fileType) throw new Error("Could not determine file type.");
+        const type = fileType.ext === "pdf" ? "PDF" : "AUDIO_FILE";
+
+        let transcript: Transcript[] = [];
+
+        if (type === "PDF") {
+          const text = await parsePdf(buffer);
+          transcript = [{ start: 0, text }];
+        } else {
+          // Transcribe the file.
+          const { result, error: transcriptionError } =
+            await deepgram.listen.prerecorded.transcribeFile(
+              fs.readFileSync(path),
+              {
+                model: "nova-2",
+                punctuate: true,
+                smart_formatting: true,
+                paragraphs: true,
+                tag: ["knownotes-file-upload"],
+              },
+            );
+          if (transcriptionError) throw new Error(transcriptionError.message);
+          transcript = formatDeepgramTranscript(result);
+        }
+
+        // Create a lecture with the transcript and title.
+        const lecture = await ctx.db.lecture.create({
+          data: {
+            type,
+            title: "Untitled Lecture", // TODO: Generate a lecture name based on the notes/lecture content.
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
+            transcript: transcript as any,
+            userId: ctx.session.user.id,
+            ...(courseId ? { courseId } : {}),
+          },
+        });
+
+        // Create vector embeddings for the lecture.
+        await embedTranscripts(transcript, lecture.id, courseId);
+
+        // Update the lecture with the transcript embedding document ids.
+        await ctx.db.lecture.update({
+          where: {
+            id: lecture.id,
+          },
+          data: {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
+            transcript: transcript as any,
+          },
+        });
+
+        return lecture;
+      } finally {
+        // Delete the file locally and from the storage bucket.
+        await fs.promises.unlink(path);
+        const { error: removeFileError } = await supabase.storage
+          .from("audio")
+          .remove([filePath]);
+        if (removeFileError) console.error(removeFileError);
+      }
     }),
 } satisfies TRPCRouterRecord;

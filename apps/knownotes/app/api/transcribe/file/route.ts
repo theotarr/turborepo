@@ -11,7 +11,7 @@ import PDFParser from "pdf2json";
 
 import { auth } from "@acme/auth";
 
-export const maxDuration = 300; // 5 minutes
+export const maxDuration = 180; // 3 minutes
 
 const deepgram = createClient(env.DEEPGRAM_API_KEY);
 
@@ -88,6 +88,7 @@ export async function POST(req: Request) {
         ) ?? [];
     } catch (error) {
       console.error(error);
+      return new Response("Failed to transcribe audio file", { status: 500 });
     }
   } else {
     // Parse the PDF file.

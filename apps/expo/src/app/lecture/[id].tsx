@@ -22,7 +22,8 @@ export default function Lecture() {
   const router = useRouter();
   const { colorScheme } = useColorScheme();
   const { id } = useGlobalSearchParams();
-  if (!id || typeof id !== "string") throw new Error("unreachable");
+  if (!id || typeof id !== "string") throw new Error("Lecture ID is required");
+
   const { data: lecture } = api.lecture.byId.useQuery({ id });
   const { data: courses } = api.course.list.useQuery();
   const generateNotes = api.lecture.generateNotes.useMutation();
@@ -150,11 +151,17 @@ export default function Lecture() {
               disabled={generateNotes.isPending}
             >
               {generateNotes.isPending ? (
-                <ActivityIndicator size="small" color="white" />
+                <ActivityIndicator
+                  size="small"
+                  color={NAV_THEME[colorScheme].primaryForeground}
+                />
               ) : (
-                <Sparkles size={20} color="white" />
+                <Sparkles
+                  size={20}
+                  color={NAV_THEME[colorScheme].primaryForeground}
+                />
               )}
-              <Text className="text-lg font-medium text-white">
+              <Text className="text-lg font-medium text-primary-foreground">
                 Generate Notes
               </Text>
             </Button>

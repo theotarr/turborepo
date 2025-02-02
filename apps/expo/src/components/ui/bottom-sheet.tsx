@@ -263,7 +263,6 @@ const BottomSheetDismissButton = React.forwardRef<
   const { dismiss } = useBottomSheetModal();
   function close(ev: GestureResponderEvent) {
     onPress?.(ev);
-    console.log("close");
     if (Keyboard.isVisible()) Keyboard.dismiss();
     dismiss();
   }

@@ -40,7 +40,6 @@ export async function getVideoTranscript(videoId: string): Promise<{
 }> {
   try {
     const response = await fetch(
-      // eslint-disable-next-line turbo/no-undeclared-env-vars
       `https://api.apify.com/v2/acts/streamers~youtube-scraper/run-sync-get-dataset-items?token=${process.env.APIFY_API_TOKEN}`,
       {
         method: "POST",

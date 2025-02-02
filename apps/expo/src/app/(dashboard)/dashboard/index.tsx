@@ -1,6 +1,9 @@
+import "react-native-get-random-values";
+
 import { useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   Pressable,
   RefreshControl,
   SafeAreaView,
@@ -20,8 +23,8 @@ import {
   Settings,
   Youtube,
 } from "lucide-react-native";
+import { v1 as uuidv1 } from "uuid";
 
-import type { Lecture } from ".prisma/client";
 import { EmptyPlaceholder } from "~/components/empty-placeholder";
 import { LectureItem } from "~/components/lecture-item";
 import {
@@ -42,6 +45,7 @@ import {
 import { Input } from "~/components/ui/input";
 import { Text } from "~/components/ui/text";
 import { NAV_THEME } from "~/lib/constants";
+import { supabase } from "~/lib/supabase";
 import { useColorScheme } from "~/lib/theme";
 import { api } from "~/utils/api";
 import { shouldShowPaywall } from "~/utils/subscription";
@@ -56,11 +60,15 @@ export default function DashboardPage() {
     name: string;
   } | null>(null);
   const [isCourseDialogOpen, setIsCourseDialogOpen] = useState(false);
-  const [file, setFile] = useState(null);
   const [courseName, setCourseName] = useState("");
   const [isYoutubeDialogOpen, setIsYoutubeDialogOpen] = useState(false);
   const [videoUrl, setVideoUrl] = useState("");
-  const user = api.auth.getUser.useQuery();
+  const { data: user } = api.auth.getUser.useQuery();
+  const createCourse = api.course.create.useMutation();
+  const createLecture = api.lecture.create.useMutation();
+  const createYoutubeLecture = api.lecture.createYoutube.useMutation();
+  const uploadFile = api.lecture.uploadFile.useMutation();
+
   const lectures = api.lecture.infiniteLectures.useInfiniteQuery(
     {
       limit: 20,
@@ -79,12 +87,7 @@ export default function DashboardPage() {
       )
     : [];
 
-  const createLecture = api.lecture.create.useMutation();
-
-  const createYoutubeLecture = api.lecture.createYoutube.useMutation();
-  const createCourse = api.course.create.useMutation();
-
-  async function handleCreateLecture(type: "live" | "audio" | "youtube") {
+  async function handleCreateLecture(type: "live" | "file" | "youtube") {
     if (isLoading) return;
     setIsLoading(true);
 
@@ -98,10 +101,46 @@ export default function DashboardPage() {
           videoUrl,
         })) as { id: string };
         router.push(`/lecture/${lecture.id}`);
+      } else {
+        const result = await DocumentPicker.getDocumentAsync({
+          type: ["audio/*", "application/pdf"], // Allow audio files and PDFs
+          multiple: false,
+          copyToCacheDirectory: true,
+        });
+
+        if (result.canceled || result.assets.length === 0) {
+          console.log("User cancelled document picker.");
+          return;
+        }
+
+        const file = result.assets[0];
+        if (!file?.uri) throw new Error("No file uri!"); // Realistically, this should never happen, but just in case...
+        const arrayBuffer = await fetch(file.uri).then((res) =>
+          res.arrayBuffer(),
+        );
+
+        // Upload the file to Supabase.
+        const fileId = uuidv1();
+        const path = `${user?.id}/${fileId}`;
+        const { error: uploadError } = await supabase.storage
+          .from("audio")
+          .upload(path, arrayBuffer);
+
+        if (uploadError) {
+          console.error("Upload error", uploadError);
+          Alert.alert("Failed to upload the file. Please try again.");
+          throw uploadError;
+        }
+
+        // Create the lecture.
+        const lecture = await uploadFile.mutateAsync({
+          fileId,
+        });
+        router.push(`/lecture/${lecture.id}`);
       }
     } catch (error) {
+      Alert.alert("Failed to create the lecture. Please try again.");
       console.error(error);
-      alert("Failed to create lecture");
     } finally {
       setIsLoading(false);
       setIsYoutubeDialogOpen(false);
@@ -119,22 +158,7 @@ export default function DashboardPage() {
     if (lectures.hasNextPage) void lectures.fetchNextPage();
   };
 
-  const pickDocument = async () => {
-    const result = await DocumentPicker.getDocumentAsync({
-      type: "*/*", // You can specify the file types you want to allow
-      copyToCacheDirectory: true,
-    });
-
-    if (result.type === "success") {
-      setFile(result);
-    }
-  };
-
-  if (
-    lectures.data === undefined ||
-    lectures.data.pages.length === 0 ||
-    !user.data
-  )
+  if (lectures.data === undefined || lectures.data.pages.length === 0 || !user)
     return (
       <Stack.Screen
         options={{
@@ -188,7 +212,7 @@ export default function DashboardPage() {
               onOpenChange={setIsCourseDialogOpen}
             >
               <BottomSheet>
-                {user.data.courses.length === 0 ? (
+                {user.courses.length === 0 ? (
                   <Button
                     size="sm"
                     variant="secondary"
@@ -219,7 +243,7 @@ export default function DashboardPage() {
                       Courses
                     </Text>
                     <ScrollView className="max-h-[400px]">
-                      {user.data.courses.map((course) => (
+                      {user.courses.map((course) => (
                         <BottomSheetDismissButton
                           key={course.id}
                           variant="outline"
@@ -323,44 +347,42 @@ export default function DashboardPage() {
                 </EmptyPlaceholder.Description>
               </EmptyPlaceholder>
             )}
-            {lectures.data.pages[0].items.length > 0 && (
+            {/* eslint-disable-next-line @typescript-eslint/no-non-null-assertion */}
+            {lectures.data.pages[0]?.items.length! > 0 && (
               <View className="flex-col gap-y-2">
-                {lectures.data.pages.map(
-                  (page: { items: Lecture[]; nextCursor: string }[]) =>
-                    page.items.map((lecture) => {
-                      if (
-                        courseFilter &&
-                        lecture.courseId !== courseFilter.courseId
-                      )
-                        return null;
-                      return (
-                        <LectureItem
-                          key={lecture.id}
-                          lecture={lecture}
-                          onLecturePress={() => {
-                            // Check if the user has an active Stripe subscription.
-                            if (
-                              !shouldShowPaywall(
-                                user.data as {
-                                  stripeCurrentPeriodEnd?: string | null;
-                                  appStoreCurrentPeriodEnd?: string | null;
-                                },
-                              )
-                            ) {
-                              router.push(`/lecture/${lecture.id}`);
-                              return;
-                            }
+                {lectures.data.pages.map((page: Lecture[]) =>
+                  page.items.map((lecture) => {
+                    if (
+                      courseFilter &&
+                      lecture.courseId !== courseFilter.courseId
+                    )
+                      return null;
+                    return (
+                      <LectureItem
+                        key={lecture.id}
+                        lecture={lecture}
+                        onLecturePress={() => {
+                          // Check if the user has an active Stripe subscription.
+                          if (
+                            !shouldShowPaywall(
+                              user as {
+                                stripeCurrentPeriodEnd?: string | null;
+                                appStoreCurrentPeriodEnd?: string | null;
+                              },
+                            )
+                          ) {
+                            router.push(`/lecture/${lecture.id}`);
+                            return;
+                          }
 
-                            // If the user doesn't have an active subscription, show the paywall.
-                            void Superwall.shared
-                              .register("viewLecture")
-                              .then(() =>
-                                router.push(`/lecture/${lecture.id}`),
-                              );
-                          }}
-                        />
-                      );
-                    }),
+                          // If the user doesn't have an active subscription, show the paywall.
+                          void Superwall.shared
+                            .register("viewLecture")
+                            .then(() => router.push(`/lecture/${lecture.id}`));
+                        }}
+                      />
+                    );
+                  }),
                 )}
               </View>
             )}
@@ -398,7 +420,7 @@ export default function DashboardPage() {
                 onPress={async () => {
                   if (
                     !shouldShowPaywall(
-                      user.data as {
+                      user as {
                         stripeCurrentPeriodEnd?: string | null;
                         appStoreCurrentPeriodEnd?: string | null;
                       },
@@ -445,11 +467,29 @@ export default function DashboardPage() {
                   size={20}
                 />
               </BottomSheetDismissButton>
-              {/* <BottomSheetDismissButton
+              <BottomSheetDismissButton
                 size="lg"
                 variant="secondary"
                 className="w-full flex-row items-center justify-between px-4"
-                onPress={pickDocument}
+                onPress={async () => {
+                  if (
+                    !shouldShowPaywall(
+                      user as {
+                        stripeCurrentPeriodEnd?: string | null;
+                        appStoreCurrentPeriodEnd?: string | null;
+                      },
+                    )
+                  ) {
+                    await handleCreateLecture("file");
+                    return;
+                  }
+
+                  void Superwall.shared
+                    .register("createLecture")
+                    .then(async () => {
+                      await handleCreateLecture("file");
+                    });
+                }}
               >
                 <View className="flex-row items-center gap-x-4">
                   <File
@@ -462,7 +502,7 @@ export default function DashboardPage() {
                   color={NAV_THEME[colorScheme].secondaryForeground}
                   size={20}
                 />
-              </BottomSheetDismissButton> */}
+              </BottomSheetDismissButton>
             </BottomSheetView>
           </BottomSheetContent>
         </BottomSheet>
@@ -488,7 +528,7 @@ export default function DashboardPage() {
               onPress={async () => {
                 if (
                   !shouldShowPaywall(
-                    user.data as {
+                    user as {
                       stripeCurrentPeriodEnd?: string | null;
                       appStoreCurrentPeriodEnd?: string | null;
                     },
