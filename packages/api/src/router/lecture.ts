@@ -6,6 +6,7 @@ import { generateObject, generateText } from "ai";
 import { fileTypeFromBuffer } from "file-type";
 import { z } from "zod";
 
+import type { Lecture } from "@acme/db";
 import type { Transcript } from "@acme/validators";
 import { CreateLectureSchema, formatTranscript } from "@acme/validators";
 
@@ -30,25 +31,57 @@ async function verifyCurrentUserHasAccessToLecture(
   return true;
 }
 
-async function generateLectureNotes(transcript: Transcript[]) {
-  // Generate Markdown notes for the lecture.
-  const { text } = await generateText({
-    model: openai("gpt-4o"),
-    system: `\
+async function generateLectureNotes({
+  transcript,
+  generateTitle = false,
+}: {
+  transcript: Transcript[];
+  generateTitle?: boolean;
+}): Promise<{ title: string; notes: string }> {
+  // Generate Markdown notes.
+  const system = `\
       You are an expert in taking detailed, concise, and easy-to-understand notes.
-      You are provided with a transcript of a lecture.
+      You are provided with a transcript of a lecture.${
+        generateTitle ? " Also, generate a concise title for the lecture." : ""
+      }
       Turn the lecture transcript into detailed and comprehensive notes.
       Here are some guidelines to follow when formatting notes:
       1. Create concise, easy-to-understand advanced bullet-point notes.
       2. Include only essential information. Remove any irrelevant details.
       3. Bold vocabulary terms and key concepts, underline important information.
       4. Respond using Markdown syntax (bold/underline/italics, bullet points, numbered lists, headings).
-      5. Use headings to organize information into categories (default to h3).`,
-    prompt: `\
-      Transcript:
+      5. Use headings to organize information into categories (default to h3).`;
+
+  if (!generateTitle) {
+    const { text } = await generateText({
+      model: openai("gpt-4o"),
+      system,
+      prompt: `Transcript:
       ${formatTranscript(transcript)}`,
-  });
-  return text;
+    });
+
+    return { notes: text, title: "Untitled Lecture" };
+  } else {
+    const { object } = await generateObject({
+      model: openai("gpt-4o"),
+      schema: z.object({
+        title: z.string(),
+        notes: z.string(),
+      }),
+      system,
+      prompt: `Transcript:
+      ${formatTranscript(transcript)}`,
+    });
+
+    const { title, notes } = object;
+
+    if (!title) {
+      console.warn("[generateLectureNotes] No title generated.");
+      return { title: "Untitled Lecture", notes };
+    }
+
+    return object;
+  }
 }
 
 export const lectureRouter = {
@@ -245,8 +278,13 @@ export const lectureRouter = {
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      if (!(await verifyCurrentUserHasAccessToLecture(ctx, input.lectureId)))
-        throw new Error("User does not have access to the lecture.");
+      const { lectureId } = input;
+
+      // Verify the user has access to the lecture.
+      const lecture = await ctx.db.lecture.findUnique({
+        where: { id: lectureId, userId: ctx.session.user.id },
+      });
+      if (!lecture) throw new Error("Lecture not found");
 
       // The audioUrl is a base64, but Deepgram doesn't support it.
       // So we need to decode it to raw audio data and pass in its
@@ -283,13 +321,24 @@ export const lectureRouter = {
         data: { transcript }, // TODO: Add notes to the lecture. We have to convert them to Tiptap JSON.
       });
 
-      const notes = await generateLectureNotes(transcript);
-      console.log("Generated notes:", notes);
+      // If the lecture title is "Untitled Lecture" (the default), generate a title.
+      const generateTitle = lecture.title === "Untitled Lecture";
+      console.log("[liveMobile] Generating title:", generateTitle);
 
-      // Update the lecture with the generated notes.
+      const { notes, title } = await generateLectureNotes({
+        transcript,
+        generateTitle,
+      });
+      console.log("[liveMobile] Generated notes:", notes);
+
+      // Update the lecture with the generated notes and title.
       await ctx.db.lecture.update({
         where: { id: input.lectureId },
-        data: { enhancedNotes: notes, markdownNotes: notes },
+        data: {
+          title: generateTitle ? title : lecture.title,
+          enhancedNotes: notes,
+          markdownNotes: notes,
+        },
       });
 
       return { transcript, notes };
@@ -393,14 +442,16 @@ export const lectureRouter = {
       });
       if (!lecture) throw new Error("Lecture not found");
 
-      const text = await generateLectureNotes(
-        lecture.transcript as unknown as Transcript[],
-      );
-      console.log("Generated notes:", text);
+      console.log("[generateNotes] Generating notes for lecture:");
+      const { notes } = await generateLectureNotes({
+        transcript: lecture.transcript as unknown as Transcript[],
+      });
+      console.log("Generated notes:", notes);
+
       // Update the lecture with the generated notes.
       return await ctx.db.lecture.update({
         where: { id: lectureId },
-        data: { enhancedNotes: text, markdownNotes: text },
+        data: { enhancedNotes: notes, markdownNotes: notes },
       });
     }),
   uploadYoutube: protectedProcedure
@@ -436,8 +487,11 @@ export const lectureRouter = {
       let notes = "";
       if (generateNotes) {
         console.log("Generating notes...");
-        notes = await generateLectureNotes(transcript);
-        console.log("Notes generated:", notes);
+        const { notes: notesString } = await generateLectureNotes({
+          transcript,
+        });
+        notes = notesString;
+        console.log("Notes generated:", notesString);
       }
 
       // Create a lecture with the transcript and title.
@@ -554,26 +608,37 @@ export const lectureRouter = {
           transcript = formatDeepgramTranscript(result);
         }
 
-        let notes = "";
+        let lecture: Lecture;
+
         if (generateNotes) {
           console.log("[uploadFile] Generating notes...");
-          notes = await generateLectureNotes(transcript);
-          console.log("[uploadFile] Notes generated:", notes);
-        }
+          const { title, notes } = await generateLectureNotes({
+            transcript,
+            generateTitle: true,
+          });
 
-        console.log("[uploadFile] Creating lecture...");
-        const lecture = await ctx.db.lecture.create({
-          data: {
-            type,
-            title: "Untitled Lecture", // TODO: Generate a lecture name based on the notes/lecture content.
-            markdownNotes: notes,
-            enhancedNotes: notes,
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
-            transcript: transcript as any,
-            userId: ctx.session.user.id,
-            ...(courseId ? { courseId } : {}),
-          },
-        });
+          lecture = await ctx.db.lecture.create({
+            data: {
+              type,
+              title,
+              markdownNotes: notes,
+              enhancedNotes: notes,
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
+              transcript: transcript as any,
+              userId: ctx.session.user.id,
+              ...(courseId ? { courseId } : {}),
+            },
+          });
+        } else {
+          lecture = await ctx.db.lecture.create({
+            data: {
+              type,
+              title: "Untitled Lecture",
+              userId: ctx.session.user.id,
+              ...(courseId ? { courseId } : {}),
+            },
+          });
+        }
 
         // Create vector embeddings for the lecture.
         await embedTranscripts(transcript, lecture.id, courseId);
