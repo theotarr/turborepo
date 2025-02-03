@@ -294,7 +294,7 @@ export const lectureRouter = {
 
       return { transcript, notes: text };
     }),
-  createYoutube: protectedProcedure
+  uploadYoutube: protectedProcedure
     .input(
       z.object({
         videoUrl: z.string(),
@@ -318,7 +318,7 @@ export const lectureRouter = {
       const id = getVideoId(videoUrl);
       if (!id) throw new Error("Invalid video URL");
 
-      console.log(`Fetching transcript for video ${id}...`);
+      console.log(`Fetching transcript and info for video ${id}...`);
       const { title, transcript } = await getVideoTranscript(id);
 
       console.log("Generating notes...");
@@ -326,19 +326,32 @@ export const lectureRouter = {
       console.log("Notes generated:", text);
 
       // Create a lecture with the transcript and title.
-      return await ctx.db.lecture.create({
+      const lecture = await ctx.db.lecture.create({
         data: {
           type: "YOUTUBE",
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
           title: title ?? "Youtube Video",
+          markdownNotes: text,
+          enhancedNotes: text,
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
           transcript: transcript as any,
           userId: ctx.session.user.id,
           ...(courseId ? { courseId } : {}),
-          markdownNotes: text,
-          enhancedNotes: text,
         },
       });
+
+      // Create vector embeddings for the lecture.
+      await embedTranscripts(transcript, lecture.id, courseId);
+
+      // Update the lecture with the transcript embedding document ids.
+      await ctx.db.lecture.update({
+        where: { id: lecture.id },
+        data: {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
+          transcript: transcript as any,
+        },
+      });
+
+      return lecture;
     }),
   createFlashcards: protectedProcedure
     .input(
@@ -470,12 +483,16 @@ export const lectureRouter = {
 
       // Download the file from the storage bucket.
       const filePath = `${ctx.session.user.id}/${fileId}`;
+      console.log("[uploadFile] Downloading file from storage bucket...");
       const { data, error: downloadError } = await supabase.storage
         .from("audio")
         .download(filePath);
+      console.log("[uploadFile] File downloaded from storage bucket.");
 
       if (downloadError) {
-        console.error(downloadError);
+        console.error(
+          `[uploadFile] Error downloading file: ${downloadError.message}`,
+        );
         // Delete the file from the storage bucket if it failed to download.
         // Make the user try again.
         const { error: removeFileError } = await supabase.storage
@@ -496,20 +513,25 @@ export const lectureRouter = {
         process.env.NODE_ENV === "development"
           ? `${process.cwd()}/${fileId}`
           : `/tmp/${fileId}`;
+      console.log("[uploadFile] Writing file to path:", path);
       await fs.promises.writeFile(path, buffer);
+      console.log("[uploadFile] File written to path.");
+
       try {
         // Get the file type.
         const fileType = await fileTypeFromBuffer(buffer);
+        console.log("[uploadFile] File type:", fileType);
         if (!fileType) throw new Error("Could not determine file type.");
         const type = fileType.ext === "pdf" ? "PDF" : "AUDIO_FILE";
 
         let transcript: Transcript[] = [];
 
         if (type === "PDF") {
+          console.log("[uploadFile] Parsing PDF...");
           const text = await parsePdf(buffer);
           transcript = [{ start: 0, text }];
         } else {
-          // Transcribe the file.
+          console.log("[uploadFile] Transcribing audio file...");
           const { result, error: transcriptionError } =
             await deepgram.listen.prerecorded.transcribeFile(
               fs.readFileSync(path),
@@ -525,7 +547,7 @@ export const lectureRouter = {
           transcript = formatDeepgramTranscript(result);
         }
 
-        // Create a lecture with the transcript and title.
+        console.log("[uploadFile] Creating lecture...");
         const lecture = await ctx.db.lecture.create({
           data: {
             type,

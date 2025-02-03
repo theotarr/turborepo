@@ -63,10 +63,11 @@ export default function DashboardPage() {
   const [courseName, setCourseName] = useState("");
   const [isYoutubeDialogOpen, setIsYoutubeDialogOpen] = useState(false);
   const [videoUrl, setVideoUrl] = useState("");
+
   const { data: user } = api.auth.getUser.useQuery();
   const createCourse = api.course.create.useMutation();
   const createLecture = api.lecture.create.useMutation();
-  const createYoutubeLecture = api.lecture.createYoutube.useMutation();
+  const uploadYoutube = api.lecture.uploadYoutube.useMutation();
   const uploadFile = api.lecture.uploadFile.useMutation();
 
   const lectures = api.lecture.infiniteLectures.useInfiniteQuery(
@@ -97,9 +98,9 @@ export default function DashboardPage() {
         const lecture = await createLecture.mutateAsync({});
         router.push(`/record/${lecture.id}`);
       } else if (type === "youtube") {
-        const lecture = (await createYoutubeLecture.mutateAsync({
+        const lecture = await uploadYoutube.mutateAsync({
           videoUrl,
-        })) as { id: string };
+        });
         router.push(`/lecture/${lecture.id}`);
       } else {
         const result = await DocumentPicker.getDocumentAsync({

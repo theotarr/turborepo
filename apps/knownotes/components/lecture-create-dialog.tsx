@@ -25,6 +25,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { api } from "@/lib/trpc/react";
 import { cn } from "@/lib/utils";
 import { Course } from "@prisma/client";
 import { DialogDescription } from "@radix-ui/react-dialog";
@@ -72,6 +73,9 @@ export function LectureCreateDialog({
   const [isLoading, setIsLoading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
+  const uploadYoutube = api.lecture.uploadYoutube.useMutation();
+  const uploadFile = api.lecture.uploadFile.useMutation();
+
   const onSubmit = async () => {
     setIsLoading(true);
     // for live lectures, we just redirect to the lecture page with the courseId
@@ -80,35 +84,18 @@ export function LectureCreateDialog({
       router.push(`/lecture/${id}`);
       router.refresh();
     } else if (tab === "youtube") {
-      // For Youtube videos, we need to create a lecture and then redirect to the lecture page.
-      const response = await fetch(`/api/transcribe/youtube`, {
-        method: "POST",
-        body: JSON.stringify({
+      try {
+        const lecture = await uploadYoutube.mutateAsync({
           videoUrl,
-          courseId: selectedCourseId,
-        }),
-      });
-      const data = await response.json();
-
-      if (response.status !== 200) {
-        if (response.status === 404 && data === "No transcript found") {
-          toast.error(
-            "We're sorry, YouTube is currently blocking us from downloading your video. We're working on a fix!",
-          );
-        }
-        // else if (response.status === 403) {
-        //   toast.error("Pro plan required");
-        // }
-        else {
-          toast.error(
-            "Failed to download your video. Make sure the video has a transcript.",
-          );
-        }
+        });
+        window.location.href = `/lecture/${lecture.id}`;
+        router.refresh();
+      } catch (error) {
+        console.error(error);
         setIsLoading(false);
+        toast.error("Failed to upload the video. Please try again.");
         return;
       }
-
-      window.location.href = `/lecture/${data.id}`;
     } else if (tab === "file") {
       // check if the user has uploaded a file
       if (!fileRef.current?.files?.length) {
@@ -136,24 +123,18 @@ export function LectureCreateDialog({
       }
       toast.success("File uploaded successfully.");
 
-      const formData = new FormData();
-      formData.append("fileId", fileId);
-      formData.append("courseId", selectedCourseId);
-
-      // Send a request to the server to transcribe the file.
-      const response = await fetch(`/api/transcribe/file`, {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!response.ok) {
+      try {
+        const lecture = await uploadFile.mutateAsync({
+          fileId,
+          courseId: selectedCourseId,
+        });
+        window.location.href = `/lecture/${lecture.id}`;
+      } catch (error) {
+        console.error(error);
         setIsLoading(false);
         toast.error("Failed to parse the file. Please try again.");
         return;
       }
-
-      const { id } = await response.json();
-      window.location.href = `/lecture/${id}`;
     }
     setIsLoading(false);
   };

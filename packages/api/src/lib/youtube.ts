@@ -35,7 +35,7 @@ export const getVideoId = (videoUrlOrId: string): string | null => {
  * @returns {Promise<Transcript[]>} Array of transcript segments with text and timestamps
  */
 export async function getVideoTranscript(videoId: string): Promise<{
-  title: string;
+  title: string | null;
   transcript: Transcript[];
 }> {
   try {
