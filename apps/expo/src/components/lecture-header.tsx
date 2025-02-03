@@ -68,7 +68,7 @@ export function LectureHeader({
           </Button>
         )}
         <View className={showBackButton ? "" : "ml-4"}>
-          <Text className="pr-16 text-2xl font-semibold tracking-tight">
+          <Text className="line-clamp-1 max-w-[280px] truncate text-2xl font-semibold tracking-tight">
             {lecture.title}
           </Text>
           <View className="mt-1 flex flex-row gap-x-2">
@@ -94,7 +94,7 @@ export function LectureHeader({
           </View>
         </View>
       </View>
-      <View>
+      <View className="absolute right-0">
         <LectureOperations
           lecture={{
             id: lecture.id,
