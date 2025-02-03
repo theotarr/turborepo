@@ -54,6 +54,7 @@ export default function DashboardPage() {
   const utils = api.useUtils();
   const { colorScheme } = useColorScheme();
   const [isLoading, setIsLoading] = useState(false);
+  const [isPickingFile, setIsPickingFile] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [courseFilter, setCourseFilter] = useState<{
     courseId: string;
@@ -104,6 +105,7 @@ export default function DashboardPage() {
         });
         router.push(`/lecture/${lecture.id}`);
       } else {
+        setIsPickingFile(true);
         const result = await DocumentPicker.getDocumentAsync({
           type: ["audio/*", "application/pdf"], // Allow audio files and PDFs
           multiple: false,
@@ -112,6 +114,7 @@ export default function DashboardPage() {
 
         if (result.canceled || result.assets.length === 0) {
           console.log("User cancelled document picker.");
+          setIsPickingFile(false);
           return;
         }
 
@@ -146,6 +149,7 @@ export default function DashboardPage() {
       console.error(error);
     } finally {
       setIsLoading(false);
+      setIsPickingFile(false);
       setIsYoutubeDialogOpen(false);
       setVideoUrl("");
     }
@@ -470,7 +474,7 @@ export default function DashboardPage() {
                   size={20}
                 />
               </BottomSheetDismissButton>
-              <BottomSheetDismissButton
+              <Button
                 size="lg"
                 variant="secondary"
                 className="w-full flex-row items-center justify-between px-4"
@@ -493,6 +497,7 @@ export default function DashboardPage() {
                       await handleCreateLecture("file");
                     });
                 }}
+                disabled={isPickingFile}
               >
                 <View className="flex-row items-center gap-x-4">
                   <File
@@ -501,11 +506,18 @@ export default function DashboardPage() {
                   />
                   <Text>Upload File</Text>
                 </View>
-                <MoveRight
-                  color={NAV_THEME[colorScheme].secondaryForeground}
-                  size={20}
-                />
-              </BottomSheetDismissButton>
+                {isPickingFile ? (
+                  <ActivityIndicator
+                    size="small"
+                    color={NAV_THEME[colorScheme].secondaryForeground}
+                  />
+                ) : (
+                  <MoveRight
+                    color={NAV_THEME[colorScheme].secondaryForeground}
+                    size={20}
+                  />
+                )}
+              </Button>
             </BottomSheetView>
           </BottomSheetContent>
         </BottomSheet>
