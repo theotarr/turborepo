@@ -283,75 +283,16 @@ export const lectureRouter = {
         data: { transcript }, // TODO: Add notes to the lecture. We have to convert them to Tiptap JSON.
       });
 
-      const text = await generateLectureNotes(transcript);
-      console.log("Generated notes:", text);
+      const notes = await generateLectureNotes(transcript);
+      console.log("Generated notes:", notes);
 
       // Update the lecture with the generated notes.
       await ctx.db.lecture.update({
         where: { id: input.lectureId },
-        data: { enhancedNotes: text, markdownNotes: text },
+        data: { enhancedNotes: notes, markdownNotes: notes },
       });
 
-      return { transcript, notes: text };
-    }),
-  uploadYoutube: protectedProcedure
-    .input(
-      z.object({
-        videoUrl: z.string(),
-        courseId: z.string().optional(),
-      }),
-    )
-    .mutation(async ({ ctx, input }) => {
-      const { videoUrl, courseId } = input;
-      if (courseId) {
-        const course = await ctx.db.course.findUnique({
-          where: {
-            id: courseId,
-          },
-        });
-        if (!course || course.userId !== ctx.session.user.id)
-          return new Response(JSON.stringify("Course not found"), {
-            status: 404,
-          });
-      }
-
-      const id = getVideoId(videoUrl);
-      if (!id) throw new Error("Invalid video URL");
-
-      console.log(`Fetching transcript and info for video ${id}...`);
-      const { title, transcript } = await getVideoTranscript(id);
-
-      console.log("Generating notes...");
-      const text = await generateLectureNotes(transcript);
-      console.log("Notes generated:", text);
-
-      // Create a lecture with the transcript and title.
-      const lecture = await ctx.db.lecture.create({
-        data: {
-          type: "YOUTUBE",
-          title: title ?? "Youtube Video",
-          markdownNotes: text,
-          enhancedNotes: text,
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
-          transcript: transcript as any,
-          userId: ctx.session.user.id,
-          ...(courseId ? { courseId } : {}),
-        },
-      });
-
-      // Create vector embeddings for the lecture.
-      await embedTranscripts(transcript, lecture.id, courseId);
-
-      // Update the lecture with the transcript embedding document ids.
-      await ctx.db.lecture.update({
-        where: { id: lecture.id },
-        data: {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
-          transcript: transcript as any,
-        },
-      });
-
-      return lecture;
+      return { transcript, notes };
     }),
   createFlashcards: protectedProcedure
     .input(
@@ -462,15 +403,81 @@ export const lectureRouter = {
         data: { enhancedNotes: text, markdownNotes: text },
       });
     }),
+  uploadYoutube: protectedProcedure
+    .input(
+      z.object({
+        videoUrl: z.string(),
+        courseId: z.string().optional(),
+        generateNotes: z.boolean().default(false),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { videoUrl, courseId, generateNotes } = input;
+
+      // Verify the user has access to the course.
+      if (courseId) {
+        const course = await ctx.db.course.findUnique({
+          where: {
+            id: courseId,
+          },
+        });
+        if (!course || course.userId !== ctx.session.user.id)
+          return new Response(JSON.stringify("Course not found"), {
+            status: 404,
+          });
+      }
+
+      const id = getVideoId(videoUrl);
+      if (!id) throw new Error("Invalid video URL");
+
+      console.log(`Fetching transcript and info for video ${id}...`);
+      const { title, transcript } = await getVideoTranscript(id);
+
+      let notes = "";
+      if (generateNotes) {
+        console.log("Generating notes...");
+        notes = await generateLectureNotes(transcript);
+        console.log("Notes generated:", notes);
+      }
+
+      // Create a lecture with the transcript and title.
+      const lecture = await ctx.db.lecture.create({
+        data: {
+          type: "YOUTUBE",
+          title: title ?? "Youtube Video",
+          markdownNotes: notes,
+          enhancedNotes: notes,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
+          transcript: transcript as any,
+          userId: ctx.session.user.id,
+          ...(courseId ? { courseId } : {}),
+        },
+      });
+
+      // Create vector embeddings for the lecture.
+      await embedTranscripts(transcript, lecture.id, courseId);
+
+      // Update the lecture with the transcript embedding document ids.
+      await ctx.db.lecture.update({
+        where: { id: lecture.id },
+        data: {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
+          transcript: transcript as any,
+        },
+      });
+
+      return lecture;
+    }),
   uploadFile: protectedProcedure
     .input(
       z.object({
         fileId: z.string(),
         courseId: z.string().optional(),
+        generateNotes: z.boolean().default(false),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const { fileId, courseId } = input;
+      const { fileId, courseId, generateNotes } = input;
 
       // Verify the user has access to the course.
       if (courseId) {
@@ -547,11 +554,20 @@ export const lectureRouter = {
           transcript = formatDeepgramTranscript(result);
         }
 
+        let notes = "";
+        if (generateNotes) {
+          console.log("[uploadFile] Generating notes...");
+          notes = await generateLectureNotes(transcript);
+          console.log("[uploadFile] Notes generated:", notes);
+        }
+
         console.log("[uploadFile] Creating lecture...");
         const lecture = await ctx.db.lecture.create({
           data: {
             type,
             title: "Untitled Lecture", // TODO: Generate a lecture name based on the notes/lecture content.
+            markdownNotes: notes,
+            enhancedNotes: notes,
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
             transcript: transcript as any,
             userId: ctx.session.user.id,

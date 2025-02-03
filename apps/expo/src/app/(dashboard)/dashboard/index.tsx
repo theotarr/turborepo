@@ -100,6 +100,7 @@ export default function DashboardPage() {
       } else if (type === "youtube") {
         const lecture = await uploadYoutube.mutateAsync({
           videoUrl,
+          generateNotes: true,
         });
         router.push(`/lecture/${lecture.id}`);
       } else {
@@ -136,6 +137,7 @@ export default function DashboardPage() {
         // Create the lecture.
         const lecture = await uploadFile.mutateAsync({
           fileId,
+          generateNotes: true,
         });
         router.push(`/lecture/${lecture.id}`);
       }
