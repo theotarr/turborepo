@@ -48,7 +48,7 @@ export default function Record() {
 
   const transcribeAudio = api.lecture.liveMobile.useMutation();
 
-  const [recording, setRecording] = useState<Audio.Recording | undefined>();
+  const [recording, setRecording] = useState<Audio.Recording | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [showPauseSheet, setShowPauseSheet] = useState(false);
@@ -75,71 +75,86 @@ export default function Record() {
     };
   });
 
-  async function startRecording() {
-    setIsRecording(true);
-    if (pauseTimeoutRef.current) {
-      clearTimeout(pauseTimeoutRef.current);
-    }
-    setShowPauseSheet(false);
+  // Setup audio mode once when component mounts
+  useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
+    if (permissionResponse?.status === "granted") return;
 
+    async function setupAudio() {
+      try {
+        console.log("[Record] Requesting permission...");
+        await requestPermission();
+
+        await Audio.setAudioModeAsync({
+          allowsRecordingIOS: true,
+          playsInSilentModeIOS: true,
+          staysActiveInBackground: true,
+          shouldDuckAndroid: true,
+          interruptionModeIOS: InterruptionModeIOS.DoNotMix,
+          interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
+          playThroughEarpieceAndroid: false,
+        });
+      } catch (err) {
+        console.error("Failed to setup audio", err);
+      }
+    }
+    void setupAudio();
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  async function startRecording() {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
+    if (permissionResponse?.status !== "granted") {
+      console.log("[Record] Requesting permission...");
+      await requestPermission();
+    }
     // If we already have a recording, resume it.
     if (recording) {
       await recording.startAsync();
       stopwatchTimerRef.current?.play();
+      setIsRecording(true);
       return;
     }
 
     try {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
-      if (permissionResponse?.status !== "granted") {
-        console.log("[Record] Requesting permission...");
-        await requestPermission();
-      }
-
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: true,
-        playsInSilentModeIOS: true,
-        staysActiveInBackground: true,
-        interruptionModeIOS: InterruptionModeIOS.DoNotMix,
-        shouldDuckAndroid: true,
-        interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
-        playThroughEarpieceAndroid: false,
-      });
-
-      console.log("[Record] Starting recording...");
+      console.log("Starting recording...");
       const { recording } = await Audio.Recording.createAsync(
         Audio.RecordingOptionsPresets.HIGH_QUALITY,
       );
-      setRecording(recording);
-      stopwatchTimerRef.current?.play();
-      console.log("[Record] Recording started");
 
       recording.setOnRecordingStatusUpdate((status) => {
+        console.log("Recording status:", status);
         metering.value = status.metering ?? -100;
       });
+
+      setRecording(recording);
+      setIsRecording(true);
+      setTimeout(() => {
+        stopwatchTimerRef.current?.play();
+      }, 100);
     } catch (err) {
-      console.error("[Record] Failed to start recording", err);
+      console.error("Failed to start recording", err);
     }
   }
 
   async function pauseRecording() {
-    console.log("[Record] Pausing recording...");
-    setIsRecording(false);
-    stopwatchTimerRef.current?.pause();
-
     try {
+      console.log("Pausing recording...");
+      stopwatchTimerRef.current?.pause();
+      setIsRecording(false);
+      setShowPauseSheet(false);
       await recording?.pauseAsync();
-      // Start 15 second timer to show end dialog
+
+      // Start a timer to show pause dialog.
       pauseTimeoutRef.current = setTimeout(() => {
         console.log("[Record] Showing pause sheet");
         // Open the bottom sheet and give haptic notifiction feedback.
         setShowPauseSheet(true);
-        void Haptics.notificationAsync(
-          Haptics.NotificationFeedbackType.Warning,
-        );
-      }, 1000);
-    } catch (e) {
-      console.error(e);
+        void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      }, 15000); // 15 seconds
+    } catch (err) {
+      console.error("Failed to pause recording", err);
     }
   }
 
@@ -276,7 +291,7 @@ export default function Record() {
         <BottomSheet>
           <PauseSheet open={showPauseSheet} />
           <BottomSheetContent>
-            <BottomSheetView className="mt-4 px-6">
+            <BottomSheetView className="my-6 px-6">
               <Text className="text-2xl font-semibold text-secondary-foreground">
                 Recording is paused. End it?
               </Text>
