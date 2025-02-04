@@ -1,5 +1,5 @@
 import type { StopwatchTimerMethods } from "react-native-animated-stopwatch-timer";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Pressable, SafeAreaView, View } from "react-native";
 import Animated, {
   FadeIn,
@@ -145,6 +145,12 @@ export default function Record() {
     }
   }
 
+  useEffect(() => {
+    if (isRecording) return;
+    setIsRecording(true); // Set the state to prevent a race condition where a second recording starts before state is set.
+    void startRecording();
+  }, []);
+
   if (!lecture) return <Stack.Screen options={{ headerShown: false }} />;
 
   return (
@@ -176,9 +182,7 @@ export default function Record() {
         </View>
         <View className="-mb-10 flex h-80 items-center justify-center bg-muted pb-12 pt-6">
           <Text className="mb-2 text-center text-2xl font-semibold text-secondary-foreground">
-            {isRecording
-              ? "Recording your lecture"
-              : "Press to start recording"}
+            {isRecording ? "Tap to stop recording" : "Recording paused"}
           </Text>
           <Text className="m-1 mb-4 text-center text-3xl font-medium text-secondary-foreground">
             <Stopwatch
