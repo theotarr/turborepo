@@ -22,6 +22,7 @@ import {
   Plus,
   Settings,
   Youtube,
+  Zap,
 } from "lucide-react-native";
 import { v1 as uuidv1 } from "uuid";
 
@@ -188,6 +189,38 @@ export default function DashboardPage() {
       <Stack.Screen
         options={{
           title: "Dashboard",
+          headerLeft: () => (
+            <>
+              {shouldShowPaywall(
+                user as {
+                  stripeCurrentPeriodEnd?: string | null;
+                  appStoreCurrentPeriodEnd?: string | null;
+                },
+              ) && (
+                <Button
+                  size="sm"
+                  className="h-8 flex-row gap-x-2 rounded-full bg-primary/60"
+                  onPress={() => {
+                    void Superwall.shared.register("upgrade");
+                  }}
+                >
+                  <Zap
+                    size={10}
+                    color={NAV_THEME[colorScheme].primaryForeground}
+                    fill={NAV_THEME[colorScheme].primaryForeground}
+                  />
+                  <Text
+                    style={{
+                      fontSize: 12,
+                    }}
+                    className="text-primary-foreground"
+                  >
+                    Upgrade
+                  </Text>
+                </Button>
+              )}
+            </>
+          ),
           headerRight: () => (
             <Pressable onPress={() => router.push("/(dashboard)/settings")}>
               <Settings
@@ -204,16 +237,18 @@ export default function DashboardPage() {
             My notes
           </Text>
           <View className="mb-4 mt-4 flex-row items-center gap-x-2">
-            <Button
-              size="sm"
-              className="rounded-full"
-              onPress={() => {
-                void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                setCourseFilter(null);
-              }}
-            >
-              <Text>{courseFilter ? courseFilter.name : "All notes"}</Text>
-            </Button>
+            {user.courses.length > 0 && (
+              <Button
+                size="sm"
+                className="rounded-full"
+                onPress={() => {
+                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                  setCourseFilter(null);
+                }}
+              >
+                <Text>{courseFilter ? courseFilter.name : "All notes"}</Text>
+              </Button>
+            )}
             <Dialog
               open={isCourseDialogOpen}
               onOpenChange={setIsCourseDialogOpen}
