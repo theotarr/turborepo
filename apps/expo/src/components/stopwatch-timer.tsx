@@ -59,7 +59,7 @@ function Stopwatch(
     textCharStyle,
     trailingZeros = 1,
     decimalSeparator = ",",
-    intervalMs = 16,
+    intervalMs = 100,
   }: StopwatchTimerProps,
   ref: ForwardedRef<StopwatchTimerMethods>,
 ) {
