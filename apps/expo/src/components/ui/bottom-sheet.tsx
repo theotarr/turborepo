@@ -37,7 +37,7 @@ const BottomSheet = React.forwardRef<BottomSheetRef, BottomSheetProps>(
     const sheetRef = React.useRef<BottomSheetModal>(null);
 
     return (
-      <BottomSheetContext.Provider value={{ sheetRef: sheetRef }}>
+      <BottomSheetContext.Provider value={{ sheetRef }}>
         <View ref={ref} {...props} />
       </BottomSheetContext.Provider>
     );
@@ -82,6 +82,7 @@ const BottomSheetContent = React.forwardRef<
     const { colors } = useTheme();
     const { sheetRef } = useBottomSheetContext();
 
+    // Expose bottom sheet methods (e.g., present/dismiss) via the ref.
     React.useImperativeHandle(ref, () => {
       if (!sheetRef.current) {
         return {} as BottomSheetModalMethods;
@@ -98,10 +99,7 @@ const BottomSheetContent = React.forwardRef<
           style,
           onPress,
           ...rest
-        } = {
-          ...props,
-          ...backdropProps,
-        };
+        } = { ...props, ...backdropProps };
         return (
           <BottomSheetBackdrop
             opacity={opacity}
@@ -148,6 +146,7 @@ const BottomSheetOpenTrigger = React.forwardRef<
 >(({ onPress, asChild = false, ...props }, ref) => {
   const { sheetRef } = useBottomSheetContext();
   function handleOnPress(ev: GestureResponderEvent) {
+    // Programmatically expand the bottom sheet using its ref
     sheetRef.current?.present();
     onPress?.(ev);
   }
@@ -311,7 +310,7 @@ type BottomSheetFooterProps = Omit<
 };
 
 /**
- * To be used in a useCallback function as a props to BottomSheetContent
+ * To be used in a useCallback function as props to BottomSheetContent
  */
 const BottomSheetFooter = React.forwardRef<
   BottomSheetFooterRef,
@@ -332,10 +331,28 @@ const BottomSheetFooter = React.forwardRef<
   );
 });
 
+// A helper component to remotely open or close the bottom sheet.
+const PauseSheet = ({ open = true }) => {
+  const { sheetRef } = useBottomSheetContext();
+
+  React.useEffect(() => {
+    if (open) sheetRef.current?.present();
+    else sheetRef.current?.dismiss();
+  }, [sheetRef, open]);
+
+  return <></>;
+};
+
+/**
+/**
+ * useBottomSheet hook provides a ref to the BottomSheetContent along with
+ * methods to programmatically expand (via 'expand') or close the bottom sheet.
+ */
 function useBottomSheet() {
   const ref = React.useRef<BottomSheetContentRef>(null);
 
-  const open = React.useCallback(() => {
+  const expand = React.useCallback(() => {
+    // Programmatically expand the bottom sheet by calling present on the ref
     ref.current?.present();
   }, []);
 
@@ -343,7 +360,7 @@ function useBottomSheet() {
     ref.current?.dismiss();
   }, []);
 
-  return { ref, open, close };
+  return { ref, expand, close };
 }
 
 export {
@@ -358,4 +375,5 @@ export {
   BottomSheetTextInput,
   BottomSheetView,
   useBottomSheet,
+  PauseSheet,
 };

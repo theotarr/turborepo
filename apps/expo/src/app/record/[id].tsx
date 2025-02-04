@@ -1,6 +1,12 @@
 import type { StopwatchTimerMethods } from "react-native-animated-stopwatch-timer";
 import { useEffect, useRef, useState } from "react";
-import { ActivityIndicator, Pressable, SafeAreaView, View } from "react-native";
+import {
+  ActivityIndicator,
+  Pressable,
+  SafeAreaView,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import Animated, {
   FadeIn,
   FadeOut,
@@ -14,10 +20,16 @@ import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from "expo-av";
 import * as FileSystem from "expo-file-system";
 import * as Haptics from "expo-haptics";
 import { Stack, useGlobalSearchParams, useRouter } from "expo-router";
-import { Aperture } from "lucide-react-native";
+import { Aperture, ChevronDown } from "lucide-react-native";
 
 import { LectureOperations } from "~/components/lecture-operations";
 import Stopwatch from "~/components/stopwatch-timer";
+import {
+  BottomSheet,
+  BottomSheetContent,
+  BottomSheetView,
+  PauseSheet,
+} from "~/components/ui/bottom-sheet";
 import { Button } from "~/components/ui/button";
 import { Text } from "~/components/ui/text";
 import { NAV_THEME } from "~/lib/constants";
@@ -39,9 +51,12 @@ export default function Record() {
   const [recording, setRecording] = useState<Audio.Recording | undefined>();
   const [isRecording, setIsRecording] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
+  const [showPauseSheet, setShowPauseSheet] = useState(false);
   const [permissionResponse, requestPermission] = Audio.usePermissions();
   const metering = useSharedValue(-100);
   const stopwatchTimerRef = useRef<StopwatchTimerMethods>(null);
+  const pauseTimeoutRef = useRef<NodeJS.Timeout>();
+
   const animatedMic = useAnimatedStyle(() => ({
     width: withTiming(isRecording ? "60%" : "100%"),
     borderRadius: withTiming(isRecording ? 5 : 35),
@@ -62,6 +77,10 @@ export default function Record() {
 
   async function startRecording() {
     setIsRecording(true);
+    if (pauseTimeoutRef.current) {
+      clearTimeout(pauseTimeoutRef.current);
+    }
+    setShowPauseSheet(false);
 
     // If we already have a recording, resume it.
     if (recording) {
@@ -110,6 +129,15 @@ export default function Record() {
 
     try {
       await recording?.pauseAsync();
+      // Start 15 second timer to show end dialog
+      pauseTimeoutRef.current = setTimeout(() => {
+        console.log("[Record] Showing pause sheet");
+        // Open the bottom sheet and give haptic notifiction feedback.
+        setShowPauseSheet(true);
+        void Haptics.notificationAsync(
+          Haptics.NotificationFeedbackType.Warning,
+        );
+      }, 1000);
     } catch (e) {
       console.error(e);
     }
@@ -121,6 +149,9 @@ export default function Record() {
     setIsRecording(false);
     setIsTranscribing(true);
     stopwatchTimerRef.current?.pause();
+    if (pauseTimeoutRef.current) {
+      clearTimeout(pauseTimeoutRef.current);
+    }
 
     try {
       await recording?.stopAndUnloadAsync();
@@ -147,8 +178,18 @@ export default function Record() {
 
   useEffect(() => {
     if (isRecording) return;
-    setIsRecording(true); // Set the state to prevent a race condition where a second recording starts before state is set.
+    // Set the state to prevent a race condition where a second recording starts before state is set.
+    setIsRecording(true);
     void startRecording();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (pauseTimeoutRef.current) {
+        clearTimeout(pauseTimeoutRef.current);
+      }
+    };
   }, []);
 
   if (!lecture) return <Stack.Screen options={{ headerShown: false }} />;
@@ -232,6 +273,27 @@ export default function Record() {
             )}
           </View>
         </View>
+        <BottomSheet>
+          <PauseSheet open={showPauseSheet} />
+          <BottomSheetContent>
+            <BottomSheetView className="mt-4 px-6">
+              <Text className="text-2xl font-semibold text-secondary-foreground">
+                Recording is paused. End it?
+              </Text>
+              <Text className="mt-2 text-muted-foreground">
+                Your recording is paused but hasn't been saved yet. Tap
+                'Transcribe & Summarize' when you're finished to create notes.
+              </Text>
+              <TouchableOpacity
+                className="mx-auto mt-4 flex-row items-center gap-x-2"
+                onPress={() => setShowPauseSheet(false)}
+              >
+                <ChevronDown size={16} color={NAV_THEME[colorScheme].primary} />
+                <Text className="text-primary">Dismiss</Text>
+              </TouchableOpacity>
+            </BottomSheetView>
+          </BottomSheetContent>
+        </BottomSheet>
       </View>
     </SafeAreaView>
   );
