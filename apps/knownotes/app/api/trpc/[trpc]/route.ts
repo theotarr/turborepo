@@ -4,6 +4,7 @@ import { appRouter, createTRPCContext } from "@acme/api";
 import { auth } from "@acme/auth";
 
 // export const runtime = "edge";
+export const maxDuration = 300; // 5 minutes
 
 /**
  * Configure basic CORS headers
