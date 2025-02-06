@@ -40,15 +40,16 @@ import { cn } from "~/lib/utils";
 import { api } from "~/utils/api";
 
 const recording = new Audio.Recording();
+const PAUSE_SHEET_TIMEOUT = 15000; // 15 seconds
 
 export default function Record() {
   const router = useRouter();
   const { colorScheme } = useColorScheme();
   const { id } = useGlobalSearchParams();
   if (!id || typeof id !== "string") throw new Error("Lecture ID is required");
+
   const { data: user } = api.auth.getUser.useQuery();
   const { data: lecture } = api.lecture.byId.useQuery({ id });
-
   const transcribeAudio = api.lecture.liveMobile.useMutation();
 
   const [isRecording, setIsRecording] = useState(false);
@@ -59,6 +60,7 @@ export default function Record() {
     startTime: number;
     endTime: number | null;
   } | null>(null);
+
   const [permissionResponse, requestPermission] = Audio.usePermissions();
   const metering = useSharedValue(-100);
 
@@ -201,7 +203,7 @@ export default function Record() {
           void Haptics.notificationAsync(
             Haptics.NotificationFeedbackType.Error,
           );
-        }, 15000); // 15 seconds
+        }, PAUSE_SHEET_TIMEOUT);
       }
     } catch (err) {
       console.error("Failed to pause recording", err);
@@ -354,7 +356,7 @@ export default function Record() {
         </View>
         <BottomSheet>
           <RemoteControlSheet open={showPauseSheet} />
-          <BottomSheetContent>
+          <BottomSheetContent onDismiss={() => setShowPauseSheet(false)}>
             <BottomSheetView className="my-6 px-6">
               <Text className="text-2xl font-semibold text-secondary-foreground">
                 Recording is paused. End it?
