@@ -4,7 +4,7 @@ import type {
   ExitAnimationsValues,
   SharedValue,
 } from "react-native-reanimated";
-import React, { forwardRef, useImperativeHandle } from "react";
+import React, { forwardRef, useEffect, useImperativeHandle } from "react";
 import { View } from "react-native";
 import Animated, {
   useSharedValue,
@@ -35,6 +35,7 @@ export interface StopwatchTimerProps {
   trailingZeros?: 0 | 1 | 2;
   decimalSeparator?: string;
   intervalMs?: number;
+  startOnMount?: boolean; // New parameter to start on mount
 }
 
 export interface StopwatchTimerMethods {
@@ -60,6 +61,7 @@ function Stopwatch(
     trailingZeros = 1,
     decimalSeparator = ",",
     intervalMs = 100,
+    startOnMount = false, // Default value for the new parameter
   }: StopwatchTimerProps,
   ref: ForwardedRef<StopwatchTimerMethods>,
 ) {
@@ -85,6 +87,12 @@ function Stopwatch(
     reset,
     getSnapshot,
   }));
+
+  useEffect(() => {
+    if (startOnMount) {
+      play();
+    }
+  }, [startOnMount, play]);
 
   const isSecondsDigitMounted = useSharedValue(false);
   const isTensOfSecondsDigitMounted = useSharedValue(false);
@@ -194,8 +202,7 @@ function Stopwatch(
   );
 }
 
-const StopwatchTimer = forwardRef<StopwatchTimerMethods, StopwatchTimerProps>(
-  Stopwatch,
-);
-
-export default StopwatchTimer;
+export const StopwatchTimer = forwardRef<
+  StopwatchTimerMethods,
+  StopwatchTimerProps
+>(Stopwatch);
