@@ -81,6 +81,6 @@ export class MySuperwallDelegate extends SuperwallDelegate {
     info?: Map<string, unknown>,
     error?: string,
   ): void {
-    console.log(`[Superwall] [${level}] ${scope}: ${message}`, info, error);
+    // console.log(`[Superwall] [${level}] ${scope}: ${message}`, info, error);
   }
 }

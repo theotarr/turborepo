@@ -73,6 +73,7 @@ const BottomSheetContent = React.forwardRef<
       backdropProps,
       backgroundStyle,
       android_keyboardInputMode = "adjustResize",
+      onDismiss,
       ...props
     },
     ref,
@@ -130,6 +131,7 @@ const BottomSheetContent = React.forwardRef<
         handleIndicatorStyle={{
           backgroundColor: colors.text,
         }}
+        onDismiss={onDismiss}
         topInset={insets.top}
         android_keyboardInputMode={android_keyboardInputMode}
         {...props}
@@ -332,7 +334,7 @@ const BottomSheetFooter = React.forwardRef<
 });
 
 // A helper component to remotely open or close the bottom sheet.
-const PauseSheet = ({ open = true }) => {
+const RemoteControlSheet = ({ open = true }) => {
   const { sheetRef } = useBottomSheetContext();
 
   React.useEffect(() => {
@@ -375,5 +377,5 @@ export {
   BottomSheetTextInput,
   BottomSheetView,
   useBottomSheet,
-  PauseSheet,
+  RemoteControlSheet,
 };

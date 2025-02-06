@@ -2,6 +2,7 @@ import type { StopwatchTimerMethods } from "react-native-animated-stopwatch-time
 import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  AppState,
   Pressable,
   SafeAreaView,
   TouchableOpacity,
@@ -28,7 +29,7 @@ import {
   BottomSheet,
   BottomSheetContent,
   BottomSheetView,
-  PauseSheet,
+  RemoteControlSheet,
 } from "~/components/ui/bottom-sheet";
 import { Button } from "~/components/ui/button";
 import { Text } from "~/components/ui/text";
@@ -37,6 +38,8 @@ import { getAudioConfig } from "~/lib/get-audio-recording";
 import { useColorScheme } from "~/lib/theme";
 import { cn } from "~/lib/utils";
 import { api } from "~/utils/api";
+
+const recording = new Audio.Recording();
 
 export default function Record() {
   const router = useRouter();
@@ -48,14 +51,30 @@ export default function Record() {
 
   const transcribeAudio = api.lecture.liveMobile.useMutation();
 
-  const [recording, setRecording] = useState<Audio.Recording | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [showPauseSheet, setShowPauseSheet] = useState(false);
+  const [isInterruption, setIsInterruption] = useState(false);
+  const [interruption, setInterruption] = useState<{
+    startTime: number;
+    endTime: number | null;
+  } | null>(null);
   const [permissionResponse, requestPermission] = Audio.usePermissions();
   const metering = useSharedValue(-100);
+
   const stopwatchTimerRef = useRef<StopwatchTimerMethods>(null);
   const pauseTimeoutRef = useRef<NodeJS.Timeout>();
+  const isRecordingRef = useRef(false);
+  const interruptionRef = useRef<{
+    startTime: number;
+    endTime: number | null;
+    isActive: boolean;
+  }>({
+    startTime: 0,
+    endTime: null,
+    isActive: false,
+  });
+  const startTimeRef = useRef<number | null>(null);
 
   const animatedMic = useAnimatedStyle(() => ({
     width: withTiming(isRecording ? "60%" : "100%"),
@@ -80,7 +99,7 @@ export default function Record() {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
     if (permissionResponse?.status === "granted") return;
 
-    async function setupAudio() {
+    async function setupRecording() {
       try {
         console.log("[Record] Requesting permission...");
         await requestPermission();
@@ -94,14 +113,34 @@ export default function Record() {
           interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
           playThroughEarpieceAndroid: false,
         });
+
+        await recording.prepareToRecordAsync(
+          Audio.RecordingOptionsPresets.HIGH_QUALITY,
+        );
       } catch (err) {
         console.error("Failed to setup audio", err);
       }
     }
-    void setupAudio();
+    void setupRecording().then(() => {
+      // Set the state to prevent a race condition where a second recording starts before state is set.
+      setIsRecording(true);
+      void startRecording();
+    });
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Update refs whenever state changes
+  useEffect(() => {
+    isRecordingRef.current = isRecording;
+  }, [isRecording]);
+  useEffect(() => {
+    interruptionRef.current = {
+      startTime: interruption?.startTime ?? 0,
+      endTime: interruption?.endTime ?? null,
+      isActive: isInterruption,
+    };
+  }, [interruption, isInterruption]);
 
   async function startRecording() {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
@@ -109,50 +148,61 @@ export default function Record() {
       console.log("[Record] Requesting permission...");
       await requestPermission();
     }
-    // If we already have a recording, resume it.
-    if (recording) {
-      await recording.startAsync();
-      stopwatchTimerRef.current?.play();
-      setIsRecording(true);
-      return;
-    }
 
     try {
       console.log("Starting recording...");
-      const { recording } = await Audio.Recording.createAsync(
-        Audio.RecordingOptionsPresets.HIGH_QUALITY,
-      );
 
+      // Set the recording status update here to prevent this running before the recording is ready.
       recording.setOnRecordingStatusUpdate((status) => {
-        console.log("Recording status:", status);
-        metering.value = status.metering ?? -100;
+        metering.value = status.metering ?? -100; // Update the metering animation value.
+
+        // Use ref instead of state to get latest value.
+        if (
+          status.isRecording === false &&
+          isRecordingRef.current &&
+          startTimeRef.current &&
+          new Date().getTime() - startTimeRef.current > 1000 // Recording for at least one second.
+        ) {
+          console.log("[Record] Interruption detected");
+
+          // Pause the recording and log the interruption time.
+          void pauseRecording(false);
+          setIsInterruption(true);
+          setInterruption({
+            startTime: new Date().getTime(),
+            endTime: null,
+          });
+        }
       });
 
-      setRecording(recording);
+      await recording.startAsync();
+      if (!startTimeRef.current) startTimeRef.current = new Date().getTime();
+      stopwatchTimerRef.current?.play();
       setIsRecording(true);
-      setTimeout(() => {
-        stopwatchTimerRef.current?.play();
-      }, 100);
     } catch (err) {
       console.error("Failed to start recording", err);
     }
   }
 
-  async function pauseRecording() {
+  async function pauseRecording(showPauseSheet = true) {
     try {
       console.log("Pausing recording...");
       stopwatchTimerRef.current?.pause();
       setIsRecording(false);
       setShowPauseSheet(false);
-      await recording?.pauseAsync();
+      await recording.pauseAsync();
 
-      // Start a timer to show pause dialog.
-      pauseTimeoutRef.current = setTimeout(() => {
-        console.log("[Record] Showing pause sheet");
-        // Open the bottom sheet and give haptic notifiction feedback.
-        setShowPauseSheet(true);
-        void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      }, 15000); // 15 seconds
+      if (showPauseSheet) {
+        // Start a timer to show pause dialog.
+        pauseTimeoutRef.current = setTimeout(() => {
+          console.log("[Record] Showing pause sheet");
+          // Open the bottom sheet and give haptic notifiction feedback.
+          setShowPauseSheet(true);
+          void Haptics.notificationAsync(
+            Haptics.NotificationFeedbackType.Error,
+          );
+        }, 15000); // 15 seconds
+      }
     } catch (err) {
       console.error("Failed to pause recording", err);
     }
@@ -169,8 +219,8 @@ export default function Record() {
     }
 
     try {
-      await recording?.stopAndUnloadAsync();
-      const recordingUri = recording?.getURI();
+      await recording.stopAndUnloadAsync();
+      const recordingUri = recording.getURI();
       if (!recordingUri) throw new Error("[Record] No recording URI");
 
       const audioUrl = await FileSystem.readAsStringAsync(recordingUri, {
@@ -191,14 +241,30 @@ export default function Record() {
     }
   }
 
+  // Handle app state changes.
   useEffect(() => {
-    if (isRecording) return;
-    // Set the state to prevent a race condition where a second recording starts before state is set.
-    setIsRecording(true);
-    void startRecording();
+    const subscription = AppState.addEventListener("change", (nextAppState) => {
+      console.log("App state changed to:", nextAppState);
+
+      if (nextAppState === "active") {
+        // App is now in the foreground.
+        if (interruptionRef.current.isActive && !isRecordingRef.current) {
+          // There was an interruption that has not been resumed.
+          setInterruption(null); // Trigger this to update the prop to trigger the bottom sheet.
+          setInterruption((prev) => ({
+            startTime: prev?.startTime ?? new Date().getTime(),
+            endTime: new Date().getTime(),
+          }));
+          void startRecording();
+        }
+      }
+    });
+
+    return () => subscription.remove();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Cleanup the pause timeout and recording on unmount
   useEffect(() => {
     return () => {
       if (pauseTimeoutRef.current) {
@@ -269,27 +335,25 @@ export default function Record() {
             />
           </Pressable>
           <View className="flex w-full items-center">
-            {recording && (
-              <Animated.View entering={FadeIn} exiting={FadeOut}>
-                <Button
-                  className="mt-6 w-96 rounded-full"
-                  size="lg"
-                  onPress={transcribeRecording}
-                  disabled={isTranscribing}
-                >
-                  <View className="flex-row items-center gap-x-2">
-                    {isTranscribing && (
-                      <ActivityIndicator size="small" color="white" />
-                    )}
-                    <Text>Transcribe & Summarize</Text>
-                  </View>
-                </Button>
-              </Animated.View>
-            )}
+            <Animated.View entering={FadeIn} exiting={FadeOut}>
+              <Button
+                className="mt-6 w-96 rounded-full"
+                size="lg"
+                onPress={transcribeRecording}
+                disabled={isTranscribing}
+              >
+                <View className="flex-row items-center gap-x-2">
+                  {isTranscribing && (
+                    <ActivityIndicator size="small" color="white" />
+                  )}
+                  <Text>Transcribe & Summarize</Text>
+                </View>
+              </Button>
+            </Animated.View>
           </View>
         </View>
         <BottomSheet>
-          <PauseSheet open={showPauseSheet} />
+          <RemoteControlSheet open={showPauseSheet} />
           <BottomSheetContent>
             <BottomSheetView className="my-6 px-6">
               <Text className="text-2xl font-semibold text-secondary-foreground">
@@ -302,6 +366,46 @@ export default function Record() {
               <TouchableOpacity
                 className="mx-auto mt-4 flex-row items-center gap-x-2"
                 onPress={() => setShowPauseSheet(false)}
+              >
+                <ChevronDown size={16} color={NAV_THEME[colorScheme].primary} />
+                <Text className="text-primary">Dismiss</Text>
+              </TouchableOpacity>
+            </BottomSheetView>
+          </BottomSheetContent>
+        </BottomSheet>
+        <BottomSheet>
+          <RemoteControlSheet open={isInterruption} />
+          <BottomSheetContent
+            onDismiss={() => {
+              setInterruption(null);
+              setIsInterruption(false);
+            }}
+          >
+            <BottomSheetView className="my-6 px-6">
+              <Text className="text-2xl font-semibold text-secondary-foreground">
+                {interruption?.endTime
+                  ? `Interruption from ${new Date(interruption.startTime).toLocaleTimeString([], { hour: "numeric", minute: "numeric" })} to ${new Date(interruption.endTime).toLocaleTimeString([], { hour: "numeric", minute: "numeric" })}`
+                  : "Recording was interrupted"}
+              </Text>
+              <Text className="mt-2 text-muted-foreground">
+                {interruption?.endTime ? (
+                  <>
+                    Another app used your microphone. We automatically resumed
+                    recording after the interruption ended.
+                  </>
+                ) : (
+                  <>
+                    Another app is using your microphone. Recording is
+                    unavailable until the interruption ends.
+                  </>
+                )}
+              </Text>
+              <TouchableOpacity
+                className="mx-auto mt-4 flex-row items-center gap-x-2"
+                onPress={() => {
+                  setIsInterruption(false);
+                  setInterruption(null);
+                }}
               >
                 <ChevronDown size={16} color={NAV_THEME[colorScheme].primary} />
                 <Text className="text-primary">Dismiss</Text>
