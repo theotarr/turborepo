@@ -1,4 +1,3 @@
-import type { StopwatchTimerMethods } from "react-native-animated-stopwatch-timer";
 import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -23,8 +22,9 @@ import * as Haptics from "expo-haptics";
 import { Stack, useGlobalSearchParams, useRouter } from "expo-router";
 import { Aperture, ChevronDown } from "lucide-react-native";
 
+import type { StopwatchTimerMethods } from "~/components/stopwatch-timer";
 import { LectureOperations } from "~/components/lecture-operations";
-import Stopwatch from "~/components/stopwatch-timer";
+import { StopwatchTimer } from "~/components/stopwatch-timer";
 import {
   BottomSheet,
   BottomSheetContent,
@@ -52,7 +52,7 @@ export default function Record() {
   const { data: lecture } = api.lecture.byId.useQuery({ id });
   const transcribeAudio = api.lecture.liveMobile.useMutation();
 
-  const [isRecording, setIsRecording] = useState(false);
+  const [isRecording, setIsRecording] = useState(true);
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [showPauseSheet, setShowPauseSheet] = useState(false);
   const [isInterruption, setIsInterruption] = useState(false);
@@ -79,8 +79,8 @@ export default function Record() {
   const startTimeRef = useRef<number | null>(null);
 
   const animatedMic = useAnimatedStyle(() => ({
-    width: withTiming(isRecording ? "60%" : "100%"),
-    borderRadius: withTiming(isRecording ? 5 : 35),
+    width: withTiming(isRecording ? "60%" : "90%"),
+    borderRadius: withTiming(isRecording ? 10 : 50),
   }));
 
   const animatedRecordWave = useAnimatedStyle(() => {
@@ -123,26 +123,17 @@ export default function Record() {
         console.error("Failed to setup audio", err);
       }
     }
-    void setupRecording().then(() => {
-      // Set the state to prevent a race condition where a second recording starts before state is set.
-      setIsRecording(true);
-      void startRecording();
-    });
+    void setupRecording()
+      .then(() => {
+        void startRecording();
+      })
+      .catch((err) => {
+        console.error("Failed to setup audio", err);
+        setIsRecording(false);
+      });
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  // Update refs whenever state changes
-  useEffect(() => {
-    isRecordingRef.current = isRecording;
-  }, [isRecording]);
-  useEffect(() => {
-    interruptionRef.current = {
-      startTime: interruption?.startTime ?? 0,
-      endTime: interruption?.endTime ?? null,
-      isActive: isInterruption,
-    };
-  }, [interruption, isInterruption]);
 
   async function startRecording() {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
@@ -156,7 +147,7 @@ export default function Record() {
 
       // Set the recording status update here to prevent this running before the recording is ready.
       recording.setOnRecordingStatusUpdate((status) => {
-        metering.value = status.metering ?? -100; // Update the metering animation value.
+        metering.value = status.metering ?? -160; // Update the metering animation value.
 
         // Use ref instead of state to get latest value.
         if (
@@ -179,8 +170,8 @@ export default function Record() {
 
       await recording.startAsync();
       if (!startTimeRef.current) startTimeRef.current = new Date().getTime();
-      stopwatchTimerRef.current?.play();
       setIsRecording(true);
+      stopwatchTimerRef.current?.play(); // This doesn't do anything on initial useEffect runs, since the stopwatch won't be mounted yet.
     } catch (err) {
       console.error("Failed to start recording", err);
     }
@@ -243,6 +234,19 @@ export default function Record() {
     }
   }
 
+  // Update refs whenever state changes.
+  useEffect(() => {
+    isRecordingRef.current = isRecording;
+  }, [isRecording]);
+
+  useEffect(() => {
+    interruptionRef.current = {
+      startTime: interruption?.startTime ?? 0,
+      endTime: interruption?.endTime ?? null,
+      isActive: isInterruption,
+    };
+  }, [interruption, isInterruption]);
+
   // Handle app state changes.
   useEffect(() => {
     const subscription = AppState.addEventListener("change", (nextAppState) => {
@@ -280,8 +284,18 @@ export default function Record() {
   return (
     <SafeAreaView className="my-0 py-0">
       <Stack.Screen options={{ headerShown: false }} />
-      <View className="flex h-full flex-col justify-between bg-background">
-        <View className="flex-1 px-6 py-4">
+      <View className="flex h-full flex-col items-center bg-background">
+        <View className="absolute right-3 top-3">
+          <LectureOperations
+            lecture={{
+              id: lecture.id,
+              title: lecture.title,
+              courseId: lecture.courseId ?? undefined,
+            }}
+            courses={user?.courses ?? []}
+          />
+        </View>
+        <View className="px-6 py-4">
           <View className="flex-row items-center justify-center">
             <View className="flex-row items-center gap-x-2">
               <Aperture
@@ -294,26 +308,17 @@ export default function Record() {
             </View>
           </View>
         </View>
-        <View className="absolute right-3 top-3">
-          <LectureOperations
-            lecture={{
-              id: lecture.id,
-              title: lecture.title,
-              courseId: lecture.courseId ?? undefined,
-            }}
-            courses={user?.courses ?? []}
-          />
-        </View>
-        <View className="-mb-10 flex h-80 items-center justify-center bg-muted pb-12 pt-6">
-          <Text className="mb-2 text-center text-2xl font-semibold text-secondary-foreground">
+        <View className="flex h-[85%] items-center justify-center">
+          <Text className="mb-2 text-center text-[1.75rem] font-semibold tracking-tight text-secondary-foreground">
             {isRecording ? "Tap to stop recording" : "Recording paused"}
           </Text>
-          <Text className="m-1 mb-4 text-center text-3xl font-medium text-secondary-foreground">
-            <Stopwatch
+          <Text className="m-1 mb-8 text-center text-3xl font-medium text-secondary-foreground">
+            <StopwatchTimer
+              startOnMount={isRecording}
               ref={stopwatchTimerRef}
               leadingZeros={2}
               trailingZeros={0}
-              textCharStyle="-m-[1px] font-bold text-secondary-foreground/80 tabular-nums text-2xl font-mono"
+              textCharStyle="-m-[1.2px] font-bold text-secondary-foreground/80 tabular-nums text-[1.8rem] font-mono"
             />
           </Text>
           <Pressable
@@ -322,12 +327,12 @@ export default function Record() {
               if (isRecording) await pauseRecording();
               else await startRecording();
             }}
-            className="relative flex size-[5rem] items-center justify-center rounded-full border-4 border-border"
+            className="relative flex size-[8rem] items-center justify-center rounded-full border-4 border-border"
           >
             <Animated.View
               style={[animatedMic]}
               className={cn(
-                "aspect-square w-[90%] rounded-full bg-primary",
+                "aspect-square w-[90%] rounded-full bg-primary/80",
                 isRecording && "w-[70%]",
               )}
             />
@@ -336,23 +341,23 @@ export default function Record() {
               className="absolute -z-10 rounded-full bg-primary/40"
             />
           </Pressable>
-          <View className="flex w-full items-center">
-            <Animated.View entering={FadeIn} exiting={FadeOut}>
-              <Button
-                className="mt-6 w-96 rounded-full"
-                size="lg"
-                onPress={transcribeRecording}
-                disabled={isTranscribing}
-              >
-                <View className="flex-row items-center gap-x-2">
-                  {isTranscribing && (
-                    <ActivityIndicator size="small" color="white" />
-                  )}
-                  <Text>Transcribe & Summarize</Text>
-                </View>
-              </Button>
-            </Animated.View>
-          </View>
+        </View>
+        <View className="absolute bottom-0 w-full items-center">
+          <Animated.View entering={FadeIn} exiting={FadeOut}>
+            <Button
+              className="mt-6 w-96 rounded-full"
+              size="lg"
+              onPress={transcribeRecording}
+              disabled={isTranscribing}
+            >
+              <View className="flex-row items-center gap-x-2">
+                {isTranscribing && (
+                  <ActivityIndicator size="small" color="white" />
+                )}
+                <Text>Transcribe & Summarize</Text>
+              </View>
+            </Button>
+          </Animated.View>
         </View>
         <BottomSheet>
           <RemoteControlSheet open={showPauseSheet} />
