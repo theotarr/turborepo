@@ -473,9 +473,7 @@ export const lectureRouter = {
           },
         });
         if (!course || course.userId !== ctx.session.user.id)
-          return new Response(JSON.stringify("Course not found"), {
-            status: 404,
-          });
+          throw new Error("User does not have access to the course.");
       }
 
       const id = getVideoId(videoUrl);
