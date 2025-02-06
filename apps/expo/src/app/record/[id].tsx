@@ -40,7 +40,7 @@ import { cn } from "~/lib/utils";
 import { api } from "~/utils/api";
 
 const recording = new Audio.Recording();
-const PAUSE_SHEET_TIMEOUT = 15000; // 15 seconds
+const PAUSE_SHEET_TIMEOUT = 20000; // 20 seconds
 
 export default function Record() {
   const router = useRouter();
@@ -56,10 +56,6 @@ export default function Record() {
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [showPauseSheet, setShowPauseSheet] = useState(false);
   const [isInterruption, setIsInterruption] = useState(false);
-  const [interruption, setInterruption] = useState<{
-    startTime: number;
-    endTime: number | null;
-  } | null>(null);
 
   const [permissionResponse, requestPermission] = Audio.usePermissions();
   const metering = useSharedValue(-100);
@@ -77,17 +73,18 @@ export default function Record() {
     isActive: false,
   });
   const startTimeRef = useRef<number | null>(null);
+  const showPauseSheetRef = useRef(false);
 
   const animatedMic = useAnimatedStyle(() => ({
-    width: withTiming(isRecording ? "60%" : "90%"),
-    borderRadius: withTiming(isRecording ? 10 : 50),
+    width: withTiming(isRecording ? "60%" : "92%"),
+    borderRadius: withTiming(isRecording ? 10 : 100),
   }));
 
   const animatedRecordWave = useAnimatedStyle(() => {
     const interpolated = interpolate(
       metering.value,
       [-160, -50, -20],
-      [0, 110, 200],
+      [0, 100, 200],
     );
 
     return {
@@ -161,10 +158,11 @@ export default function Record() {
           // Pause the recording and log the interruption time.
           void pauseRecording(false);
           setIsInterruption(true);
-          setInterruption({
+          interruptionRef.current = {
             startTime: new Date().getTime(),
             endTime: null,
-          });
+            isActive: true,
+          };
         }
       });
 
@@ -183,18 +181,22 @@ export default function Record() {
       stopwatchTimerRef.current?.pause();
       setIsRecording(false);
       setShowPauseSheet(false);
+      showPauseSheetRef.current = false;
       await recording.pauseAsync();
 
       if (showPauseSheet) {
         // Start a timer to show pause dialog.
         pauseTimeoutRef.current = setTimeout(() => {
           console.log("[Record] Showing pause sheet");
-          // Open the bottom sheet and give haptic notifiction feedback.
-          setShowPauseSheet(true);
-          void Haptics.notificationAsync(
-            Haptics.NotificationFeedbackType.Error,
-          );
+          // Open the bottom sheet and give haptic notification feedback.
+          if (showPauseSheetRef.current) {
+            setShowPauseSheet(true);
+            void Haptics.notificationAsync(
+              Haptics.NotificationFeedbackType.Error,
+            );
+          }
         }, PAUSE_SHEET_TIMEOUT);
+        showPauseSheetRef.current = true;
       }
     } catch (err) {
       console.error("Failed to pause recording", err);
@@ -237,15 +239,13 @@ export default function Record() {
   // Update refs whenever state changes.
   useEffect(() => {
     isRecordingRef.current = isRecording;
+    if (isRecording) {
+      setShowPauseSheet(false);
+      if (pauseTimeoutRef.current) {
+        clearTimeout(pauseTimeoutRef.current);
+      }
+    }
   }, [isRecording]);
-
-  useEffect(() => {
-    interruptionRef.current = {
-      startTime: interruption?.startTime ?? 0,
-      endTime: interruption?.endTime ?? null,
-      isActive: isInterruption,
-    };
-  }, [interruption, isInterruption]);
 
   // Handle app state changes.
   useEffect(() => {
@@ -256,11 +256,11 @@ export default function Record() {
         // App is now in the foreground.
         if (interruptionRef.current.isActive && !isRecordingRef.current) {
           // There was an interruption that has not been resumed.
-          setInterruption(null); // Trigger this to update the prop to trigger the bottom sheet.
-          setInterruption((prev) => ({
-            startTime: prev?.startTime ?? new Date().getTime(),
+          interruptionRef.current = {
+            startTime: interruptionRef.current.startTime,
             endTime: new Date().getTime(),
-          }));
+            isActive: false,
+          };
           void startRecording();
         }
       }
@@ -327,7 +327,7 @@ export default function Record() {
               if (isRecording) await pauseRecording();
               else await startRecording();
             }}
-            className="relative flex size-[8rem] items-center justify-center rounded-full border-4 border-border"
+            className="relative flex size-[9rem] items-center justify-center rounded-full border-4 border-border"
           >
             <Animated.View
               style={[animatedMic]}
@@ -384,18 +384,22 @@ export default function Record() {
           <RemoteControlSheet open={isInterruption} />
           <BottomSheetContent
             onDismiss={() => {
-              setInterruption(null);
               setIsInterruption(false);
+              interruptionRef.current = {
+                startTime: 0,
+                endTime: null,
+                isActive: false,
+              };
             }}
           >
             <BottomSheetView className="my-6 px-6">
               <Text className="text-2xl font-semibold text-secondary-foreground">
-                {interruption?.endTime
-                  ? `Interruption from ${new Date(interruption.startTime).toLocaleTimeString([], { hour: "numeric", minute: "numeric" })} to ${new Date(interruption.endTime).toLocaleTimeString([], { hour: "numeric", minute: "numeric" })}`
+                {interruptionRef.current.endTime
+                  ? `Interruption from ${new Date(interruptionRef.current.startTime).toLocaleTimeString([], { hour: "numeric", minute: "numeric" })} to ${new Date(interruptionRef.current.endTime).toLocaleTimeString([], { hour: "numeric", minute: "numeric" })}`
                   : "Recording was interrupted"}
               </Text>
               <Text className="mt-2 text-muted-foreground">
-                {interruption?.endTime ? (
+                {interruptionRef.current.endTime ? (
                   <>
                     Another app used your microphone. We automatically resumed
                     recording after the interruption ended.
@@ -411,7 +415,11 @@ export default function Record() {
                 className="mx-auto mt-4 flex-row items-center gap-x-2"
                 onPress={() => {
                   setIsInterruption(false);
-                  setInterruption(null);
+                  interruptionRef.current = {
+                    startTime: 0,
+                    endTime: null,
+                    isActive: false,
+                  };
                 }}
               >
                 <ChevronDown size={16} color={NAV_THEME[colorScheme].primary} />
