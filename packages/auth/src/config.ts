@@ -31,6 +31,7 @@ export const authConfig = {
   // In development, we need to skip checks to allow Expo to work.
   ...(!isSecureContext
     ? {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
         skipCSRFCheck: skipCSRFCheck as any,
         trustHost: true,
       }
