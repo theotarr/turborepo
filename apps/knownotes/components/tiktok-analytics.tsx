@@ -11,7 +11,7 @@ declare global {
 
 const TIKTOK_PIXEL_ID = "COH8383C77UC70DIPSOG";
 
-export function Analytics({
+export function TiktokAnalytics({
   userId,
   email,
 }: {

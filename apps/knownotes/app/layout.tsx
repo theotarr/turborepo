@@ -5,10 +5,10 @@ import "@/styles/globals.css";
 import { Viewport } from "next";
 import dynamic from "next/dynamic";
 import Script from "next/script";
-import { Analytics } from "@/components/analytics";
 import { CSPostHogProvider } from "@/components/posthog";
 import { TailwindIndicator } from "@/components/tailwind-indicator";
 import { ThemeProvider } from "@/components/theme-provider";
+import { TiktokAnalytics } from "@/components/tiktok-analytics";
 import { Toaster } from "@/components/ui/sonner";
 import { siteConfig } from "@/config/site";
 import { TRPCReactProvider } from "@/lib/trpc/react";
@@ -19,6 +19,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 
 import { auth } from "@acme/auth";
 
+const META_PIXEL_ID = "1646932239239037";
 const GA_MEASUREMENT_ID = "G-S4KV1S3P6L";
 
 interface RootLayoutProps {
@@ -97,19 +98,46 @@ export default async function RootLayout({ children }: RootLayoutProps) {
               <SpeedInsights />
               {process.env.NODE_ENV === "production" && (
                 <>
+                  {/* PromoteKit */}
                   <Script
                     async
                     src="https://cdn.promotekit.com/promotekit.js"
                     data-promotekit="8b10efa4-4d33-49c2-927f-39fe809a6468"
                   ></Script>
+                  {/* Facebook Pixel */}
+                  <Script id="facebook-pixel" strategy="afterInteractive">
+                    {`
+          !function(f,b,e,v,n,t,s)
+          {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+          n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+          if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+          n.queue=[];t=b.createElement(e);t.async=!0;
+          t.src=v;s=b.getElementsByTagName(e)[0];
+          s.parentNode.insertBefore(t,s)}(window, document,'script',
+          'https://connect.facebook.net/en_US/fbevents.js');
+          fbq('init', '${META_PIXEL_ID}');
+          fbq('track', 'PageView');
+        `}
+                  </Script>
+                  <noscript>
+                    <img
+                      height="1"
+                      width="1"
+                      style={{ display: "none" }}
+                      src={`https://www.facebook.com/tr?id=${META_PIXEL_ID}&ev=PageView&noscript=1`}
+                    />
+                  </noscript>
+                  {/* Google Analytics */}
                   <GoogleAnalytics gaId={GA_MEASUREMENT_ID} />
+                  {/* Vercel Analytics */}
                   <VercelAnalytics />
+                  {/* Tiktok Pixel */}
+                  <TiktokAnalytics
+                    userId={session?.user?.id ?? undefined}
+                    email={session?.user?.email ?? undefined}
+                  />
                 </>
               )}
-              <Analytics
-                userId={session?.user?.id ?? undefined}
-                email={session?.user?.email ?? undefined}
-              />
               <Toaster />
               <TailwindIndicator />
             </ThemeProvider>
