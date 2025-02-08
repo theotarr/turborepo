@@ -1,3 +1,4 @@
+import { createHash } from "crypto";
 import type {
   DefaultSession,
   NextAuthConfig,
@@ -23,8 +24,51 @@ declare module "next-auth" {
 }
 
 const adapter = PrismaAdapter(db);
-
 export const isSecureContext = env.NODE_ENV !== "development";
+
+async function reportUserRegistration({
+  userId,
+  email,
+  name,
+}: {
+  userId: string;
+  email?: string | null;
+  name?: string | null;
+}) {
+  const em = email ? [createHash("sha256").update(email).digest("hex")] : [];
+  const fn = name ? [createHash("sha256").update(name).digest("hex")] : [];
+
+  const eventData = {
+    data: [
+      {
+        event_name: "CompleteRegistration",
+        event_time: Math.floor(new Date().getTime() / 1000),
+        action_source: "website",
+        user_data: {
+          em,
+          fn,
+          external_id: userId,
+        },
+      },
+    ],
+  };
+  const response = await fetch(
+    `https://graph.facebook.com/v22.0/${env.META_PIXEL_ID}/events`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        ...eventData,
+        access_token: env.META_ACCESS_TOKEN,
+      }),
+    },
+  );
+
+  if (!response.ok) console.error("[Meta] Error: ", await response.text());
+  else console.log("[Meta] Response: ", await response.json());
+}
 
 export const authConfig = {
   adapter,
@@ -94,6 +138,12 @@ export const authConfig = {
       if (!dbUser) {
         dbUser = await db.user.create({
           data: { ...user },
+        });
+
+        await reportUserRegistration({
+          userId: dbUser.id,
+          email: user.email,
+          name: user.name,
         });
 
         // No user, hen there is also no account.

@@ -1,3 +1,4 @@
+import { createHash } from "crypto";
 import { headers } from "next/headers";
 import { proPlan } from "@/config/subscriptions";
 import { env } from "@/env";
@@ -9,6 +10,50 @@ import {
 } from "@/lib/resend";
 import { stripe } from "@/lib/stripe";
 import Stripe from "stripe";
+
+async function reportStartTrial({
+  userId,
+  email,
+  name,
+}: {
+  userId: string;
+  email?: string | null;
+  name?: string | null;
+}) {
+  const em = email ? [createHash("sha256").update(email).digest("hex")] : [];
+  const fn = name ? [createHash("sha256").update(name).digest("hex")] : [];
+
+  const eventData = {
+    data: [
+      {
+        event_name: "StartTrial",
+        event_time: Math.floor(new Date().getTime() / 1000),
+        action_source: "website",
+        user_data: {
+          em,
+          fn,
+          external_id: userId,
+        },
+      },
+    ],
+  };
+  const response = await fetch(
+    `https://graph.facebook.com/v22.0/${env.META_PIXEL_ID}/events`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        ...eventData,
+        access_token: env.META_ACCESS_TOKEN,
+      }),
+    },
+  );
+
+  if (!response.ok) console.error("[Meta] Error: ", await response.text());
+  else console.log("[Meta] Response: ", await response.json());
+}
 
 export async function POST(req: Request) {
   const body = await req.text();
@@ -169,6 +214,13 @@ export async function POST(req: Request) {
         userId: user.id,
         promotekit_referral: promotekitReferral,
       },
+    });
+
+    // Report the start of the trial to Meta.
+    await reportStartTrial({
+      userId: user.id,
+      email: user.email,
+      name: user.name,
     });
 
     console.log("Subscription created:", subscription);

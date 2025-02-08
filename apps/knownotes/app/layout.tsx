@@ -11,6 +11,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { TiktokAnalytics } from "@/components/tiktok-analytics";
 import { Toaster } from "@/components/ui/sonner";
 import { siteConfig } from "@/config/site";
+import { env } from "@/env";
 import { TRPCReactProvider } from "@/lib/trpc/react";
 import { cn } from "@/lib/utils";
 import { GoogleAnalytics } from "@next/third-parties/google";
@@ -19,7 +20,6 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 
 import { auth } from "@acme/auth";
 
-const META_PIXEL_ID = "1646932239239037";
 const GA_MEASUREMENT_ID = "G-S4KV1S3P6L";
 
 interface RootLayoutProps {
@@ -115,7 +115,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
           t.src=v;s=b.getElementsByTagName(e)[0];
           s.parentNode.insertBefore(t,s)}(window, document,'script',
           'https://connect.facebook.net/en_US/fbevents.js');
-          fbq('init', '${META_PIXEL_ID}');
+          fbq('init', '${env.META_PIXEL_ID}');
           fbq('track', 'PageView');
         `}
                   </Script>
@@ -124,7 +124,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
                       height="1"
                       width="1"
                       style={{ display: "none" }}
-                      src={`https://www.facebook.com/tr?id=${META_PIXEL_ID}&ev=PageView&noscript=1`}
+                      src={`https://www.facebook.com/tr?id=${env.META_PIXEL_ID}&ev=PageView&noscript=1`}
                     />
                   </noscript>
                   {/* Google Analytics */}

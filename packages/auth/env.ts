@@ -12,6 +12,8 @@ export const env = createEnv({
     GOOGLE_CLIENT_SECRET: z.string().min(1),
     AUTH_APPLE_ID: z.string().min(1),
     AUTH_APPLE_SECRET: z.string().min(1),
+    META_PIXEL_ID: z.string().min(1),
+    META_ACCESS_TOKEN: z.string().min(1),
     NODE_ENV: z.enum(["development", "production"]).optional(),
   },
   client: {},

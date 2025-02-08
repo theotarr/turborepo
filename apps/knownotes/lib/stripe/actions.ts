@@ -1,13 +1,59 @@
 "use server";
 
+import { createHash } from "crypto";
 import type { Stripe } from "stripe";
 import { proPlan } from "@/config/subscriptions";
+import { env } from "@/env";
 import { stripe } from "@/lib/stripe";
 import { getUserSubscriptionPlan } from "@/lib/subscription";
 
 import { auth } from "@acme/auth";
 
 import { supabase } from "../supabase";
+
+async function reportAddPaymentInfo({
+  userId,
+  email,
+  name,
+}: {
+  userId: string;
+  email?: string | null;
+  name?: string | null;
+}) {
+  const em = email ? [createHash("sha256").update(email).digest("hex")] : [];
+  const fn = name ? [createHash("sha256").update(name).digest("hex")] : [];
+
+  const eventData = {
+    data: [
+      {
+        event_name: "AddPaymentInfo",
+        event_time: Math.floor(new Date().getTime() / 1000),
+        action_source: "website",
+        user_data: {
+          em,
+          fn,
+          external_id: userId,
+        },
+      },
+    ],
+  };
+  const response = await fetch(
+    `https://graph.facebook.com/v22.0/${env.META_PIXEL_ID}/events`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        ...eventData,
+        access_token: env.META_ACCESS_TOKEN,
+      }),
+    },
+  );
+
+  if (!response.ok) console.error("[Meta] Error: ", await response.text());
+  else console.log("[Meta] Response: ", await response.json());
+}
 
 export async function getPromotionCode(
   promotionCode: string,
@@ -57,6 +103,12 @@ export async function createSetupIntent(promotekitReferral?: string): Promise<{
       userId: session.user.id,
       promotekit_refferal: promotekitReferral as string,
     },
+  });
+
+  await reportAddPaymentInfo({
+    userId: session.user.id,
+    email: session.user.email as string,
+    name: session.user.name as string,
   });
 
   return {
