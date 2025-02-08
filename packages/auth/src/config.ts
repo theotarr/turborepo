@@ -1,4 +1,3 @@
-import { createHash } from "crypto";
 import type {
   DefaultSession,
   NextAuthConfig,
@@ -36,9 +35,16 @@ async function reportUserRegistration({
   email?: string | null;
   name?: string | null;
 }) {
-  const em = email ? [createHash("sha256").update(email).digest("hex")] : [];
-  const fn = name ? [createHash("sha256").update(name).digest("hex")] : [];
-  const external_id = createHash("sha256").update(userId).digest("hex");
+  const em = email
+    ? [await crypto.subtle.digest("SHA-256", new TextEncoder().encode(email))]
+    : [];
+  const fn = name
+    ? [await crypto.subtle.digest("SHA-256", new TextEncoder().encode(name))]
+    : [];
+  const external_id = await crypto.subtle.digest(
+    "SHA-256",
+    new TextEncoder().encode(userId),
+  );
 
   const eventData = {
     data: [
