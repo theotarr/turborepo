@@ -22,6 +22,7 @@ async function reportAddPaymentInfo({
 }) {
   const em = email ? [createHash("sha256").update(email).digest("hex")] : [];
   const fn = name ? [createHash("sha256").update(name).digest("hex")] : [];
+  const external_id = createHash("sha256").update(userId).digest("hex");
 
   const eventData = {
     data: [
@@ -32,13 +33,13 @@ async function reportAddPaymentInfo({
         user_data: {
           em,
           fn,
-          external_id: userId,
+          external_id,
         },
       },
     ],
   };
   const response = await fetch(
-    `https://graph.facebook.com/v22.0/${env.META_PIXEL_ID}/events`,
+    `https://graph.facebook.com/v22.0/${env.NEXT_PUBLIC_META_PIXEL_ID}/events`,
     {
       method: "POST",
       headers: {

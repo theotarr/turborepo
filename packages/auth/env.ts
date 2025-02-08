@@ -12,12 +12,15 @@ export const env = createEnv({
     GOOGLE_CLIENT_SECRET: z.string().min(1),
     AUTH_APPLE_ID: z.string().min(1),
     AUTH_APPLE_SECRET: z.string().min(1),
-    META_PIXEL_ID: z.string().min(1),
     META_ACCESS_TOKEN: z.string().min(1),
     NODE_ENV: z.enum(["development", "production"]).optional(),
   },
-  client: {},
-  experimental__runtimeEnv: {},
+  client: {
+    NEXT_PUBLIC_META_PIXEL_ID: z.string().min(1),
+  },
+  experimental__runtimeEnv: {
+    NEXT_PUBLIC_META_PIXEL_ID: process.env.NEXT_PUBLIC_META_PIXEL_ID,
+  },
   skipValidation:
     !!process.env.CI || process.env.npm_lifecycle_event === "lint",
 });
