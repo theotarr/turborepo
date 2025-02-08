@@ -20,15 +20,25 @@ async function reportAddPaymentInfo({
   name?: string | null;
 }) {
   const em = email
-    ? [await crypto.subtle.digest("SHA-256", new TextEncoder().encode(email))]
+    ? [
+        Buffer.from(
+          await crypto.subtle.digest(
+            "SHA-256",
+            new TextEncoder().encode(email),
+          ),
+        ).toString("hex"),
+      ]
     : [];
   const fn = name
-    ? [await crypto.subtle.digest("SHA-256", new TextEncoder().encode(name))]
+    ? [
+        Buffer.from(
+          await crypto.subtle.digest("SHA-256", new TextEncoder().encode(name)),
+        ).toString("hex"),
+      ]
     : [];
-  const external_id = await crypto.subtle.digest(
-    "SHA-256",
-    new TextEncoder().encode(userId),
-  );
+  const external_id = Buffer.from(
+    await crypto.subtle.digest("SHA-256", new TextEncoder().encode(userId)),
+  ).toString("hex");
 
   const eventData = {
     data: [
