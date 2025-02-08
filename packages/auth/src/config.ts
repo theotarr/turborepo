@@ -55,7 +55,8 @@ async function reportUserRegistration({
     ],
   };
   const response = await fetch(
-    `https://graph.facebook.com/v22.0/${env.NEXT_PUBLIC_META_PIXEL_ID}/events`,
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion, turbo/no-undeclared-env-vars, no-restricted-properties
+    `https://graph.facebook.com/v22.0/${process.env.NEXT_PUBLIC_META_PIXEL_ID!}/events`,
     {
       method: "POST",
       headers: {
@@ -63,7 +64,8 @@ async function reportUserRegistration({
       },
       body: JSON.stringify({
         ...eventData,
-        access_token: env.META_ACCESS_TOKEN,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion, turbo/no-undeclared-env-vars, no-restricted-properties
+        access_token: process.env.META_ACCESS_TOKEN!,
       }),
     },
   );
