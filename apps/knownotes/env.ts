@@ -22,7 +22,6 @@ export const env = createEnv({
     CRON_SECRET: z.string().min(1),
     APIFY_API_TOKEN: z.string().min(1),
     NEXT_PUBLIC_META_PIXEL_ID: z.string().min(1),
-    META_ACCESS_TOKEN: z.string(),
   },
   client: {
     NEXT_PUBLIC_APP_URL: z.string().min(1),
@@ -55,6 +54,5 @@ export const env = createEnv({
     NEXT_PUBLIC_POSTHOG_HOST: process.env.NEXT_PUBLIC_POSTHOG_HOST,
     APIFY_API_TOKEN: process.env.APIFY_API_TOKEN,
     NEXT_PUBLIC_META_PIXEL_ID: process.env.NEXT_PUBLIC_META_PIXEL_ID,
-    META_ACCESS_TOKEN: process.env.META_ACCESS_TOKEN,
   },
 });

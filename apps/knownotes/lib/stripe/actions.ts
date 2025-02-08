@@ -47,7 +47,8 @@ async function reportAddPaymentInfo({
       },
       body: JSON.stringify({
         ...eventData,
-        access_token: env.META_ACCESS_TOKEN,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion, turbo/no-undeclared-env-vars, no-restricted-properties
+        access_token: process.env.META_ACCESS_TOKEN!,
       }),
     },
   );
