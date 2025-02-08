@@ -22,7 +22,7 @@ export const env = createEnv({
     CRON_SECRET: z.string().min(1),
     APIFY_API_TOKEN: z.string().min(1),
     NEXT_PUBLIC_META_PIXEL_ID: z.string().min(1),
-    META_ACCESS_TOKEN: z.string().min(1),
+    META_ACCESS_TOKEN: z.string(),
   },
   client: {
     NEXT_PUBLIC_APP_URL: z.string().min(1),
