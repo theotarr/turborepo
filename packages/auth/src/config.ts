@@ -24,6 +24,7 @@ declare module "next-auth" {
 }
 
 const adapter = PrismaAdapter(db);
+const resend = new Resend(env.RESEND_API_KEY);
 export const isSecureContext = env.NODE_ENV !== "development";
 
 async function reportUserRegistration({
@@ -135,18 +136,42 @@ export const authConfig = {
       });
 
       // If there's no user in the database, create one.
+      // Since the `createUser` event isn't working from Next Auth, this is a workaround.
       if (!dbUser) {
         dbUser = await db.user.create({
           data: { ...user },
         });
 
+        // Report the user registration to Meta.
         await reportUserRegistration({
           userId: dbUser.id,
           email: user.email,
           name: user.name,
         });
 
-        // No user, hen there is also no account.
+        // Email the user a welcome email with a tutorial.
+        if (user.email) {
+          try {
+            console.log("[Resend] Sending welcome email to: ", user.email);
+            await resend.emails.send({
+              from: "Theo from KnowNotes <theo@knownotes.ai>",
+              to: user.email,
+              subject: "Save hours studying",
+              text: `\
+        Welcome to KnowNotes!
+        To make the most of KnowNotes, here's a short tutorial on how to use all its features (2min on 2x):
+        https://www.loom.com/share/5f1fbb33b9a44d5ab2d61928d30af528?sid=94a40531-7cf3-48e4-826b-655bd32ee8be
+        Let me know if you have any questions.
+        Best,
+        Theo`,
+              html: `Welcome to KnowNotes!<br><br>To make the most of KnowNotes, here's a short tutorial on how to use all its features (2min on 2x):<br><a href="https://www.loom.com/share/5f1fbb33b9a44d5ab2d61928d30af528?sid=94a40531-7cf3-48e4-826b-655bd32ee8be">Watch the tutorial</a><br><br>Let me know if you have any questions.<br><br>Best,<br>Theo`,
+            });
+          } catch (error) {
+            console.error("[Resend] Error sending welcome email: ", error);
+          }
+        }
+
+        // If there's no user, then there is also no account.
         if (account) {
           // Check if the account is already linked to another user.
           const existingAccount = await db.account.findFirst({
