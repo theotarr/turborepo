@@ -11,6 +11,7 @@ import StanfordLogo from "@/assets/images/institutions/stanford.png";
 import YaleLogo from "@/assets/images/institutions/yale.png";
 import { FaqArray } from "@/components/faq";
 import { PrimaryFeatures } from "@/components/features";
+import { Icons } from "@/components/icons";
 import { PricingCard } from "@/components/pricing";
 import { ReviewGrid } from "@/components/testimonials";
 import { TrustPilot } from "@/components/trust-pilot";
@@ -159,16 +160,27 @@ export default async function IndexPage() {
               href={session ? "/dashboard" : "/login"}
               className={cn(
                 buttonVariants({ size: "lg", variant: "shadow" }),
-                "h-12 w-56 rounded-lg text-base font-semibold",
+                "h-12 w-64 rounded-lg text-base font-semibold shadow-lg",
               )}
             >
-              {session ? "Dashboard" : "Get Started"}
+              {session ? "Dashboard" : "Get Started on Web"}
             </Link>
             {session ? null : (
               <p className="mt-2 text-sm text-muted-foreground">
                 No credit card required
               </p>
             )}
+            <Link
+              target="_blank"
+              href="https://apps.apple.com/us/app/knownotes-ai-note-taker/id6739503513"
+              className={cn(
+                buttonVariants({ size: "lg", variant: "secondary" }),
+                "mt-8 flex h-12 items-center rounded-lg text-base font-semibold",
+              )}
+            >
+              <Icons.apple className="mr-2 size-4" />
+              iPhone App
+            </Link>
           </div>
           <div className="relative mt-12 flex flex-col items-center justify-center sm:mt-16">
             <p className="text-secondary-foreground/8 text-lg font-bold uppercase sm:text-xl">
@@ -269,7 +281,7 @@ export default async function IndexPage() {
             <Link href="/register">
               <Button
                 variant="shadow"
-                className="h-14 w-72 rounded-lg text-lg font-semibold"
+                className="h-14 w-72 rounded-lg text-lg font-semibold shadow-lg"
               >
                 Continue on Web
                 <span className="ml-2 text-lg font-medium text-primary-foreground/80">
