@@ -39,7 +39,7 @@ export default function Page() {
     if (session) {
       void identifyUser();
       void AsyncStorage.getItem("onboardingComplete").then((value) => {
-        if (value === "true") router.replace("/(dashboard)/dashboard");
+        if (value === "false") router.replace("/(dashboard)/dashboard");
         else router.replace("/onboarding");
       });
     }
