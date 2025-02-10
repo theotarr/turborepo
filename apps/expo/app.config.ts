@@ -24,7 +24,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   assetBundlePatterns: ["**/*"],
   ios: {
-    buildNumber: "3",
+    buildNumber: "4",
     bundleIdentifier: "ai.knownotes.ios",
     usesAppleSignIn: true,
     supportsTablet: true,
