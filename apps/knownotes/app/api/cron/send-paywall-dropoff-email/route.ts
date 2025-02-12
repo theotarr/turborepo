@@ -33,7 +33,7 @@ export async function GET(request: Request) {
     if (!user.email) continue;
 
     const emailResponse = await resend.emails.send({
-      from: "Theo <theo@knownotes.ai>",
+      from: "Theo from KnowNotes <theo@knownotes.ai>",
       to: user.email,
       subject: "Want to try KnowNotes for free?",
       html: `Hey,

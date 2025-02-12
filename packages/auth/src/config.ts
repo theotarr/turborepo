@@ -175,7 +175,7 @@ export const authConfig = {
             await resend.emails.send({
               from: "Theo from KnowNotes <theo@knownotes.ai>",
               to: user.email,
-              subject: "Save hours studying",
+              subject: "Never take notes again",
               text: `\
         Welcome to KnowNotes!
         To make the most of KnowNotes, here's a short tutorial on how to use all its features (2min on 2x):
