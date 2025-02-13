@@ -40,6 +40,10 @@ async function reportStartTrial({
     await crypto.subtle.digest("SHA-256", new TextEncoder().encode(userId)),
   ).toString("hex");
 
+  console.log("em", em);
+  console.log("fn", fn);
+  console.log("external_id", external_id);
+
   const eventData = {
     data: [
       {
@@ -235,6 +239,7 @@ export async function POST(req: Request) {
     });
 
     // Report the start of the trial to Meta.
+    console.log("Reporting start of trial to Meta...");
     await reportStartTrial({
       userId: user.id,
       email: user.email,
