@@ -134,14 +134,14 @@ export default function App() {
 
   const screens = useMemo(
     () => [
-      {
-        text: "Never take notes again",
-        description: "Just hit record in class and we'll do the rest.",
-        containerClassName:
-          "w-full flex-1 flex-col items-center justify-center px-8",
-        showNextButton: true,
-        content: <OnboardingDictaphone />,
-      },
+      // {
+      //   text: "Never take notes again",
+      //   description: "Just hit record in class and we'll do the rest.",
+      //   containerClassName:
+      //     "w-full flex-1 flex-col items-center justify-center px-8",
+      //   showNextButton: true,
+      //   content: <OnboardingDictaphone />,
+      // },
       {
         text: "What describes you best?",
         description:
