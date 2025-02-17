@@ -45,7 +45,7 @@ export default function RootLayout() {
   const { colorScheme, setColorScheme, isDarkColorScheme } = useColorScheme();
   const [isColorSchemeLoaded, setIsColorSchemeLoaded] = React.useState(false);
 
-  // Initialize Superwall and AppsFlyer
+  // Initialize Superwall
   React.useEffect(() => {
     const setupSuperwall = async () => {
       const apiKey =
@@ -53,11 +53,14 @@ export default function RootLayout() {
           ? "pk_4c26d917d2debc8d3e77f570082055efc61abb846b7efae4"
           : "MY_ANDROID_API_KEY";
       await Superwall.configure(apiKey);
-      Superwall.shared.setDelegate(delegate);
+      void Superwall.shared.setDelegate(delegate);
     };
 
-    setupSuperwall();
+    void setupSuperwall();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
+  React.useEffect(() => {
     appsFlyer.initSdk(
       {
         appId: "id6739503513",
@@ -76,7 +79,8 @@ export default function RootLayout() {
     void (async () => {
       const theme = await AsyncStorage.getItem("theme");
       if (!theme) {
-        void AsyncStorage.setItem("theme", colorScheme);
+        // Default to light theme.
+        void AsyncStorage.setItem("theme", "light");
         setIsColorSchemeLoaded(true);
         return;
       }
