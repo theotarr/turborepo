@@ -55,7 +55,7 @@ const Dictaphone = () => {
         onPress={() => {
           void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
         }}
-        className="relative flex size-[9rem] items-center justify-center rounded-full border-4 border-border"
+        className="relative mt-12 flex size-[9rem] items-center justify-center rounded-full border-4 border-border"
       >
         <Animated.View
           style={[animatedMic]}
@@ -66,19 +66,19 @@ const Dictaphone = () => {
           className="absolute -z-10 rounded-full bg-primary/40"
         />
       </Pressable>
-      <Text className="mt-12 text-center text-xl font-medium text-secondary-foreground">
+      <Text className="mt-12 text-center text-lg text-muted-foreground">
         "Next" to continue
       </Text>
     </View>
   );
 };
 
-const AllowMicrophone = () => {
-  const [_, requestPermission] = Audio.usePermissions();
-
+export const OnboardingDictaphone = () => {
+  const [permissionResponse, requestPermission] = Audio.usePermissions();
+  const fadeAnim = useSharedValue(0);
   const bounceAnimation = useSharedValue(0);
 
-  const animatedStyle = useAnimatedStyle(() => {
+  const bounceStyle = useAnimatedStyle(() => {
     return {
       transform: [
         {
@@ -99,58 +99,6 @@ const AllowMicrophone = () => {
     );
   }, [bounceAnimation]);
 
-  return (
-    <View className="flex items-center justify-center rounded-2xl bg-secondary px-8 py-6">
-      <Text className="mb-14 text-center text-2xl font-semibold text-secondary-foreground">
-        KnowNotes would like to access your microphone
-      </Text>
-      <View className="absolute bottom-0 left-0 right-0 mt-4 flex-row border-t border-border">
-        <Button
-          size="lg"
-          className="flex-1 rounded-b-none rounded-t-none rounded-bl-2xl"
-          variant="secondary"
-          onPress={() => {
-            Alert.alert(
-              "Microphone Permission",
-              "This app requires access to your microphone to record audio. Please enable microphone access in your settings.",
-              [{ text: "OK" }],
-            );
-          }}
-        >
-          <Text className="font-medium text-secondary-foreground">
-            Don't Allow
-          </Text>
-        </Button>
-        <Button
-          size="lg"
-          className="relative flex-1 rounded-b-none rounded-t-none rounded-br-2xl"
-          onPress={async () => {
-            await requestPermission();
-          }}
-        >
-          <Text className="font-medium text-primary-foreground">Allow</Text>
-          <Animated.View
-            style={[
-              animatedStyle,
-              {
-                position: "absolute",
-                bottom: -55,
-                left: "50%",
-              },
-            ]}
-          >
-            <Text className="text-4xl">👆</Text>
-          </Animated.View>
-        </Button>
-      </View>
-    </View>
-  );
-};
-
-export const OnboardingDictaphone = () => {
-  const [permissionResponse] = Audio.usePermissions();
-  const fadeAnim = useSharedValue(0);
-
   useEffect(() => {
     fadeAnim.value = withTiming(1, { duration: 750 });
   }, [fadeAnim, permissionResponse]);
@@ -163,7 +111,54 @@ export const OnboardingDictaphone = () => {
 
   return (
     <Animated.View style={animatedStyle}>
-      {permissionResponse?.granted ? <Dictaphone /> : <AllowMicrophone />}
+      {permissionResponse?.granted ? (
+        <Dictaphone />
+      ) : (
+        <View className="flex items-center justify-center rounded-2xl bg-secondary px-8 py-6">
+          <Text className="mb-14 text-center text-2xl font-semibold text-secondary-foreground">
+            KnowNotes would like to access your microphone
+          </Text>
+          <View className="absolute bottom-0 left-0 right-0 mt-4 flex-row border-t border-border">
+            <Button
+              size="lg"
+              className="flex-1 rounded-b-none rounded-t-none rounded-bl-2xl"
+              variant="secondary"
+              onPress={() => {
+                Alert.alert(
+                  "Microphone Permission",
+                  "This app requires access to your microphone to record audio. Please enable microphone access in your settings.",
+                  [{ text: "OK" }],
+                );
+              }}
+            >
+              <Text className="font-medium text-secondary-foreground">
+                Don't Allow
+              </Text>
+            </Button>
+            <Button
+              size="lg"
+              className="relative flex-1 rounded-b-none rounded-t-none rounded-br-2xl"
+              onPress={async () => {
+                await requestPermission();
+              }}
+            >
+              <Text className="font-medium text-primary-foreground">Allow</Text>
+              <Animated.View
+                style={[
+                  bounceStyle,
+                  {
+                    position: "absolute",
+                    bottom: -55,
+                    left: "50%",
+                  },
+                ]}
+              >
+                <Text className="text-4xl">👆</Text>
+              </Animated.View>
+            </Button>
+          </View>
+        </View>
+      )}
     </Animated.View>
   );
 };

@@ -14,6 +14,8 @@ import Animated, {
   FadeOut,
   useAnimatedStyle,
   useSharedValue,
+  withRepeat,
+  withSequence,
   withTiming,
 } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
@@ -22,7 +24,7 @@ import { Stack, useRouter } from "expo-router";
 import * as StoreReview from "expo-store-review";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Superwall from "@superwall/react-native-superwall";
-import { ArrowLeft, Plus } from "lucide-react-native";
+import { ArrowLeft, CircleCheckBig, Plus } from "lucide-react-native";
 
 import { OnboardingDictaphone } from "~/components/dictaphone";
 import { OnboardingQuestionItem } from "~/components/onboarding-question-item";
@@ -35,6 +37,7 @@ import { Progress } from "~/components/ui/progress";
 import { Text } from "~/components/ui/text";
 import { NAV_THEME } from "~/lib/constants";
 import { useColorScheme } from "~/lib/theme";
+import { capitalizeWords } from "~/lib/utils";
 import { api } from "~/utils/api";
 import { shouldShowPaywall } from "~/utils/subscription";
 
@@ -72,7 +75,7 @@ export default function App() {
   const { data: user } = api.auth.getUser.useQuery();
   const createCourseMutation = api.course.create.useMutation();
 
-  const [index, setIndex] = useState(4);
+  const [index, setIndex] = useState(0);
   const [course, setCourse] = useState("");
   const [selectedRole, setSelectedRole] = useState<string | null>(null);
   const [selectedStudyHours, setSelectedStudyHours] = useState<string | null>(
@@ -80,6 +83,8 @@ export default function App() {
   );
   const [selectedSource, setSelectedSource] = useState<string | null>(null);
   const [requestedRating, setRequestedRating] = useState(false);
+  const [showTips, setShowTips] = useState(false);
+  const [getStarted, setGetStarted] = useState(false);
   const fadeAnim = useSharedValue(1);
 
   const fadeIn = useCallback(() => {
@@ -100,27 +105,42 @@ export default function App() {
     [fadeIn, fadeOut],
   );
 
+  const bounceAnimation = useSharedValue(0);
+  const bounceStyle = useAnimatedStyle(() => {
+    return {
+      transform: [
+        {
+          translateY: bounceAnimation.value,
+        },
+      ],
+    };
+  });
+  useEffect(() => {
+    bounceAnimation.value = withRepeat(
+      withSequence(
+        withTiming(-10, { duration: 750 }),
+        withTiming(0, { duration: 750 }),
+      ),
+      -1,
+      true,
+    );
+  }, [bounceAnimation]);
+
   const animatedStyle = useAnimatedStyle(() => {
     return {
       opacity: fadeAnim.value,
     };
   });
 
-  const pages = useMemo(
+  const screens = useMemo(
     () => [
       {
         text: "Never take notes again",
         description: "Just hit record in class and we'll do the rest.",
         containerClassName:
-          "w-full flex-1 flex-col items-center justify-center",
+          "w-full flex-1 flex-col items-center justify-center px-8",
         showNextButton: true,
-        content: (
-          <View>
-            <View className="flex w-full flex-1 items-center justify-center">
-              <OnboardingDictaphone />
-            </View>
-          </View>
-        ),
+        content: <OnboardingDictaphone />,
       },
       {
         text: "What describes you best?",
@@ -182,6 +202,43 @@ export default function App() {
               ))}
             </View>
           </ScrollView>
+        ),
+      },
+      {
+        text: "KnowNotes creates tangible results",
+        description: "",
+        containerClassName: "mt-8 px-6 flex-col items-center justify-center",
+        showNextButton: true,
+        content: (
+          <View className="flex w-full flex-col items-center">
+            <View className="w-full max-w-md rounded-xl border border-border bg-secondary p-6">
+              <Text className="text-lg font-medium text-secondary-foreground">
+                Your Stats
+              </Text>
+              <View className="mt-8 flex w-full flex-row items-center justify-around">
+                <View className="flex flex-col items-center">
+                  <Text className="text-3xl font-semibold tracking-tighter text-secondary-foreground">
+                    +0.3
+                  </Text>
+                  <Text className="text-base text-muted-foreground">
+                    GPA increase
+                  </Text>
+                </View>
+                <View className="flex flex-col items-center">
+                  <Text className="text-3xl font-semibold tracking-tighter text-secondary-foreground">
+                    2.5 hrs
+                  </Text>
+                  <Text className="text-base text-muted-foreground">
+                    saved per week
+                  </Text>
+                </View>
+              </View>
+              <Text className="mt-10 text-center text-sm text-muted-foreground">
+                Based on 100k+ KnowNotes users from top universities around the
+                world.
+              </Text>
+            </View>
+          </View>
         ),
       },
       {
@@ -287,45 +344,94 @@ export default function App() {
         ),
       },
       {
-        text: "",
+        text: "What's stopping you from reaching your academic goals?",
+        description: "",
+        containerClassName: "mt-8 px-6 flex-col items-center justify-center",
         showNextButton: true,
-        containerClassName: "flex flex-col items-center justify-center",
         content: (
-          <View className="flex flex-col items-center justify-center px-8">
-            <View className="flex items-center justify-center rounded-2xl bg-secondary px-8 py-6">
-              <Text className="mb-14 text-center text-2xl font-semibold text-secondary-foreground">
-                KnowNotes would like to send you Notifications
-              </Text>
-              <View className="absolute bottom-0 left-0 right-0 mt-4 flex-row border-t border-border">
-                <Button
-                  size="lg"
-                  className="flex-1 rounded-b-none rounded-t-none rounded-bl-2xl"
-                  variant="secondary"
-                  onPress={() => handlePageChange(index + 1)}
-                >
-                  <Text>Don't Allow</Text>
-                </Button>
-                <Button
-                  size="lg"
-                  className="flex-1 rounded-b-none rounded-t-none rounded-br-2xl"
-                  onPress={async () => {
-                    const { status } =
-                      await Notifications.requestPermissionsAsync();
-
-                    // Check if permission was granted
-                    // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
-                    if (status === "granted") {
-                      // Next page
-                      console.log("Notification permissions granted!");
-                      handlePageChange(index + 1);
-                    } else {
-                      console.log("Notification permissions denied");
-                    }
+          <ScrollView className="w-full">
+            <View className="flex flex-col gap-y-3">
+              {[
+                "Lack of time",
+                "Poor study habits",
+                "Lack of motivation",
+                "Distractions",
+                "Difficult subjects",
+              ].map((text) => (
+                <OnboardingQuestionItem
+                  key={text}
+                  isSelected={selectedRole === text}
+                  onSelect={() => {
+                    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    setSelectedRole(text);
                   }}
+                  text={text}
+                />
+              ))}
+            </View>
+          </ScrollView>
+        ),
+      },
+      {
+        text: "Recording Reminders",
+        description: "You're 2x more likely to take notes with reminders.",
+        showNextButton: true,
+        // onActive: async () => {
+        //   const { status } = await Notifications.requestPermissionsAsync();
+
+        //   // Check if permission was granted
+        //   // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
+        //   if (status === "granted") {
+        //     handlePageChange(index + 1);
+        //   }
+        // },
+        containerClassName: "flex flex-col items-center justify-center px-8",
+        content: (
+          <View className="flex items-center justify-center rounded-2xl bg-secondary px-8 py-6">
+            <Text className="mb-14 text-center text-2xl font-semibold text-secondary-foreground">
+              KnowNotes would like to send you Notifications
+            </Text>
+            <View className="absolute bottom-0 left-0 right-0 mt-4 flex-row border-t border-border">
+              <Button
+                size="lg"
+                className="flex-1 rounded-b-none rounded-t-none rounded-bl-2xl"
+                variant="secondary"
+                onPress={() => handlePageChange(index + 1)}
+              >
+                <Text>Don't Allow</Text>
+              </Button>
+              <Button
+                size="lg"
+                className="relative flex-1 rounded-b-none rounded-t-none rounded-br-2xl"
+                onPress={async () => {
+                  const { status } =
+                    await Notifications.requestPermissionsAsync();
+
+                  // Check if permission was granted
+                  // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
+                  if (status === "granted") {
+                    // Next page
+                    console.log("Notification permissions granted!");
+                    handlePageChange(index + 1);
+                  } else {
+                    console.log("Notification permissions denied");
+                  }
+                }}
+              >
+                <Text>Allow</Text>
+                <Animated.View
+                  style={[
+                    bounceStyle,
+                    {
+                      position: "absolute",
+                      bottom: -55,
+                      left: "50%",
+                    },
+                  ]}
                 >
-                  <Text>Allow</Text>
-                </Button>
-              </View>
+                  <Text className="text-4xl">👆</Text>
+                </Animated.View>
+              </Button>
             </View>
           </View>
         ),
@@ -333,7 +439,7 @@ export default function App() {
       {
         text: "Give us a rating",
         description: "",
-        showNextButton: true,
+        showNextButton: requestedRating,
         onActive: () => {
           if (requestedRating) return;
           setRequestedRating(true);
@@ -373,7 +479,7 @@ export default function App() {
                 </View>
               </View>
               <Text className="text-center text-sm font-medium">
-                +1000 KnowNotes users
+                +100k KnowNotes users
               </Text>
             </View>
             <View className="flex flex-col gap-y-4 px-4">
@@ -393,15 +499,105 @@ export default function App() {
           </ScrollView>
         ),
       },
+      {
+        text: "",
+        description: "",
+        showNextButton: getStarted,
+        onActive: () => {
+          setTimeout(() => setShowTips(true), 3500); // 3.5 seconds
+          setTimeout(() => setGetStarted(true), 8500);
+        },
+        content: (
+          <>
+            {showTips ? (
+              <View className="flex-1 items-center px-6">
+                <Animated.View entering={FadeIn} className="mb-2 items-center">
+                  <CircleCheckBig
+                    size={24}
+                    color={NAV_THEME[colorScheme].secondaryForeground}
+                  />
+                </Animated.View>
+                <Animated.Text
+                  entering={FadeIn}
+                  className="mb-8 max-w-xs text-center text-3xl font-semibold text-secondary-foreground"
+                >
+                  Your personal tutor is ready!
+                </Animated.Text>
+                <Animated.View
+                  entering={FadeIn.delay(1000)}
+                  className="mb-4 w-full flex-row items-center gap-x-4 rounded-xl bg-secondary p-5"
+                >
+                  <Text className="text-left text-3xl">🎓</Text>
+                  <View className="flex-1">
+                    <Text className="text-left text-xl font-semibold tracking-tight text-secondary-foreground">
+                      Smart Studying for{" "}
+                      {selectedRole
+                        ? capitalizeWords(formatRole(selectedRole))
+                        : "Students"}
+                    </Text>
+                    <Text className="mt-2 text-left text-base font-medium leading-tight text-muted-foreground">
+                      8,250+ other{" "}
+                      {selectedRole ? formatRole(selectedRole) : "students"} are
+                      using KnowNotes to study smarter and save time.
+                    </Text>
+                  </View>
+                </Animated.View>
+                <Animated.View
+                  entering={FadeIn.delay(2500)}
+                  className="mb-4 w-full flex-row items-center gap-x-4 rounded-xl bg-secondary p-5"
+                >
+                  <Text className="text-left text-3xl">📈</Text>
+                  <View className="flex-1">
+                    <Text className="text-left text-xl font-semibold tracking-tight text-secondary-foreground">
+                      Boost Your GPA
+                    </Text>
+                    <Text className="mt-2 text-left text-base font-medium leading-tight text-muted-foreground">
+                      The average student using KnowNotes sees their GPA rise by
+                      0.3.
+                    </Text>
+                  </View>
+                </Animated.View>
+                <Animated.View
+                  entering={FadeIn.delay(4000)}
+                  className="mb-4 w-full flex-row items-center gap-x-4 rounded-xl bg-secondary p-5"
+                >
+                  <Text className="text-left text-3xl">⏰</Text>
+                  <View className="flex-1">
+                    <Text className="text-left text-xl font-semibold tracking-tight text-secondary-foreground">
+                      Work Smarter, Not Harder
+                    </Text>
+                    <Text className="mt-2 text-left text-base font-medium leading-tight text-muted-foreground">
+                      The average KnowNotes user saves 2.5 hours per week.
+                    </Text>
+                  </View>
+                </Animated.View>
+              </View>
+            ) : (
+              <Animated.View
+                exiting={FadeOut}
+                className="flex-1 items-center justify-center"
+              >
+                <Text className="mb-6 max-w-xs text-center text-3xl font-semibold text-secondary-foreground">
+                  We're setting everything up for you
+                </Text>
+                <ActivityIndicator
+                  size="large"
+                  color={NAV_THEME[colorScheme].secondaryForeground}
+                />
+              </Animated.View>
+            )}
+          </>
+        ),
+      },
     ],
     [
       selectedRole,
-      selectedStudyHours,
       selectedSource,
       course,
       createCourseMutation,
       colorScheme,
       user?.courses,
+      showTips,
       utils.auth.getUser,
       handlePageChange,
       index,
@@ -411,10 +607,10 @@ export default function App() {
 
   useEffect(() => {
     // On page switch, run the onActive function if it exists.
-    if (pages[index]?.onActive) {
-      void pages[index].onActive();
+    if (screens[index]?.onActive) {
+      void screens[index].onActive();
     }
-  }, [index, pages]);
+  }, [index, screens]);
 
   return (
     <SafeAreaView className="flex-1">
@@ -444,7 +640,7 @@ export default function App() {
             <View className="mx-4 flex-1">
               <Progress
                 className="h-1"
-                value={((index + 1) / pages.length) * 100}
+                value={((index + 1) / screens.length) * 100}
               />
             </View>
           </View>
@@ -452,22 +648,22 @@ export default function App() {
       </View>
       <Animated.View className="flex-1" style={animatedStyle}>
         {/* eslint-disable-next-line @typescript-eslint/no-non-null-assertion */}
-        <OnboardingScreen item={pages[index]!} />
+        <OnboardingScreen item={screens[index]!} />
       </Animated.View>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={10}
         className="mb-4 w-full"
       >
         <Button
-          className="mx-4 rounded-full"
+          className="mx-4 items-center rounded-full"
           size="lg"
-          disabled={!pages[index]?.showNextButton}
+          disabled={!screens[index]?.showNextButton}
           onPress={async () => {
             void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
-            if (index === pages.length - 1) {
+            if (index === screens.length - 1) {
               // Mark onboarding as complete. Send the analytics event to AppsFlyer.
-              await AsyncStorage.setItem("onboardingComplete", "true");
               await appsFlyer.logEvent("af_onboarding_completion", {});
 
               if (user) {
@@ -480,18 +676,24 @@ export default function App() {
                       appStoreCurrentPeriodEnd?: string | null;
                     },
                   )
-                )
-                  void Superwall.shared.register("onboarding").then(() => {
-                    router.replace("/(dashboard)/dashboard");
-                  });
+                ) {
+                  void Superwall.shared
+                    .register("onboarding")
+                    .then(async () => {
+                      await AsyncStorage.setItem("onboardingComplete", "true");
+                      router.replace("/(dashboard)/dashboard");
+                    });
+                } else {
+                  await AsyncStorage.setItem("onboardingComplete", "true");
+                  router.replace("/(dashboard)/dashboard");
+                }
 
-                router.replace("/(dashboard)/dashboard");
                 return;
               }
             }
 
             fadeOut();
-            if (index < pages.length - 1) {
+            if (index < screens.length - 1) {
               setTimeout(() => {
                 setIndex((prevIndex) => prevIndex + 1);
                 fadeIn();
@@ -499,9 +701,9 @@ export default function App() {
             }
           }}
         >
-          <View className="flex-row items-center">
-            <Text className="text-xl font-semibold">Next</Text>
-          </View>
+          <Text className="text-xl font-semibold">
+            {index === screens.length - 1 ? "Let's Get Started" : "Next"}
+          </Text>
         </Button>
       </KeyboardAvoidingView>
     </SafeAreaView>
