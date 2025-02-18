@@ -19,7 +19,6 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
-import * as Notifications from "expo-notifications";
 import { Stack, useRouter } from "expo-router";
 import * as StoreReview from "expo-store-review";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -689,15 +688,16 @@ export default function App() {
                     // Feature gated behind Superwall.
                     // Schedule a notification for 2 days from now.
                     .then(async () => {
-                      await Notifications.scheduleNotificationAsync({
-                        content: {
-                          title: "You're trial ends soon",
-                          body: "You have one day left on your trial until you are charged. Cancel anytime.",
-                        },
-                        trigger: {
-                          date: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // 2 days from now
-                        },
-                      });
+                      // await Notifications.scheduleNotificationAsync({
+                      //   content: {
+                      //     title: "You're trial ends soon",
+                      //     body: "You have one day left on your trial until you are charged. Cancel anytime.",
+                      //   },
+                      //   trigger: {
+                      //     date: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // 2 days from now
+                      //   },
+                      // });
+                      await utils.invalidate();
                       router.replace("/(dashboard)/dashboard");
                     });
                 } else {

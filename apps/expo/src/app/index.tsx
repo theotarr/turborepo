@@ -16,6 +16,7 @@ import { shouldShowPaywall } from "~/utils/subscription";
 
 export default function Index() {
   const router = useRouter();
+  const utils = api.useUtils();
   const { colorScheme } = useColorScheme();
 
   const { isLoading, data: user } = api.auth.getUser.useQuery();
@@ -45,7 +46,9 @@ export default function Index() {
     void AsyncStorage.getItem("onboardingComplete").then((value) => {
       if (value === "true") {
         // User has completed onboarding but hasn't subscribed.
-        void Superwall.shared.register("onboarding").then(() => {
+        void Superwall.shared.register("onboarding").then(async () => {
+          // Invalidate user data.
+          await utils.invalidate();
           router.replace("/(dashboard)/dashboard");
         });
       } else {
@@ -53,13 +56,9 @@ export default function Index() {
         router.replace("/onboarding");
       }
     });
-  }, [router, user]);
+  }, [router, user, utils]);
 
-  console.log("isLoading", isLoading);
-  console.log("user", user);
-
-  if (isLoading || user)
-    return <Stack.Screen options={{ headerShown: false }} />;
+  if (isLoading) return <Stack.Screen options={{ headerShown: false }} />;
 
   return (
     <SafeAreaView className="bg-background">
