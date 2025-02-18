@@ -3,6 +3,7 @@ import { Pressable, View } from "react-native";
 import appsFlyer from "react-native-appsflyer";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 import * as AppleAuthentication from "expo-apple-authentication";
+import { usePathname, useRouter } from "expo-router";
 import { Aperture } from "lucide-react-native";
 
 import { Button } from "~/components/ui/button";
@@ -15,6 +16,8 @@ import { useSignIn } from "~/utils/auth";
 import { setToken } from "~/utils/session-store";
 
 export function AuthForm({ className }: { className?: string }) {
+  const router = useRouter();
+  const pathname = usePathname();
   const utils = api.useUtils();
   const { colorScheme } = useColorScheme();
   const [showButton, setShowButton] = useState(false);
@@ -90,12 +93,18 @@ export function AuthForm({ className }: { className?: string }) {
             name: name ?? undefined,
           });
 
-          // Store the app store user ID as then token prefixed with apple_. Then refetch the session to redirect.
+          // Store the app store user ID as then token prefixed with apple_.
+          // Refetch the session to redirect.
           setToken(`apple_${appStoreUserId}`);
           await appsFlyer.logEvent("af_login", {
             af_registration_method: "apple",
           });
           await utils.auth.getSession.invalidate();
+
+          // If current route is `/login`, redirect to `/`.
+          if (pathname.endsWith("/login")) {
+            router.replace("/");
+          }
         }}
       />
     </View>

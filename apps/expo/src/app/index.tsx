@@ -12,33 +12,49 @@ import { Text } from "~/components/ui/text";
 import { NAV_THEME } from "~/lib/constants";
 import { useColorScheme } from "~/lib/theme";
 import { api } from "~/utils/api";
+import { shouldShowPaywall } from "~/utils/subscription";
 
-export default function Page() {
+export default function Index() {
   const router = useRouter();
   const { colorScheme } = useColorScheme();
 
-  const { isLoading, data: session } = api.auth.getSession.useQuery();
+  const { isLoading, data: user } = api.auth.getUser.useQuery();
 
   useEffect(() => {
     const identifyUser = async () => {
       // Identify the user in Superwall.
       // This id ends up being the `appAccountToken` in Apple webhooks.
-      if (session) {
-        await Superwall.shared.identify(session.user.id);
-        await Superwall.shared.setUserAttributes(session.user);
+      if (user) {
+        await Superwall.shared.identify(user.id);
+        await Superwall.shared.setUserAttributes(user);
       }
     };
 
-    if (session) {
-      void identifyUser();
-      void AsyncStorage.getItem("onboardingComplete").then((value) => {
-        if (value === "true") router.replace("/(dashboard)/dashboard");
-        else router.replace("/onboarding");
-      });
-    }
-  }, [router, session]);
+    if (!user) return;
 
-  if (isLoading) return <Stack.Screen options={{ title: "" }} />;
+    void identifyUser();
+
+    void AsyncStorage.getItem("onboardingComplete").then((value) => {
+      if (
+        value === "true" &&
+        shouldShowPaywall(
+          user as {
+            stripeCurrentPeriodEnd: string | null;
+            appStoreCurrentPeriodEnd: string | null;
+          },
+        )
+      ) {
+        void Superwall.shared.register("onboarding").then(() => {
+          router.replace("/(dashboard)/dashboard");
+        });
+      } else {
+        router.replace("/(dashboard)/dashboard");
+      }
+    });
+  }, [router, user]);
+
+  if (isLoading || user)
+    return <Stack.Screen options={{ headerShown: false }} />;
 
   return (
     <SafeAreaView className="bg-background">
