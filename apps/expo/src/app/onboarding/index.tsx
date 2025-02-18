@@ -669,8 +669,15 @@ export default function App() {
 
             if (index === screens.length - 1) {
               // Mark onboarding as complete. Send the analytics event to AppsFlyer.
-              await AsyncStorage.setItem("onboardingComplete", "true");
-              await appsFlyer.logEvent("af_onboarding_completion", {});
+
+              // Only log onboarding complete once.
+              await AsyncStorage.getItem("onboardingComplete").then(
+                async (value) => {
+                  if (value === "true") return;
+                  await AsyncStorage.setItem("onboardingComplete", "true");
+                  await appsFlyer.logEvent("af_onboarding_completion", {});
+                },
+              );
 
               if (user) {
                 await Superwall.shared.identify(user.id);

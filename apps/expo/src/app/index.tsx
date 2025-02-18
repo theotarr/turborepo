@@ -2,7 +2,6 @@ import { useEffect } from "react";
 import { View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Stack, useRouter } from "expo-router";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import Superwall from "@superwall/react-native-superwall";
 import { Aperture } from "lucide-react-native";
 
@@ -19,19 +18,21 @@ export default function Index() {
   const utils = api.useUtils();
   const { colorScheme } = useColorScheme();
 
-  const { isLoading, data: user } = api.auth.getUser.useQuery();
+  const { isLoading, data: session } = api.auth.getSession.useQuery();
+  const { isLoading: isUserLoading, data: user } = api.auth.getUser.useQuery();
 
   useEffect(() => {
-    if (!user) return;
+    if (!user || !session) return;
 
     const identifyUser = async () => {
       // Identify the user in Superwall.
       // This id ends up being the `appAccountToken` in Apple webhooks.
-      await Superwall.shared.identify(user.id);
-      await Superwall.shared.setUserAttributes(user);
+      await Superwall.shared.identify(session.user.id);
+      await Superwall.shared.setUserAttributes(session.user);
     };
     void identifyUser();
 
+    // If the user has an active subscription, redirect to the dashboard.
     if (
       !shouldShowPaywall(
         user as {
@@ -41,24 +42,27 @@ export default function Index() {
       )
     ) {
       router.replace("/(dashboard)/dashboard");
+      return;
     }
 
-    void AsyncStorage.getItem("onboardingComplete").then((value) => {
-      if (value === "true") {
-        // User has completed onboarding but hasn't subscribed.
-        void Superwall.shared.register("onboarding").then(async () => {
-          // Invalidate user data.
-          await utils.invalidate();
-          router.replace("/(dashboard)/dashboard");
-        });
-      } else {
-        // User has not completed onboarding.
-        router.replace("/onboarding");
-      }
-    });
-  }, [router, user, utils]);
+    // User hasn't completed onboarding.
+    router.replace("/onboarding");
+  }, [router, session, user, utils]);
 
-  if (isLoading) return <Stack.Screen options={{ headerShown: false }} />;
+  if (isLoading || isUserLoading)
+    return (
+      <SafeAreaView className="bg-background">
+        <Stack.Screen options={{ headerShown: false }} />
+        <View className="flex h-full w-full flex-col">
+          <View className="flex-1 items-center justify-center">
+            <Aperture
+              size={64}
+              color={NAV_THEME[colorScheme].secondaryForeground}
+            />
+          </View>
+        </View>
+      </SafeAreaView>
+    );
 
   return (
     <SafeAreaView className="bg-background">
