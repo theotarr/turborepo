@@ -32,6 +32,7 @@ const LIGHT_THEME: Theme = {
   dark: false,
   colors: NAV_THEME.light,
 };
+
 const DARK_THEME: Theme = {
   dark: true,
   colors: NAV_THEME.dark,

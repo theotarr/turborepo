@@ -21,37 +21,42 @@ export default function Index() {
   const { isLoading, data: user } = api.auth.getUser.useQuery();
 
   useEffect(() => {
+    if (!user) return;
+
     const identifyUser = async () => {
       // Identify the user in Superwall.
       // This id ends up being the `appAccountToken` in Apple webhooks.
-      if (user) {
-        await Superwall.shared.identify(user.id);
-        await Superwall.shared.setUserAttributes(user);
-      }
+      await Superwall.shared.identify(user.id);
+      await Superwall.shared.setUserAttributes(user);
     };
-
-    if (!user) return;
-
     void identifyUser();
 
+    if (
+      !shouldShowPaywall(
+        user as {
+          stripeCurrentPeriodEnd: string | null;
+          appStoreCurrentPeriodEnd: string | null;
+        },
+      )
+    ) {
+      router.replace("/(dashboard)/dashboard");
+    }
+
     void AsyncStorage.getItem("onboardingComplete").then((value) => {
-      if (
-        value === "true" &&
-        shouldShowPaywall(
-          user as {
-            stripeCurrentPeriodEnd: string | null;
-            appStoreCurrentPeriodEnd: string | null;
-          },
-        )
-      ) {
+      if (value === "true") {
+        // User has completed onboarding but hasn't subscribed.
         void Superwall.shared.register("onboarding").then(() => {
           router.replace("/(dashboard)/dashboard");
         });
       } else {
-        router.replace("/(dashboard)/dashboard");
+        // User has not completed onboarding.
+        router.replace("/onboarding");
       }
     });
   }, [router, user]);
+
+  console.log("isLoading", isLoading);
+  console.log("user", user);
 
   if (isLoading || user)
     return <Stack.Screen options={{ headerShown: false }} />;

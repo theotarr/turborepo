@@ -26,7 +26,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import Superwall from "@superwall/react-native-superwall";
 import { ArrowLeft, CircleCheckBig, Plus } from "lucide-react-native";
 
-import { OnboardingDictaphone } from "~/components/dictaphone";
 import { OnboardingQuestionItem } from "~/components/onboarding-question-item";
 import OnboardingScreen from "~/components/onboarding-screen";
 import { ReviewCard } from "~/components/review-card";
@@ -36,6 +35,7 @@ import { Label } from "~/components/ui/label";
 import { Progress } from "~/components/ui/progress";
 import { Text } from "~/components/ui/text";
 import { NAV_THEME } from "~/lib/constants";
+import { registerForPushNotificationsAsync } from "~/lib/notifications";
 import { useColorScheme } from "~/lib/theme";
 import { capitalizeWords } from "~/lib/utils";
 import { api } from "~/utils/api";
@@ -404,17 +404,20 @@ export default function App() {
                 size="lg"
                 className="relative flex-1 rounded-b-none rounded-t-none rounded-br-2xl"
                 onPress={async () => {
-                  const { status } =
-                    await Notifications.requestPermissionsAsync();
-
-                  // Check if permission was granted
-                  // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
-                  if (status === "granted") {
-                    // Next page
-                    console.log("Notification permissions granted!");
+                  try {
+                    await registerForPushNotificationsAsync();
+                    // await Notifications.scheduleNotificationAsync({
+                    //   content: {
+                    //     title: "You're trial ends soon",
+                    //     body: "You have one day left on your trial until you are charged. Cancel anytime.",
+                    //   },
+                    //   trigger: {
+                    //     date: new Date(Date.now() + 2 * 1000), // 2 seconds from now
+                    //   },
+                    // });
                     handlePageChange(index + 1);
-                  } else {
-                    console.log("Notification permissions denied");
+                  } catch (error) {
+                    console.error(error);
                   }
                 }}
               >
@@ -592,16 +595,19 @@ export default function App() {
     ],
     [
       selectedRole,
+      selectedStudyHours,
       selectedSource,
       course,
       createCourseMutation,
       colorScheme,
       user?.courses,
+      bounceStyle,
+      requestedRating,
+      getStarted,
       showTips,
       utils.auth.getUser,
       handlePageChange,
       index,
-      requestedRating,
     ],
   );
 
@@ -664,6 +670,7 @@ export default function App() {
 
             if (index === screens.length - 1) {
               // Mark onboarding as complete. Send the analytics event to AppsFlyer.
+              await AsyncStorage.setItem("onboardingComplete", "true");
               await appsFlyer.logEvent("af_onboarding_completion", {});
 
               if (user) {
@@ -679,12 +686,21 @@ export default function App() {
                 ) {
                   void Superwall.shared
                     .register("onboarding")
+                    // Feature gated behind Superwall.
+                    // Schedule a notification for 2 days from now.
                     .then(async () => {
-                      await AsyncStorage.setItem("onboardingComplete", "true");
+                      await Notifications.scheduleNotificationAsync({
+                        content: {
+                          title: "You're trial ends soon",
+                          body: "You have one day left on your trial until you are charged. Cancel anytime.",
+                        },
+                        trigger: {
+                          date: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // 2 days from now
+                        },
+                      });
                       router.replace("/(dashboard)/dashboard");
                     });
                 } else {
-                  await AsyncStorage.setItem("onboardingComplete", "true");
                   router.replace("/(dashboard)/dashboard");
                 }
 
