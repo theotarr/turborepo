@@ -80,8 +80,7 @@ export default function RootLayout() {
     void (async () => {
       const theme = await AsyncStorage.getItem("theme");
       if (!theme) {
-        // Default to light theme.
-        void AsyncStorage.setItem("theme", "light");
+        void AsyncStorage.setItem("theme", "light"); // Default to light theme.
         setIsColorSchemeLoaded(true);
         return;
       }
