@@ -11,6 +11,7 @@ import {
   View,
 } from "react-native";
 import appsFlyer from "react-native-appsflyer";
+import * as Audio from "expo-av";
 import * as DocumentPicker from "expo-document-picker";
 import * as Haptics from "expo-haptics";
 import { router, Stack } from "expo-router";
@@ -22,7 +23,6 @@ import {
   Plus,
   Settings,
   Youtube,
-  Zap,
 } from "lucide-react-native";
 import { v1 as uuidv1 } from "uuid";
 
@@ -98,7 +98,7 @@ export default function DashboardPage() {
     try {
       if (type === "live") {
         const lecture = await createLecture.mutateAsync({});
-        router.push(`/record/${lecture.id}`);
+        router.push(`/(record)/record/${lecture.id}`);
       } else if (type === "youtube") {
         const lecture = await uploadYoutube.mutateAsync({
           videoUrl,

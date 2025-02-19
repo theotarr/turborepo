@@ -24,6 +24,7 @@ import { Aperture, ChevronDown } from "lucide-react-native";
 
 import type { StopwatchTimerMethods } from "~/components/stopwatch-timer";
 import { LectureOperations } from "~/components/lecture-operations";
+import { MicrophonePermission } from "~/components/mic-permissions";
 import { StopwatchTimer } from "~/components/stopwatch-timer";
 import {
   BottomSheet,
@@ -92,45 +93,6 @@ export default function Record() {
       height: withSpring(`${interpolated}%`),
     };
   });
-
-  // Setup audio mode once when component mounts
-  useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
-    if (permissionResponse?.status === "granted") return;
-
-    async function setupRecording() {
-      try {
-        console.log("[Record] Requesting permission...");
-        await requestPermission();
-
-        await Audio.setAudioModeAsync({
-          allowsRecordingIOS: true,
-          playsInSilentModeIOS: true,
-          staysActiveInBackground: true,
-          shouldDuckAndroid: true,
-          interruptionModeIOS: InterruptionModeIOS.DoNotMix,
-          interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
-          playThroughEarpieceAndroid: false,
-        });
-
-        await recording.prepareToRecordAsync(
-          Audio.RecordingOptionsPresets.HIGH_QUALITY,
-        );
-      } catch (err) {
-        console.error("Failed to setup audio", err);
-      }
-    }
-    void setupRecording()
-      .then(() => {
-        void startRecording();
-      })
-      .catch((err) => {
-        console.error("Failed to setup audio", err);
-        setIsRecording(false);
-      });
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   async function startRecording() {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
@@ -236,6 +198,45 @@ export default function Record() {
     }
   }
 
+  // Setup audio mode once when component mounts
+  useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
+    if (permissionResponse?.status === "granted") return;
+
+    async function setupRecording() {
+      try {
+        console.log("[Record] Requesting permission...");
+        await requestPermission();
+
+        await Audio.setAudioModeAsync({
+          allowsRecordingIOS: true,
+          playsInSilentModeIOS: true,
+          staysActiveInBackground: true,
+          shouldDuckAndroid: true,
+          interruptionModeIOS: InterruptionModeIOS.DoNotMix,
+          interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
+          playThroughEarpieceAndroid: false,
+        });
+
+        await recording.prepareToRecordAsync(
+          Audio.RecordingOptionsPresets.HIGH_QUALITY,
+        );
+      } catch (err) {
+        console.error("Failed to setup audio", err);
+      }
+    }
+    void setupRecording()
+      .then(() => {
+        void startRecording();
+      })
+      .catch((err) => {
+        console.error("Failed to setup audio", err);
+        setIsRecording(false);
+      });
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Update refs whenever state changes.
   useEffect(() => {
     isRecordingRef.current = isRecording;
@@ -284,6 +285,7 @@ export default function Record() {
   return (
     <SafeAreaView className="my-0 py-0">
       <Stack.Screen options={{ headerShown: false }} />
+      <MicrophonePermission />
       <View className="flex h-full flex-col items-center bg-background">
         <View className="absolute right-3 top-3">
           <LectureOperations
