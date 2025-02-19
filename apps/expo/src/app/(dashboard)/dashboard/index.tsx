@@ -189,38 +189,38 @@ export default function DashboardPage() {
       <Stack.Screen
         options={{
           title: "Dashboard",
-          headerLeft: () => (
-            <>
-              {shouldShowPaywall(
-                user as {
-                  stripeCurrentPeriodEnd?: string | null;
-                  appStoreCurrentPeriodEnd?: string | null;
-                },
-              ) && (
-                <Button
-                  size="sm"
-                  className="h-8 flex-row gap-x-2 rounded-full bg-primary/60"
-                  onPress={() => {
-                    void Superwall.shared.register("upgrade");
-                  }}
-                >
-                  <Zap
-                    size={10}
-                    color={NAV_THEME[colorScheme].primaryForeground}
-                    fill={NAV_THEME[colorScheme].primaryForeground}
-                  />
-                  <Text
-                    style={{
-                      fontSize: 12,
-                    }}
-                    className="text-primary-foreground"
-                  >
-                    Upgrade
-                  </Text>
-                </Button>
-              )}
-            </>
-          ),
+          // headerLeft: () => (
+          //   <>
+          //     {shouldShowPaywall(
+          //       user as {
+          //         stripeCurrentPeriodEnd?: string | null;
+          //         appStoreCurrentPeriodEnd?: string | null;
+          //       },
+          //     ) && (
+          //       <Button
+          //         size="sm"
+          //         className="h-8 flex-row gap-x-2 rounded-full bg-primary/60"
+          //         onPress={() => {
+          //           void Superwall.shared.register("upgrade");
+          //         }}
+          //       >
+          //         <Zap
+          //           size={10}
+          //           color={NAV_THEME[colorScheme].primaryForeground}
+          //           fill={NAV_THEME[colorScheme].primaryForeground}
+          //         />
+          //         <Text
+          //           style={{
+          //             fontSize: 12,
+          //           }}
+          //           className="text-primary-foreground"
+          //         >
+          //           Upgrade
+          //         </Text>
+          //       </Button>
+          //     )}
+          //   </>
+          // ),
           headerRight: () => (
             <Pressable onPress={() => router.push("/(dashboard)/settings")}>
               <Settings
