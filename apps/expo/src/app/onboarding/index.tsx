@@ -81,6 +81,7 @@ export default function App() {
     null,
   );
   const [selectedSource, setSelectedSource] = useState<string | null>(null);
+  const [stoppingReason, setStoppingReason] = useState<string | null>(null);
   const [requestedRating, setRequestedRating] = useState(false);
   const [showTips, setShowTips] = useState(false);
   const [getStarted, setGetStarted] = useState(false);
@@ -133,14 +134,6 @@ export default function App() {
 
   const screens = useMemo(
     () => [
-      // {
-      //   text: "Never take notes again",
-      //   description: "Just hit record in class and we'll do the rest.",
-      //   containerClassName:
-      //     "w-full flex-1 flex-col items-center justify-center px-8",
-      //   showNextButton: true,
-      //   content: <OnboardingDictaphone />,
-      // },
       {
         text: "What describes you best?",
         description:
@@ -214,7 +207,7 @@ export default function App() {
               <Text className="text-lg font-medium text-secondary-foreground">
                 Your Stats
               </Text>
-              <View className="mt-8 flex w-full flex-row items-center justify-around">
+              <View className="mt-8 flex w-full flex-row items-center">
                 <View className="flex flex-col items-center">
                   <Text className="text-3xl font-semibold tracking-tighter text-secondary-foreground">
                     +0.3
@@ -346,7 +339,7 @@ export default function App() {
         text: "What's stopping you from reaching your academic goals?",
         description: "",
         containerClassName: "mt-8 px-6 flex-col items-center justify-center",
-        showNextButton: true,
+        showNextButton: stoppingReason !== null,
         content: (
           <ScrollView className="w-full">
             <View className="flex flex-col gap-y-3">
@@ -359,10 +352,10 @@ export default function App() {
               ].map((text) => (
                 <OnboardingQuestionItem
                   key={text}
-                  isSelected={selectedRole === text}
+                  isSelected={stoppingReason === text}
                   onSelect={() => {
                     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    setSelectedRole(text);
+                    setStoppingReason(text);
                   }}
                   text={text}
                 />
@@ -600,6 +593,7 @@ export default function App() {
       createCourseMutation,
       colorScheme,
       user?.courses,
+      stoppingReason,
       bounceStyle,
       requestedRating,
       getStarted,
