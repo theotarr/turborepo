@@ -77,8 +77,8 @@ export default async function SettingsPage() {
             isCanceled: cancelAtPeriodEnd,
           }}
         />
-        {!subscriptionPlan?.stripeCurrentPeriodEnd ||
-        subscriptionPlan.stripeCurrentPeriodEnd <= new Date() ? (
+        {!subscriptionPlan.stripeSubscriptionId ||
+        subscriptionPlan.stripeCurrentPeriodEnd < new Date() ? (
           <UserDeleteForm user={{ id: session.user.id }} />
         ) : null}
       </div>
