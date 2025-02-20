@@ -184,7 +184,8 @@ export default async function IndexPage() {
           </div>
           <div className="relative mt-12 flex flex-col items-center justify-center sm:mt-16">
             <p className="text-secondary-foreground/8 text-lg font-bold uppercase sm:text-xl">
-              Loved by <span className="text-primary/80">10k+ students</span> at
+              Loved by <span className="text-primary/80">100k+ students</span>{" "}
+              at
             </p>
             <div className="mt-4 flex w-screen flex-col items-center justify-center overflow-hidden bg-primary/5 antialiased dark:bg-transparent">
               <InfiniteMovingCards
