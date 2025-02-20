@@ -21,6 +21,7 @@ import { NAV_THEME } from "~/lib/constants";
 import { useColorScheme } from "~/lib/theme";
 import { api } from "~/utils/api";
 import { useSignOut } from "~/utils/auth";
+import { getBaseUrl } from "~/utils/base-url";
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -136,7 +137,7 @@ export default function SettingsPage() {
                 Update email or delete your account on{" "}
                 <Link
                   className="underline"
-                  href="https://knownotes.ai/dashboard/settings"
+                  href={`${getBaseUrl()}/dashboard/settings`}
                 >
                   KnowNotes.ai
                 </Link>
