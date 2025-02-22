@@ -16,18 +16,3 @@ export async function createCourse(courseName: string) {
     },
   });
 }
-
-export async function registeredInPastMinute() {
-  const session = await auth();
-  if (!session) return redirect("/login");
-
-  // If the current user was created before 1 hour ago (arbitrary time), they are considered a new user.
-  const user = await db.user.findUnique({
-    where: {
-      id: session.user.id,
-    },
-  });
-  if (!user) return redirect("/login");
-
-  return new Date(user.createdAt) < new Date(Date.now() - 1000 * 60); // 1 minute ago
-}

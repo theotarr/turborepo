@@ -80,11 +80,10 @@ function CheckoutForm({ className, ...props }: CheckoutFormProps) {
         return;
       }
 
-      // Send a payment details event to Tiktok pixel and GA.
+      // Send a payment details event  GA.
       sendGAEvent("event", "add_payment_info", {
         paymentType,
       });
-      TiktokPixel.track("AddPaymentInfo", {});
 
       // Create a SetupIntent.
       const { client_secret: clientSecret } = await createSetupIntent(

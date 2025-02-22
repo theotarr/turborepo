@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { registeredInPastMinute } from "@/app/(auth)/actions";
 import { Icons } from "@/components/icons";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,7 +11,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { signIn } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import TiktokPixel from "tiktok-pixel";
 import * as z from "zod";
 
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {}
@@ -33,9 +31,6 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
     setIsLoading(true);
 
     try {
-      if (await registeredInPastMinute()) {
-        TiktokPixel.track("CompleteRegistration", {});
-      }
       await signIn("resend", {
         email: data.email.toLowerCase(),
         redirect: false,
@@ -103,10 +98,6 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
         <Button
           variant="outline"
           onClick={async () => {
-            const isNewUser = await registeredInPastMinute();
-            if (isNewUser) {
-              TiktokPixel.track("CompleteRegistration", {});
-            }
             await signIn("google", {
               redirectTo: absoluteUrl("/dashboard"),
             });
@@ -124,10 +115,6 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
         <Button
           variant="outline"
           onClick={async () => {
-            const isNewUser = await registeredInPastMinute();
-            if (isNewUser) {
-              TiktokPixel.track("CompleteRegistration", {});
-            }
             await signIn("apple", {
               // https://github.com/nextauthjs/next-auth/pull/12068
               // `redirectTo` doesn't work with `form_post` response mode for Apple OAuth.
