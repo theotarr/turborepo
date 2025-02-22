@@ -14,7 +14,6 @@ import {
 } from "@stripe/react-stripe-js";
 import { useTheme } from "next-themes";
 import { toast } from "sonner";
-import TiktokPixel from "tiktok-pixel";
 import { useDebouncedCallback } from "use-debounce";
 
 import { Icons } from "./icons";

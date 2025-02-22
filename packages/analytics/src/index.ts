@@ -85,10 +85,6 @@ export async function trackTiktokEvent({
           external_id: await hashString(userId),
           ...(email ? { email: await hashString(email) } : {}),
         },
-        // properties: {
-        //   currency: null,
-        //   content_type: null,
-        // },
         page: {
           url,
         },

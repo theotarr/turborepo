@@ -20,8 +20,10 @@ export function PixelTracking({
   userId?: string;
   email?: string;
 }) {
-  useMount(() => {
+  useMount(async () => {
     // Push the user id to Google Analytics (the datalayer).
+    let hashedUserId: string;
+
     if (userId) {
       window.dataLayer = window.dataLayer || [];
       window.dataLayer.push({
@@ -34,6 +36,16 @@ export function PixelTracking({
     TiktokPixel.init(
       TIKTOK_PIXEL_ID,
       {
+        ...(userId
+          ? {
+              external_id: Buffer.from(
+                await crypto.subtle.digest(
+                  "SHA-256",
+                  new TextEncoder().encode(userId),
+                ),
+              ).toString("hex"),
+            }
+          : {}),
         email,
       },
       {
