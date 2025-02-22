@@ -10,6 +10,7 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import Apple from "next-auth/providers/apple";
 import { Resend } from "resend";
 
+import { trackMetaEvent, trackTiktokEvent } from "@acme/analytics";
 import { db } from "@acme/db";
 
 import { env } from "../env";
@@ -25,70 +26,6 @@ declare module "next-auth" {
 const adapter = PrismaAdapter(db);
 const resend = new Resend(env.RESEND_API_KEY);
 export const isSecureContext = env.NODE_ENV !== "development";
-
-async function reportUserRegistration({
-  userId,
-  email,
-  name,
-}: {
-  userId: string;
-  email?: string | null;
-  name?: string | null;
-}) {
-  const em = email
-    ? [
-        Buffer.from(
-          await crypto.subtle.digest(
-            "SHA-256",
-            new TextEncoder().encode(email),
-          ),
-        ).toString("hex"),
-      ]
-    : [];
-  const fn = name
-    ? [
-        Buffer.from(
-          await crypto.subtle.digest("SHA-256", new TextEncoder().encode(name)),
-        ).toString("hex"),
-      ]
-    : [];
-  const external_id = Buffer.from(
-    await crypto.subtle.digest("SHA-256", new TextEncoder().encode(userId)),
-  ).toString("hex");
-
-  const eventData = {
-    data: [
-      {
-        event_name: "CompleteRegistration",
-        event_time: Math.floor(new Date().getTime() / 1000),
-        action_source: "website",
-        user_data: {
-          em,
-          fn,
-          external_id,
-        },
-      },
-    ],
-  };
-  const response = await fetch(
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion, turbo/no-undeclared-env-vars, no-restricted-properties
-    `https://graph.facebook.com/v22.0/${process.env.NEXT_PUBLIC_META_PIXEL_ID!}/events`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        ...eventData,
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion, turbo/no-undeclared-env-vars, no-restricted-properties
-        access_token: process.env.META_ACCESS_TOKEN!,
-      }),
-    },
-  );
-
-  if (!response.ok) console.error("[Meta] Error: ", await response.text());
-  else console.log("[Meta] Response: ", await response.json());
-}
 
 export const authConfig = {
   adapter,
@@ -161,14 +98,19 @@ export const authConfig = {
           data: { ...user },
         });
 
-        // Report the user registration to Meta.
-        await reportUserRegistration({
+        // Report the user registration to Meta and TikTok.
+        await trackMetaEvent({
           userId: dbUser.id,
           email: user.email,
-          name: user.name,
+          event: "CompleteRegistration",
+        });
+        await trackTiktokEvent({
+          userId: dbUser.id,
+          email: user.email,
+          event: "CompleteRegistration",
+          url: "https://knownotes.ai/onboarding",
         });
 
-        // Email the user a welcome email with a tutorial.
         if (user.email) {
           try {
             console.log("[Resend] Sending welcome email to: ", user.email);

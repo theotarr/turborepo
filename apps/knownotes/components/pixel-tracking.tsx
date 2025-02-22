@@ -5,13 +5,13 @@ import { env } from "@/env";
 import { useMount } from "react-use";
 import TiktokPixel from "tiktok-pixel";
 
+import { TIKTOK_PIXEL_ID } from "@acme/analytics";
+
 declare global {
   interface Window {
     dataLayer?: Object[];
   }
 }
-
-const TIKTOK_PIXEL_ID = "COH8383C77UC70DIPSOG";
 
 export function PixelTracking({
   userId,

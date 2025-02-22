@@ -10,72 +10,7 @@ import {
 import { stripe } from "@/lib/stripe";
 import Stripe from "stripe";
 
-async function reportStartTrial({
-  userId,
-  email,
-  name,
-}: {
-  userId: string;
-  email?: string | null;
-  name?: string | null;
-}) {
-  const em = email
-    ? [
-        Buffer.from(
-          await crypto.subtle.digest(
-            "SHA-256",
-            new TextEncoder().encode(email),
-          ),
-        ).toString("hex"),
-      ]
-    : [];
-  const fn = name
-    ? [
-        Buffer.from(
-          await crypto.subtle.digest("SHA-256", new TextEncoder().encode(name)),
-        ).toString("hex"),
-      ]
-    : [];
-  const external_id = Buffer.from(
-    await crypto.subtle.digest("SHA-256", new TextEncoder().encode(userId)),
-  ).toString("hex");
-
-  console.log("em", em);
-  console.log("fn", fn);
-  console.log("external_id", external_id);
-
-  const eventData = {
-    data: [
-      {
-        event_name: "StartTrial",
-        event_time: Math.floor(new Date().getTime() / 1000),
-        action_source: "website",
-        user_data: {
-          em,
-          fn,
-          external_id,
-        },
-      },
-    ],
-  };
-  const response = await fetch(
-    `https://graph.facebook.com/v22.0/${env.META_PIXEL_ID}/events`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        ...eventData,
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion, turbo/no-undeclared-env-vars, no-restricted-properties
-        access_token: process.env.META_ACCESS_TOKEN!,
-      }),
-    },
-  );
-
-  if (!response.ok) console.error("[Meta] Error: ", await response.text());
-  else console.log("[Meta] Response: ", await response.json());
-}
+import { trackMetaEvent, trackTiktokEvent } from "@acme/analytics";
 
 export async function POST(req: Request) {
   const body = await req.text();
@@ -240,10 +175,16 @@ export async function POST(req: Request) {
 
     // Report the start of the trial to Meta.
     console.log("Reporting start of trial to Meta...");
-    await reportStartTrial({
+    await trackMetaEvent({
       userId: user.id,
       email: user.email,
-      name: user.name,
+      event: "StartTrial",
+    });
+    await trackTiktokEvent({
+      userId: user.id,
+      email: user.email,
+      event: "StartTrial",
+      url: "https://knownotes.ai/dashboard",
     });
 
     console.log("Subscription created:", subscription);

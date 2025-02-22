@@ -2,76 +2,13 @@
 
 import type { Stripe } from "stripe";
 import { proPlan } from "@/config/subscriptions";
-import { env } from "@/env";
 import { stripe } from "@/lib/stripe";
 import { getUserSubscriptionPlan } from "@/lib/subscription";
 
+import { trackMetaEvent, trackTiktokEvent } from "@acme/analytics";
 import { auth } from "@acme/auth";
 
 import { supabase } from "../supabase";
-
-async function reportAddPaymentInfo({
-  userId,
-  email,
-  name,
-}: {
-  userId: string;
-  email?: string | null;
-  name?: string | null;
-}) {
-  const em = email
-    ? [
-        Buffer.from(
-          await crypto.subtle.digest(
-            "SHA-256",
-            new TextEncoder().encode(email),
-          ),
-        ).toString("hex"),
-      ]
-    : [];
-  const fn = name
-    ? [
-        Buffer.from(
-          await crypto.subtle.digest("SHA-256", new TextEncoder().encode(name)),
-        ).toString("hex"),
-      ]
-    : [];
-  const external_id = Buffer.from(
-    await crypto.subtle.digest("SHA-256", new TextEncoder().encode(userId)),
-  ).toString("hex");
-
-  const eventData = {
-    data: [
-      {
-        event_name: "AddPaymentInfo",
-        event_time: Math.floor(new Date().getTime() / 1000),
-        action_source: "website",
-        user_data: {
-          em,
-          fn,
-          external_id,
-        },
-      },
-    ],
-  };
-  const response = await fetch(
-    `https://graph.facebook.com/v22.0/${env.NEXT_PUBLIC_META_PIXEL_ID}/events`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        ...eventData,
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion, turbo/no-undeclared-env-vars, no-restricted-properties
-        access_token: process.env.META_ACCESS_TOKEN!,
-      }),
-    },
-  );
-
-  if (!response.ok) console.error("[Meta] Error: ", await response.text());
-  else console.log("[Meta] Response: ", await response.json());
-}
 
 export async function getPromotionCode(
   promotionCode: string,
@@ -123,10 +60,17 @@ export async function createSetupIntent(promotekitReferral?: string): Promise<{
     },
   });
 
-  await reportAddPaymentInfo({
+  // Report the user adding payment info to Meta and TikTok.
+  await trackMetaEvent({
     userId: session.user.id,
     email: session.user.email as string,
-    name: session.user.name as string,
+    event: "AddPaymentInfo",
+  });
+  await trackTiktokEvent({
+    userId: session.user.id,
+    email: session.user.email as string,
+    event: "AddPaymentInfo",
+    url: "https://knownotes.ai/dashboard",
   });
 
   return {
