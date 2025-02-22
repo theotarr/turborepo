@@ -231,8 +231,8 @@ export default function App() {
               <Text className="text-lg font-medium text-secondary-foreground">
                 Your Stats
               </Text>
-              <View className="mt-8 flex w-full flex-row items-center">
-                <View className="flex flex-col items-center">
+              <View className="mt-8 flex w-full flex-row items-center justify-center">
+                <View className="mr-12 flex flex-col items-center">
                   <Text className="text-3xl font-semibold tracking-tighter text-secondary-foreground">
                     +0.3
                   </Text>
