@@ -569,7 +569,7 @@ export default function App() {
                     <Animated.View
                       key={idx}
                       entering={FadeIn}
-                      className="mb-4 w-full flex-row items-center gap-x-4 rounded-xl bg-secondary p-5"
+                      className="mb-6 w-full flex-row items-center gap-x-4 rounded-xl bg-secondary p-5"
                     >
                       <Text className="text-left text-3xl">{tip.icon}</Text>
                       <View className="flex-1">
