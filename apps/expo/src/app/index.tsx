@@ -1,89 +1,71 @@
 import { useEffect } from "react";
-import { View } from "react-native";
+import { Dimensions, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { ResizeMode, Video } from "expo-av";
 import { Stack, useRouter } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import Superwall from "@superwall/react-native-superwall";
-import { Aperture } from "lucide-react-native";
 
 import { AuthForm } from "~/components/auth-form";
-import { TrustPilot } from "~/components/trust-pilot";
 import { Text } from "~/components/ui/text";
-import { NAV_THEME } from "~/lib/constants";
-import { useColorScheme } from "~/lib/theme";
 import { api } from "~/utils/api";
-import { shouldShowPaywall } from "~/utils/subscription";
+
+const { height } = Dimensions.get("window");
 
 export default function Index() {
   const router = useRouter();
   const utils = api.useUtils();
-  const { colorScheme } = useColorScheme();
-
   const { isLoading, data: session } = api.auth.getSession.useQuery();
-  const { isLoading: isUserLoading, data: user } = api.auth.getUser.useQuery();
 
   useEffect(() => {
-    if (!user || !session) return;
+    if (!session) return;
 
     const identifyUser = async () => {
-      // Identify the user in Superwall.
-      // This id ends up being the `appAccountToken` in Apple webhooks.
       await Superwall.shared.identify(session.user.id);
       await Superwall.shared.setUserAttributes(session.user);
     };
     void identifyUser();
 
-    // If the user has an active subscription, redirect to the dashboard.
-    if (
-      !shouldShowPaywall(
-        user as {
-          stripeCurrentPeriodEnd: string | null;
-          appStoreCurrentPeriodEnd: string | null;
-        },
-      )
-    ) {
-      router.replace("/(dashboard)/dashboard");
-      return;
-    }
+    // Check if the user has completed onboarding.
+    void AsyncStorage.getItem("onboardingComplete").then((value) => {
+      if (value === "true") router.replace("/(dashboard)/dashboard");
+      else router.replace("/onboarding");
+    });
+  }, [router, session, utils]);
 
-    // User hasn't completed onboarding.
-    router.replace("/onboarding");
-  }, [router, session, user, utils]);
-
-  if (isLoading || isUserLoading)
+  if (isLoading) {
     return (
       <SafeAreaView className="bg-background">
         <Stack.Screen options={{ headerShown: false }} />
-        <View className="flex h-full w-full flex-col">
-          <View className="flex-1 items-center justify-center">
-            <Aperture
-              size={64}
-              color={NAV_THEME[colorScheme].secondaryForeground}
-            />
-          </View>
-        </View>
       </SafeAreaView>
     );
+  }
 
   return (
-    <SafeAreaView className="bg-background">
+    <SafeAreaView className="h-screen flex-col bg-background">
       <Stack.Screen options={{ headerShown: false }} />
-      <View className="flex h-full w-full flex-col p-4">
-        <View className="mt-16 flex flex-col items-center gap-4">
-          <View className="mb-2 flex flex-row items-center gap-2">
-            <Aperture
-              size={20}
-              color={NAV_THEME[colorScheme].secondaryForeground}
-            />
-            <Text className="text-xl font-semibold tracking-tighter text-secondary-foreground">
-              KnowNotes
-            </Text>
-          </View>
-          <Text className="text-center text-5xl font-bold tracking-tighter text-secondary-foreground">
-            The AI Assistant{"\n"} For Students
-          </Text>
-          <TrustPilot />
-        </View>
-        <AuthForm className="mt-auto" />
+      <View className="mt-10 flex items-center justify-center px-4">
+        <Video
+          source={{
+            uri: "https://user-content.superwalleditor.com/user-content/Tw75anXwky2tZWtI7vHdW",
+          }}
+          style={{
+            height: height * 0.6,
+            width: "80%",
+            borderRadius: 16,
+          }}
+          useNativeControls={false}
+          resizeMode={ResizeMode.COVER}
+          shouldPlay
+          isLooping
+          isMuted={true}
+        />
+      </View>
+      <View className="mt-12 h-full w-full rounded-t-3xl border-x border-t border-border px-4 pt-6">
+        <Text className="text-center text-3xl font-semibold tracking-tight">
+          Never take notes again
+        </Text>
+        <AuthForm className="mt-6" />
       </View>
     </SafeAreaView>
   );

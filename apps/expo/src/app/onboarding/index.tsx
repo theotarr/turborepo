@@ -67,6 +67,7 @@ const socials = [
   "Friend",
   "Other",
 ];
+
 export default function App() {
   const utils = api.useUtils();
   const router = useRouter();
@@ -75,6 +76,7 @@ export default function App() {
   const createCourseMutation = api.course.create.useMutation();
 
   const [index, setIndex] = useState(0);
+  const [prevIndex, setPrevIndex] = useState(0);
   const [course, setCourse] = useState("");
   const [selectedRole, setSelectedRole] = useState<string | null>(null);
   const [selectedStudyHours, setSelectedStudyHours] = useState<string | null>(
@@ -84,6 +86,7 @@ export default function App() {
   const [stoppingReason, setStoppingReason] = useState<string | null>(null);
   const [requestedRating, setRequestedRating] = useState(false);
   const [showTips, setShowTips] = useState(false);
+  const [tipIndex, setTipIndex] = useState(0);
   const [getStarted, setGetStarted] = useState(false);
   const fadeAnim = useSharedValue(1);
 
@@ -131,6 +134,27 @@ export default function App() {
       opacity: fadeAnim.value,
     };
   });
+
+  const tips = useMemo(
+    () => [
+      {
+        icon: "🎓",
+        title: `Smart Studying for ${selectedRole ? capitalizeWords(formatRole(selectedRole)) : "Students"}`,
+        description: `8,250+ other ${selectedRole ? formatRole(selectedRole) : "students"} are using KnowNotes to achieve their academic goals.`,
+      },
+      {
+        icon: "📈",
+        title: `Boost Your GPA`,
+        description: `The average student using KnowNotes sees their GPA rise by 0.3.`,
+      },
+      {
+        icon: "⏰",
+        title: `Work Smarter, Not Harder`,
+        description: `The average KnowNotes user saves 2.5 hours per week.`,
+      },
+    ],
+    [selectedRole],
+  );
 
   const screens = useMemo(
     () => [
@@ -499,8 +523,26 @@ export default function App() {
         description: "",
         showNextButton: getStarted,
         onActive: () => {
-          setTimeout(() => setShowTips(true), 3500); // 3.5 seconds
-          setTimeout(() => setGetStarted(true), 8500);
+          const delay = 3500;
+
+          setTimeout(() => {
+            setShowTips(true);
+          }, delay);
+
+          setTimeout(() => {
+            setTipIndex(1);
+            void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          }, delay + 1000);
+
+          setTimeout(() => {
+            setTipIndex(2);
+            void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          }, delay + 2000);
+
+          setTimeout(() => {
+            setGetStarted(true);
+            void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          }, delay + 3000);
         },
         content: (
           <>
@@ -515,62 +557,40 @@ export default function App() {
                 <Animated.Text
                   entering={FadeIn}
                   className="mb-8 max-w-xs text-center text-3xl font-semibold text-secondary-foreground"
+                  onLayout={() => {
+                    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  }}
                 >
                   Your personal tutor is ready!
                 </Animated.Text>
-                <Animated.View
-                  entering={FadeIn.delay(1000)}
-                  className="mb-4 w-full flex-row items-center gap-x-4 rounded-xl bg-secondary p-5"
-                >
-                  <Text className="text-left text-3xl">🎓</Text>
-                  <View className="flex-1">
-                    <Text className="text-left text-xl font-semibold tracking-tight text-secondary-foreground">
-                      Smart Studying for{" "}
-                      {selectedRole
-                        ? capitalizeWords(formatRole(selectedRole))
-                        : "Students"}
-                    </Text>
-                    <Text className="mt-2 text-left text-base font-medium leading-tight text-muted-foreground">
-                      8,250+ other{" "}
-                      {selectedRole ? formatRole(selectedRole) : "students"} are
-                      using KnowNotes to study smarter and save time.
-                    </Text>
-                  </View>
-                </Animated.View>
-                <Animated.View
-                  entering={FadeIn.delay(2500)}
-                  className="mb-4 w-full flex-row items-center gap-x-4 rounded-xl bg-secondary p-5"
-                >
-                  <Text className="text-left text-3xl">📈</Text>
-                  <View className="flex-1">
-                    <Text className="text-left text-xl font-semibold tracking-tight text-secondary-foreground">
-                      Boost Your GPA
-                    </Text>
-                    <Text className="mt-2 text-left text-base font-medium leading-tight text-muted-foreground">
-                      The average student using KnowNotes sees their GPA rise by
-                      0.3.
-                    </Text>
-                  </View>
-                </Animated.View>
-                <Animated.View
-                  entering={FadeIn.delay(4000)}
-                  className="mb-4 w-full flex-row items-center gap-x-4 rounded-xl bg-secondary p-5"
-                >
-                  <Text className="text-left text-3xl">⏰</Text>
-                  <View className="flex-1">
-                    <Text className="text-left text-xl font-semibold tracking-tight text-secondary-foreground">
-                      Work Smarter, Not Harder
-                    </Text>
-                    <Text className="mt-2 text-left text-base font-medium leading-tight text-muted-foreground">
-                      The average KnowNotes user saves 2.5 hours per week.
-                    </Text>
-                  </View>
-                </Animated.View>
+                {tips.map((tip, idx) => {
+                  if (idx > tipIndex) return null;
+                  return (
+                    <Animated.View
+                      key={idx}
+                      entering={FadeIn}
+                      className="mb-4 w-full flex-row items-center gap-x-4 rounded-xl bg-secondary p-5"
+                    >
+                      <Text className="text-left text-3xl">{tip.icon}</Text>
+                      <View className="flex-1">
+                        <Text className="text-left text-xl font-semibold tracking-tight text-secondary-foreground">
+                          {tip.title}
+                        </Text>
+                        <Text className="mt-2 text-left text-base font-medium leading-tight text-muted-foreground">
+                          {tip.description}
+                        </Text>
+                      </View>
+                    </Animated.View>
+                  );
+                })}
               </View>
             ) : (
               <Animated.View
                 exiting={FadeOut}
                 className="flex-1 items-center justify-center"
+                onLayout={() => {
+                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }}
               >
                 <Text className="mb-6 max-w-xs text-center text-3xl font-semibold text-secondary-foreground">
                   We're setting everything up for you
@@ -601,15 +621,20 @@ export default function App() {
       utils.auth.getUser,
       handlePageChange,
       index,
+      tipIndex,
+      tips,
     ],
   );
 
   useEffect(() => {
-    // On page switch, run the onActive function if it exists.
-    if (screens[index]?.onActive) {
-      void screens[index].onActive();
+    if (prevIndex !== index) {
+      setPrevIndex(index);
+      // On page switch, run the onActive function if it exists.
+      if (screens[index]?.onActive) {
+        void screens[index].onActive();
+      }
     }
-  }, [index, screens]);
+  }, [index, prevIndex, screens]);
 
   return (
     <SafeAreaView className="flex-1">
@@ -623,11 +648,13 @@ export default function App() {
                 size="icon"
                 variant="secondary"
                 onPress={() => {
-                  fadeOut();
-                  setTimeout(() => {
-                    setIndex((prevIndex) => prevIndex - 1);
-                    fadeIn();
-                  }, 150);
+                  if (index > 0) {
+                    fadeOut();
+                    setTimeout(() => {
+                      setIndex((prevIndex) => prevIndex - 1);
+                      fadeIn();
+                    }, 150);
+                  }
                 }}
               >
                 <ArrowLeft
@@ -687,8 +714,8 @@ export default function App() {
                   void Superwall.shared
                     .register("onboarding")
                     // Feature gated behind Superwall.
-                    // Schedule a notification for 2 days from now.
                     .then(async () => {
+                      // // Schedule a notification for 2 days from now.
                       // await Notifications.scheduleNotificationAsync({
                       //   content: {
                       //     title: "You're trial ends soon",
