@@ -24,7 +24,6 @@ import { Aperture, ChevronDown } from "lucide-react-native";
 
 import type { StopwatchTimerMethods } from "~/components/stopwatch-timer";
 import { LectureOperations } from "~/components/lecture-operations";
-import { MicrophonePermission } from "~/components/mic-permissions";
 import { StopwatchTimer } from "~/components/stopwatch-timer";
 import {
   BottomSheet,
@@ -285,7 +284,6 @@ export default function Record() {
   return (
     <SafeAreaView className="my-0 py-0">
       <Stack.Screen options={{ headerShown: false }} />
-      <MicrophonePermission />
       <View className="flex h-full flex-col items-center bg-background">
         <View className="absolute right-3 top-3">
           <LectureOperations

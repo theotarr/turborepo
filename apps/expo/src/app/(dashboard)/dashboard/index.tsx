@@ -28,6 +28,7 @@ import { v1 as uuidv1 } from "uuid";
 
 import { EmptyPlaceholder } from "~/components/empty-placeholder";
 import { LectureItem } from "~/components/lecture-item";
+import { MicrophonePermission } from "~/components/mic-permissions";
 import {
   BottomSheet,
   BottomSheetContent,
@@ -186,6 +187,7 @@ export default function DashboardPage() {
 
   return (
     <SafeAreaView className="bg-background">
+      <MicrophonePermission />
       <Stack.Screen
         options={{
           title: "Dashboard",
@@ -392,7 +394,7 @@ export default function DashboardPage() {
             {/* eslint-disable-next-line @typescript-eslint/no-non-null-assertion */}
             {lectures.data.pages[0]?.items.length! > 0 && (
               <View className="flex-col gap-y-2">
-                {lectures.data.pages.map((page: Lecture[]) =>
+                {lectures.data.pages.map((page) =>
                   page.items.map((lecture) => {
                     if (
                       courseFilter &&
