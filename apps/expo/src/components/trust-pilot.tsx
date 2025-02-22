@@ -22,7 +22,9 @@ export function TrustPilot({ ...props }) {
             />
           ))}
         </View>
-        <Text className="text-center text-lg text-muted-foreground">4.9/5</Text>
+        <Text className="text-center text-lg font-medium text-muted-foreground">
+          4.9/5
+        </Text>
         <View className="-mt-1 fill-secondary-foreground text-secondary-foreground">
           <Svg
             width={76}
