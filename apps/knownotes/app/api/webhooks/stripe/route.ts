@@ -183,7 +183,7 @@ export async function POST(req: Request) {
     await trackTiktokEvent({
       userId: user.id,
       email: user.email,
-      event: "StartTrial",
+      event: "Subscribe",
       url: "https://knownotes.ai/dashboard",
     });
 
