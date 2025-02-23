@@ -32,6 +32,7 @@ export default async function ChatPage() {
           <div className="flex flex-col space-y-4">
             {courses.map((course) => (
               <Link
+                key={course.id}
                 href={`/chat/${course.id}`}
                 className="flex items-center justify-between rounded-md border border-border px-4 py-2 hover:bg-muted"
               >

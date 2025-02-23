@@ -113,7 +113,7 @@ export function ChatCourse({
               {messages.length === 0 &&
                 exampleMessages.map((example, index) => (
                   <div
-                    key={example.heading}
+                    key={index}
                     className={`cursor-pointer rounded-lg border bg-background p-4 hover:bg-secondary/70 ${
                       index > 1 && "hidden md:block"
                     }`}
