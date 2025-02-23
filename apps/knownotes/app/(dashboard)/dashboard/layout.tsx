@@ -1,13 +1,10 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { StaticAffiliateCard } from "@/components/affiliate-card";
-import { LectureCommandMenu } from "@/components/command-menu";
 import { MainNav } from "@/components/main-nav";
 import { DashboardNav } from "@/components/nav";
 import { SiteFooter } from "@/components/site-footer";
 import { UserAccountNav } from "@/components/user-account-nav";
 import { dashboardConfig } from "@/config/dashboard";
-import { getLectures } from "@/lib/lecture/actions";
 import { getUserSubscriptionPlan } from "@/lib/subscription";
 
 import { auth } from "@acme/auth";
