@@ -265,6 +265,7 @@ export function NotesPage({ lecture, courses }: NotesPageProps) {
         <ResizablePanel defaultSize={70} className="relative">
           <div className="absolute bottom-16 left-1/2 z-10 -translate-x-1/2">
             <Dictaphone
+              isGenerating={isGeneratingNotes}
               onCaption={(t) => {
                 setIsUpdateTranscriptLoading(true);
                 addTranscript(t);

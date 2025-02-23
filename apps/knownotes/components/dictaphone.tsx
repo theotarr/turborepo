@@ -31,15 +31,17 @@ import { Button, buttonVariants } from "./ui/button";
 import { Card } from "./ui/card";
 
 interface DictaphoneProps extends React.HTMLAttributes<HTMLButtonElement> {
-  onCaption: (transcript: Transcript) => void;
+  onCaption?: (transcript: Transcript) => void;
   onInterimCaption?: (transcript: Transcript) => void;
   onGenerate?: () => void;
+  isGenerating?: boolean;
 }
 
 export const Dictaphone = ({
   onCaption,
   onInterimCaption,
   onGenerate,
+  isGenerating,
 }: DictaphoneProps) => {
   const { transcript, interim } = useTranscriptStore();
   const { enhancedNotes } = useNotesStore();
@@ -56,7 +58,6 @@ export const Dictaphone = ({
   const [userMedia, setUserMedia] = useState<MediaStream | null>();
   const isRecording = !!userMedia && !!microphone && micOpen;
   const { isCopied, copyToClipboard } = useCopyToClipboard({ timeout: 2000 });
-  const [isLoadingGeneration, setIsLoadingGeneration] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
   const [dismissedPopup, setDismissedPopup] = useState(false);
 
@@ -177,7 +178,7 @@ export const Dictaphone = ({
           onInterimCaption &&
           onInterimCaption({ start, text: interim });
 
-        if (final && interim !== "") onCaption({ start, text: interim });
+        if (final && interim !== "") onCaption?.({ start, text: interim });
       });
 
       connection.on(LiveTranscriptionEvents.Error, (error) => {
@@ -381,39 +382,40 @@ export const Dictaphone = ({
           </Tooltip>
           {!isRecording && transcript.length > 0 && (
             <>
-              {isNotesNull(enhancedNotes) ? (
+              {isNotesNull(enhancedNotes) || isGenerating ? (
                 <button
                   aria-label="Generate notes"
                   onClick={() => {
-                    setIsLoadingGeneration(true);
                     onGenerate && onGenerate();
-                    setIsLoadingGeneration(false);
                   }}
                   className={cn(
                     buttonVariants({ variant: "default" }),
-                    "h-auto w-auto rounded-full shadow-lg",
+                    "h-auto w-auto rounded-full shadow-lg transition-all",
                   )}
-                  disabled={isLoadingGeneration}
+                  disabled={isGenerating}
                 >
-                  <Icons.magic className="size-6 pr-1 text-accent" />
-                  Generate notes
+                  {isGenerating ? (
+                    <Icons.spinner className="size-5 animate-spin text-accent" />
+                  ) : (
+                    <Icons.magic className="size-6 text-accent" />
+                  )}
+                  <span className="ml-1">
+                    {isGenerating ? "Generating..." : "Generate notes"}
+                  </span>
                 </button>
               ) : (
                 <button
                   aria-label="Regenerate notes"
                   onClick={() => {
-                    setIsLoadingGeneration(true);
                     onGenerate && onGenerate();
-                    setIsLoadingGeneration(false);
                   }}
                   className={cn(
                     buttonVariants({ variant: "outline" }),
-                    "h-auto w-auto rounded-full border border-border shadow-lg",
+                    "h-auto w-auto rounded-full border border-border shadow-lg transition-all",
                   )}
-                  disabled={isLoadingGeneration}
                 >
-                  <Icons.magic className="size-6 pr-1" />
-                  Regenerate notes
+                  <Icons.magic className="size-6 text-secondary-foreground" />
+                  <span className="ml-1">Regenerate notes</span>
                 </button>
               )}
             </>

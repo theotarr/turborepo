@@ -20,7 +20,6 @@ import { Course } from "@prisma/client";
 import { auth } from "@acme/auth";
 
 export const dynamic = "force-dynamic";
-export const maxDuration = 30;
 
 interface LecturePageProps {
   params: { id: string };
