@@ -35,7 +35,7 @@
     "@rn-primitives/types": "^1.0.4",
     "@shopify/flash-list": "1.6.3",
     "@supabase/supabase-js": "^2.39.2",
-    "@superwall/react-native-superwall": "^1.4.7",
+    "@superwall/react-native-superwall": "^1.4.2",
     "@tanstack/react-query": "catalog:",
     "@trpc/client": "catalog:",
     "@trpc/react-query": "catalog:",
