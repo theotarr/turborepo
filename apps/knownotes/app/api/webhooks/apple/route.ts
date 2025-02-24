@@ -37,7 +37,12 @@ export async function POST(req: Request) {
   console.log("Message Body:", messageBody);
 
   const { notificationType, data } = messageBody;
-  const { signedTransactionInfo } = data;
+  const { signedTransactionInfo, environment } = data;
+
+  if (environment === "Sandbox") {
+    console.log("Sandbox environment detected. Skipping processing.");
+    return new Response(null, { status: 200 });
+  }
 
   const signedTransactionInfoBody = signedTransactionInfo
     .replace(/-/g, "+")
