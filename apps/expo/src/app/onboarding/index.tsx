@@ -24,6 +24,7 @@ import * as StoreReview from "expo-store-review";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Superwall from "@superwall/react-native-superwall";
 import { ArrowLeft, CircleCheckBig, Plus } from "lucide-react-native";
+import { usePostHog } from "posthog-react-native";
 
 import { OnboardingQuestionItem } from "~/components/onboarding-question-item";
 import OnboardingScreen from "~/components/onboarding-screen";
@@ -69,8 +70,9 @@ const socials = [
 ];
 
 export default function App() {
-  const utils = api.useUtils();
   const router = useRouter();
+  const utils = api.useUtils();
+  const posthog = usePostHog();
   const { colorScheme } = useColorScheme();
   const { data: user } = api.auth.getUser.useQuery();
   const createCourseMutation = api.course.create.useMutation();
@@ -702,6 +704,9 @@ export default function App() {
 
               if (user) {
                 await Superwall.shared.identify(user.id);
+                posthog.identify(user.id, {
+                  email: user.email,
+                });
 
                 if (
                   shouldShowPaywall(

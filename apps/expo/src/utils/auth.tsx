@@ -2,6 +2,7 @@ import * as Linking from "expo-linking";
 import { useRouter } from "expo-router";
 import * as Browser from "expo-web-browser";
 import Superwall from "@superwall/react-native-superwall";
+import { usePostHog } from "posthog-react-native";
 
 import { api } from "./api";
 import { getBaseUrl } from "./base-url";
@@ -40,11 +41,17 @@ export const signUp = async () => {
 };
 
 export const useUser = () => {
+  const posthog = usePostHog();
   const { data: session } = api.auth.getSession.useQuery();
+
   if (session?.user) {
     void Superwall.shared.identify(session.user.id); // Pass the user id to Superwall.
     void Superwall.shared.setUserAttributes(session.user);
+    posthog.identify(session.user.id, {
+      email: session.user.email,
+    });
   }
+
   return session?.user ?? null;
 };
 

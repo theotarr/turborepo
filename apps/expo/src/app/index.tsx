@@ -5,6 +5,7 @@ import { ResizeMode, Video } from "expo-av";
 import { Stack, useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Superwall from "@superwall/react-native-superwall";
+import { usePostHog } from "posthog-react-native";
 
 import { AuthForm } from "~/components/auth-form";
 import { Text } from "~/components/ui/text";
@@ -15,14 +16,19 @@ const { height } = Dimensions.get("window");
 export default function Index() {
   const router = useRouter();
   const utils = api.useUtils();
+  const posthog = usePostHog();
   const { isLoading, data: session } = api.auth.getSession.useQuery();
 
   useEffect(() => {
     if (!session) return;
 
+    // Share the user id with Superwall and PostHog.
     const identifyUser = async () => {
       await Superwall.shared.identify(session.user.id);
       await Superwall.shared.setUserAttributes(session.user);
+      posthog.identify(session.user.id, {
+        email: session.user.email,
+      });
     };
     void identifyUser();
 
@@ -31,7 +37,7 @@ export default function Index() {
       if (value === "true") router.replace("/(dashboard)/dashboard");
       else router.replace("/onboarding");
     });
-  }, [router, session, utils]);
+  }, [posthog, router, session, utils]);
 
   if (isLoading) {
     return (
