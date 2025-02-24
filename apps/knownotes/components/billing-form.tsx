@@ -5,7 +5,6 @@ import { Icons } from "@/components/icons";
 import { buttonVariants } from "@/components/ui/button";
 import {
   Card,
-  CardContent,
   CardDescription,
   CardFooter,
   CardHeader,
