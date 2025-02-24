@@ -2,6 +2,7 @@
 
 import Script from "next/script";
 import { env } from "@/env";
+import { usePostHog } from "posthog-js/react";
 import { useMount } from "react-use";
 import TiktokPixel from "tiktok-pixel";
 
@@ -20,15 +21,18 @@ export function PixelTracking({
   userId?: string;
   email?: string;
 }) {
+  const posthog = usePostHog();
+
   useMount(async () => {
     // Push the user id to Google Analytics (the datalayer).
-    let hashedUserId: string;
-
     if (userId) {
       window.dataLayer = window.dataLayer || [];
       window.dataLayer.push({
         event: "login",
         userId,
+      });
+      posthog.identify(userId, {
+        email,
       });
     }
 

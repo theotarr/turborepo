@@ -117,7 +117,7 @@
     "openai": "^4.24.1",
     "pdf-parse": "^1.1.1",
     "pdf2json": "^3.1.5",
-    "posthog-js": "^1.157.2",
+    "posthog-js": "^1.223.3",
     "postmark": "^3.11.0",
     "prop-types": "^15.8.1",
     "react": "catalog:react18",
