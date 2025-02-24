@@ -395,13 +395,11 @@ export const Dictaphone = ({
                   disabled={isGenerating}
                 >
                   {isGenerating ? (
-                    <Icons.spinner className="size-5 animate-spin text-accent" />
+                    <Icons.spinner className="mr-2 size-4 animate-spin text-accent" />
                   ) : (
-                    <Icons.magic className="size-6 text-accent" />
+                    <Icons.magic className="mr-1 size-6 text-accent" />
                   )}
-                  <span className="ml-1">
-                    {isGenerating ? "Generating..." : "Generate notes"}
-                  </span>
+                  {isGenerating ? "Generating..." : "Generate notes"}
                 </button>
               ) : (
                 <button
@@ -414,8 +412,8 @@ export const Dictaphone = ({
                     "h-auto w-auto rounded-full border border-border shadow-lg transition-all",
                   )}
                 >
-                  <Icons.magic className="size-6 text-secondary-foreground" />
-                  <span className="ml-1">Regenerate notes</span>
+                  <Icons.magic className="mr-1 size-6 text-secondary-foreground" />
+                  Regenerate notes
                 </button>
               )}
             </>
