@@ -4,9 +4,6 @@ import { absoluteUrl } from "@/lib/utils";
 
 import { createLecture } from "../actions";
 
-export const runtime = "edge";
-export const maxDuration = 300; // 300 seconds
-
 const title = "Record Lecture";
 const ogUrl = `${absoluteUrl("")}/api/og?heading=${title}&mode=light`;
 
