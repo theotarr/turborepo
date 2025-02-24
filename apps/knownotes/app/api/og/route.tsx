@@ -12,6 +12,7 @@ export async function GET(req: NextRequest) {
       : (heading ?? "KnowNotes");
   const type = searchParams.get("type") ?? "The AI Assistant For Students";
 
+  // TODO: Debug why Gesit fonts don't work on the edge.
   // const geistRegular = fetch(
   //   new URL("../../../assets/fonts/GeistVariableVF.ttf", import.meta.url)
   // ).then((res) => res.arrayBuffer())
