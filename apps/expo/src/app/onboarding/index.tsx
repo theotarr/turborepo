@@ -479,19 +479,19 @@ export default function App() {
                 <View className="flex-row">
                   <Image
                     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-require-imports
-                    source={require("~/../assets/erik.jpg")}
+                    source={require("~/../assets/people/erik.jpg")}
                     className="-ml-6 size-20 rounded-full border-2 border-background"
                     style={{ zIndex: 3 }}
                   />
                   <Image
                     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-require-imports
-                    source={require("~/../assets/sam.jpg")}
+                    source={require("~/../assets/people/sam.jpg")}
                     className="-ml-6 size-20 rounded-full border-2 border-background"
                     style={{ zIndex: 2 }}
                   />
                   <Image
                     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-require-imports
-                    source={require("~/../assets/momo.jpg")}
+                    source={require("~/../assets/people/momo.jpg")}
                     className="-ml-6 size-20 rounded-full border-2 border-background"
                     style={{ zIndex: 1 }}
                   />
