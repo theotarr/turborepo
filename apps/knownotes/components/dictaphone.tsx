@@ -390,7 +390,7 @@ export const Dictaphone = ({
                   }}
                   className={cn(
                     buttonVariants({ variant: "default" }),
-                    "h-auto w-auto rounded-full shadow-lg transition-all",
+                    "h-auto w-auto items-center rounded-full shadow-lg transition-all",
                   )}
                   disabled={isGenerating}
                 >
@@ -409,7 +409,7 @@ export const Dictaphone = ({
                   }}
                   className={cn(
                     buttonVariants({ variant: "outline" }),
-                    "h-auto w-auto rounded-full border border-border shadow-lg transition-all",
+                    "h-auto w-auto items-center rounded-full border border-border shadow-lg transition-all",
                   )}
                 >
                   <Icons.magic className="mr-1 size-6 text-secondary-foreground" />
