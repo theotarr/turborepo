@@ -73,5 +73,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       },
     ],
     ["react-native-appsflyer", {}],
+    "expo-quick-actions",
   ],
 });

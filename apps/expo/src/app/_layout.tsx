@@ -1,9 +1,10 @@
 import "@bacons/text-decoder/install";
 
 import type { Theme } from "@react-navigation/native";
-import * as React from "react";
+import type { RouterAction } from "expo-quick-actions/router";
 import { Platform } from "react-native";
 import appsFlyer from "react-native-appsflyer";
+import { useQuickActionRouting } from "expo-quick-actions/router";
 import { SplashScreen, Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -18,7 +19,9 @@ import { TRPCProvider } from "~/utils/api";
 
 import "../globals.css";
 
+import { useEffect, useState } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import * as QuickActions from "expo-quick-actions";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 
 import { MySuperwallDelegate } from "~/lib/superwall-delegate";
@@ -44,10 +47,13 @@ void SplashScreen.preventAutoHideAsync();
 export default function RootLayout() {
   const delegate = new MySuperwallDelegate();
   const { colorScheme, setColorScheme, isDarkColorScheme } = useColorScheme();
-  const [isColorSchemeLoaded, setIsColorSchemeLoaded] = React.useState(false);
+  const [isColorSchemeLoaded, setIsColorSchemeLoaded] = useState(false);
+
+  // Enable linking to the `href` param when a quick action is used.
+  useQuickActionRouting();
 
   // Initialize Superwall
-  React.useEffect(() => {
+  useEffect(() => {
     const setupSuperwall = async () => {
       const apiKey =
         Platform.OS === "ios"
@@ -61,7 +67,7 @@ export default function RootLayout() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     appsFlyer.initSdk(
       {
         appId: "id6739503513",
@@ -76,7 +82,7 @@ export default function RootLayout() {
     );
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     void (async () => {
       const theme = await AsyncStorage.getItem("theme");
       if (!theme) {
@@ -96,6 +102,20 @@ export default function RootLayout() {
       void SplashScreen.hideAsync();
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    void QuickActions.setItems<RouterAction>([
+      {
+        title: "Deleteing? Tell us why.",
+        subtitle: "Send feedback before you delete.",
+        icon: Platform.OS === "ios" ? "symbol:square.and.pencil" : undefined,
+        id: "0",
+        params: {
+          href: "mailto:support@knownotes.ai",
+        },
+      },
+    ]);
   }, []);
 
   if (!isColorSchemeLoaded) return null;
