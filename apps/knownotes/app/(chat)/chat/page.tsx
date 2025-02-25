@@ -1,18 +1,11 @@
+"use client";
+
 import Link from "next/link";
 import { Icons } from "@/components/icons";
-import { db } from "@/lib/db";
+import { api } from "@/lib/trpc/react";
 
-import { auth } from "@acme/auth";
-
-export default async function ChatPage() {
-  const session = await auth();
-
-  const courses = await db.course.findMany({
-    where: {
-      userId: session?.user?.id,
-    },
-  });
-
+export default function ChatPage() {
+  const { data: courses } = api.course.list.useQuery();
   return (
     <>
       <div className="flex h-full flex-col items-center justify-center">
@@ -30,7 +23,7 @@ export default async function ChatPage() {
             </div>
           </div>
           <div className="flex flex-col space-y-4">
-            {courses.map((course) => (
+            {courses?.map((course) => (
               <Link
                 key={course.id}
                 href={`/chat/${course.id}`}

@@ -2,8 +2,10 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { api } from "@/lib/trpc/react";
 import { cn } from "@/lib/utils";
 import { useActions, useAIState, useUIState } from "ai/rsc";
+import { toast } from "sonner";
 
 import { ButtonScrollToBottom } from "./button-scroll-to-bottom";
 import { PromptForm } from "./chat-form";
@@ -18,7 +20,6 @@ interface ChatCourseProps extends React.HTMLAttributes<HTMLDivElement> {
     name: string;
   };
   chatName?: string;
-  userId: string;
 }
 
 const exampleMessages = [
@@ -46,7 +47,6 @@ const exampleMessages = [
 
 export function ChatCourse({
   id,
-  userId,
   course,
   chatName,
   className,
@@ -57,7 +57,7 @@ export function ChatCourse({
   const [messages, setMessages] = useUIState();
   const [input, setInput] = useState("");
   const { submitCourseMessage } = useActions();
-  const isLoading = true;
+  const { data: session } = api.auth.getSession.useQuery();
 
   // Push the user the explicit url for this chat when they send their first message.
   useEffect(() => {
@@ -131,6 +131,11 @@ export function ChatCourse({
             <div className="space-y-4 border-t bg-background px-4 py-2 shadow-lg sm:rounded-t-xl sm:border md:py-4">
               <PromptForm
                 onSubmit={async (input) => {
+                  if (!session?.user.id) {
+                    toast.error("You must be logged in to send a message.");
+                    return;
+                  }
+
                   // Add the message to UI state.
                   setMessages((prev) => [
                     ...prev,
@@ -148,7 +153,7 @@ export function ChatCourse({
                   // Submit the user message to the server.
                   const message = await submitCourseMessage(
                     input,
-                    userId,
+                    session?.user.id,
                     id,
                     course.id,
                   );

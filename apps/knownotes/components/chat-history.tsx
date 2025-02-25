@@ -1,18 +1,13 @@
+"use client";
+
 import * as React from "react";
 import { SidebarList } from "@/components/sidebar-list";
-import { supabase } from "@/lib/supabase";
+import { api } from "@/lib/trpc/react";
 
 import { ChatCreateDialog } from "./chat-create-dialog";
 
-interface ChatHistoryProps {
-  userId: string;
-}
-
-export async function ChatHistory({ userId }: ChatHistoryProps) {
-  const { data: courses } = await supabase // This runs on the edge, so we can't use Prisma.
-    .from("Course")
-    .select("id, name")
-    .eq("userId", userId);
+export function ChatHistory() {
+  const { data: courses } = api.course.list.useQuery();
 
   return (
     <div className="flex h-full flex-col">
@@ -31,8 +26,7 @@ export async function ChatHistory({ userId }: ChatHistoryProps) {
           </div>
         }
       >
-        {/* @ts-ignore */}
-        <SidebarList userId={userId} />
+        <SidebarList />
       </React.Suspense>
     </div>
   );

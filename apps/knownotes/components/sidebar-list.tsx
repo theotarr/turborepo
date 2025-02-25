@@ -1,28 +1,18 @@
-// @ts-ignore
-import { cache } from "react";
-import { getChats } from "@/app/(chat)/actions";
-import { Chat } from "openai/resources";
+"use client";
+
+import { api } from "@/lib/trpc/react";
 
 import { ModeToggle } from "./mode-toggle";
 import { SidebarItems } from "./sidebar-items";
 
-interface SidebarListProps {
-  userId: string;
-  children?: React.ReactNode;
-}
+export async function SidebarList() {
+  const { data: chats } = api.chat.list.useQuery();
 
-const loadChats = cache(async (userId: string) => {
-  return await getChats(userId);
-});
-
-export async function SidebarList({ userId }: SidebarListProps) {
-  const chats = (await loadChats(userId)) as Record<string, Chat[]>;
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
       <div className="flex-1 overflow-auto">
-        {Object.keys(chats).length > 0 ? (
+        {chats && Object.keys(chats).length > 0 ? (
           <div className="space-y-2 px-2">
-            {/* @ts-ignore */}
             <SidebarItems chats={chats} />
           </div>
         ) : (

@@ -4,11 +4,6 @@ import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { buttonVariants } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { Chat } from "@prisma/client";
 
@@ -35,19 +30,7 @@ export function SidebarItem({ chat, children }: SidebarItemProps) {
           isActive && "bg-secondary pr-16 font-semibold",
         )}
       >
-        {/* {chat.sharePath ? (
-          <Tooltip delayDuration={1000}>
-            <TooltipTrigger
-              tabIndex={-1}
-              className="focus:bg-muted focus:ring-1 focus:ring-ring"
-            >
-              <IconUsers className="mr-2" />
-            </TooltipTrigger>
-            <TooltipContent>This is a shared chat.</TooltipContent>
-          </Tooltip>
-        ) : ( */}
         <Icons.messageSquare className="mr-2 size-4" />
-        {/* )} */}
         <div
           className="relative max-h-5 flex-1 select-none overflow-hidden text-ellipsis break-all"
           title={chat.name}

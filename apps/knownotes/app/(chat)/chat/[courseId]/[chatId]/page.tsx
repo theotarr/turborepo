@@ -1,15 +1,12 @@
 import { Metadata } from "next";
-import { redirect } from "next/navigation";
 import { ChatCourse } from "@/components/chat-course";
 import { env } from "@/env";
 import { AI } from "@/lib/chat/actions";
 import { supabase } from "@/lib/supabase";
 import { absoluteUrl } from "@/lib/utils";
 
-import { auth } from "@acme/auth";
-
-// export const runtime = "edge";
-export const maxDuration = 60; // 1 min in seconds
+export const runtime = "edge";
+// export const maxDuration = 60; // 1 min in seconds
 
 interface SavedChatPageProps {
   params: { courseId: string; chatId: string };
@@ -71,15 +68,11 @@ export async function generateMetadata({
 }
 
 export default async function CourseChatPage({ params }: SavedChatPageProps) {
-  const session = await auth();
-  if (!session) redirect("/login");
-
   const { data: course } = await supabase
     .from("Course")
     .select("*")
     .eq("id", params.courseId)
     .single();
-  if (!course || course.userId !== session.user.id) redirect("/404");
 
   const { data: chat } = await supabase
     .from("Chat")
@@ -108,12 +101,7 @@ export default async function CourseChatPage({ params }: SavedChatPageProps) {
   return (
     // @ts-ignore
     <AI initialAIState={aiState}>
-      <ChatCourse
-        id={chat.id}
-        course={course}
-        chatName={chat.name}
-        userId={session.user.id}
-      />
+      <ChatCourse id={chat.id} course={course} chatName={chat.name} />
     </AI>
   );
 }

@@ -14,8 +14,7 @@ export function SidebarMobile({ userId }: { userId: string }) {
         className="inset-y-0 flex h-auto w-[300px] flex-col p-0 lg:hidden"
       >
         <SidebarWrapper className="flex pt-6">
-          {/* @ts-ignore */}
-          <ChatHistory userId={userId} />
+          <ChatHistory />
         </SidebarWrapper>
       </SheetContent>
     </Sheet>
