@@ -30,7 +30,7 @@ export async function getUserSubscriptionPlan(
     new Date(user.stripeCurrentPeriodEnd).getTime() > new Date().getTime(); // Check if the Stripe subscription is active
 
   const isAppStoreSubscriptionActive =
-    proPlan.appStoreProductIds?.includes(user.appStoreProductId) &&
+    // proPlan.appStoreProductIds?.includes(user.appStoreProductId) &&
     new Date(user.appStoreCurrentPeriodEnd).getTime() > new Date().getTime(); // Check if the App Store subscription is active
 
   if (isStripeSubscriptionActive && isAppStoreSubscriptionActive)
