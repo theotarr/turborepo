@@ -254,6 +254,52 @@ export async function POST(req: Request) {
     });
   }
 
+  // Primary purpose of this is to listen for manual updates to the subscription.
+  // For example, if we extend trials or change prices.
+  // This should automatically update the subscription in the db.
+  if (event.type === "customer.subscription.updated") {
+    // If the user's subscription is updated, we need to update the user's subscription id in the db.
+    const { id: stripeSubscriptionId } = event.data
+      .object as Stripe.Subscription;
+    const subscription =
+      await stripe.subscriptions.retrieve(stripeSubscriptionId);
+
+    // Check if the subscription is active.
+    if (
+      subscription.status === "canceled" ||
+      subscription.status === "incomplete" ||
+      subscription.status === "incomplete_expired"
+    ) {
+      return new Response(
+        "Subscription is either canceled, incomplete, or incomplete expired.",
+        { status: 200 },
+      );
+    }
+
+    const user = await db.user.findUnique({
+      where: {
+        stripeCustomerId: subscription.customer as string,
+      },
+    });
+    if (!user) return new Response("User does not exist.", { status: 404 });
+
+    // Update the user's subscription id in the db.
+    console.log(
+      `Updating ${user.email}'s subscription (${subscription.id})...`,
+    );
+    await db.user.update({
+      where: {
+        stripeSubscriptionId,
+      },
+      data: {
+        stripePriceId: subscription.items.data[0].price.id,
+        stripeCurrentPeriodEnd: new Date(
+          subscription.current_period_end * 1000,
+        ),
+      },
+    });
+  }
+
   if (event.type === "customer.subscription.deleted") {
     // If the user cancels their subscription, we need to remove their subscription id from the db.
     const stripeSubscriptionId = (event.data.object as Stripe.Subscription).id;
