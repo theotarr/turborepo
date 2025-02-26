@@ -1,34 +1,36 @@
 import { SubscriptionPlan } from "types";
 
-// export const freePlan: SubscriptionPlan = {
-//   name: "Class Clown",
-//   description: "Try out KnowNotes for free with limited access.",
-//   chatModel: "gpt-4o-mini",
-//   lecturesPerMonth: 3,
-//   noteGenerationsPerMonth: 10,
-//   messagesPerMonth: 15,
-// }
-
 export const freePlan: SubscriptionPlan = {
   name: "Free Plan",
   description: "Try out KnowNotes for free with limited access.",
   stripePriceIds: [],
-  chatModel: "gpt-4o",
-  lecturesPerMonth: 30,
-  noteGenerationsPerMonth: 500,
-  messagesPerMonth: 500,
+  // chatModel: "gpt-4o",
+  // lecturesPerMonth: 30,
+  // noteGenerationsPerMonth: 500,
+  // messagesPerMonth: 500,
 };
 
 export const proPlan: SubscriptionPlan = {
   name: "KnowNotes Pro",
   description: "Access to all KnowNotes' features and powerful models.",
-  stripePriceIds: [
-    "price_1ObteaLB8OER9Cjf5hpps6bW",
-    "price_1P8Wv4LB8OER9CjfJuUAuA8I",
+  stripePriceIds:
+    process.env.NODE_ENV === "production"
+      ? [
+          // Production prices
+          "price_1ObteaLB8OER9Cjf5hpps6bW",
+          "price_1P8Wv4LB8OER9CjfJuUAuA8I",
+        ]
+      : ["price_1ObsJnLB8OER9CjfsU27aNqX"],
+  appStoreProductIds: [
+    "weekly_5.99",
+    "yearly_119.99",
+    "yearly_99.99",
+    "yearly_139.99",
+    "monthly_18.99",
+    "offer_89.99",
   ],
-  appStoreProductIds: ["weekly_5.99", "yearly_119.99"],
-  chatModel: "gpt-4o",
-  lecturesPerMonth: 1_000,
-  noteGenerationsPerMonth: 1_000,
-  messagesPerMonth: 1_000,
+  // chatModel: "gpt-4o",
+  // lecturesPerMonth: 1_000,
+  // noteGenerationsPerMonth: 1_000,
+  // messagesPerMonth: 1_000,
 };
