@@ -246,8 +246,8 @@ export const Dictaphone = ({
               className="absolute right-2 top-2 size-4"
             />
 
-            <p className="text-sm font-medium text-secondary-foreground">
-              Is there talking?
+            <p className="mr-2 text-sm font-medium text-secondary-foreground">
+              Is there talking?{" "}
               {transcript.length > 0 ? (
                 <>Click &quot;Resume&quot; to transcribe it.</>
               ) : (
