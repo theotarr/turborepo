@@ -76,7 +76,7 @@ export function UserNameForm({ user, className, ...props }: UserNameFormProps) {
     >
       <Card>
         <CardHeader>
-          <CardTitle className="text-xl">Profile</CardTitle>
+          <CardTitle>Profile</CardTitle>
           <CardDescription>
             This information will never be shared publicly.
           </CardDescription>
