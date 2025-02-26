@@ -1,4 +1,5 @@
 export const TIKTOK_PIXEL_ID = "COH8383C77UC70DIPSOG";
+const isProd = process.env.NODE_ENV === "production";
 
 // Helper function to hash a string with SHA-256.
 async function hashString(input: string): Promise<string> {
@@ -20,6 +21,12 @@ export async function trackMetaEvent({
   email?: string | null;
   name?: string | null;
 }) {
+  // Only track events in production
+  if (!isProd) {
+    console.log("[trackMetaEvent] Skipping in non-production environment");
+    return;
+  }
+
   console.debug("[trackMetaEvent] Input:", { userId, event, email, name });
   const em = email ? [await hashString(email)] : [];
   const fn = name ? [await hashString(name)] : [];
@@ -42,8 +49,8 @@ export async function trackMetaEvent({
   console.debug("[trackMetaEvent] Event Data:", eventData);
 
   const response = await fetch(
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion, turbo/no-undeclared-env-vars, no-restricted-properties
-    `https://graph.facebook.com/v22.0/${process.env.NEXT_PUBLIC_META_PIXEL_ID!}/events`,
+    // eslint-disable-next-line turbo/no-undeclared-env-vars
+    `https://graph.facebook.com/v22.0/${process.env.NEXT_PUBLIC_META_PIXEL_ID}/events`,
     {
       method: "POST",
       headers: {
@@ -51,7 +58,7 @@ export async function trackMetaEvent({
       },
       body: JSON.stringify({
         ...eventData,
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion, turbo/no-undeclared-env-vars, no-restricted-properties
+        // eslint-disable-next-line turbo/no-undeclared-env-vars, @typescript-eslint/no-non-null-assertion
         access_token: process.env.META_ACCESS_TOKEN!,
       }),
     },
@@ -73,6 +80,12 @@ export async function trackTiktokEvent({
   email?: string | null;
   url: string;
 }) {
+  // Only track events in production
+  if (!isProd) {
+    console.log("[trackTiktokEvent] Skipping in non-production environment");
+    return;
+  }
+
   console.debug("[trackTiktokEvent] Input:", { userId, event, email, url });
   const eventData = {
     event_source: "web",
@@ -98,6 +111,7 @@ export async function trackTiktokEvent({
     {
       method: "POST",
       headers: {
+        // eslint-disable-next-line turbo/no-undeclared-env-vars, @typescript-eslint/no-non-null-assertion
         "Access-Token": process.env.TIKTOK_ACCESS_TOKEN!,
         "Content-Type": "application/json",
       },
