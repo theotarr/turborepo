@@ -14,13 +14,14 @@ export const proPlan: SubscriptionPlan = {
   name: "KnowNotes Pro",
   description: "Access to all KnowNotes' features and powerful models.",
   stripePriceIds:
-    process.env.NODE_ENV === "production"
-      ? [
+    process.env.NODE_ENV === "development"
+      ? // Development prices
+        ["price_1ObsJnLB8OER9CjfsU27aNqX"]
+      : [
           // Production prices
           "price_1ObteaLB8OER9Cjf5hpps6bW",
           "price_1P8Wv4LB8OER9CjfJuUAuA8I",
-        ]
-      : ["price_1ObsJnLB8OER9CjfsU27aNqX"],
+        ],
   appStoreProductIds: [
     "weekly_5.99",
     "yearly_119.99",
