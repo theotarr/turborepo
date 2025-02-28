@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { Icons } from "@/components/icons";
-import { buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardDescription,
@@ -30,8 +30,7 @@ export function BillingForm({
   const router = useRouter();
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
 
-  async function onSubmit(event) {
-    event.preventDefault();
+  async function resumeSubscription() {
     setIsLoading(true);
 
     try {
@@ -63,73 +62,74 @@ export function BillingForm({
     return null;
 
   return (
-    <form className={cn(className)} onSubmit={onSubmit} {...props}>
-      <Card>
-        <CardHeader>
-          <CardTitle>Billing</CardTitle>
-          <CardDescription>
-            Manage your billing and payment methods.
-          </CardDescription>
-        </CardHeader>
-        <CardFooter className="flex flex-col items-start space-y-2 md:flex-row md:justify-between md:space-x-0">
-          {subscriptionPlan.stripeSubscriptionId ? (
-            <>
-              <button
-                type="submit"
-                className={cn(
-                  buttonVariants({
-                    size: "sm",
-                    variant: subscriptionPlan.stripeSubscriptionId
-                      ? "outline"
-                      : "default",
-                  }),
-                )}
+    <Card className={cn(className)}>
+      <CardHeader>
+        <CardTitle>Billing</CardTitle>
+        <CardDescription>
+          Manage your billing and payment methods.
+        </CardDescription>
+      </CardHeader>
+      <CardFooter className="flex flex-col items-start space-y-2 md:flex-row md:justify-between md:space-x-0">
+        {subscriptionPlan.stripeSubscriptionId ? (
+          <>
+            {subscriptionPlan.stripeCurrentPeriodEnd > new Date().getTime() ? (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => router.push("/dashboard/billing")}
                 disabled={isLoading}
               >
                 {isLoading && (
                   <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
                 )}
-                {subscriptionPlan.stripeCurrentPeriodEnd >
-                new Date().getTime() ? (
-                  <>Manage Billing</>
-                ) : (
-                  <>Resume Subscription</>
+                Manage Billing
+              </Button>
+            ) : (
+              <Button
+                onClick={resumeSubscription}
+                size="sm"
+                variant="default"
+                disabled={isLoading}
+              >
+                {isLoading && (
+                  <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
                 )}
-              </button>
-              <div>
-                {subscriptionPlan.stripeCurrentPeriodEnd <
-                new Date().getTime() ? (
-                  <>
-                    {subscriptionPlan.isCanceled ? (
-                      <p className="text-xs font-medium">
-                        Your subscription is canceled and expires on{" "}
-                        {formatDate(subscriptionPlan.stripeCurrentPeriodEnd)}
-                      </p>
-                    ) : (
-                      <p className="text-xs font-medium">
-                        Your subscription has ended. Resume your subscription to
-                        continue using KnowNotes.
-                      </p>
-                    )}
-                  </>
-                ) : (
-                  <></>
-                )}
-              </div>
-            </>
-          ) : (
-            <></>
-          )}
-          {subscriptionPlan.appStoreCurrentPeriodEnd ? (
-            <div className="text-sm font-medium">
-              Your subscription was created through the Apple App Store. Use
-              your Apple device to manage your subscription.
+                Resume Subscription
+              </Button>
+            )}
+            <div>
+              {subscriptionPlan.stripeCurrentPeriodEnd <
+              new Date().getTime() ? (
+                <>
+                  {subscriptionPlan.isCanceled ? (
+                    <p className="text-xs font-medium">
+                      Your subscription is canceled and expires on{" "}
+                      {formatDate(subscriptionPlan.stripeCurrentPeriodEnd)}
+                    </p>
+                  ) : (
+                    <p className="text-xs font-medium">
+                      Your subscription has ended. Resume your subscription to
+                      continue using KnowNotes.
+                    </p>
+                  )}
+                </>
+              ) : (
+                <></>
+              )}
             </div>
-          ) : (
-            <></>
-          )}
-        </CardFooter>
-      </Card>
-    </form>
+          </>
+        ) : (
+          <></>
+        )}
+        {subscriptionPlan.appStoreCurrentPeriodEnd ? (
+          <div className="text-sm font-medium">
+            Your subscription was created through the Apple App Store. Use your
+            Apple device to manage your subscription.
+          </div>
+        ) : (
+          <></>
+        )}
+      </CardFooter>
+    </Card>
   );
 }
