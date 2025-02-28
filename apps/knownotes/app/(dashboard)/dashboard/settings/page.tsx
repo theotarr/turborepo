@@ -2,8 +2,10 @@ import { redirect } from "next/navigation";
 import { BillingForm } from "@/components/billing-form";
 import { DashboardHeader } from "@/components/header";
 import { DashboardShell } from "@/components/shell";
+import { UsageCard } from "@/components/usage-card";
 import { UserDeleteForm } from "@/components/user-delete-form";
 import { UserNameForm } from "@/components/user-name-form";
+import { db } from "@/lib/db";
 import { stripe } from "@/lib/stripe";
 import { getUserSubscriptionPlan } from "@/lib/subscription";
 import { absoluteUrl } from "@/lib/utils";
@@ -46,6 +48,44 @@ export default async function SettingsPage() {
 
   const subscriptionPlan = await getUserSubscriptionPlan(session.user.id);
 
+  // Get usage statistics
+  const usageStats = await db.user.findUnique({
+    where: {
+      id: session.user.id,
+    },
+    select: {
+      _count: {
+        select: {
+          lectures: true,
+          chats: true,
+        },
+      },
+    },
+  });
+
+  // Count different types of lectures
+  const lectureStats = await db.lecture.groupBy({
+    by: ["type"],
+    where: {
+      userId: session.user.id,
+    },
+    _count: true,
+  });
+
+  // Format lecture stats
+  const lecturesByType = {
+    AUDIO_FILE: 0,
+    YOUTUBE: 0,
+    PDF: 0,
+    LIVE: 0,
+  };
+
+  lectureStats.forEach((stat) => {
+    if (stat.type in lecturesByType) {
+      lecturesByType[stat.type as keyof typeof lecturesByType] = stat._count;
+    }
+  });
+
   // If user has a paid plan, check cancel status on Stripe.
   let cancelAtPeriodEnd = false;
 
@@ -69,6 +109,10 @@ export default async function SettingsPage() {
             name: session.user.name || "",
             email: session.user.email || "",
           }}
+        />
+        <UsageCard
+          totalNotes={usageStats?._count.lectures || 0}
+          notesByType={lecturesByType}
         />
         <BillingForm
           subscriptionPlan={{

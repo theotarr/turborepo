@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
 import { Icons } from "@/components/icons";
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -10,6 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { createSubscription } from "@/lib/stripe/actions";
 import { cn, formatDate } from "@/lib/utils";
 import { toast } from "sonner";
 import { UserSubscriptionPlan } from "types";
@@ -25,35 +27,31 @@ export function BillingForm({
   className,
   ...props
 }: BillingFormProps) {
+  const router = useRouter();
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
 
   async function onSubmit(event) {
     event.preventDefault();
-    setIsLoading(!isLoading);
+    setIsLoading(true);
 
-    if (
-      subscriptionPlan.stripeCurrentPeriodEnd < new Date().getTime() ||
-      subscriptionPlan.appStoreCurrentPeriodEnd < new Date().getTime()
-    ) {
-      // The subscription has ended.
-      // Unpause the subscription.
-    }
+    try {
+      if (
+        subscriptionPlan.stripeCurrentPeriodEnd < new Date().getTime() ||
+        subscriptionPlan.appStoreCurrentPeriodEnd < new Date().getTime()
+      ) {
+        // The subscription has ended, create a new subscription
+        await createSubscription();
+        toast.success("Subscription reactivated successfully");
+      }
 
-    // Get a Stripe session URL.
-    const response = await fetch("/api/users/stripe");
-
-    if (!response?.ok) {
-      return toast.error(
-        "Something went wrong. Please refresh the page and try again.",
-      );
-    }
-
-    // Redirect to the Stripe session.
-    // This could be a checkout page for initial upgrade.
-    // Or portal to manage existing subscription.
-    const session = await response.json();
-    if (session) {
-      window.location.href = session.url;
+      // Redirect to `/dashboard/billing`
+      router.push("/dashboard/billing");
+      router.refresh();
+    } catch (error) {
+      console.error("Error managing subscription:", error);
+      toast.error("Failed to manage subscription. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -80,6 +78,7 @@ export function BillingForm({
                 type="submit"
                 className={cn(
                   buttonVariants({
+                    size: "sm",
                     variant: subscriptionPlan.stripeSubscriptionId
                       ? "outline"
                       : "default",
@@ -94,7 +93,7 @@ export function BillingForm({
                 new Date().getTime() ? (
                   <>Manage Billing</>
                 ) : (
-                  <>Unpause Subscription</>
+                  <>Resume Subscription</>
                 )}
               </button>
               <div>
@@ -108,8 +107,8 @@ export function BillingForm({
                       </p>
                     ) : (
                       <p className="text-xs font-medium">
-                        Your subscription has ended. Unpause your subscription
-                        to continue using KnowNotes.
+                        Your subscription has ended. Resume your subscription to
+                        continue using KnowNotes.
                       </p>
                     )}
                   </>

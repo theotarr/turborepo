@@ -12,7 +12,6 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronsUpDown,
-  Command,
   Copy,
   CreditCard,
   DollarSignIcon,
@@ -26,10 +25,12 @@ import {
   Forward,
   GalleryVerticalEnd,
   Gauge,
+  Gift,
   GraduationCap,
   HelpCircle,
   Home,
   Image,
+  Info,
   Instagram,
   Laptop,
   Link,
@@ -70,7 +71,9 @@ import {
 } from "lucide-react";
 
 export const Icons = {
+  gift: Gift,
   zap: Zap,
+  info: Info,
   quiz: FolderClosed,
   flashcards: GalleryVerticalEnd,
   link: Link,

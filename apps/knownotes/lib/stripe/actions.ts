@@ -148,7 +148,7 @@ export async function updateUserSubsciptionPlan(setupIntentId: string) {
   }
 }
 
-export async function unpauseSubscription() {
+export async function createSubscription() {
   const session = await auth();
   if (!session?.user) throw new Error("User not found.");
 
@@ -177,5 +177,55 @@ export async function unpauseSubscription() {
         ),
       })
       .eq("id", session.user.id);
+  }
+}
+
+export async function cancelSubscription() {
+  const session = await auth();
+  if (!session?.user) throw new Error("User not found.");
+
+  try {
+    const subscription = await getUserSubscriptionPlan(session.user.id);
+
+    if (subscription.isPro) {
+      await stripe.subscriptions.update(subscription.stripeSubscriptionId, {
+        cancel_at_period_end: true,
+      });
+    }
+  } catch (error) {
+    console.error(error);
+    throw new Error("Failed to cancel subscription.");
+  }
+}
+
+export async function keepSubscription() {
+  const session = await auth();
+  if (!session?.user) throw new Error("User not found.");
+
+  const subscription = await getUserSubscriptionPlan(session.user.id);
+
+  // If the subscription has not ended, then do not cancel it.
+  if (subscription.stripeCurrentPeriodEnd > Date.now()) {
+    await stripe.subscriptions.update(subscription.stripeSubscriptionId, {
+      cancel_at_period_end: false,
+    });
+  }
+}
+
+export async function pauseSubscription() {
+  const session = await auth();
+  if (!session?.user) throw new Error("User not found.");
+
+  const subscription = await getUserSubscriptionPlan(session.user.id);
+
+  if (subscription.isPro) {
+    await stripe.subscriptions.update(subscription.stripeSubscriptionId, {
+      pause_collection: {
+        behavior: "void",
+        resumes_at: Math.floor(
+          new Date(Date.now() + 1000 * 60 * 60 * 24 * 30).getTime() / 1000,
+        ), // 30 days from now
+      },
+    });
   }
 }

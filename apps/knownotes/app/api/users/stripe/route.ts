@@ -1,4 +1,3 @@
-import { NextRequest } from "next/server";
 import { proPlan } from "@/config/subscriptions";
 import { stripe } from "@/lib/stripe";
 import { getUserSubscriptionPlan } from "@/lib/subscription";
@@ -7,15 +6,10 @@ import { z } from "zod";
 
 import { auth } from "@acme/auth";
 
-const billingUrl = absoluteUrl("/dashboard/settings");
+const billingUrl = absoluteUrl("/dashboard/billing");
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
-    // const priceId = req.nextUrl.searchParams.get("priceId")
-    // if (!priceId) {
-    //   return new Response(null, { status: 400 })
-    // }
-
     const session = await auth();
     if (!session) return new Response(null, { status: 403 });
 

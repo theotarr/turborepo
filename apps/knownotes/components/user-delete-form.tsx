@@ -71,6 +71,7 @@ export function UserDeleteForm({
               <Button
                 className={cn(
                   buttonVariants({
+                    size: "sm",
                     variant: "secondary",
                   }),
                   className,
@@ -80,7 +81,7 @@ export function UserDeleteForm({
                 {isSaving && (
                   <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
                 )}
-                <span>Delete Account</span>
+                Delete Account
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
