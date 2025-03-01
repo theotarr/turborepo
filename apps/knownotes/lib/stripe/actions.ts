@@ -188,9 +188,12 @@ export async function cancelSubscription() {
     const subscription = await getUserSubscriptionPlan(session.user.id);
 
     if (subscription.isPro) {
-      await stripe.subscriptions.update(subscription.stripeSubscriptionId, {
-        cancel_at_period_end: true,
-      });
+      await stripe.subscriptions.update(
+        subscription.stripeSubscriptionId as string,
+        {
+          cancel_at_period_end: true,
+        },
+      );
     }
   } catch (error) {
     console.error(error);
@@ -204,28 +207,93 @@ export async function keepSubscription() {
 
   const subscription = await getUserSubscriptionPlan(session.user.id);
 
+  if (!subscription.stripeSubscriptionId) {
+    throw new Error("No active subscription found");
+  }
+
   // If the subscription has not ended, then do not cancel it.
   if (subscription.stripeCurrentPeriodEnd > Date.now()) {
-    await stripe.subscriptions.update(subscription.stripeSubscriptionId, {
-      cancel_at_period_end: false,
-    });
+    await stripe.subscriptions.update(
+      subscription.stripeSubscriptionId as string,
+      {
+        cancel_at_period_end: false,
+      },
+    );
   }
 }
 
-export async function pauseSubscription() {
+export async function pauseSubscription(resumeDate?: Date): Promise<boolean> {
   const session = await auth();
   if (!session?.user) throw new Error("User not found.");
 
-  const subscription = await getUserSubscriptionPlan(session.user.id);
+  try {
+    const subscription = await getUserSubscriptionPlan(session.user.id);
 
-  if (subscription.isPro) {
+    if (!subscription.isPro || !subscription.stripeSubscriptionId) {
+      throw new Error("No active subscription found");
+    }
+
+    // Validate resume date - maximum 3 months from now
+    const maxResumeDate = new Date(Date.now() + 1000 * 60 * 60 * 24 * 90); // 90 days (3 months)
+
+    // Calculate resume date - default to 30 days if not provided but cap at 3 months
+    const resumeAt =
+      resumeDate && resumeDate <= maxResumeDate
+        ? resumeDate
+        : new Date(Date.now() + 1000 * 60 * 60 * 24 * 30);
+
+    // Pause the subscription
     await stripe.subscriptions.update(subscription.stripeSubscriptionId, {
       pause_collection: {
         behavior: "void",
-        resumes_at: Math.floor(
-          new Date(Date.now() + 1000 * 60 * 60 * 24 * 30).getTime() / 1000,
-        ), // 30 days from now
+        resumes_at: Math.floor(resumeAt.getTime() / 1000),
       },
     });
+
+    // Update user record
+    await supabase
+      .from("User")
+      .update({
+        stripeSubscriptionPaused: true,
+        stripeSubscriptionResumeAt: resumeAt.toISOString(),
+      })
+      .eq("id", session.user.id);
+
+    return true;
+  } catch (error) {
+    console.error("Error pausing subscription:", error);
+    throw new Error("Failed to pause subscription.");
+  }
+}
+
+export async function resumeSubscription(): Promise<boolean> {
+  const session = await auth();
+  if (!session?.user) throw new Error("User not found.");
+
+  try {
+    const subscription = await getUserSubscriptionPlan(session.user.id);
+
+    if (!subscription.isPro || !subscription.stripeSubscriptionId) {
+      throw new Error("No active subscription found");
+    }
+
+    // Unpause payment collection for the subscription.
+    await stripe.subscriptions.update(subscription.stripeSubscriptionId, {
+      pause_collection: "",
+    });
+
+    // Update user record.
+    await supabase
+      .from("User")
+      .update({
+        stripeSubscriptionPaused: false,
+        stripeSubscriptionResumeAt: null,
+      })
+      .eq("id", session.user.id);
+
+    return true;
+  } catch (error) {
+    console.error("Error resuming subscription:", error);
+    throw new Error("Failed to resume subscription.");
   }
 }

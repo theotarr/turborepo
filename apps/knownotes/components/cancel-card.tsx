@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Icons } from "@/components/icons";
+import { ResumeDatePicker } from "@/components/resume-date-picker";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Card,
@@ -22,34 +23,85 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Textarea } from "@/components/ui/textarea";
 import { keepSubscription, pauseSubscription } from "@/lib/stripe/actions";
 import { cn } from "@/lib/utils";
 import { UserSubscriptionPlan } from "@/types";
+import { addMonths, format } from "date-fns";
+import { usePostHog } from "posthog-js/react";
 import { toast } from "sonner";
 
 interface CancelCardProps {
   subscriptionPlan: UserSubscriptionPlan & {
     isCanceled: boolean;
+    isPaused: boolean;
+    resumeAt: number | null;
   };
 }
 
 export function CancelCard({ subscriptionPlan }: CancelCardProps) {
   const router = useRouter();
+  const posthog = usePostHog();
   const [isLoading, setIsLoading] = useState(false);
   const [isPauseDialogOpen, setIsPauseDialogOpen] = useState(false);
+  const [pauseStep, setPauseStep] = useState<"date" | "feedback">("date");
+  const [pauseReason, setPauseReason] = useState<string>("");
+  const [details, setDetails] = useState<string>("");
+  const [resumeDate, setResumeDate] = useState<Date>(
+    addMonths(new Date(), 1), // Default to 1 month
+  );
+
+  const handlePauseStepNext = () => {
+    setPauseStep("feedback");
+  };
+
+  const handlePauseStepBack = () => {
+    setPauseStep("date");
+  };
+
+  const handleResetSteps = () => {
+    setPauseStep("date");
+    setPauseReason("");
+    setDetails("");
+  };
 
   const handlePauseSubscription = async () => {
     try {
       setIsLoading(true);
-      await pauseSubscription();
+      const reason = pauseReason === "other" ? details : pauseReason;
+
+      // Pass the resume date to the server action
+      await pauseSubscription(resumeDate);
+
       setIsPauseDialogOpen(false);
       router.refresh();
-      toast.success("Subscription paused");
+
+      // Reset steps for next time
+      handleResetSteps();
+
+      toast.success("Subscription paused", {
+        description: `Your subscription will automatically resume on ${format(resumeDate, "PPP")}.`,
+      });
+
+      // Here you could send the feedback to your analytics or database
+      posthog.capture("subscription_paused", {
+        reason,
+        details,
+        resumeDate: resumeDate.toISOString(),
+      });
     } catch (error) {
       console.error(error);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleCloseDialog = () => {
+    setIsPauseDialogOpen(false);
+    // Reset steps when closing
+    handleResetSteps();
   };
 
   if (!subscriptionPlan.isPro) {
@@ -87,7 +139,143 @@ export function CancelCard({ subscriptionPlan }: CancelCardProps) {
           )}
         </div>
       </CardContent>
-      <CardFooter className="flex gap-2">
+      <CardFooter className="flex justify-between gap-2">
+        {!subscriptionPlan.isCanceled && (
+          <Dialog
+            open={isPauseDialogOpen}
+            onOpenChange={(open) => {
+              setIsPauseDialogOpen(open);
+              if (!open) handleResetSteps();
+            }}
+          >
+            <DialogTrigger asChild>
+              <Button variant="secondary" size="sm" disabled={isLoading}>
+                Pause Subscription
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Pause Subscription</DialogTitle>
+                <DialogDescription>
+                  {pauseStep === "date"
+                    ? "Choose when you'd like your subscription to automatically resume."
+                    : "Help us improve by sharing why you're pausing your subscription."}
+                </DialogDescription>
+              </DialogHeader>
+
+              {pauseStep === "date" ? (
+                <>
+                  <div className="py-4">
+                    <div className="mb-4">
+                      <ResumeDatePicker
+                        value={resumeDate}
+                        onChange={setResumeDate}
+                      />
+                    </div>
+                    <div className="mt-2 rounded-md bg-muted p-3 text-sm text-muted-foreground">
+                      <div className="flex items-start gap-2">
+                        <Icons.info className="mt-0.5 size-4" />
+                        <p>
+                          You'll maintain access until the end of your current
+                          billing cycle. It will automatically resume on{" "}
+                          <span className="font-medium text-foreground">
+                            {format(resumeDate, "MMMM d, yyyy")}
+                          </span>
+                          .
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <DialogFooter className="flex justify-between gap-2 sm:justify-between">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleCloseDialog}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      variant="default"
+                      size="sm"
+                      onClick={handlePauseStepNext}
+                    >
+                      Continue
+                    </Button>
+                  </DialogFooter>
+                </>
+              ) : (
+                <>
+                  <div className="py-4">
+                    <RadioGroup
+                      value={pauseReason}
+                      onValueChange={setPauseReason}
+                      className="space-y-3"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="not_using" id="not_using" />
+                        <Label htmlFor="not_using">
+                          I'm not using it enough
+                        </Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem
+                          value="missing_features"
+                          id="missing_features"
+                        />
+                        <Label htmlFor="missing_features">
+                          Missing features I need
+                        </Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem
+                          value="school_break"
+                          id="school_break"
+                        />
+                        <Label htmlFor="school_break">Break from school</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="other" id="other" />
+                        <Label htmlFor="other">Other reason</Label>
+                      </div>
+                    </RadioGroup>
+
+                    {pauseReason === "other" && (
+                      <div className="mt-3">
+                        <Textarea
+                          placeholder="Please tell us more..."
+                          value={details}
+                          onChange={(e) => setDetails(e.target.value)}
+                          className="h-20"
+                        />
+                      </div>
+                    )}
+                  </div>
+                  <DialogFooter className="flex justify-between gap-2 sm:justify-between">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handlePauseStepBack}
+                    >
+                      Back
+                    </Button>
+                    <Button
+                      variant="default"
+                      size="sm"
+                      onClick={handlePauseSubscription}
+                      disabled={isLoading}
+                    >
+                      {isLoading && (
+                        <Icons.spinner className="mr-2 size-4 animate-spin" />
+                      )}
+                      Pause Subscription
+                    </Button>
+                  </DialogFooter>
+                </>
+              )}
+            </DialogContent>
+          </Dialog>
+        )}
+
         {subscriptionPlan.isCanceled ? (
           <Button
             variant="outline"
@@ -110,54 +298,12 @@ export function CancelCard({ subscriptionPlan }: CancelCardProps) {
           </Button>
         ) : (
           <Link
-            className={cn(
-              buttonVariants({ variant: "ghost", size: "sm" }),
-              "font-normal",
-            )}
+            className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}
             href="/dashboard/billing/cancel"
           >
             Cancel Subscription
           </Link>
         )}
-        {/* {!subscriptionPlan.isCanceled && (
-          <Dialog open={isPauseDialogOpen} onOpenChange={setIsPauseDialogOpen}>
-            <DialogTrigger asChild>
-              <Button size="sm" disabled={isLoading}>
-                Pause Subscription
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Pause Subscription</DialogTitle>
-                <DialogDescription>
-                  Are you sure you want to pause your subscription? We'll
-                  automatically resume your subscription 30 days from now.
-                </DialogDescription>
-              </DialogHeader>
-              <DialogFooter className="flex justify-end gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setIsPauseDialogOpen(false)}
-                  disabled={isLoading}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  variant="default"
-                  size="sm"
-                  onClick={handlePauseSubscription}
-                  disabled={isLoading}
-                >
-                  {isLoading && (
-                    <Icons.spinner className="mr-2 size-4 animate-spin" />
-                  )}
-                  Confirm Pause
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        )} */}
       </CardFooter>
     </Card>
   );

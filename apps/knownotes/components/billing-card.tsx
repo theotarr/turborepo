@@ -9,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { keepSubscription } from "@/lib/stripe/actions";
+import { keepSubscription, resumeSubscription } from "@/lib/stripe/actions";
 import { formatDate } from "@/lib/utils";
 import { UserSubscriptionPlan } from "@/types";
 import { toast } from "sonner";
@@ -20,6 +20,8 @@ import { Button } from "./ui/button";
 interface BillingCardProps {
   subscriptionPlan: UserSubscriptionPlan & {
     isCanceled: boolean;
+    isPaused: boolean;
+    resumeAt: number | null;
   };
 }
 
@@ -45,13 +47,32 @@ export function BillingCard({ subscriptionPlan }: BillingCardProps) {
                 </div>
               </div>
             </div>
-            {subscriptionPlan.stripeCurrentPeriodEnd && (
-              <div className="flex items-center justify-between">
-                <div className="text-sm font-medium">
-                  {subscriptionPlan.isCanceled ? "Cancels on" : "Renews on"}
+            {subscriptionPlan.stripeCurrentPeriodEnd &&
+              !subscriptionPlan.isPaused && (
+                <div className="flex items-center justify-between">
+                  <div className="text-sm font-medium">
+                    {subscriptionPlan.isCanceled ? "Cancels on" : "Renews on"}
+                  </div>
+                  <div className="text-sm font-medium">
+                    {formatDate(subscriptionPlan.stripeCurrentPeriodEnd)}
+                  </div>
                 </div>
+              )}
+            {subscriptionPlan.isPro && subscriptionPlan.isPaused && (
+              <div className="flex items-center justify-between">
+                <div className="text-sm font-medium">Status</div>
+                <div className="flex items-center gap-2">
+                  <div className="rounded-full bg-amber-500/10 px-2 py-1 text-xs font-medium text-amber-500">
+                    Paused
+                  </div>
+                </div>
+              </div>
+            )}
+            {subscriptionPlan.isPaused && subscriptionPlan.resumeAt && (
+              <div className="flex items-center justify-between">
+                <div className="text-sm font-medium">Resumes on</div>
                 <div className="text-sm font-medium">
-                  {formatDate(subscriptionPlan.stripeCurrentPeriodEnd)}
+                  {formatDate(subscriptionPlan.resumeAt)}
                 </div>
               </div>
             )}
@@ -98,6 +119,36 @@ export function BillingCard({ subscriptionPlan }: BillingCardProps) {
                 <Icons.spinner className="mr-2 size-4 animate-spin" />
               )}
               Keep Subscription
+            </Button>
+          </div>
+        )}
+        {subscriptionPlan.isPro && subscriptionPlan.isPaused && (
+          <div className="mt-2">
+            <Button
+              variant="default"
+              className="w-full"
+              onClick={async () => {
+                setIsLoading(true);
+                try {
+                  await resumeSubscription();
+                  router.refresh();
+                  toast.success("Subscription resumed", {
+                    description:
+                      "Your subscription has been successfully resumed.",
+                  });
+                } catch (error) {
+                  toast.error("Failed to resume subscription", {
+                    description: "Please try again or contact support.",
+                  });
+                }
+                setIsLoading(false);
+              }}
+              disabled={isLoading}
+            >
+              {isLoading && (
+                <Icons.spinner className="mr-2 size-4 animate-spin" />
+              )}
+              Resume Subscription
             </Button>
           </div>
         )}

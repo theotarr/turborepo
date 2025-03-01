@@ -187,10 +187,12 @@ model User {
   chats           Chat[]
 
   // Stripe Subscription
-  stripeCustomerId       String?   @unique
-  stripeSubscriptionId   String?   @unique
-  stripePriceId          String?
-  stripeCurrentPeriodEnd DateTime?
+  stripeCustomerId           String?   @unique
+  stripeSubscriptionId       String?   @unique
+  stripePriceId              String?
+  stripeCurrentPeriodEnd     DateTime?
+  stripeSubscriptionPaused   Boolean?  @default(false)
+  stripeSubscriptionResumeAt DateTime?
 
   // App Store
   appStoreUserId           String?   @unique

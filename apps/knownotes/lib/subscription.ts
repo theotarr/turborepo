@@ -13,6 +13,8 @@ export async function getUserSubscriptionPlan(
       stripeCurrentPeriodEnd,
       stripeCustomerId,
       stripePriceId,
+      stripeSubscriptionPaused,
+      stripeSubscriptionResumeAt,
       appStoreSubscriptionId,
       appStoreProductId,
       appStoreCurrentPeriodEnd`,
@@ -45,6 +47,10 @@ export async function getUserSubscriptionPlan(
     ...plan,
     ...user,
     isPro: plan !== freePlan,
+    isPaused: user.stripeSubscriptionPaused || false,
+    resumeAt: user.stripeSubscriptionResumeAt
+      ? new Date(user.stripeSubscriptionResumeAt).getTime()
+      : null,
     stripeCurrentPeriodEnd: new Date(user.stripeCurrentPeriodEnd).getTime(),
     appStoreCurrentPeriodEnd: new Date(user.appStoreCurrentPeriodEnd).getTime(),
   };

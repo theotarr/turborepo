@@ -83,10 +83,11 @@ export type SubscriptionPlan = {
 export type UserSubscriptionPlan = SubscriptionPlan &
   Pick<
     User,
-    "stripeCustomerId" | "stripeSubscriptionId",
-    "appStoreSubscriptionId"
+    "stripeCustomerId" | "stripeSubscriptionId" | "appStoreSubscriptionId"
   > & {
     stripeCurrentPeriodEnd: number;
     appStoreCurrentPeriodEnd: number;
     isPro: boolean;
+    isPaused: boolean;
+    resumeAt: number | null;
   };
