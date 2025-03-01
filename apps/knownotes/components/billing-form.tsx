@@ -22,11 +22,7 @@ interface BillingFormProps extends React.HTMLAttributes<HTMLFormElement> {
   };
 }
 
-export function BillingForm({
-  subscriptionPlan,
-  className,
-  ...props
-}: BillingFormProps) {
+export function BillingForm({ subscriptionPlan, className }: BillingFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
 
