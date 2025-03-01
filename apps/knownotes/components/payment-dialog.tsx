@@ -53,7 +53,7 @@ export function PaymentDialog({ subscription, ...props }: PaymentDialogProps) {
 
   return (
     <>
-      <Dialog open={true} {...props}>
+      <Dialog open={open} {...props}>
         <DialogContent
           className="max-h-[90vh] overflow-y-auto sm:max-w-lg"
           closable={false}
