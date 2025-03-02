@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import { ChatCourse } from "@/components/chat-course";
+import { PremiumFeature } from "@/components/premium-feature";
 import { env } from "@/env";
 import { AI } from "@/lib/chat/actions";
 import { supabase } from "@/lib/supabase";
@@ -99,9 +100,10 @@ export default async function CourseChatPage({ params }: SavedChatPageProps) {
   };
 
   return (
-    // @ts-ignore
     <AI initialAIState={aiState}>
-      <ChatCourse id={chat.id} course={course} chatName={chat.name} />
+      <PremiumFeature>
+        <ChatCourse id={chat.id} course={course} chatName={chat.name} />
+      </PremiumFeature>
     </AI>
   );
 }

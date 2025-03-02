@@ -118,7 +118,7 @@ export async function updateUserSubsciptionPlan(setupIntentId: string) {
   const subscription = await getUserSubscriptionPlan(
     session?.user.id as string,
   );
-  if (subscription.isPro) return; // The user is already subscribed.
+  if (subscription.isPro) return; // The user already has or had an active subscription.
 
   // If the user is not subscribed, then fetch the setup intent to check if it succeeded.
   const setupIntent = await stripe.setupIntents.retrieve(setupIntentId);
@@ -271,29 +271,57 @@ export async function resumeSubscription(): Promise<boolean> {
   if (!session?.user) throw new Error("User not found.");
 
   try {
-    const subscription = await getUserSubscriptionPlan(session.user.id);
-
-    if (!subscription.isPro || !subscription.stripeSubscriptionId) {
+    const dbSubscription = await getUserSubscriptionPlan(session.user.id);
+    if (!dbSubscription.stripeSubscriptionId)
       throw new Error("No active subscription found");
-    }
 
-    // Unpause payment collection for the subscription.
-    await stripe.subscriptions.update(subscription.stripeSubscriptionId, {
+    const subscription = await stripe.subscriptions.retrieve(
+      dbSubscription.stripeSubscriptionId,
+    );
+    console.log(
+      `Resuming subscription for ${session.user.id} with subscription id ${subscription.id}`,
+    );
+
+    // Unpause the subscription and reset the billing cycle anchor to now.
+    // This will charge the customer immediately regardless of previous billing period.
+    await stripe.subscriptions.update(subscription.id, {
       pause_collection: "",
+      // The trial end cannot be after billing_cycle_anchor.
+      // Consider ending the trial `trial_end=now`, however this will charge the customer immediately.
+      // So if the user is trialing don't set the billing cycle anchor to now, otherwise set it to now and charge the customer immediately.
+      ...(subscription &&
+        subscription.status !== "trialing" && {
+          billing_cycle_anchor: "now",
+        }),
+      proration_behavior: "none", // Don't prorate when changing the billing cycle.
     });
 
-    // Update user record.
+    console.log(
+      `Resumed subscription for ${session.user.id} with subscription id ${subscription.id}`,
+    );
+
+    // Update the database with a temporary future end date to prevent payment dialogs from showing during the Stripe operations.
     await supabase
       .from("User")
       .update({
         stripeSubscriptionPaused: false,
         stripeSubscriptionResumeAt: null,
+        stripeCurrentPeriodEnd: new Date(Date.now() + 10 * 60 * 1000), // 10-minute window to prevent payment dialogs from appearing.
       })
       .eq("id", session.user.id);
 
     return true;
   } catch (error) {
     console.error("Error resuming subscription:", error);
+
+    // In case of an error, we need to reset the database to show paused status.
+    await supabase
+      .from("User")
+      .update({
+        stripeSubscriptionPaused: true,
+      })
+      .eq("id", session.user.id);
+
     throw new Error("Failed to resume subscription.");
   }
 }

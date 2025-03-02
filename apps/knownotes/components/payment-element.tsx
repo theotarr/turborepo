@@ -4,7 +4,7 @@ import type { StripeError } from "@stripe/stripe-js";
 import { useState } from "react";
 import { sendGAEvent } from "@/lib/analytics";
 import getStripe from "@/lib/get-stripejs";
-import { createSetupIntent, validatePromotionCode } from "@/lib/stripe/actions";
+import { createSetupIntent } from "@/lib/stripe/actions";
 import { cn } from "@/lib/utils";
 import {
   Elements,
@@ -14,52 +14,23 @@ import {
 } from "@stripe/react-stripe-js";
 import { useTheme } from "next-themes";
 import { toast } from "sonner";
-import { useDebouncedCallback } from "use-debounce";
 
 import { Icons } from "./icons";
 import { buttonVariants } from "./ui/button";
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
 
-interface CheckoutFormProps extends React.HTMLAttributes<HTMLDivElement> {}
+interface CheckoutFormProps extends React.HTMLAttributes<HTMLDivElement> {
+  ctaText?: string;
+}
 
-function CheckoutForm({ className, ...props }: CheckoutFormProps) {
-  const { theme } = useTheme();
+function CheckoutForm({ className, ctaText, ...props }: CheckoutFormProps) {
+  const stripe = useStripe();
+  const elements = useElements();
+
   const [paymentType, setPaymentType] = useState<string>("");
   const [payment, setPayment] = useState<{
     status: "initial" | "processing" | "error";
   }>({ status: "initial" });
   const [errorMessage, setErrorMessage] = useState<string>("");
-
-  const [promoCode, setPromoCode] = useState<string>("");
-  const [promoCodeMessage, setPromoCodeMessage] = useState<{
-    status: "applied" | "error";
-    message: string;
-  } | null>(null);
-  const debouncedPromoCode = useDebouncedCallback(async (promoCode: string) => {
-    if (!promoCode) {
-      setPromoCodeMessage(null);
-      return;
-    }
-
-    const { valid } = await validatePromotionCode(promoCode);
-    if (valid) {
-      setPromoCodeMessage({
-        status: "applied",
-        message: `Promo code applied! You get your first week free!`,
-      });
-      toast.success(`Promo code applied! You get your first week free!`);
-    } else {
-      setPromoCodeMessage({
-        status: "error",
-        message: `Invalid promo code`,
-      });
-      toast.error("Invalid promo code");
-    }
-  }, 500);
-
-  const stripe = useStripe();
-  const elements = useElements();
 
   const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
     try {
@@ -127,21 +98,7 @@ function CheckoutForm({ className, ...props }: CheckoutFormProps) {
   };
 
   return (
-    <>
-      <div
-        className={cn("flex flex-col space-y-6 text-center", className)}
-        {...props}
-      >
-        <Icons.logo className="mx-auto h-12 w-12" />
-        <div className="flex flex-col space-y-1">
-          <h1 className="text-3xl font-semibold tracking-tight">
-            Free For 72 Hours!
-          </h1>
-          <p className="text-lg text-secondary-foreground/70">
-            Unlimited access, cancel anytime.
-          </p>
-        </div>
-      </div>
+    <div className={cn(className)} {...props}>
       <form onSubmit={handleSubmit}>
         <fieldset className="elements-style">
           <div className="FormRow elements-style antialiased">
@@ -167,48 +124,6 @@ function CheckoutForm({ className, ...props }: CheckoutFormProps) {
             />
           </div>
         </fieldset>
-        {/* <div
-          className="pt-2 transition-all"
-          style={{
-            fontFamily:
-              'ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"',
-          }}
-        >
-          <Label
-            className="mb-1 text-[0.93rem] font-[400] leading-4"
-            style={{
-              color:
-                theme === "dark"
-                  ? "hsl(210 40% 98%)"
-                  : "hsl(222.2 47.4% 11.2%)",
-            }}
-            htmlFor="promoCode"
-          >
-            Promo code
-          </Label>
-          <Input
-            name="promoCode"
-            placeholder="Enter promo code"
-            value={promoCode}
-            className="h-11 shadow-sm transition-all duration-75 placeholder:text-base focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-            onChange={(e) => {
-              setPromoCode(e.target.value)
-              debouncedPromoCode(e.target.value)
-            }}
-          />
-          {promoCodeMessage && (
-            <p
-              className={cn(
-                "mt-1 text-sm font-medium",
-                promoCodeMessage.status === "applied"
-                  ? "text-green-500"
-                  : "text-red-500"
-              )}
-            >
-              {promoCodeMessage.message}
-            </p>
-          )}
-        </div> */}
         <button
           className={cn(
             buttonVariants({
@@ -226,17 +141,17 @@ function CheckoutForm({ className, ...props }: CheckoutFormProps) {
           {payment.status === "processing" && (
             <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
           )}
-          Let&apos;s go! &rarr;
+          {ctaText ?? <>Let's go! &rarr;</>}
         </button>
         <div className="mx-2 mt-2 text-xs text-secondary-foreground/70">
           By providing your payment information you agree to our terms of
           service and privacy policy.
         </div>
         {errorMessage && (
-          <p className="mt-2 text-sm text-red-500">{errorMessage}</p>
+          <p className="mt-2 text-sm text-destructive">{errorMessage}</p>
         )}
       </form>
-    </>
+    </div>
   );
 }
 
@@ -292,7 +207,6 @@ export function PaymentElementsForm({
         },
         currency: "usd",
         mode: "setup",
-        // amount: 99, // in cents = $0.99
         setupFutureUsage: "off_session",
       }}
     >

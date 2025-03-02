@@ -1,3 +1,4 @@
+export const GA_MEASUREMENT_ID = "G-S4KV1S3P6L";
 export const TIKTOK_PIXEL_ID = "COH8383C77UC70DIPSOG";
 const isProd = process.env.NODE_ENV === "production";
 

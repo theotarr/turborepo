@@ -5,22 +5,23 @@ import "@/styles/globals.css";
 import { Viewport } from "next";
 import dynamic from "next/dynamic";
 import Script from "next/script";
+import { PaymentDialog } from "@/components/payment-dialog";
 import { PixelTracking } from "@/components/pixel-tracking";
 import { CSPostHogProvider } from "@/components/posthog";
+// import { ReactivateSubscriptionDialog } from "@/components/reactivate-subscription-dialog";
+import { ResumeSubscriptionDialog } from "@/components/resume-subscription-dialog";
 import { TailwindIndicator } from "@/components/tailwind-indicator";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { siteConfig } from "@/config/site";
-import { env } from "@/env";
 import { TRPCReactProvider } from "@/lib/trpc/react";
 import { cn } from "@/lib/utils";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import { Analytics as VercelAnalytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
+import { GA_MEASUREMENT_ID } from "@acme/analytics";
 import { auth } from "@acme/auth";
-
-const GA_MEASUREMENT_ID = "G-S4KV1S3P6L";
 
 interface RootLayoutProps {
   children: React.ReactNode;
@@ -80,6 +81,7 @@ const PostHogPageView = dynamic(
 
 export default async function RootLayout({ children }: RootLayoutProps) {
   const session = await auth();
+
   return (
     <html lang="en" className={`${GeistSans.variable}`}>
       <head>
@@ -117,6 +119,9 @@ export default async function RootLayout({ children }: RootLayoutProps) {
               )}
               <Toaster />
               <TailwindIndicator />
+              <PaymentDialog />
+              <ResumeSubscriptionDialog />
+              {/* <ReactivateSubscriptionDialog /> */}
             </ThemeProvider>
           </body>
         </CSPostHogProvider>

@@ -25,6 +25,44 @@ export const authRouter = {
       },
     });
   }),
+  getSubscription: protectedProcedure.query(async ({ ctx }) => {
+    const user = await ctx.db.user.findUnique({
+      where: { id: ctx.session.user.id },
+      select: {
+        id: true,
+        stripeSubscriptionId: true,
+        stripePriceId: true,
+        stripeCurrentPeriodEnd: true,
+        stripeSubscriptionPaused: true,
+        stripeSubscriptionResumeAt: true,
+        appStoreCurrentPeriodEnd: true,
+      },
+    });
+    if (!user) throw new Error("User not found");
+
+    const isPro =
+      (user.stripeCurrentPeriodEnd &&
+        user.stripeCurrentPeriodEnd.getTime() > Date.now() &&
+        !user.stripeSubscriptionPaused) ??
+      (user.appStoreCurrentPeriodEnd &&
+        user.appStoreCurrentPeriodEnd.getTime() > Date.now());
+
+    return {
+      isPro,
+      isPaused: user.stripeSubscriptionPaused || false,
+      resumeAt: user.stripeSubscriptionResumeAt
+        ? user.stripeSubscriptionResumeAt.getTime()
+        : null,
+      stripeSubscriptionId: user.stripeSubscriptionId,
+      stripePriceId: user.stripePriceId,
+      stripeCurrentPeriodEnd: user.stripeCurrentPeriodEnd
+        ? user.stripeCurrentPeriodEnd.getTime()
+        : 0,
+      appStoreCurrentPeriodEnd: user.appStoreCurrentPeriodEnd
+        ? user.appStoreCurrentPeriodEnd.getTime()
+        : 0,
+    };
+  }),
   update: protectedProcedure
     .input(
       z.object({

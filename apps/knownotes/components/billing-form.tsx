@@ -26,7 +26,7 @@ export function BillingForm({ subscriptionPlan, className }: BillingFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
 
-  async function resumeSubscription() {
+  async function reactivateSubscription() {
     setIsLoading(true);
 
     try {
@@ -82,7 +82,7 @@ export function BillingForm({ subscriptionPlan, className }: BillingFormProps) {
               </Button>
             ) : (
               <Button
-                onClick={resumeSubscription}
+                onClick={reactivateSubscription}
                 size="sm"
                 variant="default"
                 disabled={isLoading}
@@ -90,7 +90,7 @@ export function BillingForm({ subscriptionPlan, className }: BillingFormProps) {
                 {isLoading && (
                   <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
                 )}
-                Resume Subscription
+                Reactivate Subscription
               </Button>
             )}
             <div>
@@ -104,8 +104,8 @@ export function BillingForm({ subscriptionPlan, className }: BillingFormProps) {
                     </p>
                   ) : (
                     <p className="text-xs font-medium">
-                      Your subscription has ended. Resume your subscription to
-                      continue using KnowNotes.
+                      Your subscription has ended. Reactivate your subscription
+                      to continue using KnowNotes.
                     </p>
                   )}
                 </>

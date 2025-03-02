@@ -33,7 +33,7 @@ import { addMonths, format } from "date-fns";
 import { usePostHog } from "posthog-js/react";
 import { toast } from "sonner";
 
-interface CancelCardProps {
+interface SubscriptionManagementCardProps {
   subscriptionPlan: UserSubscriptionPlan & {
     isCanceled: boolean;
     isPaused: boolean;
@@ -41,7 +41,9 @@ interface CancelCardProps {
   };
 }
 
-export function CancelCard({ subscriptionPlan }: CancelCardProps) {
+export function SubscriptionManagementCard({
+  subscriptionPlan,
+}: SubscriptionManagementCardProps) {
   const router = useRouter();
   const posthog = usePostHog();
   const [isLoading, setIsLoading] = useState(false);
@@ -158,7 +160,7 @@ export function CancelCard({ subscriptionPlan }: CancelCardProps) {
                 <DialogTitle>Pause Subscription</DialogTitle>
                 <DialogDescription>
                   {pauseStep === "date"
-                    ? "Choose when you'd like your subscription to automatically resume."
+                    ? "Choose when you'd like your subscription to automatically resume. You can pause your subscription for up to 3 months."
                     : "Help us improve by sharing why you're pausing your subscription."}
                 </DialogDescription>
               </DialogHeader>
@@ -167,6 +169,7 @@ export function CancelCard({ subscriptionPlan }: CancelCardProps) {
                 <>
                   <div className="py-4">
                     <div className="mb-4">
+                      <Label htmlFor="resume-date">Resume Date</Label>
                       <ResumeDatePicker
                         value={resumeDate}
                         onChange={setResumeDate}
@@ -212,6 +215,13 @@ export function CancelCard({ subscriptionPlan }: CancelCardProps) {
                       className="space-y-3"
                     >
                       <div className="flex items-center space-x-2">
+                        <RadioGroupItem
+                          value="school_break"
+                          id="school_break"
+                        />
+                        <Label htmlFor="school_break">Break from school</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
                         <RadioGroupItem value="not_using" id="not_using" />
                         <Label htmlFor="not_using">
                           I'm not using it enough
@@ -225,13 +235,6 @@ export function CancelCard({ subscriptionPlan }: CancelCardProps) {
                         <Label htmlFor="missing_features">
                           Missing features I need
                         </Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem
-                          value="school_break"
-                          id="school_break"
-                        />
-                        <Label htmlFor="school_break">Break from school</Label>
                       </div>
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="other" id="other" />
@@ -262,7 +265,7 @@ export function CancelCard({ subscriptionPlan }: CancelCardProps) {
                       variant="default"
                       size="sm"
                       onClick={handlePauseSubscription}
-                      disabled={isLoading}
+                      disabled={isLoading || pauseReason === ""}
                     >
                       {isLoading && (
                         <Icons.spinner className="mr-2 size-4 animate-spin" />

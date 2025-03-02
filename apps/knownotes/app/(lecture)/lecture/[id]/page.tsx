@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Icons } from "@/components/icons";
 import { NotesPage } from "@/components/notes-page";
+import { PremiumFeature } from "@/components/premium-feature";
 import { buttonVariants } from "@/components/ui/button";
 import {
   Tooltip,
@@ -139,7 +140,9 @@ export default async function LecturePage({ params }: LecturePageProps) {
           </div>
         </header>
         <main className="flex w-full flex-1 flex-col overflow-hidden">
-          <NotesPage lecture={lecture} courses={courses as Course[]} />
+          <PremiumFeature>
+            <NotesPage lecture={lecture} courses={courses as Course[]} />
+          </PremiumFeature>
         </main>
       </div>
     </AI>

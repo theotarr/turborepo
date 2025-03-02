@@ -1,10 +1,10 @@
 import type { Stripe } from "stripe";
 import { redirect } from "next/navigation";
 import { BillingCard } from "@/components/billing-card";
-import { CancelCard } from "@/components/cancel-card";
 import { DashboardHeader } from "@/components/header";
 import { PaymentInfoCard } from "@/components/payment-info-card";
 import { DashboardShell } from "@/components/shell";
+import { SubscriptionManagementCard } from "@/components/subscription-management-card";
 import { stripe } from "@/lib/stripe";
 import { getUserSubscriptionPlan } from "@/lib/subscription";
 import { absoluteUrl } from "@/lib/utils";
@@ -110,7 +110,7 @@ export default async function BillingPage() {
           <PaymentInfoCard paymentMethods={paymentMethods} />
         )}
         {subscriptionPlan.isPro && (
-          <CancelCard
+          <SubscriptionManagementCard
             subscriptionPlan={{
               ...subscriptionPlan,
               isCanceled: cancelAtPeriodEnd,

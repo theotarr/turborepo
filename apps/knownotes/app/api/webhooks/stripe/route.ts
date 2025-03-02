@@ -150,13 +150,13 @@ export async function POST(req: Request) {
     });
 
     // Check if the user has a subscription.
-    const hasSubscription = user.stripeSubscriptionId
+    const existingSubscription = user.stripeSubscriptionId
       ? await stripe.subscriptions.retrieve(user.stripeSubscriptionId)
       : null;
 
-    if (hasSubscription) {
-      // Return a 200 response if the user has a subscription.
-      // We don't need to create a payment intent or create a subscription.
+    // If the user has an existing subscription, the only case in which we need to create a new subscription is if the subscription is canceled.
+    // Return a 200 response.
+    if (existingSubscription && existingSubscription.status !== "canceled") {
       return new Response(null, { status: 200 });
     }
 
@@ -173,8 +173,7 @@ export async function POST(req: Request) {
       },
     });
 
-    // Report the start of the trial to Meta.
-    console.log("Reporting start of trial to Meta...");
+    console.log("Reporting StartTrial to Meta and TikTok");
     await trackMetaEvent({
       userId: user.id,
       email: user.email,
