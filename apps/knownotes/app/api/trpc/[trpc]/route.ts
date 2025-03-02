@@ -3,7 +3,7 @@ import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 import { appRouter, createTRPCContext } from "@acme/api";
 import { auth } from "@acme/auth";
 
-export const maxDuration = 120; // 2 minutes
+export const maxDuration = 300; // 5 minutes
 
 /**
  * Configure basic CORS headers
