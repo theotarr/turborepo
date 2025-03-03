@@ -16,20 +16,18 @@ import {
 } from "@/components/ui/select";
 import { api } from "@/lib/trpc/react";
 import { cn } from "@/lib/utils";
-import { Course, Lecture } from "@prisma/client";
+import { Course } from "@prisma/client";
 import { debounce } from "lodash";
 
 interface LectureSearchProps extends React.HTMLAttributes<HTMLDivElement> {
   placeholder?: string;
   courses?: Course[];
-  defaultLectures?: (Lecture & { course?: Course | null })[];
 }
 
 export function LectureSearch({
   className,
   placeholder = "Search your lectures...",
   courses,
-  defaultLectures = [],
   ...props
 }: LectureSearchProps) {
   const searchParams = useSearchParams();
@@ -70,24 +68,13 @@ export function LectureSearch({
 
   // Determine what to show based on query and results
   const hasValidQuery = query.length >= 2;
-  const showSearchResults = hasValidQuery && !isLoading;
   const searchResults = lectures || [];
-
-  // If we have a valid query but no search results yet, or no query at all, show default lectures
-  // Filter default lectures by course if a course is selected
-  const showDefaultLectures =
-    !hasValidQuery || (hasValidQuery && !searchResults.length && isLoading);
-  const filteredDefaultLectures = showDefaultLectures
-    ? defaultLectures?.filter(
-        (lecture) => !selectedCourseId || lecture.courseId === selectedCourseId,
-      )
-    : [];
 
   return (
     <div className={cn("w-full space-y-4", className)} {...props}>
       <div className="flex gap-2">
         {/* Course filter dropdown */}
-        <div className="w-[180px] shrink-0">
+        <div className="w-[160px] shrink-0">
           <Select defaultValue="all" onValueChange={handleCourseChange}>
             <SelectTrigger>
               <SelectValue placeholder="All courses" />
@@ -138,43 +125,19 @@ export function LectureSearch({
         </div>
       )}
 
-      {showSearchResults && searchResults.length === 0 && (
+      {searchResults.length === 0 && (
         <div className="text-center text-sm text-muted-foreground">
           No lectures found matching your search.
         </div>
       )}
 
-      {showSearchResults && searchResults.length > 0 && (
+      {searchResults.length > 0 && (
         <div className="divide-y divide-border rounded-md border">
           {searchResults.map((lecture) => (
             <LectureItem key={lecture.id} lecture={lecture} courses={courses} />
           ))}
         </div>
       )}
-
-      {/* Show default lectures when not searching or when search is in progress */}
-      {showDefaultLectures &&
-        filteredDefaultLectures &&
-        filteredDefaultLectures.length > 0 && (
-          <div className="divide-y divide-border rounded-md border">
-            {filteredDefaultLectures.map((lecture) => (
-              <LectureItem
-                key={lecture.id}
-                lecture={lecture}
-                courses={courses}
-              />
-            ))}
-          </div>
-        )}
-
-      {showDefaultLectures &&
-        selectedCourseId &&
-        filteredDefaultLectures?.length === 0 && (
-          <div className="text-center text-sm text-muted-foreground">
-            No lectures found. Try selecting a different course or update your
-            search.
-          </div>
-        )}
     </div>
   );
 }

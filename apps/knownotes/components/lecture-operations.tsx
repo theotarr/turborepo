@@ -46,6 +46,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { deleteLecture } from "@/lib/lecture/actions";
+import { api } from "@/lib/trpc/react";
 import { cn } from "@/lib/utils";
 import { Transcript } from "@/types";
 import { toast } from "sonner";
@@ -99,7 +100,7 @@ export function LectureOperations({
   className,
 }: LectureOperationsProps) {
   const router = useRouter();
-
+  const utils = api.useUtils();
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
   const [isDeleteLoading, setIsDeleteLoading] = useState(false);
 
@@ -224,6 +225,7 @@ export function LectureOperations({
                       setIsUpdateLoading(false);
                       setIsEditDialogOpen(false);
                       router.refresh();
+                      await utils.lecture.invalidate();
                     }
                   }}
                   disabled={isUpdateLoading}
@@ -270,6 +272,7 @@ export function LectureOperations({
                       setIsDeleteLoading(false);
                       setIsDeleteAlertOpen(false);
                       router.refresh();
+                      await utils.lecture.invalidate();
                     } catch (error) {
                       console.error("Error deleting lecture:", error);
                       setIsDeleteLoading(false);

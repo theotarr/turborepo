@@ -67,15 +67,6 @@ export default async function DashboardPage() {
       },
     },
   });
-  const lectures = await db.lecture.findMany({
-    where: { userId: session.user.id },
-    include: {
-      course: true,
-    },
-    // Limit to 6 lectures, otherwise with a ton of lectures and transcripts the request will time out or exceed maximum request size for 1 request.
-    take: 6,
-    orderBy: { updatedAt: "desc" },
-  });
 
   return (
     <DashboardShell>
@@ -93,26 +84,22 @@ export default async function DashboardPage() {
         courses={user?.courses as Course[]}
         className="hidden"
       />
-      {lectures?.length ? (
-        <div className="flex flex-col space-y-4">
-          <div className="flex flex-col space-y-2 px-1">
-            <div className="flex items-center justify-between">
-              <span className="text-lg font-medium">Lectures</span>
-            </div>
-            <LectureSearch courses={user?.courses} defaultLectures={lectures} />
+      <div className="flex flex-col space-y-4">
+        <div className="flex flex-col space-y-2 px-1">
+          <div className="flex items-center justify-between">
+            <span className="text-lg font-medium">Lectures</span>
           </div>
-          <div className="flex justify-center">
-            <Link
-              href="/dashboard/lectures"
-              className="text-sm font-medium text-secondary-foreground hover:underline"
-            >
-              View all lectures
-            </Link>
-          </div>
+          <LectureSearch courses={user?.courses} />
         </div>
-      ) : (
-        <></>
-      )}
+        <div className="flex justify-center">
+          <Link
+            href="/dashboard/lectures"
+            className="text-sm font-medium text-secondary-foreground hover:underline"
+          >
+            View all lectures
+          </Link>
+        </div>
+      </div>
       {user?.courses.length! > 0 ? (
         <div className="flex flex-col space-y-4">
           <div className="flex w-full items-center justify-between">

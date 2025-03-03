@@ -692,6 +692,7 @@ export const lectureRouter = {
           orderBy: {
             updatedAt: "desc",
           },
+          take: 10,
         });
       }
 
