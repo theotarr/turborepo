@@ -502,6 +502,7 @@ export const lectureRouter = {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
           transcript: transcript as any,
           userId: ctx.session.user.id,
+          youtubeVideoId: id,
           ...(courseId ? { courseId } : {}),
         },
       });
