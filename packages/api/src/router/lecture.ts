@@ -662,4 +662,51 @@ export const lectureRouter = {
         if (removeFileError) console.error(removeFileError);
       }
     }),
+  search: protectedProcedure
+    .input(
+      z.object({
+        query: z.string().min(1),
+        courseId: z.string().optional(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const { query, courseId } = input;
+
+      // // TODO: Create a gin index on the enhancedNotes column and transcript column to use for full text search.
+      // // Search for lectures by title, enhancedNotes, and transcript
+      // const lectures = await ctx.db.$queryRaw`
+      //   SELECT * FROM "Lecture"
+      //   WHERE to_tsvector(title) @@ to_tsquery(${query})
+      //   AND "userId" = ${ctx.session.user.id}::uuid;
+      // `;
+
+      const { data: ids, error } = await supabase
+        .from("Lecture")
+        .select("id")
+        .eq("userId", ctx.session.user.id)
+        .textSearch("title", query, {
+          config: "english",
+          type: "websearch",
+        })
+        .limit(10);
+
+      if (error) {
+        console.error(error);
+        throw new Error(error.message);
+      }
+
+      const lectures = await ctx.db.lecture.findMany({
+        where: {
+          id: {
+            in: ids.map((id) => id.id as string),
+          },
+          ...(courseId ? { courseId } : {}),
+        },
+        include: {
+          course: true,
+        },
+      });
+
+      return lectures;
+    }),
 } satisfies TRPCRouterRecord;

@@ -5,7 +5,7 @@ import { CourseCreateDialog } from "@/components/course-create-dialog";
 import { EmptyPlaceholder } from "@/components/empty-placeholder";
 import { DashboardHeader } from "@/components/header";
 import { LectureCreateDialog } from "@/components/lecture-create-dialog";
-import { LectureItem } from "@/components/lecture-item";
+import { LectureSearch } from "@/components/lecture-search";
 import {
   QuickChat,
   QuickLecture,
@@ -88,42 +88,30 @@ export default async function DashboardPage() {
         </div>
         <ScrollBar orientation="horizontal" />
       </ScrollArea>
+      <LectureCreateDialog
+        userId={session.user.id}
+        courses={user?.courses as Course[]}
+        className="hidden"
+      />
       {lectures?.length ? (
         <div className="flex flex-col space-y-4">
-          <div className="flex items-center justify-between">
-            <span className="text-lg font-medium">Recent Lectures</span>
-            <LectureCreateDialog
-              userId={session.user.id}
-              courses={user?.courses as Course[]}
-              className="hidden"
-            />
-          </div>
-          <div className="divide-y divide-border rounded-md border">
-            {lectures.slice(0, 6).map((lecture) => (
-              <LectureItem
-                key={lecture.id}
-                lecture={lecture as any}
-                courses={user?.courses}
-              />
-            ))}
-          </div>
-          {lectures.length > 1 && (
-            <div className="mt-6 flex justify-center">
-              <Link
-                href="/dashboard/lectures"
-                className="text-sm font-medium text-secondary-foreground hover:underline"
-              >
-                View all lectures
-              </Link>
+          <div className="flex flex-col space-y-2 px-1">
+            <div className="flex items-center justify-between">
+              <span className="text-lg font-medium">Lectures</span>
             </div>
-          )}
+            <LectureSearch courses={user?.courses} defaultLectures={lectures} />
+          </div>
+          <div className="flex justify-center">
+            <Link
+              href="/dashboard/lectures"
+              className="text-sm font-medium text-secondary-foreground hover:underline"
+            >
+              View all lectures
+            </Link>
+          </div>
         </div>
       ) : (
-        <LectureCreateDialog
-          userId={session.user.id}
-          courses={user?.courses ?? []}
-          className="hidden"
-        />
+        <></>
       )}
       {user?.courses.length! > 0 ? (
         <div className="flex flex-col space-y-4">
