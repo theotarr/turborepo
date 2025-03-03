@@ -145,7 +145,7 @@ export function LectureSearch({
       )}
 
       {showSearchResults && searchResults.length === 0 && (
-        <div className="pt-4 text-center text-sm text-muted-foreground">
+        <div className="text-center text-sm text-muted-foreground">
           No lectures found matching your search.
         </div>
       )}
@@ -176,9 +176,9 @@ export function LectureSearch({
       {showDefaultLectures &&
         selectedCourseId &&
         filteredDefaultLectures?.length === 0 && (
-          <div className="pt-4 text-center text-sm text-muted-foreground">
-            No lectures in this course. Try selecting a different course or add
-            lectures to this one.
+          <div className="text-center text-sm text-muted-foreground">
+            No lectures found. Try selecting a different course or update your
+            search.
           </div>
         )}
     </div>

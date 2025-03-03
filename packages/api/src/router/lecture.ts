@@ -665,7 +665,7 @@ export const lectureRouter = {
   search: protectedProcedure
     .input(
       z.object({
-        query: z.string().min(1),
+        query: z.string(),
         courseId: z.string().optional(),
       }),
     )
@@ -679,6 +679,21 @@ export const lectureRouter = {
       //   WHERE to_tsvector(title) @@ to_tsquery(${query})
       //   AND "userId" = ${ctx.session.user.id}::uuid;
       // `;
+
+      if (query.length === 0) {
+        return await ctx.db.lecture.findMany({
+          where: {
+            userId: ctx.session.user.id,
+            ...(courseId ? { courseId } : {}),
+          },
+          include: {
+            course: true,
+          },
+          orderBy: {
+            updatedAt: "desc",
+          },
+        });
+      }
 
       const { data: ids, error } = await supabase
         .from("Lecture")
