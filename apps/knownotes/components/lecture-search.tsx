@@ -51,16 +51,10 @@ export function LectureSearch({
     data: lectures,
     isLoading,
     error,
-  } = api.lecture.search.useQuery(
-    {
-      query,
-      courseId: selectedCourseId,
-    },
-    {
-      enabled: query.length >= 2,
-      keepPreviousData: true,
-    },
-  );
+  } = api.lecture.search.useQuery({
+    query,
+    courseId: selectedCourseId,
+  });
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     debouncedSearch(e.target.value);
