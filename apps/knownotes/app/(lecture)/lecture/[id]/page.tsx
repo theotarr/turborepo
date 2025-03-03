@@ -103,7 +103,6 @@ export default async function LecturePage({ params }: LecturePageProps) {
   };
 
   return (
-    // @ts-ignore
     <AI initialAIState={aiState}>
       <div className="flex h-screen flex-col overflow-hidden">
         <header className="sticky top-0 z-10 border-b">
@@ -122,7 +121,9 @@ export default async function LecturePage({ params }: LecturePageProps) {
                       <Icons.chevronLeft className="h-4 w-4" />
                     </Link>
                   </TooltipTrigger>
-                  <TooltipContent>Back to dashboard</TooltipContent>
+                  <TooltipContent side="right">
+                    Back to dashboard
+                  </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
             </div>

@@ -382,6 +382,24 @@ export function NotesPage({ lecture, courses }: NotesPageProps) {
                   </Badge>
                 </div>
               </div>
+
+              {lecture.type === "YOUTUBE" && lecture.youtubeVideoId && (
+                <div className="mt-4 px-8 pb-4">
+                  <div className="block aspect-video overflow-hidden rounded-lg">
+                    <iframe
+                      src={`https://www.youtube.com/embed/${lecture.youtubeVideoId}`}
+                      title={lecture.title}
+                      width="100%"
+                      height="100%"
+                      frameBorder="0"
+                      referrerPolicy="strict-origin-when-cross-origin"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                  </div>
+                </div>
+              )}
+
               <TooltipProvider delayDuration={100} skipDelayDuration={100}>
                 {enhancedNotes && (
                   <div className="mt-4 flex gap-1 px-8">
@@ -422,6 +440,7 @@ export function NotesPage({ lecture, courses }: NotesPageProps) {
                   </div>
                 )}
               </TooltipProvider>
+
               <Editor
                 lectureId={lecture.id}
                 defaultValue={notesTab === "notes" ? notes : enhancedNotes}
