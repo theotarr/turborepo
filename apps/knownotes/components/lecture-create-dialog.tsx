@@ -197,11 +197,8 @@ export function LectureCreateDialog({
                 onChange={(e) => setVideoUrl(e.target.value)}
               />
               <p className="text-sm text-muted-foreground">
-                Paste the URL of a YouTube video. We&apos;ll generate notes, and
-                create an AI chat bot for it.{" "}
-                <span className="italic">
-                  Your video must have a YT-generated transcript.
-                </span>
+                Paste the link of a YouTube video. Your video must have a
+                transcript.
               </p>
             </div>
           </TabsContent>
