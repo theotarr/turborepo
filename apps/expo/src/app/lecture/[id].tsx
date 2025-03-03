@@ -7,7 +7,12 @@ import {
 } from "react-native";
 import { WebView } from "react-native-webview";
 import { Stack, useGlobalSearchParams, useRouter } from "expo-router";
-import { GalleryVerticalEnd, Share2, Sparkles } from "lucide-react-native";
+import {
+  Captions,
+  GalleryVerticalEnd,
+  Share2,
+  Sparkles,
+} from "lucide-react-native";
 
 import { LectureHeader } from "~/components/lecture-header";
 import { Button } from "~/components/ui/button";
@@ -98,6 +103,17 @@ export default function Lecture() {
               color={NAV_THEME[colorScheme].secondaryForeground}
             />
             <Text>Quiz</Text>
+          </Button>
+          <Button
+            variant="secondary"
+            className="mr-2 flex flex-row gap-2 rounded-full"
+            onPress={() => router.push(`/lecture/transcript/${lecture.id}`)}
+          >
+            <Captions
+              size={16}
+              color={NAV_THEME[colorScheme].secondaryForeground}
+            />
+            <Text>Transcript</Text>
           </Button>
           <Button
             variant="secondary"

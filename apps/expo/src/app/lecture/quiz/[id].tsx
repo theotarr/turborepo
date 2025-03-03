@@ -36,10 +36,9 @@ export default function LectureQuiz() {
     }[]
   >([]);
   const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
+  const [_, setSelectedAnswer] = useState<string | null>(null);
   const [correctAnswers, setCorrectAnswers] = useState(0);
   const [showResults, setShowResults] = useState(false);
-  const [isGenerating, setIsGenerating] = useState(false);
 
   const resetQuiz = () => {
     setCurrentQuestion(0);
@@ -73,22 +72,17 @@ export default function LectureQuiz() {
     }
 
     // Generate questions
-    setIsGenerating(true);
     void (async () => {
-      try {
-        const questions = await createQuiz.mutateAsync({
-          lectureId: lecture.id,
-        });
-        setQuestions(
-          questions.map(({ question, choices, answerIndex }) => ({
-            question,
-            choices,
-            answerIndex,
-          })),
-        );
-      } finally {
-        setIsGenerating(false);
-      }
+      const questions = await createQuiz.mutateAsync({
+        lectureId: lecture.id,
+      });
+      setQuestions(
+        questions.map(({ question, choices, answerIndex }) => ({
+          question,
+          choices,
+          answerIndex,
+        })),
+      );
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
