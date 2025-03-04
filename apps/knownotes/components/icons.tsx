@@ -53,6 +53,7 @@ import {
   Send,
   Settings,
   Settings2,
+  Share,
   Sidebar,
   Square,
   SquareAsterisk,
@@ -218,6 +219,7 @@ export const Icons = {
   sidebar: Sidebar,
   arrowDown: ArrowDown,
   menu: Menu,
+  share: Share,
   separator: ({ ...props }: LucideProps) => (
     <svg
       fill="none"

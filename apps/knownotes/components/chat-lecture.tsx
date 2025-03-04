@@ -92,38 +92,6 @@ export function Chat({
               </>
             )}
             <p className="mb-1 text-xs font-medium uppercase text-muted-foreground">
-              Share Notes
-            </p>
-            <div className="mb-2 flex space-x-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  copyToClipboard(absoluteUrl(`/share/lecture/${lectureId}`));
-                  sendGAEvent("event", "copy_link", {
-                    url: window.location.href,
-                  });
-                  toast.success("Link copied to clipboard.");
-                }}
-              >
-                <Icons.link className="mr-2 size-4" />
-                Copy link
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  copyToClipboard(editor?.storage.markdown.getMarkdown());
-                  sendGAEvent("event", "copy_notes");
-                  toast.success("Notes copied to clipboard.");
-                }}
-              >
-                <Icons.copy className="mr-2 size-4" />
-                Copy notes
-              </Button>
-            </div>
-            <Separator />
-            <p className="mb-1 text-xs font-medium uppercase text-muted-foreground">
               Ask KnowNotes
             </p>
             {messages.length === 0 &&

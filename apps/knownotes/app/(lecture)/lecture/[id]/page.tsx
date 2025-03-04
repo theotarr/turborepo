@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { Icons } from "@/components/icons";
 import { NotesPage } from "@/components/notes-page";
 import { PremiumFeature } from "@/components/premium-feature";
+import { ShareLectureDialog } from "@/components/share-lecture-dialog";
 import { buttonVariants } from "@/components/ui/button";
 import {
   Tooltip,
@@ -129,6 +130,7 @@ export default async function LecturePage({ params }: LecturePageProps) {
             </div>
             <div className="flex flex-1 items-center sm:justify-end">
               <div className="ml-4 flex flex-1 justify-end space-x-4 sm:grow-0">
+                <ShareLectureDialog lectureId={params.id} />
                 <UserAccountNav
                   user={{
                     name: session.user.name,
