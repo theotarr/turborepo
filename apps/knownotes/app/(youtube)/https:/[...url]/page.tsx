@@ -1,9 +1,7 @@
 import { redirect } from "next/navigation";
 import { YoutubeGenerator } from "@/components/youtube-generator";
-import { db } from "@/lib/db";
-import { LectureType } from "@prisma/client";
 
-import { getVideoId, getVideoTranscript } from "@acme/api";
+import { getVideoId } from "@acme/api";
 import { auth } from "@acme/auth";
 
 interface YoutubeCatchAllProps {
