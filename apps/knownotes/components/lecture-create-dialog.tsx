@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createLecture } from "@/app/(lecture)/actions";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -30,6 +30,7 @@ import { cn } from "@/lib/utils";
 import { Course } from "@prisma/client";
 import { DialogDescription } from "@radix-ui/react-dialog";
 import { createBrowserClient } from "@supabase/ssr";
+import { UploadCloud } from "lucide-react";
 import { toast } from "sonner";
 import { v1 as uuidv1 } from "uuid";
 import { create } from "zustand";
@@ -72,9 +73,85 @@ export function LectureCreateDialog({
   const [videoUrl, setVideoUrl] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const dragCounter = useRef(0);
 
   const uploadYoutube = api.lecture.uploadYoutube.useMutation();
   const uploadFile = api.lecture.uploadFile.useMutation();
+
+  // Native drag and drop handlers
+  const handleDragIn = useCallback(
+    (e: DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dragCounter.current++;
+
+      if (e.dataTransfer?.items && e.dataTransfer.items.length > 0) {
+        setIsDragging(true);
+        if (!open) {
+          setOpen(true);
+          setTab("file");
+        }
+      }
+    },
+    [open, setOpen, setTab],
+  );
+
+  const handleDragOut = useCallback((e: DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounter.current--;
+
+    if (dragCounter.current <= 0) {
+      setIsDragging(false);
+      dragCounter.current = 0;
+    }
+  }, []);
+
+  const handleDrag = useCallback((e: DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  }, []);
+
+  const handleDrop = useCallback((e: DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    dragCounter.current = 0;
+
+    if (
+      e.dataTransfer?.files &&
+      e.dataTransfer.files.length > 0 &&
+      fileRef.current
+    ) {
+      const dataTransfer = new DataTransfer();
+      dataTransfer.items.add(e.dataTransfer.files[0]);
+      fileRef.current.files = dataTransfer.files;
+    }
+  }, []);
+
+  // Set up event listeners
+  useEffect(() => {
+    window.addEventListener("dragenter", handleDragIn);
+    window.addEventListener("dragleave", handleDragOut);
+    window.addEventListener("dragover", handleDrag);
+    window.addEventListener("drop", handleDrop);
+
+    return () => {
+      window.removeEventListener("dragenter", handleDragIn);
+      window.removeEventListener("dragleave", handleDragOut);
+      window.removeEventListener("dragover", handleDrag);
+      window.removeEventListener("drop", handleDrop);
+    };
+  }, [handleDragIn, handleDragOut, handleDrag, handleDrop]);
+
+  // Reset dragging state when dialog closes
+  useEffect(() => {
+    if (!open) {
+      setIsDragging(false);
+      dragCounter.current = 0;
+    }
+  }, [open]);
 
   const onSubmit = async () => {
     setIsLoading(true);
@@ -128,6 +205,7 @@ export function LectureCreateDialog({
           fileId,
           courseId: selectedCourseId,
         });
+        setIsDragging(false);
         window.location.href = `/lecture/${lecture.id}`;
       } catch (error) {
         console.error(error);
@@ -137,6 +215,7 @@ export function LectureCreateDialog({
       }
     }
     setIsLoading(false);
+    setIsDragging(false);
   };
 
   return (
@@ -153,12 +232,16 @@ export function LectureCreateDialog({
           <div className="mr-1 hidden sm:inline">New </div> Lecture
         </button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent
+        className={cn(
+          "sm:max-w-lg",
+          isDragging && "border-2 border-dashed border-primary",
+        )}
+      >
         <DialogHeader>
           <DialogTitle>New Lecture</DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
-            Create a new lecture, or import a Youtube video or a file (pdf, mp3,
-            wav, etc.).
+            Upload a file, paste a Youtube video, or record a lecture.
           </DialogDescription>
         </DialogHeader>
         <Tabs
@@ -203,7 +286,12 @@ export function LectureCreateDialog({
             </div>
           </TabsContent>
           <TabsContent value="file">
-            <div className="grid gap-2">
+            <div
+              className={cn(
+                "grid gap-2",
+                isDragging && "rounded-md bg-muted/20 p-4",
+              )}
+            >
               <Label htmlFor="audioFile">File</Label>
               <Input
                 id="file"
@@ -212,9 +300,14 @@ export function LectureCreateDialog({
                 accept="audio/*,application/pdf"
               />
               <p className="text-sm text-muted-foreground">
-                Upload a file in PDF or any audio format. We&apos;ll generate
-                notes and create an AI tutor for it.
+                Upload a PDF or audio file.
               </p>
+              {isDragging && (
+                <div className="mt-2 flex flex-col items-center justify-center gap-4 rounded-md border border-2 border-dashed border-primary bg-muted/20 p-4 text-center text-sm text-primary">
+                  <UploadCloud className="size-10" />
+                  Drop your file here to upload
+                </div>
+              )}
             </div>
           </TabsContent>
           <div>
