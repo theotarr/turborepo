@@ -1,13 +1,10 @@
 import { Metadata } from "next";
 import { ChatCourse } from "@/components/chat-course";
-import { PremiumFeature } from "@/components/premium-feature";
 import { env } from "@/env";
 import { AI } from "@/lib/chat/actions";
 import { supabase } from "@/lib/supabase";
 import { absoluteUrl } from "@/lib/utils";
 import { v1 as uuidv1 } from "uuid";
-
-export const runtime = "edge";
 
 interface ChatPageProps {
   params: { courseId: string };
@@ -71,9 +68,7 @@ export default async function CourseChatPage({ params }: ChatPageProps) {
 
   return (
     <AI initialAIState={aiState}>
-      <PremiumFeature>
-        <ChatCourse id={chatId} course={course} />
-      </PremiumFeature>
+      <ChatCourse id={chatId} course={course} />
     </AI>
   );
 }

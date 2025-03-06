@@ -1,13 +1,9 @@
 import { Metadata } from "next";
 import { ChatCourse } from "@/components/chat-course";
-import { PremiumFeature } from "@/components/premium-feature";
 import { env } from "@/env";
 import { AI } from "@/lib/chat/actions";
 import { supabase } from "@/lib/supabase";
 import { absoluteUrl } from "@/lib/utils";
-
-export const runtime = "edge";
-// export const maxDuration = 60; // 1 min in seconds
 
 interface SavedChatPageProps {
   params: { courseId: string; chatId: string };
@@ -101,9 +97,7 @@ export default async function CourseChatPage({ params }: SavedChatPageProps) {
 
   return (
     <AI initialAIState={aiState}>
-      <PremiumFeature>
-        <ChatCourse id={chat.id} course={course} chatName={chat.name} />
-      </PremiumFeature>
+      <ChatCourse id={chat.id} course={course} chatName={chat.name} />
     </AI>
   );
 }
