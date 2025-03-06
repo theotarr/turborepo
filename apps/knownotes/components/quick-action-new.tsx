@@ -68,7 +68,7 @@ export function QuickLecture() {
     <QuickAction
       icon="add"
       title="Live Lecture"
-      description="Start a live lecture to take notes"
+      description="Record a lecture in real-time"
       primary={true}
       onClick={() => {
         setOpen(true);
@@ -84,7 +84,7 @@ export function QuickYoutubeImport() {
     <QuickAction
       icon="youtube"
       title="Upload Lecture"
-      description="Upload a lecture for notes and an AI-tutor"
+      description="Paste a Youtube video for notes"
       primary={true}
       onClick={() => {
         setOpen(true);
