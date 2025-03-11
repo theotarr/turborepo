@@ -4,10 +4,9 @@ import { useState } from "react";
 import Link from "next/link";
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
 import { sendGAEvent } from "@/lib/analytics";
-import { absoluteUrl, cn } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { Message } from "ai/react";
 import { useActions, useUIState } from "ai/rsc";
-import { toast } from "sonner";
 
 import { PromptForm } from "./chat-form";
 import { ChatList } from "./chat-list";
@@ -43,14 +42,12 @@ export function Chat({
   lectureId,
   ...props
 }: ChatProps) {
-  const { copyToClipboard } = useCopyToClipboard({});
   const { transcript } = useTranscriptStore();
-  const { editor, enhancedNotes } = useNotesStore();
-  // const [aiState] = useAIState()
+  const { enhancedNotes } = useNotesStore();
   const [messages, setMessages] = useUIState();
   const [input, setInput] = useState("");
   const { submitLectureMessage } = useActions();
-  const isLoading = true;
+  const [isLoading, setIsLoading] = useState(false);
 
   return (
     <div {...props}>
@@ -137,41 +134,38 @@ export function Chat({
         </div>
       </div>
       <div className="absolute inset-x-0 bottom-0">
-        <div className="mx-auto sm:max-w-2xl sm:px-4">
-          <div className="space-y-4 border-t bg-background px-4 py-2 shadow-lg sm:rounded-t-xl sm:border md:py-4">
-            <PromptForm
-              placeholder="Ask about the lecture..."
-              onSubmit={async (input) => {
-                sendGAEvent("event", "submit_chat_form", {
-                  prompt: input,
-                });
-                setMessages((prev) => [
-                  ...prev,
-                  {
-                    id: new Date().getTime(),
-                    role: "user" as
-                      | "function"
-                      | "assistant"
-                      | "user"
-                      | "system",
-                    display: <UserMessage>{input}</UserMessage>,
-                  },
-                ]);
+        <div className="mx-auto w-full bg-background px-4 pb-4 sm:px-4 md:pb-6">
+          <PromptForm
+            placeholder="Ask anything..."
+            onSubmit={async (input) => {
+              sendGAEvent("event", "submit_chat_form", {
+                prompt: input,
+              });
+              setIsLoading(true);
+              setMessages((prev) => [
+                ...prev,
+                {
+                  id: new Date().getTime(),
+                  role: "user" as "function" | "assistant" | "user" | "system",
+                  display: <UserMessage>{input}</UserMessage>,
+                },
+              ]);
 
-                // Submit the user message to the server.
-                const message = await submitLectureMessage(
-                  input,
-                  lectureId,
-                  transcript,
-                );
-                setMessages((prev) => [...prev, message]);
-                setInput("");
-              }}
-              input={input}
-              setInput={setInput}
-              isLoading={isLoading}
-            />
-          </div>
+              // Submit the user message to the server.
+              const message = await submitLectureMessage(
+                input,
+                lectureId,
+                transcript,
+              );
+              setMessages((prev) => [...prev, message]);
+              setInput("");
+              setIsLoading(false);
+            }}
+            input={input}
+            setInput={setInput}
+            isLoading={isLoading}
+            className="sm:max-w-2xl"
+          />
         </div>
       </div>
     </div>

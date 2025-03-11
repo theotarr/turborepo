@@ -130,7 +130,7 @@ export function ChatCourse({
                     </div>
                   ))}
               </div>
-              <div className="space-y-4 border-t bg-background px-4 py-2 shadow-lg sm:rounded-t-xl sm:border md:py-4">
+              <div className="pb-4 md:pb-6">
                 <PromptForm
                   onSubmit={async (input) => {
                     if (!session?.user.id) {

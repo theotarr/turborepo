@@ -1,21 +1,18 @@
-import * as React from "react";
+import { useEffect, useRef } from "react";
 import { Icons } from "@/components/icons";
-import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { useEnterSubmit } from "@/hooks/use-enter-submit";
-import { TooltipProvider } from "@radix-ui/react-tooltip";
+import { cn } from "@/lib/utils";
 import { UseChatHelpers } from "ai/react";
-import Textarea from "react-textarea-autosize";
+
+import { buttonVariants } from "./ui/button";
+import { Textarea } from "./ui/textarea";
 
 export interface PromptProps
   extends Pick<UseChatHelpers, "input" | "setInput"> {
   onSubmit: (value: string) => Promise<void>;
   isLoading: boolean;
   placeholder?: string;
+  className?: string;
 }
 
 export function PromptForm({
@@ -23,12 +20,14 @@ export function PromptForm({
   input,
   setInput,
   isLoading,
-  placeholder = "Send a message.",
+  placeholder = "Ask anything...",
+  className,
 }: PromptProps) {
   const { formRef, onKeyDown } = useEnterSubmit();
-  const inputRef = React.useRef<HTMLTextAreaElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
 
-  React.useEffect(() => {
+  // Focus on the input when the form is mounted.
+  useEffect(() => {
     if (inputRef.current) {
       inputRef.current.focus();
     }
@@ -45,34 +44,42 @@ export function PromptForm({
       }}
       ref={formRef}
     >
-      <div className="relative flex max-h-60 w-full grow flex-col overflow-hidden bg-background pr-8 sm:rounded-md sm:border sm:pr-12">
+      <div className="relative flex w-full flex-col gap-4">
         <Textarea
           ref={inputRef}
           tabIndex={0}
           onKeyDown={onKeyDown}
-          rows={1}
+          className={cn(
+            "max-h-[calc(75dvh)] min-h-[24px] resize-none overflow-hidden rounded-2xl bg-muted pb-10 !text-base",
+            className,
+          )}
+          rows={2}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder={placeholder}
           spellCheck={false}
-          className="min-h-[60px] w-full resize-none bg-transparent px-4 py-[1.3rem] focus-within:outline-none sm:text-sm"
         />
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                type="submit"
-                size="sm"
-                disabled={isLoading || input === ""}
-                className="absolute right-0 top-4 h-8 w-8 p-0 sm:right-4"
-              >
-                <Icons.send className="h-5 w-5 stroke-1" />
-                <span className="sr-only">Send message</span>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Send message</TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+
+        <div className="absolute bottom-0 right-0 flex w-fit flex-row justify-end p-2">
+          <button
+            type="submit"
+            className={cn(
+              buttonVariants({
+                variant: "outline",
+                size: "icon",
+              }),
+              "m-0 h-auto w-auto rounded-full border bg-background p-1.5",
+            )}
+            disabled={isLoading || input === ""}
+          >
+            {isLoading ? (
+              <Icons.spinner className="size-4 animate-spin" />
+            ) : (
+              <Icons.arrowUp className="size-4" />
+            )}
+            <span className="sr-only">Send message</span>
+          </button>
+        </div>
       </div>
     </form>
   );
