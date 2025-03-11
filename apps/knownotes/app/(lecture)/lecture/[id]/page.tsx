@@ -119,7 +119,7 @@ export default async function LecturePage({ params }: LecturePageProps) {
                         "p-1",
                       )}
                     >
-                      <Icons.chevronLeft className="h-4 w-4" />
+                      <Icons.chevronLeft className="size-4" />
                     </Link>
                   </TooltipTrigger>
                   <TooltipContent side="right">
@@ -127,6 +127,12 @@ export default async function LecturePage({ params }: LecturePageProps) {
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
+              <div className="flex items-center space-x-2">
+                <Icons.logo className="size-6" />
+                <span className="text-lg font-bold tracking-tight">
+                  KnowNotes
+                </span>
+              </div>
             </div>
             <div className="flex flex-1 items-center sm:justify-end">
               <div className="ml-4 flex flex-1 justify-end space-x-4 sm:grow-0">
