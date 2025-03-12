@@ -8,23 +8,20 @@ import {
 } from "@/components/ui/resizable";
 import { updateLecture } from "@/lib/lecture/actions";
 import { generateEnhancedNotes } from "@/lib/lecture/notes";
-import { cn, formatDate, formatLectureType } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { Transcript } from "@/types";
 import { Course, Lecture, Message } from "@prisma/client";
 import { Editor as EditorType, JSONContent } from "@tiptap/core";
 import { readStreamableValue } from "ai/rsc";
-import ContentEditable from "react-contenteditable";
-import { toast } from "sonner";
 import { useDebouncedCallback } from "use-debounce";
 import { create } from "zustand";
 
 import { AffiliateCard } from "./affiliate-card";
 import { Chat } from "./chat-lecture";
-import { CourseSelectBadge } from "./course-select-badge";
 import { Dictaphone } from "./dictaphone";
 import Editor from "./editor";
 import { Icons } from "./icons";
-import { Badge } from "./ui/badge";
+import { PdfRenderer } from "./pdf-renderer";
 import { buttonVariants } from "./ui/button";
 import {
   Tooltip,
@@ -307,84 +304,9 @@ export function NotesPage({ lecture, courses }: NotesPageProps) {
             />
           </div>
           <div className="absolute max-h-full w-full overflow-y-scroll px-4">
-            {saveStatus && (
-              <div className="absolute right-4 top-4 z-10 rounded-lg bg-secondary/75 px-2 py-1 text-sm text-secondary-foreground/75">
-                {saveStatus}
-              </div>
-            )}
             <div className="relative mx-auto max-w-4xl">
-              <div className="px-8">
-                <ContentEditable
-                  className={cn(
-                    "mt-4 text-2xl font-semibold tracking-tight outline-none ring-0",
-                    lectureTitle === "Untitled lecture"
-                      ? "text-secondary-foreground/50"
-                      : "text-secondary-foreground",
-                  )}
-                  tagName="h1"
-                  html={lectureTitle}
-                  onKeyDown={(e) => {
-                    // Check if the new title contains a newline character.
-                    // If it does, prevent it from adding html to the title and focus the editor.
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      // editor?.chain().focus("start").run() // This doesn't work.
-                    }
-                  }}
-                  onChange={(e) => {
-                    setLectureTitle(e.target.value);
-                    debouncedLectureTitle(e.target.value);
-                    setSaveStatus("Unsaved");
-                  }}
-                  onFocus={() => {
-                    // If the title is "Untitled lecture", clear it when the user focuses on it.
-                    if (lectureTitle === "Untitled lecture")
-                      setLectureTitle("");
-                  }}
-                />
-                <div className="mt-2 flex gap-2">
-                  {lecture.course ? (
-                    <CourseSelectBadge
-                      courses={courses}
-                      selectedCourseId={selectedCourseId}
-                      onSelect={async (courseId) => {
-                        setSelectedCourseId(courseId);
-                        setSaveStatus("Saving...");
-                        const response = await fetch(
-                          `/api/lecture/${lecture.id}`,
-                          {
-                            method: "PATCH",
-                            headers: {
-                              "Content-Type": "application/json",
-                            },
-                            body: JSON.stringify({
-                              courseId,
-                            }),
-                          },
-                        );
-
-                        if (!response?.ok) {
-                          setSaveStatus("Error");
-                          toast.error(
-                            "Something went wrong. Your lecture was not deleted. Please try again.",
-                          );
-                        } else setSaveStatus("Saved");
-                      }}
-                    />
-                  ) : (
-                    <></>
-                  )}
-                  <Badge className="mt-[0.165rem]" variant="secondary">
-                    {formatLectureType(lecture.type)}
-                  </Badge>
-                  <Badge className="mt-[0.165rem]" variant="outline">
-                    {formatDate(lecture.createdAt as unknown as string)}
-                  </Badge>
-                </div>
-              </div>
-
               {lecture.type === "YOUTUBE" && lecture.youtubeVideoId && (
-                <div className="mt-4 px-8 pb-4">
+                <div className="px-8 pb-4">
                   <div className="block aspect-video overflow-hidden rounded-lg">
                     <iframe
                       src={`https://www.youtube.com/embed/${lecture.youtubeVideoId}`}

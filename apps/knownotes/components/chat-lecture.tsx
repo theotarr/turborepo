@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
 import { sendGAEvent } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 import { Message } from "ai/react";

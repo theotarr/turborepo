@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { EditableTitle } from "@/components/editable-title";
 import { Icons } from "@/components/icons";
 import { NotesPage } from "@/components/notes-page";
 import { PremiumFeature } from "@/components/premium-feature";
@@ -106,7 +107,7 @@ export default async function LecturePage({ params }: LecturePageProps) {
   return (
     <AI initialAIState={aiState}>
       <div className="flex h-screen flex-col overflow-hidden">
-        <header className="sticky top-0 z-10 border-b">
+        <header className="sticky top-0 z-10">
           <div className="container flex h-16 items-center justify-between py-4">
             <div className="flex items-center space-x-6 overflow-hidden">
               <TooltipProvider>
@@ -127,11 +128,11 @@ export default async function LecturePage({ params }: LecturePageProps) {
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
-              <div className="flex items-center space-x-2">
-                <Icons.logo className="size-6" />
-                <span className="text-lg font-bold tracking-tight">
-                  KnowNotes
-                </span>
+              <div className="flex flex-col justify-center gap-y-2">
+                <EditableTitle
+                  lectureId={params.id}
+                  initialTitle={lecture.title}
+                />
               </div>
             </div>
             <div className="flex flex-1 items-center sm:justify-end">

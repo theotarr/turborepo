@@ -14,6 +14,8 @@ import { defaultEditorProps } from "./props";
 import "@/styles/prosemirror.css";
 import "katex/dist/katex.min.css";
 
+import { cn } from "@/lib/utils";
+
 import { useNotesStore } from "../notes-page";
 
 export default function Editor({
@@ -27,6 +29,7 @@ export default function Editor({
   editable = true,
   autoFocus = false,
   id,
+  saveStatus,
 }: {
   /**
    * Additional classes to add to the editor container.
@@ -132,8 +135,13 @@ export default function Editor({
       onClick={() => {
         editor?.chain().focus().run();
       }}
-      className={className}
+      className={cn(className, "relative")}
     >
+      {saveStatus && (
+        <div className="absolute right-4 top-0 z-10 rounded-lg bg-secondary/75 px-2 py-1 text-xs text-secondary-foreground/75">
+          {saveStatus}
+        </div>
+      )}
       {editor && editable && <EditorBubbleMenu editor={editor} />}
       {editor?.isActive("image") && editable && (
         <ImageResizer editor={editor} />
