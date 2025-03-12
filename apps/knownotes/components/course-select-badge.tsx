@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import {
   Select,
@@ -17,7 +19,7 @@ interface CourseSelectBadgeProps {
     name: string;
   }[];
   selectedCourseId?: string;
-  onSelect: (courseId: string) => void;
+  onSelect?: (courseId: string) => void;
 }
 
 export const CourseSelectBadge = ({
@@ -31,14 +33,13 @@ export const CourseSelectBadge = ({
     <Select
       open={open}
       onOpenChange={(open) => setOpen(open)}
-      onValueChange={(value) => onSelect(value)}
+      onValueChange={(value) => onSelect && onSelect(value)}
       defaultValue={selectedCourseId ?? undefined}
     >
       <SelectTrigger className="m-0 p-0 outline-none ring-0 focus:outline-none">
         <Badge>
-          <SelectValue placeholder="No course selected...">
-            {courses.find((c) => c.id === selectedCourseId)?.name ??
-              "No course selected..."}
+          <SelectValue placeholder="Add to course">
+            {courses.find((c) => c.id === selectedCourseId)?.name}
           </SelectValue>
         </Badge>
       </SelectTrigger>
