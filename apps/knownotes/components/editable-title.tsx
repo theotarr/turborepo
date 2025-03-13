@@ -35,7 +35,7 @@ export function EditableTitle({ lectureId, initialTitle }: EditableTitleProps) {
     <div className="group relative flex items-center">
       <ContentEditable
         className={cn(
-          "inline-block max-w-[280px] truncate rounded-md px-2 text-lg font-medium tracking-tight outline-none outline-1 ring-0 transition-all group-hover:bg-accent/50 group-hover:outline group-hover:outline-accent-foreground/20 sm:max-w-none",
+          "mr-1 inline-block max-w-[280px] truncate rounded-md px-2 text-lg font-medium tracking-tight outline-none outline-1 ring-0 transition-all group-hover:bg-accent/50 group-hover:outline group-hover:outline-accent-foreground/20 sm:max-w-none",
           lectureTitle === "Untitled lecture"
             ? "text-secondary-foreground/50"
             : "text-secondary-foreground",
