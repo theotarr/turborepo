@@ -123,7 +123,7 @@ export const PdfRenderer = ({
   const calculatePageWidth = () => {
     if (!width) return 1; // Use a default value instead of undefined
     // More aggressive padding to ensure fit within container
-    return width > 100 ? width - 100 : width;
+    return width > 50 ? width - 50 : width;
   };
 
   // Setup intersection observers for pages with proper dependencies
@@ -505,7 +505,7 @@ export const PdfRenderer = ({
         </div>
       </div>
 
-      <div className="flex h-[calc(100vh-9rem)] w-full overflow-x-hidden overflow-y-scroll">
+      <div className="flex h-[calc(100vh-9rem)] w-full overflow-scroll">
         <div
           ref={ref}
           onMouseUp={handleTextSelection}
