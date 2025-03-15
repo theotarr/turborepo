@@ -32,6 +32,9 @@ const nextConfig = {
         ...config.experiments,
         topLevelAwait: true,
       });
+
+    config.resolve.alias.canvas = false; // Needed for React PDF.
+
     return config;
   },
   images: {
