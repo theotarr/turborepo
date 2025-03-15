@@ -619,6 +619,7 @@ export const lectureRouter = {
           lecture = await ctx.db.lecture.create({
             data: {
               type,
+              fileId,
               title,
               markdownNotes: notes,
               enhancedNotes: notes,
@@ -632,6 +633,7 @@ export const lectureRouter = {
           lecture = await ctx.db.lecture.create({
             data: {
               type,
+              fileId,
               title: "Untitled Lecture",
               userId: ctx.session.user.id,
               ...(courseId ? { courseId } : {}),
@@ -655,12 +657,8 @@ export const lectureRouter = {
 
         return lecture;
       } finally {
-        // Delete the file locally and from the storage bucket.
+        // Delete the file locally.
         await fs.promises.unlink(path);
-        const { error: removeFileError } = await supabase.storage
-          .from("audio")
-          .remove([filePath]);
-        if (removeFileError) console.error(removeFileError);
       }
     }),
   search: protectedProcedure

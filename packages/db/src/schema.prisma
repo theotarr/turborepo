@@ -33,6 +33,7 @@ enum LectureType {
 
 model Lecture {
   id             String      @id @default(dbgenerated("uuid_generate_v1()")) @db.Uuid
+  fileId         String?
   title          String
   type           LectureType @default(LIVE)
   transcript     Json[]
