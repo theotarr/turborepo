@@ -18,7 +18,6 @@ import { env } from "@/env";
 import { AI } from "@/lib/chat/actions";
 import { supabase } from "@/lib/supabase";
 import { absoluteUrl, cn } from "@/lib/utils";
-import { Course } from "@prisma/client";
 
 import { auth } from "@acme/auth";
 
@@ -72,11 +71,6 @@ export async function generateMetadata({
 export default async function LecturePage({ params }: LecturePageProps) {
   const session = await auth();
   if (!session) redirect("/login");
-
-  const { data: courses } = await supabase
-    .from("Course")
-    .select("*")
-    .eq("userId", session.user.id);
 
   const { data: lecture } = await supabase
     .from("Lecture")
@@ -151,7 +145,7 @@ export default async function LecturePage({ params }: LecturePageProps) {
         </header>
         <main className="flex w-full flex-1 flex-col overflow-hidden">
           <PremiumFeature>
-            <NotesPage lecture={lecture} courses={courses as Course[]} />
+            <NotesPage lecture={lecture} />
           </PremiumFeature>
         </main>
       </div>
