@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   ResizableHandle,
   ResizablePanel,
@@ -132,7 +132,6 @@ interface NotesPageProps {
 }
 
 export function NotesPage({ lecture }: NotesPageProps) {
-  const router = useRouter();
   const [hydrated, setHydrated] = useState(false);
   const [pdfUrl, setPdfUrl] = useState<string | undefined>(undefined);
   const { activeTab, setActiveTab, notesTab, setNotesTab } = useTabStore();
@@ -498,24 +497,20 @@ export function NotesPage({ lecture }: NotesPageProps) {
                   Chat
                 </TabsTrigger>
                 <TabsTrigger
-                  onClick={() => {
-                    router.push(`/lecture/${lecture.id}/flashcards`);
-                  }}
                   className="w-full rounded-lg"
                   value="flashcards"
+                  asChild
                 >
-                  <Icons.flashcards className="mr-2 size-4" />
-                  Flashcards
+                  <Link href={`/lecture/${lecture.id}/flashcards`}>
+                    <Icons.flashcards className="mr-2 size-4" />
+                    Flashcards
+                  </Link>
                 </TabsTrigger>
-                <TabsTrigger
-                  onClick={() => {
-                    router.push(`/lecture/${lecture.id}/quiz`);
-                  }}
-                  className="w-full rounded-lg"
-                  value="quiz"
-                >
-                  <Icons.study className="mr-2 size-4" />
-                  Quiz
+                <TabsTrigger className="w-full rounded-lg" value="quiz" asChild>
+                  <Link href={`/lecture/${lecture.id}/quiz`}>
+                    <Icons.study className="mr-2 size-4" />
+                    Quiz
+                  </Link>
                 </TabsTrigger>
               </TabsList>
               <TabsContent value="chat">
@@ -618,7 +613,7 @@ export function NotesPage({ lecture }: NotesPageProps) {
                   </div>
                 </TabsContent>
               )}
-
+              {/* 
               <TabsContent value="flashcards">
                 <div className="flex h-full items-center justify-center">
                   <p className="text-muted-foreground">
@@ -631,7 +626,7 @@ export function NotesPage({ lecture }: NotesPageProps) {
                 <div className="flex h-full items-center justify-center">
                   <p className="text-muted-foreground">Quiz coming soon</p>
                 </div>
-              </TabsContent>
+              </TabsContent> */}
             </Tabs>
           </div>
         </ResizablePanel>
