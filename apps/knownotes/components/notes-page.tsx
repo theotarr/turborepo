@@ -172,10 +172,22 @@ export function NotesPage({ lecture }: NotesPageProps) {
           process.env.NEXT_PUBLIC_SUPABASE_URL as string,
           process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string,
         );
-        const { data: pdf } = supabase.storage
-          .from("audio")
-          .getPublicUrl(`${lecture.userId}/${lecture.fileId}`);
-        setPdfUrl(pdf.publicUrl);
+
+        (async () => {
+          const { data: pdf } = await supabase.storage
+            .from("audio")
+            .createSignedUrl(
+              `${lecture.userId}/${lecture.fileId}`,
+              60 * 60 * 24 * 7,
+            );
+
+          if (!pdf?.signedUrl) {
+            toast.error("Cannot render your PDF.");
+            return;
+          }
+
+          setPdfUrl(pdf.signedUrl);
+        })();
       }
 
       // If there are markdown notes, default the notes tab to markdown.
