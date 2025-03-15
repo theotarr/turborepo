@@ -75,13 +75,12 @@ metaphysics, epistemology, ethics, logic
             Flashcards
           </Button>
           <Button variant="secondary">
-            <Icons.quiz className="mr-2 size-4" />
+            <Icons.study className="mr-2 size-4" />
             Quiz
           </Button>
         </div>
         <div className="mt-8 h-full rounded-t-lg border-x border-t bg-background shadow-sm">
           <Editor
-            Render={false}
             className="pb-16 pt-4"
             editable={false}
             autoFocus={false}
