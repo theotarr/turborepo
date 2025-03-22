@@ -103,7 +103,7 @@ export default async function LecturePage({ params }: LecturePageProps) {
       <div className="flex h-screen flex-col overflow-hidden">
         <header className="sticky top-0 z-10">
           <div className="container flex h-16 items-center justify-between py-4">
-            <div className="flex items-center space-x-6 overflow-hidden">
+            <div className="flex items-center space-x-2 overflow-hidden">
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
