@@ -384,7 +384,7 @@ export function NotesPage({ lecture }: NotesPageProps) {
       />
       <ResizablePanelGroup direction={resizablePanelDirection}>
         <ResizablePanel
-          defaultSize={lecture.type === "PDF" ? 50 : 70}
+          defaultSize={lecture.type === "PDF" ? 50 : 65}
           className="relative mx-8"
         >
           {pdfUrl ? (
@@ -576,7 +576,7 @@ export function NotesPage({ lecture }: NotesPageProps) {
         </ResizablePanel>
         <ResizableHandle withHandle />
         <ResizablePanel
-          defaultSize={lecture.type === "PDF" ? 50 : 30}
+          defaultSize={lecture.type === "PDF" ? 50 : 35}
           className="relative"
         >
           <div className="flex w-full flex-col px-4">
