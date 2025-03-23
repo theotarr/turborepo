@@ -10,7 +10,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { Course, Lecture } from "@prisma/client";
+import { Course } from "@prisma/client";
 
 import { useLectureCreateDialogStore } from "./lecture-create-dialog";
 import { Badge } from "./ui/badge";
@@ -31,7 +31,7 @@ export function CourseCard({ course, className, ...props }: CourseCardProps) {
     <Card className={cn("w-[340px] border", className)} {...props}>
       <CardHeader>
         <Link href={`/course/${course.id}`}>
-          <CardTitle className="text-xl font-bold tracking-tighter">
+          <CardTitle className="text-xl font-semibold tracking-tighter">
             {course.name}
           </CardTitle>
         </Link>
