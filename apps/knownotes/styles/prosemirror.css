@@ -195,3 +195,38 @@ ul[data-type="taskList"] li[data-checked="true"] > div > p {
   border-radius: 0.25rem;
   display: inline-block;
 }
+
+/* Editor transition styles for streaming content */
+.editor-transition .ProseMirror {
+  transition:
+    opacity 0.2s ease-in-out,
+    background-color 0.2s ease;
+}
+
+.editor-transition .ProseMirror.updating {
+  opacity: 0.85;
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+.editor-transition .ProseMirror:not(.updating) {
+  opacity: 1;
+  background-color: transparent;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.editor-transition .ProseMirror p:last-child,
+.editor-transition .ProseMirror ul:last-child,
+.editor-transition .ProseMirror li:last-child,
+.editor-transition .ProseMirror h1:last-child,
+.editor-transition .ProseMirror h2:last-child,
+.editor-transition .ProseMirror h3:last-child {
+  animation: fadeIn 0.3s ease-in-out;
+}

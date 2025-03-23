@@ -147,7 +147,7 @@ export default function Editor({
         <ImageResizer editor={editor} />
       )}
       <EditorContent
-        className="flex grow flex-col break-words"
+        className="editor-transition flex grow flex-col break-words"
         editor={editor}
       />
     </div>

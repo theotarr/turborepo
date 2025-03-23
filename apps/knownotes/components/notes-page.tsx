@@ -417,9 +417,43 @@ export function NotesPage({ lecture }: NotesPageProps) {
                       markdownNotes,
                     );
                     let text = "";
+                    let chunkBuffer = "";
+                    const CHUNK_SIZE = 100; // Update after collecting ~100 characters
 
+                    // Add streaming with less frequent updates
                     for await (const delta of readStreamableValue(output)) {
                       text = `${text}${delta}`;
+                      chunkBuffer += delta;
+
+                      // Only update the editor content after collecting enough chunks
+                      if (chunkBuffer.length >= CHUNK_SIZE) {
+                        // Add transition effect
+                        const prosemirrorEl = document.querySelector(
+                          ".editor-transition .ProseMirror",
+                        );
+                        if (prosemirrorEl) {
+                          prosemirrorEl.classList.add("updating");
+
+                          // Set content and then remove the updating class after a short delay
+                          editor?.commands.setContent(text);
+
+                          setTimeout(() => {
+                            prosemirrorEl.classList.remove("updating");
+                          }, 50);
+                        } else {
+                          editor?.commands.setContent(text);
+                        }
+
+                        chunkBuffer = ""; // Reset buffer
+                        // Small delay to allow React to process
+                        await new Promise((resolve) =>
+                          setTimeout(resolve, 100),
+                        );
+                      }
+                    }
+
+                    // Final update to ensure all content is displayed
+                    if (chunkBuffer.length > 0 || text.length > 0) {
                       editor?.commands.setContent(text);
                     }
 
@@ -583,16 +617,53 @@ export function NotesPage({ lecture }: NotesPageProps) {
                           );
 
                           let text = "";
+                          let chunkBuffer = "";
+                          const CHUNK_SIZE = 100; // Update after collecting ~100 characters
 
+                          // Add streaming with less frequent updates
                           for await (const delta of readStreamableValue(
                             output,
                           )) {
                             text = `${text}${delta}`;
+                            chunkBuffer += delta;
+
+                            // Only update the editor content after collecting enough chunks
+                            if (chunkBuffer.length >= CHUNK_SIZE) {
+                              // Add transition effect
+                              const prosemirrorEl = document.querySelector(
+                                ".editor-transition .ProseMirror",
+                              );
+                              if (prosemirrorEl) {
+                                prosemirrorEl.classList.add("updating");
+
+                                // Set content and then remove the updating class after a short delay
+                                editor?.commands.setContent(text);
+
+                                setTimeout(() => {
+                                  prosemirrorEl.classList.remove("updating");
+                                }, 50);
+                              } else {
+                                editor?.commands.setContent(text);
+                              }
+
+                              chunkBuffer = ""; // Reset buffer
+                              // Small delay to allow React to process
+                              await new Promise((resolve) =>
+                                setTimeout(resolve, 100),
+                              );
+                            }
+                          }
+
+                          // Final update to ensure all content is displayed
+                          if (chunkBuffer.length > 0 || text.length > 0) {
                             editor?.commands.setContent(text);
                           }
 
                           setEnhancedNotes(text);
-                          // Save the generated notes to the database
+                          setIsGeneratingNotes(false);
+
+                          // Update the lecture with the enhanced notes.
+                          // Save the notes with the Tiptap JSONContent format so that special characters and LaTeX are preserved.
                           await updateLecture({
                             lectureId: lecture.id,
                             enhancedNotes: JSON.stringify(editor?.getJSON()),
@@ -699,9 +770,43 @@ export function NotesPage({ lecture }: NotesPageProps) {
                           markdownNotes,
                         );
                         let text = "";
+                        let chunkBuffer = "";
+                        const CHUNK_SIZE = 100; // Update after collecting ~100 characters
 
+                        // Add streaming with less frequent updates
                         for await (const delta of readStreamableValue(output)) {
                           text = `${text}${delta}`;
+                          chunkBuffer += delta;
+
+                          // Only update the editor content after collecting enough chunks
+                          if (chunkBuffer.length >= CHUNK_SIZE) {
+                            // Add transition effect
+                            const prosemirrorEl = document.querySelector(
+                              ".editor-transition .ProseMirror",
+                            );
+                            if (prosemirrorEl) {
+                              prosemirrorEl.classList.add("updating");
+
+                              // Set content and then remove the updating class after a short delay
+                              editor?.commands.setContent(text);
+
+                              setTimeout(() => {
+                                prosemirrorEl.classList.remove("updating");
+                              }, 50);
+                            } else {
+                              editor?.commands.setContent(text);
+                            }
+
+                            chunkBuffer = ""; // Reset buffer
+                            // Small delay to allow React to process
+                            await new Promise((resolve) =>
+                              setTimeout(resolve, 100),
+                            );
+                          }
+                        }
+
+                        // Final update to ensure all content is displayed
+                        if (chunkBuffer.length > 0 || text.length > 0) {
                           editor?.commands.setContent(text);
                         }
 
