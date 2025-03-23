@@ -135,7 +135,10 @@ export default function DashboardPage() {
 
         if (uploadError) {
           console.error("Upload error", uploadError);
-          Alert.alert("Failed to upload the file. Please try again.");
+          Alert.alert(
+            `Failed to upload the file. Please try again.
+            ${uploadError.message}`,
+          );
           throw uploadError;
         }
 
@@ -147,7 +150,10 @@ export default function DashboardPage() {
         router.push(`/lecture/${lecture.id}`);
       }
     } catch (error) {
-      Alert.alert("Failed to create the lecture. Please try again.");
+      Alert.alert(
+        `Failed to create the lecture. Please try again.
+        ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
       console.error(error);
     } finally {
       setIsLoading(false);
@@ -511,7 +517,7 @@ export default function DashboardPage() {
                   size={20}
                 />
               </BottomSheetDismissButton>
-              <Button
+              {/* <Button
                 size="lg"
                 variant="secondary"
                 className="w-full flex-row items-center justify-between px-4"
@@ -554,7 +560,7 @@ export default function DashboardPage() {
                     size={20}
                   />
                 )}
-              </Button>
+              </Button> */}
             </BottomSheetView>
           </BottomSheetContent>
         </BottomSheet>
