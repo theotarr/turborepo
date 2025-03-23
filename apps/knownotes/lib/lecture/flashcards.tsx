@@ -104,3 +104,40 @@ export async function updateFlashcard({
     throw error;
   }
 }
+
+/**
+ * Toggle the starred status of a flashcard
+ */
+export async function toggleFlashcardStar(
+  id: string,
+): Promise<{ isStarred: boolean }> {
+  const session = await auth();
+  if (!session) throw new Error("User not authenticated");
+
+  // First get the current state
+  const { data: flashcard, error: fetchError } = await supabase
+    .from("Flashcard")
+    .select("isStarred")
+    .eq("id", id)
+    .single();
+
+  if (fetchError) {
+    console.error(fetchError);
+    throw fetchError;
+  }
+
+  // Toggle the isStarred status
+  const newStarredState = !flashcard.isStarred;
+
+  const { error: updateError } = await supabase
+    .from("Flashcard")
+    .update({ isStarred: newStarredState })
+    .eq("id", id);
+
+  if (updateError) {
+    console.error(updateError);
+    throw updateError;
+  }
+
+  return { isStarred: newStarredState };
+}

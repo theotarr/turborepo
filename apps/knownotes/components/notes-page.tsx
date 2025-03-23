@@ -8,6 +8,7 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import { updateLecture } from "@/lib/lecture/actions";
+import { generateFlashcards } from "@/lib/lecture/flashcards";
 import { generateEnhancedNotes } from "@/lib/lecture/notes";
 import { cn } from "@/lib/utils";
 import { Transcript } from "@/types";
@@ -22,9 +23,10 @@ import { AffiliateCard } from "./affiliate-card";
 import { Chat } from "./chat-lecture";
 import { Dictaphone } from "./dictaphone";
 import Editor from "./editor";
+import { FlashcardContainer } from "./flashcard-container";
 import { Icons } from "./icons";
 import { PdfRenderer } from "./pdf-renderer";
-import { buttonVariants } from "./ui/button";
+import { Button, buttonVariants } from "./ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import {
   Tooltip,
@@ -88,6 +90,58 @@ export const useTranscriptStore = create<{
   setInterim: (transcript) => set({ interim: transcript }),
 }));
 
+export const useFlashcardStore = create<{
+  tab: "study" | "manage";
+  setTab: (tab: "study" | "manage") => void;
+  flashcards: {
+    id: string;
+    term: string;
+    definition: string;
+    isStarred?: boolean;
+  }[];
+  setFlashcards: (
+    flashcards: {
+      id: string;
+      term: string;
+      definition: string;
+      isStarred?: boolean;
+    }[],
+  ) => void;
+  updateFlashcard: (id: string, term: string, definition: string) => void;
+  deleteFlashcard: (id: string) => void;
+  updateStarredStatus: (id: string, isStarred: boolean) => void;
+}>((set) => ({
+  tab: "study",
+  setTab: (tab) => set({ tab }),
+  flashcards: [],
+  setFlashcards: (flashcards) => set({ flashcards }),
+  updateFlashcard: (id, term, definition) => {
+    set((state) => {
+      const flashcard = state.flashcards.find((card) => card.id === id);
+      if (!flashcard) return state;
+
+      flashcard.term = term;
+      flashcard.definition = definition;
+
+      return { flashcards: state.flashcards };
+    });
+  },
+  deleteFlashcard: (id) => {
+    set((state) => {
+      const flashcards = state.flashcards.filter((card) => card.id !== id);
+      return { flashcards };
+    });
+  },
+  updateStarredStatus: (id, isStarred) => {
+    set((state) => {
+      const flashcards = state.flashcards.map((card) =>
+        card.id === id ? { ...card, isStarred } : card,
+      );
+      return { flashcards };
+    });
+  },
+}));
+
 export function isNotesNull(notes: JSONContent | string | undefined) {
   // If the notes are undefined, return true.
   if (!notes) return true;
@@ -128,6 +182,12 @@ interface NotesPageProps {
   lecture: Lecture & {
     course: Course;
     messages: Message[];
+    flashcards?: {
+      id: string;
+      term: string;
+      definition: string;
+      isStarred?: boolean;
+    }[];
   };
 }
 
@@ -153,6 +213,8 @@ export function NotesPage({ lecture }: NotesPageProps) {
   const [resizablePanelDirection, setResizablePanelDirection] = useState<
     "horizontal" | "vertical"
   >("horizontal");
+  const { flashcards, setFlashcards } = useFlashcardStore();
+  const [isLoadingFlashcards, setIsLoadingFlashcards] = useState(false);
 
   function changeNotesTab(tab: "notes" | "enhanced") {
     setNotesTab(tab);
@@ -164,6 +226,7 @@ export function NotesPage({ lecture }: NotesPageProps) {
   // Hydate the component with the lecture data.
   useEffect(() => {
     if (!hydrated) {
+      console.log(lecture.flashcards);
       setTranscript(lecture.transcript as any as Transcript[]);
 
       // If the lecture is a PDF, get the public url for it.
@@ -263,6 +326,54 @@ export function NotesPage({ lecture }: NotesPageProps) {
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, []);
+
+  // Add effect to load flashcards when the flashcards tab is selected
+  useEffect(() => {
+    async function loadFlashcards() {
+      if (
+        activeTab === "flashcards" &&
+        flashcards.length === 0 &&
+        !isLoadingFlashcards
+      ) {
+        setIsLoadingFlashcards(true);
+
+        try {
+          // If lecture already has flashcards, use those
+          if (lecture.flashcards && lecture.flashcards.length > 0) {
+            setFlashcards(lecture.flashcards);
+            return;
+          }
+
+          // Otherwise generate new flashcards
+          const object = await generateFlashcards(lecture.id, transcript);
+
+          for await (const partialObject of readStreamableValue(object)) {
+            if (partialObject) {
+              setFlashcards(partialObject.flashcards);
+            }
+          }
+
+          toast.success("Flashcards generated successfully");
+        } catch (error) {
+          console.error("Error generating flashcards:", error);
+          toast.error("Failed to generate flashcards");
+        } finally {
+          setIsLoadingFlashcards(false);
+        }
+      }
+    }
+
+    loadFlashcards();
+  }, [
+    activeTab,
+    isLoadingFlashcards,
+    lecture.flashcards,
+    lecture.id,
+    setFlashcards,
+    transcript,
+  ]);
+
+  console.log(lecture.flashcards);
 
   return (
     <>
@@ -508,15 +619,9 @@ export function NotesPage({ lecture }: NotesPageProps) {
                   <Icons.messageSquareText className="mr-2 size-4" />
                   Chat
                 </TabsTrigger>
-                <TabsTrigger
-                  className="w-full rounded-lg"
-                  value="flashcards"
-                  asChild
-                >
-                  <Link href={`/lecture/${lecture.id}/flashcards`}>
-                    <Icons.flashcards className="mr-2 size-4" />
-                    Flashcards
-                  </Link>
+                <TabsTrigger className="w-full rounded-lg" value="flashcards">
+                  <Icons.flashcards className="mr-2 size-4" />
+                  Flashcards
                 </TabsTrigger>
                 <TabsTrigger className="w-full rounded-lg" value="quiz" asChild>
                   <Link href={`/lecture/${lecture.id}/quiz`}>
@@ -625,20 +730,64 @@ export function NotesPage({ lecture }: NotesPageProps) {
                   </div>
                 </TabsContent>
               )}
-              {/* 
+
               <TabsContent value="flashcards">
-                <div className="flex h-full items-center justify-center">
-                  <p className="text-muted-foreground">
-                    Flashcards coming soon
-                  </p>
+                <div className="flex h-[calc(100vh-8rem)] flex-col items-center overflow-y-auto pb-20">
+                  {isLoadingFlashcards ? (
+                    <div className="flex h-full w-full flex-col items-center justify-center">
+                      <Icons.spinner className="size-6 animate-spin text-muted-foreground" />
+                      <p className="mt-4 text-muted-foreground">
+                        Generating flashcards...
+                      </p>
+                    </div>
+                  ) : flashcards.length > 0 ? (
+                    <div className="mt-4 w-full max-w-3xl">
+                      <FlashcardContainer flashcards={flashcards} />
+                    </div>
+                  ) : (
+                    <div className="flex h-full flex-col items-center justify-center">
+                      <p className="mb-4 text-muted-foreground">
+                        No flashcards found
+                      </p>
+                      <Button
+                        onClick={async () => {
+                          setIsLoadingFlashcards(true);
+                          try {
+                            const object = await generateFlashcards(
+                              lecture.id,
+                              transcript,
+                            );
+
+                            for await (const partialObject of readStreamableValue(
+                              object,
+                            )) {
+                              if (partialObject) {
+                                setFlashcards(partialObject.flashcards);
+                              }
+                            }
+                            toast.success("Flashcards generated successfully");
+                          } catch (error) {
+                            console.error(
+                              "Error generating flashcards:",
+                              error,
+                            );
+                            toast.error("Failed to generate flashcards");
+                          } finally {
+                            setIsLoadingFlashcards(false);
+                          }
+                        }}
+                      >
+                        {isLoadingFlashcards ? (
+                          <Icons.spinner className="mr-2 size-4 animate-spin" />
+                        ) : (
+                          <Icons.flashcards className="mr-2 size-4" />
+                        )}
+                        Generate Flashcards
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </TabsContent>
-
-              <TabsContent value="quiz">
-                <div className="flex h-full items-center justify-center">
-                  <p className="text-muted-foreground">Quiz coming soon</p>
-                </div>
-              </TabsContent> */}
             </Tabs>
           </div>
         </ResizablePanel>

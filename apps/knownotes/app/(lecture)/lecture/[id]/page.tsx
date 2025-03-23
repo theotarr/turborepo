@@ -74,14 +74,16 @@ export default async function LecturePage({ params }: LecturePageProps) {
 
   const { data: lecture } = await supabase
     .from("Lecture")
-    .select("*, course:courseId (*), Message(*)")
+    .select("*, course:courseId (*), Message(*), Flashcard(*)")
     .eq("userId", session.user.id)
     .eq("id", params.id)
     .single();
 
-  // Convert lecture.Message to lecture.messages
+  // Convert SQL to Prisma relations format.
   lecture.messages = lecture.Message;
   delete lecture.Message;
+  lecture.flashcards = lecture.Flashcard;
+  delete lecture.Flashcard;
 
   if (!lecture) return <>Loading...</>;
 

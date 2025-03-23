@@ -1,99 +1,260 @@
 "use client";
 
 import { useState } from "react";
-import { deleteFlashcard, updateFlashcard } from "@/lib/lecture/flashcards";
+import {
+  deleteFlashcard,
+  toggleFlashcardStar,
+  updateFlashcard,
+} from "@/lib/lecture/flashcards";
 import { cn } from "@/lib/utils";
-import ContentEditable from "react-contenteditable";
+import { Pencil, Save, Star, Trash2, X } from "lucide-react";
 import { useDebouncedCallback } from "use-debounce";
 
-import { useFlashcardStore } from "./flashcard-page";
 import { Icons } from "./icons";
-import { buttonVariants } from "./ui/button";
+import { useFlashcardStore } from "./notes-page";
+import { Button } from "./ui/button";
+import { Card, CardContent, CardHeader } from "./ui/card";
 import { Skeleton } from "./ui/skeleton";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "./ui/tooltip";
 
 export const FlashcardItem = ({
   flashcard,
+  cardNumber,
 }: {
   flashcard: {
     id: string;
     term: string;
     definition: string;
+    isStarred?: boolean;
   };
+  cardNumber: number;
 }) => {
   const {
     updateFlashcard: updateFlashcardState,
     deleteFlashcard: deleteFlashcardState,
+    updateStarredStatus,
   } = useFlashcardStore();
+
   const [isDeleteLoading, setIsDeleteLoading] = useState(false);
-  const debouncedTerm = useDebouncedCallback(async (term: string) => {
+  const [isStarLoading, setIsStarLoading] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedTerm, setEditedTerm] = useState(flashcard.term);
+  const [editedDefinition, setEditedDefinition] = useState(
+    flashcard.definition,
+  );
+
+  useDebouncedCallback(async (term: string) => {
     await updateFlashcard({
       id: flashcard.id,
       term,
     });
   }, 300);
-  const debouncedDefinition = useDebouncedCallback(
-    async (definition: string) => {
-      await updateFlashcard({ id: flashcard.id, definition });
-    },
-    300,
-  );
+
+  useDebouncedCallback(async (definition: string) => {
+    await updateFlashcard({ id: flashcard.id, definition });
+  }, 300);
+
+  const handleToggleStar = async () => {
+    setIsStarLoading(true);
+    try {
+      const { isStarred } = await toggleFlashcardStar(flashcard.id);
+      // Update local state
+      updateStarredStatus(flashcard.id, isStarred);
+    } catch (error) {
+      console.error("Error toggling star:", error);
+    } finally {
+      setIsStarLoading(false);
+    }
+  };
+
+  const handleSaveEdit = async () => {
+    if (editedTerm !== flashcard.term) {
+      await updateFlashcard({ id: flashcard.id, term: editedTerm });
+    }
+
+    if (editedDefinition !== flashcard.definition) {
+      await updateFlashcard({ id: flashcard.id, definition: editedDefinition });
+    }
+
+    updateFlashcardState(flashcard.id, editedTerm, editedDefinition);
+    setIsEditing(false);
+  };
+
+  const handleCancelEdit = () => {
+    setEditedTerm(flashcard.term);
+    setEditedDefinition(flashcard.definition);
+    setIsEditing(false);
+  };
 
   return (
-    <div className="group relative grid min-h-16 grid-cols-2 gap-6 px-4 py-2">
-      <ContentEditable
-        className="flex h-full items-center border-r px-2 text-base font-semibold text-secondary-foreground focus:outline-1 focus:outline-border"
-        html={flashcard.term}
-        onChange={(e) => {
-          updateFlashcardState(
-            flashcard.id,
-            e.target.value,
-            flashcard.definition,
-          );
-          debouncedTerm(e.target.value);
-        }}
-      />
-      {flashcard.definition && (
-        <ContentEditable
-          className="flex items-center px-2 text-sm text-muted-foreground focus:outline-1 focus:outline-border"
-          html={flashcard.definition}
-          onChange={(e) => {
-            updateFlashcardState(flashcard.id, flashcard.term, e.target.value);
-            debouncedDefinition(e.target.value);
-          }}
-        />
-      )}
-      <div className="absolute right-2 top-1/2 hidden -translate-y-1/2 group-hover:block">
-        <button
-          onClick={async () => {
-            setIsDeleteLoading(true);
-            deleteFlashcardState(flashcard.id);
-            await deleteFlashcard(flashcard.id);
-            setIsDeleteLoading(false);
-          }}
-          disabled={isDeleteLoading}
-          className={cn(
-            buttonVariants({ variant: "secondary" }),
-            "h-auto w-auto p-0.5",
-          )}
-        >
-          {isDeleteLoading ? (
-            <Icons.spinner className="size-4 animate-spin" />
+    <Card
+      id={`flashcard-item-${flashcard.id}`}
+      className="group mb-4 overflow-hidden border-none shadow-none"
+    >
+      <CardHeader className="flex flex-row items-center justify-between gap-2 px-3 py-2">
+        <div className="flex items-center gap-2">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={handleToggleStar}
+                  disabled={isStarLoading}
+                >
+                  {isStarLoading ? (
+                    <Icons.spinner className="size-4 animate-spin" />
+                  ) : (
+                    <Star
+                      className={cn(
+                        "size-4",
+                        flashcard.isStarred
+                          ? "fill-primary text-primary"
+                          : "text-muted-foreground",
+                      )}
+                    />
+                  )}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="top">
+                {flashcard.isStarred ? "Unstar this card" : "Star this card"}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          <h3 className="text-sm font-medium text-muted-foreground">
+            {isEditing ? "Editing Card" : `Card ${cardNumber}`}
+          </h3>
+        </div>
+
+        <div className="flex items-center gap-1">
+          {isEditing ? (
+            <>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={handleSaveEdit}
+              >
+                <Save className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={handleCancelEdit}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </>
           ) : (
-            <Icons.trash className="size-4 rounded text-secondary-foreground hover:bg-accent" />
+            <>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => setIsEditing(true)}
+              >
+                <Pencil className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-destructive"
+                onClick={async () => {
+                  setIsDeleteLoading(true);
+                  try {
+                    deleteFlashcardState(flashcard.id);
+                    await deleteFlashcard(flashcard.id);
+                  } catch (error) {
+                    console.error("Error deleting flashcard:", error);
+                  } finally {
+                    setIsDeleteLoading(false);
+                  }
+                }}
+                disabled={isDeleteLoading}
+              >
+                {isDeleteLoading ? (
+                  <Icons.spinner className="size-4 animate-spin" />
+                ) : (
+                  <Trash2 className="h-4 w-4" />
+                )}
+              </Button>
+            </>
           )}
-        </button>
-      </div>
-    </div>
+        </div>
+      </CardHeader>
+
+      <CardContent>
+        {isEditing ? (
+          <div className="space-y-3">
+            <div>
+              <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                Term
+              </label>
+              <textarea
+                className="w-full rounded-md border bg-background p-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                value={editedTerm}
+                onChange={(e) => setEditedTerm(e.target.value)}
+                rows={2}
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                Definition
+              </label>
+              <textarea
+                className="w-full rounded-md border bg-background p-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                value={editedDefinition}
+                onChange={(e) => setEditedDefinition(e.target.value)}
+                rows={3}
+              />
+            </div>
+          </div>
+        ) : (
+          <div className="grid gap-3 md:grid-cols-2">
+            <div>
+              <div className="mb-1 text-xs font-medium text-muted-foreground">
+                Term
+              </div>
+              <div className="text-sm font-semibold">{flashcard.term}</div>
+            </div>
+            <div>
+              <div className="mb-1 text-xs font-medium text-muted-foreground">
+                Definition
+              </div>
+              <div className="text-sm">{flashcard.definition}</div>
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 };
 
 FlashcardItem.Skeleton = function FlashcardItemSkeleton() {
   return (
-    <div className="p-4">
-      <div className="space-y-3">
-        <Skeleton className="h-5 w-2/5" />
-        <Skeleton className="h-4 w-4/5" />
-      </div>
-    </div>
+    <Card className="mb-4">
+      <CardHeader className="p-3 pb-0">
+        <Skeleton className="h-6 w-24" />
+      </CardHeader>
+      <CardContent>
+        <div className="grid gap-3 md:grid-cols-2">
+          <div>
+            <Skeleton className="mb-2 h-4 w-16" />
+            <Skeleton className="h-5 w-full" />
+          </div>
+          <div>
+            <Skeleton className="mb-2 h-4 w-16" />
+            <Skeleton className="h-5 w-full" />
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 };
