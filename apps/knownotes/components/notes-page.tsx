@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import {
   ResizableHandle,
   ResizablePanel,
@@ -10,6 +9,7 @@ import {
 import { updateLecture } from "@/lib/lecture/actions";
 import { generateFlashcards } from "@/lib/lecture/flashcards";
 import { generateEnhancedNotes } from "@/lib/lecture/notes";
+import { generateQuiz } from "@/lib/lecture/quiz";
 import { cn } from "@/lib/utils";
 import { Transcript } from "@/types";
 import { Course, Lecture, Message } from "@prisma/client";
@@ -23,9 +23,11 @@ import { AffiliateCard } from "./affiliate-card";
 import { Chat } from "./chat-lecture";
 import { Dictaphone } from "./dictaphone";
 import Editor from "./editor";
+import { FlashcardSkeleton } from "./flashcard";
 import { FlashcardContainer } from "./flashcard-container";
 import { Icons } from "./icons";
 import { PdfRenderer } from "./pdf-renderer";
+import { QuizPage, QuizSkeleton } from "./quiz";
 import { Button, buttonVariants } from "./ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import {
@@ -188,6 +190,12 @@ interface NotesPageProps {
       definition: string;
       isStarred?: boolean;
     }[];
+    questions?: {
+      id: string;
+      question: string;
+      choices: string[];
+      answerIndex: number;
+    }[];
   };
 }
 
@@ -215,6 +223,8 @@ export function NotesPage({ lecture }: NotesPageProps) {
   >("horizontal");
   const { flashcards, setFlashcards } = useFlashcardStore();
   const [isLoadingFlashcards, setIsLoadingFlashcards] = useState(false);
+  const [isLoadingQuiz, setIsLoadingQuiz] = useState(false);
+  const [quizQuestions, setQuizQuestions] = useState<any[]>([]);
 
   function changeNotesTab(tab: "notes" | "enhanced") {
     setNotesTab(tab);
@@ -370,6 +380,56 @@ export function NotesPage({ lecture }: NotesPageProps) {
     lecture.flashcards,
     lecture.id,
     setFlashcards,
+    transcript,
+  ]);
+
+  // Add effect to load quiz questions when the quiz tab is selected
+  useEffect(() => {
+    async function loadQuiz() {
+      if (
+        activeTab === "quiz" &&
+        quizQuestions.length === 0 &&
+        !isLoadingQuiz
+      ) {
+        setIsLoadingQuiz(true);
+
+        try {
+          console.log(
+            "Loading quiz questions. Lecture questions:",
+            lecture.questions,
+          );
+          // If lecture already has questions, use those
+          if (lecture.questions && lecture.questions.length > 0) {
+            setQuizQuestions(lecture.questions);
+            return;
+          }
+
+          // Otherwise generate new quiz questions
+          const object = await generateQuiz(lecture.id, transcript);
+
+          for await (const partialObject of readStreamableValue(object)) {
+            if (partialObject && partialObject.questions) {
+              setQuizQuestions(partialObject.questions);
+            }
+          }
+
+          toast.success("Quiz generated successfully");
+        } catch (error) {
+          console.error("Error generating quiz:", error);
+          toast.error("Failed to generate quiz");
+        } finally {
+          setIsLoadingQuiz(false);
+        }
+      }
+    }
+
+    loadQuiz();
+  }, [
+    activeTab,
+    isLoadingQuiz,
+    lecture.questions,
+    lecture.id,
+    quizQuestions.length,
     transcript,
   ]);
 
@@ -694,11 +754,9 @@ export function NotesPage({ lecture }: NotesPageProps) {
                   <Icons.flashcards className="mr-2 size-4" />
                   Flashcards
                 </TabsTrigger>
-                <TabsTrigger className="w-full rounded-lg" value="quiz" asChild>
-                  <Link href={`/lecture/${lecture.id}/quiz`}>
-                    <Icons.study className="mr-2 size-4" />
-                    Quiz
-                  </Link>
+                <TabsTrigger className="w-full rounded-lg" value="quiz">
+                  <Icons.study className="mr-2 size-4" />
+                  Quiz
                 </TabsTrigger>
               </TabsList>
               <TabsContent value="chat">
@@ -839,12 +897,7 @@ export function NotesPage({ lecture }: NotesPageProps) {
               <TabsContent value="flashcards">
                 <div className="flex h-[calc(100vh-8rem)] flex-col items-center overflow-y-auto pb-20">
                   {isLoadingFlashcards ? (
-                    <div className="flex h-full w-full flex-col items-center justify-center">
-                      <Icons.spinner className="size-6 animate-spin text-muted-foreground" />
-                      <p className="mt-4 text-muted-foreground">
-                        Generating flashcards...
-                      </p>
-                    </div>
+                    <FlashcardSkeleton />
                   ) : flashcards.length > 0 ? (
                     <div className="mt-4 w-full max-w-3xl">
                       <FlashcardContainer flashcards={flashcards} />
@@ -888,6 +941,61 @@ export function NotesPage({ lecture }: NotesPageProps) {
                           <Icons.flashcards className="mr-2 size-4" />
                         )}
                         Generate Flashcards
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </TabsContent>
+
+              <TabsContent value="quiz">
+                <div className="flex h-[calc(100vh-8rem)] w-full flex-col overflow-y-auto pb-20">
+                  {isLoadingQuiz ? (
+                    <QuizSkeleton />
+                  ) : quizQuestions.length > 0 ? (
+                    <div className="w-full">
+                      <QuizPage
+                        lecture={{
+                          ...lecture,
+                          questions: quizQuestions,
+                        }}
+                      />
+                    </div>
+                  ) : (
+                    <div className="flex h-full flex-col items-center justify-center">
+                      <p className="mb-4 text-muted-foreground">
+                        No quiz questions found
+                      </p>
+                      <Button
+                        onClick={async () => {
+                          setIsLoadingQuiz(true);
+                          try {
+                            const object = await generateQuiz(
+                              lecture.id,
+                              transcript,
+                            );
+
+                            for await (const partialObject of readStreamableValue(
+                              object,
+                            )) {
+                              if (partialObject && partialObject.questions) {
+                                setQuizQuestions(partialObject.questions);
+                              }
+                            }
+                            toast.success("Quiz generated successfully");
+                          } catch (error) {
+                            console.error("Error generating quiz:", error);
+                            toast.error("Failed to generate quiz");
+                          } finally {
+                            setIsLoadingQuiz(false);
+                          }
+                        }}
+                      >
+                        {isLoadingQuiz ? (
+                          <Icons.spinner className="mr-2 size-4 animate-spin" />
+                        ) : (
+                          <Icons.study className="mr-2 size-4" />
+                        )}
+                        Generate Quiz
                       </Button>
                     </div>
                   )}

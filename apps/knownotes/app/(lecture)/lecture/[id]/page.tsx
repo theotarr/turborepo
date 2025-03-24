@@ -74,7 +74,7 @@ export default async function LecturePage({ params }: LecturePageProps) {
 
   const { data: lecture } = await supabase
     .from("Lecture")
-    .select("*, course:courseId (*), Message(*), Flashcard(*)")
+    .select("*, course:courseId (*), Message(*), Flashcard(*), Question(*)")
     .eq("userId", session.user.id)
     .eq("id", params.id)
     .single();
@@ -84,6 +84,8 @@ export default async function LecturePage({ params }: LecturePageProps) {
   delete lecture.Message;
   lecture.flashcards = lecture.Flashcard;
   delete lecture.Flashcard;
+  lecture.questions = lecture.Question;
+  delete lecture.Question;
 
   if (!lecture) return <>Loading...</>;
 

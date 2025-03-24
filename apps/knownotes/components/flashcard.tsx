@@ -367,3 +367,16 @@ export function Flashcard({
     </div>
   );
 }
+
+export function FlashcardSkeleton() {
+  return (
+    <div className="flex h-full w-full flex-col items-center justify-center">
+      <div className="relative mx-auto flex h-[400px] w-full max-w-2xl flex-col items-center justify-center rounded-xl border bg-card p-6 shadow-sm">
+        <div className="flex h-full w-full flex-col items-center justify-center gap-6">
+          <div className="h-8 w-3/4 animate-pulse rounded-md bg-muted" />
+          <div className="h-4 w-1/2 animate-pulse rounded-md bg-muted" />
+        </div>
+      </div>
+    </div>
+  );
+}
