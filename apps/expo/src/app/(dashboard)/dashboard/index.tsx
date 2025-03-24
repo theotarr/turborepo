@@ -1,6 +1,6 @@
 import "react-native-get-random-values";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import appsFlyer from "react-native-appsflyer";
 import * as DocumentPicker from "expo-document-picker";
+import * as FileSystem from "expo-file-system";
 import * as Haptics from "expo-haptics";
 import { router, Stack } from "expo-router";
 import Superwall from "@superwall/react-native-superwall";
@@ -24,6 +25,7 @@ import {
   Youtube,
   Zap,
 } from "lucide-react-native";
+import * as Tus from "tus-js-client";
 import { v1 as uuidv1 } from "uuid";
 
 import { EmptyPlaceholder } from "~/components/empty-placeholder";
@@ -47,10 +49,17 @@ import {
 import { Input } from "~/components/ui/input";
 import { Text } from "~/components/ui/text";
 import { NAV_THEME } from "~/lib/constants";
-import { supabase } from "~/lib/supabase";
 import { useColorScheme } from "~/lib/theme";
 import { api } from "~/utils/api";
 import { shouldShowPaywall } from "~/utils/subscription";
+
+// Define a custom FileSource interface for tus-js-client
+interface ReactNativeFileSource {
+  uri: string;
+  name?: string;
+  type?: string;
+  size?: number;
+}
 
 export default function DashboardPage() {
   const utils = api.useUtils();
@@ -66,6 +75,8 @@ export default function DashboardPage() {
   const [courseName, setCourseName] = useState("");
   const [isYoutubeDialogOpen, setIsYoutubeDialogOpen] = useState(false);
   const [videoUrl, setVideoUrl] = useState("");
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const uploadRef = useRef<Tus.Upload | null>(null);
 
   const { data: user } = api.auth.getUser.useQuery();
   const createCourse = api.course.create.useMutation();
@@ -108,6 +119,7 @@ export default function DashboardPage() {
         router.push(`/lecture/${lecture.id}`);
       } else {
         setIsPickingFile(true);
+
         const result = await DocumentPicker.getDocumentAsync({
           type: ["audio/*", "application/pdf"], // Allow audio files and PDFs
           multiple: false,
@@ -122,46 +134,112 @@ export default function DashboardPage() {
 
         const file = result.assets[0];
         if (!file?.uri) throw new Error("No file uri!"); // Realistically, this should never happen, but just in case...
-        const arrayBuffer = await fetch(file.uri).then((res) =>
-          res.arrayBuffer(),
-        );
 
-        // Upload the file to Supabase.
+        // Generate file ID for upload
         const fileId = uuidv1();
         const path = `${user?.id}/${fileId}`;
-        const { error: uploadError } = await supabase.storage
-          .from("audio")
-          .upload(path, arrayBuffer);
 
-        if (uploadError) {
-          console.error("Upload error", uploadError);
+        // Get the Supabase URL
+        // eslint-disable-next-line turbo/no-undeclared-env-vars
+        const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL ?? "";
+        // Create the endpoint for resumable uploads
+        const endpoint = `${supabaseUrl}/storage/v1/upload/resumable`;
+
+        try {
+          // Get file info
+          const fileInfo = await FileSystem.getInfoAsync(file.uri);
+          if (!fileInfo.exists) throw new Error("File does not exist!");
+
+          // Create a React Native compatible file object
+          const rnFile: ReactNativeFileSource = {
+            uri: file.uri,
+            name: file.name,
+            type: file.mimeType,
+            size: fileInfo.size,
+          };
+
+          // Configure the TUS upload
+          const upload = new Tus.Upload(rnFile as unknown as File, {
+            endpoint,
+            metadata: {
+              // Required metadata for Supabase Storage
+              bucketName: "audio",
+              objectName: path,
+              contentType: file.mimeType ?? "application/octet-stream",
+              cacheControl: "3600",
+            },
+            headers: {
+              // Pass your Supabase anon key as authorization
+              // eslint-disable-next-line turbo/no-undeclared-env-vars
+              Authorization: `Bearer ${process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY}`,
+            },
+            // Called when an error occurs during upload
+            onError: (error: Error) => {
+              console.error("Upload error:", error);
+              Alert.alert("Upload error", error.message || "Unknown error");
+              setIsPickingFile(false);
+            },
+            // Called when upload progress changes
+            onProgress: (bytesUploaded: number, bytesTotal: number) => {
+              const percentage = (bytesUploaded / bytesTotal) * 100;
+              console.log(`Upload progress: ${percentage.toFixed(2)}%`);
+              setUploadProgress(percentage);
+            },
+            // Called when upload is completed successfully
+            // eslint-disable-next-line @typescript-eslint/no-misused-promises
+            onSuccess: async () => {
+              console.log("Upload completed successfully");
+              setUploadProgress(100);
+
+              // Create the lecture entry in your database
+              const lecture = await uploadFile.mutateAsync({
+                fileId,
+                generateNotes: true,
+              });
+
+              // Navigate to the lecture page
+              router.push(`/lecture/${lecture.id}`);
+              setIsPickingFile(false);
+              setUploadProgress(0);
+            },
+          });
+
+          // Store the upload instance to potentially cancel it later
+          uploadRef.current = upload;
+          upload.start();
+        } catch (error) {
+          console.error("Error setting up file upload:", error);
           Alert.alert(
-            `Failed to upload the file. Please try again.
-            ${uploadError.message}`,
+            "Upload Error",
+            error instanceof Error ? error.message : "Unknown error occurred",
           );
-          throw uploadError;
+          setIsPickingFile(false);
         }
-
-        // Create the lecture.
-        const lecture = await uploadFile.mutateAsync({
-          fileId,
-          generateNotes: true,
-        });
-        router.push(`/lecture/${lecture.id}`);
       }
     } catch (error) {
       Alert.alert(
-        `Failed to create the lecture. Please try again.
-        ${error instanceof Error ? error.message : "Unknown error"}`,
+        `Failed to create the note. ${error instanceof Error ? error.message : "Unknown error"}`,
       );
       console.error(error);
     } finally {
-      setIsLoading(false);
-      setIsPickingFile(false);
-      setIsYoutubeDialogOpen(false);
-      setVideoUrl("");
+      if (type !== "file") {
+        setIsLoading(false);
+        setIsPickingFile(false);
+        setIsYoutubeDialogOpen(false);
+        setVideoUrl("");
+      }
     }
   }
+
+  // Function to cancel ongoing upload
+  const cancelUpload = async () => {
+    if (uploadRef.current) {
+      await uploadRef.current.abort();
+      uploadRef.current = null;
+      setUploadProgress(0);
+      setIsPickingFile(false);
+    }
+  };
 
   async function onRefresh() {
     setRefreshing(true);
@@ -197,38 +275,38 @@ export default function DashboardPage() {
       <Stack.Screen
         options={{
           title: "Dashboard",
-          // headerLeft: () => (
-          //   <>
-          //     {shouldShowPaywall(
-          //       user as {
-          //         stripeCurrentPeriodEnd?: string | null;
-          //         appStoreCurrentPeriodEnd?: string | null;
-          //       },
-          //     ) && (
-          //       <Button
-          //         size="sm"
-          //         className="h-8 flex-row gap-x-2 rounded-full bg-primary/60"
-          //         onPress={() => {
-          //           void Superwall.shared.register("upgrade");
-          //         }}
-          //       >
-          //         <Zap
-          //           size={10}
-          //           color={NAV_THEME[colorScheme].primaryForeground}
-          //           fill={NAV_THEME[colorScheme].primaryForeground}
-          //         />
-          //         <Text
-          //           style={{
-          //             fontSize: 12,
-          //           }}
-          //           className="text-primary-foreground"
-          //         >
-          //           Upgrade
-          //         </Text>
-          //       </Button>
-          //     )}
-          //   </>
-          // ),
+          headerLeft: () => (
+            <>
+              {shouldShowPaywall(
+                user as {
+                  stripeCurrentPeriodEnd?: string | null;
+                  appStoreCurrentPeriodEnd?: string | null;
+                },
+              ) && (
+                <Button
+                  size="sm"
+                  className="h-8 flex-row gap-x-2 rounded-full bg-primary/60"
+                  onPress={() => {
+                    void Superwall.shared.register("upgrade");
+                  }}
+                >
+                  <Zap
+                    size={10}
+                    color={NAV_THEME[colorScheme].primaryForeground}
+                    fill={NAV_THEME[colorScheme].primaryForeground}
+                  />
+                  <Text
+                    style={{
+                      fontSize: 12,
+                    }}
+                    className="text-primary-foreground"
+                  >
+                    Upgrade
+                  </Text>
+                </Button>
+              )}
+            </>
+          ),
           headerRight: () => (
             <Pressable onPress={() => router.push("/(dashboard)/settings")}>
               <Settings
@@ -517,7 +595,7 @@ export default function DashboardPage() {
                   size={20}
                 />
               </BottomSheetDismissButton>
-              {/* <Button
+              <Button
                 size="lg"
                 variant="secondary"
                 className="w-full flex-row items-center justify-between px-4"
@@ -542,12 +620,18 @@ export default function DashboardPage() {
                 }}
                 disabled={isPickingFile}
               >
-                <View className="flex-row items-center gap-x-4">
-                  <File
-                    size={20}
-                    color={NAV_THEME[colorScheme].secondaryForeground}
-                  />
-                  <Text>Upload File</Text>
+                <View className="flex-col">
+                  <View className="flex-row items-center gap-x-4">
+                    <File
+                      size={20}
+                      color={NAV_THEME[colorScheme].secondaryForeground}
+                    />
+                    <Text>
+                      {isPickingFile && uploadProgress > 0
+                        ? `Uploading ${uploadProgress.toFixed(0)}%`
+                        : "Upload File"}
+                    </Text>
+                  </View>
                 </View>
                 {isPickingFile ? (
                   <ActivityIndicator
@@ -560,7 +644,7 @@ export default function DashboardPage() {
                     size={20}
                   />
                 )}
-              </Button> */}
+              </Button>
             </BottomSheetView>
           </BottomSheetContent>
         </BottomSheet>

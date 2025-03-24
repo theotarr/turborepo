@@ -1,6 +1,8 @@
 import { createClient } from "@supabase/supabase-js";
 
+// eslint-disable-next-line turbo/no-undeclared-env-vars
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL ?? "";
+// eslint-disable-next-line turbo/no-undeclared-env-vars
 const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ?? "";
 
 if (!supabaseUrl || !supabaseAnonKey) {
