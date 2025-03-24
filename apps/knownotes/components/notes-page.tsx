@@ -433,7 +433,21 @@ export function NotesPage({ lecture }: NotesPageProps) {
     transcript,
   ]);
 
-  console.log(lecture.flashcards);
+  // Function to add/remove the editing-content class to the document body
+  useEffect(() => {
+    if (isGeneratingNotes) {
+      document.body.classList.add("generating-content");
+      document.body.classList.remove("editing-content");
+    } else {
+      document.body.classList.remove("generating-content");
+      document.body.classList.add("editing-content");
+    }
+
+    return () => {
+      document.body.classList.remove("generating-content");
+      document.body.classList.remove("editing-content");
+    };
+  }, [isGeneratingNotes]);
 
   return (
     <>
@@ -462,6 +476,7 @@ export function NotesPage({ lecture }: NotesPageProps) {
                   onInterimCaption={(t) => setInterim(t)}
                   onGenerate={async () => {
                     setIsGeneratingNotes(true);
+                    // The useEffect will handle the class changes
 
                     // Get the notes in markdown format.
                     changeNotesTab("notes");
@@ -519,6 +534,7 @@ export function NotesPage({ lecture }: NotesPageProps) {
 
                     setEnhancedNotes(text);
                     setIsGeneratingNotes(false);
+                    // The useEffect will handle the class changes
 
                     // Update the lecture with the enhanced notes.
                     // Save the notes with the Tiptap JSONContent format so that special characters and LaTeX are preserved.
@@ -813,6 +829,7 @@ export function NotesPage({ lecture }: NotesPageProps) {
                       disabled={isGeneratingNotes}
                       onClick={async () => {
                         setIsGeneratingNotes(true);
+                        // The useEffect will handle the class changes
 
                         // Get the notes in markdown format.
                         changeNotesTab("notes");
@@ -870,6 +887,7 @@ export function NotesPage({ lecture }: NotesPageProps) {
 
                         setEnhancedNotes(text);
                         setIsGeneratingNotes(false);
+                        // The useEffect will handle the class changes
 
                         // Update the lecture with the enhanced notes.
                         // Save the notes with the Tiptap JSONContent format so that special characters and LaTeX are preserved.
