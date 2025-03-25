@@ -231,15 +231,15 @@ export default function DashboardPage() {
     }
   }
 
-  // Function to cancel ongoing upload
-  const cancelUpload = async () => {
-    if (uploadRef.current) {
-      await uploadRef.current.abort();
-      uploadRef.current = null;
-      setUploadProgress(0);
-      setIsPickingFile(false);
-    }
-  };
+  // // Function to cancel ongoing upload
+  // const cancelUpload = async () => {
+  //   if (uploadRef.current) {
+  //     await uploadRef.current.abort();
+  //     uploadRef.current = null;
+  //     setUploadProgress(0);
+  //     setIsPickingFile(false);
+  //   }
+  // };
 
   async function onRefresh() {
     setRefreshing(true);
@@ -475,45 +475,59 @@ export default function DashboardPage() {
                 </EmptyPlaceholder.Description>
               </EmptyPlaceholder>
             )}
-            {/* eslint-disable-next-line @typescript-eslint/no-non-null-assertion */}
-            {lectures.data.pages[0]?.items.length! > 0 && (
-              <View className="flex-col gap-y-2">
-                {lectures.data.pages.map((page) =>
-                  page.items.map((lecture) => {
-                    if (
-                      courseFilter &&
-                      lecture.courseId !== courseFilter.courseId
-                    )
-                      return null;
-                    return (
-                      <LectureItem
-                        key={lecture.id}
-                        lecture={lecture}
-                        onLecturePress={() => {
-                          // Check if the user has an active Stripe subscription.
-                          if (
-                            !shouldShowPaywall(
-                              user as {
-                                stripeCurrentPeriodEnd?: string | null;
-                                appStoreCurrentPeriodEnd?: string | null;
-                              },
-                            )
-                          ) {
-                            router.push(`/lecture/${lecture.id}`);
-                            return;
-                          }
+            {lectures.data.pages[0]?.items &&
+              lectures.data.pages[0].items.length > 0 && (
+                <View className="flex-col gap-y-2">
+                  {lectures.data.pages.map((page) =>
+                    page.items.map((lecture) => {
+                      if (
+                        courseFilter &&
+                        lecture.courseId !== courseFilter.courseId
+                      )
+                        return null;
 
-                          // If the user doesn't have an active subscription, show the paywall.
-                          void Superwall.shared
-                            .register("viewLecture")
-                            .then(() => router.push(`/lecture/${lecture.id}`));
-                        }}
-                      />
-                    );
-                  }),
-                )}
-              </View>
-            )}
+                      // Transform lecture to match expected types
+                      const transformedLecture = {
+                        ...lecture,
+                        course: lecture.course
+                          ? {
+                              id: lecture.course.id,
+                              name: lecture.course.name,
+                            }
+                          : undefined,
+                      };
+
+                      return (
+                        <LectureItem
+                          key={lecture.id}
+                          lecture={transformedLecture}
+                          onLecturePress={() => {
+                            // Check if the user has an active Stripe subscription.
+                            if (
+                              !shouldShowPaywall(
+                                user as {
+                                  stripeCurrentPeriodEnd?: string | null;
+                                  appStoreCurrentPeriodEnd?: string | null;
+                                },
+                              )
+                            ) {
+                              router.push(`/lecture/${lecture.id}`);
+                              return;
+                            }
+
+                            // If the user doesn't have an active subscription, show the paywall.
+                            void Superwall.shared
+                              .register("viewLecture")
+                              .then(() =>
+                                router.push(`/lecture/${lecture.id}`),
+                              );
+                          }}
+                        />
+                      );
+                    }),
+                  )}
+                </View>
+              )}
             {lectures.isFetchingNextPage && (
               <View className="mt-2">
                 <ActivityIndicator

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ActivityIndicator, Alert, Pressable, Share, View } from "react-native";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
-import { useRouter } from "expo-router";
+import { usePathname, useRouter } from "expo-router";
 import { EllipsisVertical } from "lucide-react-native";
 import { create } from "zustand";
 
@@ -68,6 +68,8 @@ export function LectureOperations({
 }: LectureOperationsProps) {
   const utils = api.useUtils();
   const router = useRouter();
+  const pathname = usePathname();
+  const isDashboard = pathname === "/dashboard";
   const { colorScheme } = useColorScheme();
   const { open, setOpen } = useEditLectureDialogStore();
   const [title, setTitle] = useState(lecture.title);
@@ -220,12 +222,15 @@ export function LectureOperations({
                         void (async () => {
                           await deleteLecture.mutateAsync(lecture.id);
                           await utils.lecture.infiniteLectures.invalidate();
-                        })();
 
-                        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-                        router.canGoBack()
-                          ? router.back()
-                          : router.replace("/(dashboard)/dashboard");
+                          // Only navigate if not on dashboard
+                          if (!isDashboard) {
+                            // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+                            router.canGoBack()
+                              ? router.back()
+                              : router.replace("/(dashboard)/dashboard");
+                          }
+                        })();
                       },
                     },
                   ],

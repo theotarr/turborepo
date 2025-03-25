@@ -1,10 +1,8 @@
 import React from "react";
 import { Pressable, View } from "react-native";
-import { ChevronRight } from "lucide-react-native";
 
+import { LectureOperations } from "~/components/lecture-operations";
 import { Text } from "~/components/ui/text";
-import { NAV_THEME } from "~/lib/constants";
-import { useColorScheme } from "~/lib/theme";
 import { formatLectureType, formatShortDate } from "~/lib/utils";
 import { Badge } from "./ui/badge";
 
@@ -14,7 +12,7 @@ interface LectureItemProps {
     title: string;
     type: string;
     updatedAt: Date;
-    courseId: string;
+    courseId?: string | null;
   } & {
     course?: {
       id: string;
@@ -25,18 +23,20 @@ interface LectureItemProps {
 }
 
 export function LectureItem({ lecture, onLecturePress }: LectureItemProps) {
-  const { colorScheme } = useColorScheme();
-
   return (
     <Pressable
       onPress={onLecturePress}
       className="group flex w-full flex-row items-center justify-between rounded-xl border border-border p-4"
     >
-      <View className="grid gap-1">
-        <Text className="line-clamp-1 truncate font-semibold hover:underline">
+      <View className="mr-2 grid flex-1 gap-1">
+        <Text
+          className="line-clamp-1 truncate font-semibold hover:underline"
+          numberOfLines={1}
+          ellipsizeMode="tail"
+        >
           {lecture.title}
         </Text>
-        <View className="flex flex-row gap-x-2 text-sm text-muted-foreground">
+        <View className="flex flex-row flex-wrap gap-x-2 gap-y-1 text-sm text-muted-foreground">
           <Badge variant="secondary">
             <Text>{formatLectureType(lecture.type)}</Text>
           </Badge>
@@ -45,17 +45,19 @@ export function LectureItem({ lecture, onLecturePress }: LectureItemProps) {
               <Text>{lecture.course.name}</Text>
             </Badge>
           )}
+          <Badge variant="outline" className="flex-row items-center gap-x-1">
+            <Text>{formatShortDate(lecture.updatedAt.toDateString())}</Text>
+          </Badge>
         </View>
       </View>
-      <View className="flex flex-row items-center gap-x-4">
-        <Text className="text-xs text-muted-foreground">
-          {formatShortDate(lecture.updatedAt.toDateString())}
-        </Text>
-        <ChevronRight
-          size={16}
-          color={NAV_THEME[colorScheme].mutedForeground}
-        />
-      </View>
+      <LectureOperations
+        lecture={{
+          id: lecture.id,
+          title: lecture.title,
+          courseId: lecture.courseId ?? undefined,
+        }}
+        courses={lecture.course ? [lecture.course] : undefined}
+      />
     </Pressable>
   );
 }
