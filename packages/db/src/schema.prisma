@@ -29,6 +29,8 @@ enum LectureType {
   YOUTUBE
   AUDIO_FILE
   PDF
+  TEXT
+  DOCX
 }
 
 model Lecture {

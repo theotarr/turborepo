@@ -2,8 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { createLecture } from "@/app/(lecture)/actions";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   Command,
   CommandGroup,
@@ -16,7 +15,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import {
@@ -37,46 +35,71 @@ import { create } from "zustand";
 
 import { Icons } from "./icons";
 import { Input } from "./ui/input";
+import { Textarea } from "./ui/textarea";
 
-export const useLectureCreateDialogStore = create<{
+// Upload File Dialog Store
+export const useFileUploadDialogStore = create<{
   open: boolean;
   setOpen: (open: boolean) => void;
-  tab: "live" | "file" | "youtube";
-  setTab: (tab: "live" | "file" | "youtube") => void;
   selectedCourseId: string;
   setSelectedCourseId: (id: string) => void;
 }>((set) => ({
   open: false,
   setOpen: (open) => set({ open }),
-  tab: "live",
+  selectedCourseId: "",
+  setSelectedCourseId: (id) => set({ selectedCourseId: id }),
+}));
+
+// YouTube/Text Dialog Store
+export const useYoutubeTextDialogStore = create<{
+  open: boolean;
+  setOpen: (open: boolean) => void;
+  tab: "youtube" | "text";
+  setTab: (tab: "youtube" | "text") => void;
+  selectedCourseId: string;
+  setSelectedCourseId: (id: string) => void;
+}>((set) => ({
+  open: false,
+  setOpen: (open) => set({ open }),
+  tab: "youtube",
   setTab: (tab) => set({ tab }),
   selectedCourseId: "",
   setSelectedCourseId: (id) => set({ selectedCourseId: id }),
 }));
 
-interface LectureCreateDialogProps {
+interface LectureCreateActionsProps {
   userId: string;
   courses: Course[];
-  className?: string;
-  [key: string]: any;
 }
 
-export function LectureCreateDialog({
+export function LectureCreateActions({
   userId,
   courses,
-  className,
-}: LectureCreateDialogProps) {
-  const router = useRouter();
-  const { open, setOpen, tab, setTab, selectedCourseId, setSelectedCourseId } =
-    useLectureCreateDialogStore();
+}: LectureCreateActionsProps) {
+  return (
+    <>
+      <FileUploadDialog userId={userId} courses={courses} />
+      <YoutubeTextDialog courses={courses} />
+    </>
+  );
+}
+
+// File Upload Dialog
+function FileUploadDialog({
+  userId,
+  courses,
+}: {
+  userId: string;
+  courses: Course[];
+}) {
+  const { open, setOpen, selectedCourseId, setSelectedCourseId } =
+    useFileUploadDialogStore();
   const [coursePopoverOpen, setCoursePopoverOpen] = useState(false);
-  const [videoUrl, setVideoUrl] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const dragCounter = useRef(0);
 
-  const uploadYoutube = api.lecture.uploadYoutube.useMutation();
   const uploadFile = api.lecture.uploadFile.useMutation();
 
   // Native drag and drop handlers
@@ -90,11 +113,10 @@ export function LectureCreateDialog({
         setIsDragging(true);
         if (!open) {
           setOpen(true);
-          setTab("file");
         }
       }
     },
-    [open, setOpen, setTab],
+    [open, setOpen],
   );
 
   const handleDragOut = useCallback((e: DragEvent) => {
@@ -155,15 +177,192 @@ export function LectureCreateDialog({
 
   const onSubmit = async () => {
     setIsLoading(true);
-    // for live lectures, we just redirect to the lecture page with the courseId
-    if (tab === "live") {
-      const id = await createLecture(selectedCourseId, "LIVE");
-      router.push(`/lecture/${id}`);
-      router.refresh();
-    } else if (tab === "youtube") {
+
+    // check if the user has uploaded a file
+    if (!fileRef.current?.files?.length) {
+      setIsLoading(false);
+      toast.error("Please upload a file.");
+      return;
+    }
+
+    // Upload the file to the Supabase `audio` bucket
+    const file = fileRef.current.files[0];
+    const fileExt = file.name.split(".").pop()?.toLowerCase() || "";
+    const fileId = `${uuidv1()}.${fileExt}`;
+    const supabase = createBrowserClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL as string,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string,
+    );
+
+    const { error } = await supabase.storage
+      .from("audio")
+      .upload(`${userId}/${fileId}`, file);
+
+    if (error) {
+      console.error(error);
+      setIsLoading(false);
+      toast.error("Failed to upload the file.");
+      return;
+    }
+    toast.success("File uploaded successfully.");
+
+    try {
+      const lecture = await uploadFile.mutateAsync({
+        fileId,
+        courseId: selectedCourseId,
+      });
+      setIsDragging(false);
+      window.location.href = `/lecture/${lecture.id}`;
+    } catch (error) {
+      console.error(error);
+      setIsLoading(false);
+      toast.error("Failed to parse the file. Please try again.");
+      return;
+    }
+
+    setIsLoading(false);
+    setIsDragging(false);
+    setOpen(false);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogContent
+        className={cn(
+          "sm:max-w-lg",
+          isDragging && "border-2 border-dashed border-primary",
+        )}
+      >
+        <DialogHeader>
+          <DialogTitle>Upload File</DialogTitle>
+          <DialogDescription className="text-sm text-muted-foreground">
+            Upload a file to create a lecture.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="grid gap-4 py-4">
+          <div
+            className={cn(
+              "grid gap-2",
+              isDragging && "rounded-md bg-muted/20 p-4",
+            )}
+          >
+            <Label htmlFor="audioFile">File</Label>
+            <Input
+              id="file"
+              type="file"
+              ref={fileRef}
+              accept="audio/*,application/pdf,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/msword,text/plain"
+            />
+            <p className="text-sm text-muted-foreground">
+              Upload a PDF, DOCX, TXT, or audio file to create notes.
+            </p>
+            {isDragging && (
+              <div className="mt-2 flex flex-col items-center justify-center gap-4 rounded-md border border-2 border-dashed border-primary bg-muted/20 p-4 text-center text-sm text-primary">
+                <UploadCloud className="size-10" />
+                Drop your file here to upload
+              </div>
+            )}
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="course">Course (Optional)</Label>
+            <Popover
+              open={coursePopoverOpen}
+              onOpenChange={setCoursePopoverOpen}
+            >
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  className="justify-between"
+                  disabled={isLoading}
+                >
+                  {selectedCourseId
+                    ? courses.find((c) => c.id === selectedCourseId)?.name
+                    : "Select course..."}
+                  <Icons.chevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="mr-[80px] w-[360px] p-0">
+                <Command>
+                  <CommandInput
+                    name="course"
+                    disabled={isLoading}
+                    placeholder="Search your courses..."
+                  />
+                  <CommandGroup>
+                    {courses.map((c) => (
+                      <CommandItem
+                        key={c.id}
+                        value={c.id}
+                        onSelect={(currentSelectedCourse) => {
+                          setSelectedCourseId(
+                            currentSelectedCourse === selectedCourseId
+                              ? ""
+                              : currentSelectedCourse,
+                          );
+                          setCoursePopoverOpen(false);
+                        }}
+                      >
+                        <Icons.check
+                          className={cn(
+                            "mr-2 h-4 w-4",
+                            selectedCourseId === c.id
+                              ? "opacity-100"
+                              : "opacity-0",
+                          )}
+                        />
+                        {c.name}
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </Command>
+              </PopoverContent>
+            </Popover>
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button onClick={() => onSubmit()} disabled={isLoading}>
+            {isLoading && (
+              <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+            )}
+            Upload
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// YouTube/Text Dialog
+function YoutubeTextDialog({ courses }: { courses: Course[] }) {
+  const router = useRouter();
+  const { open, setOpen, tab, setTab, selectedCourseId, setSelectedCourseId } =
+    useYoutubeTextDialogStore();
+  const [coursePopoverOpen, setCoursePopoverOpen] = useState(false);
+  const [videoUrl, setVideoUrl] = useState("");
+  const [pastedText, setPastedText] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const uploadYoutube = api.lecture.uploadYoutube.useMutation();
+  const uploadText = api.lecture.uploadText.useMutation();
+
+  const onSubmit = async () => {
+    setIsLoading(true);
+
+    if (tab === "youtube") {
       try {
+        if (!videoUrl.trim()) {
+          setIsLoading(false);
+          toast.error("Please enter a video URL.");
+          return;
+        }
+
         const lecture = await uploadYoutube.mutateAsync({
           videoUrl,
+          courseId: selectedCourseId,
         });
         window.location.href = `/lecture/${lecture.id}`;
         router.refresh();
@@ -173,101 +372,63 @@ export function LectureCreateDialog({
         toast.error("Failed to upload the video. Please try again.");
         return;
       }
-    } else if (tab === "file") {
-      // check if the user has uploaded a file
-      if (!fileRef.current?.files?.length) {
-        setIsLoading(false);
-        toast.error("Please upload a file.");
-        return;
-      }
-      // Upload the file to the Supabase `audio` bucket
-      const file = fileRef.current.files[0];
-      const fileId = uuidv1();
-      const supabase = createBrowserClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL as string,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string,
-      );
-
-      const { error } = await supabase.storage
-        .from("audio")
-        .upload(`${userId}/${fileId}`, file);
-
-      if (error) {
-        console.error(error);
-        setIsLoading(false);
-        toast.error("Failed to upload the file.");
-        return;
-      }
-      toast.success("File uploaded successfully.");
-
+    } else if (tab === "text") {
       try {
-        const lecture = await uploadFile.mutateAsync({
-          fileId,
+        if (!pastedText.trim()) {
+          setIsLoading(false);
+          toast.error("Please enter some text.");
+          return;
+        }
+
+        const lecture = await uploadText.mutateAsync({
+          text: pastedText,
           courseId: selectedCourseId,
         });
-        setIsDragging(false);
         window.location.href = `/lecture/${lecture.id}`;
+        router.refresh();
       } catch (error) {
         console.error(error);
         setIsLoading(false);
-        toast.error("Failed to parse the file. Please try again.");
+        toast.error("Failed to process the text. Please try again.");
         return;
       }
     }
+
     setIsLoading(false);
-    setIsDragging(false);
+    setOpen(false);
   };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <button
-          className={
-            className
-              ? className
-              : buttonVariants({ variant: "outline", size: "sm" })
-          }
-        >
-          <Icons.add className="mr-2 h-4 w-4 sm:hidden" />
-          <div className="mr-1 hidden sm:inline">New </div> Lecture
-        </button>
-      </DialogTrigger>
-      <DialogContent
-        className={cn(
-          "sm:max-w-lg",
-          isDragging && "border-2 border-dashed border-primary",
-        )}
-      >
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>New Lecture</DialogTitle>
+          <DialogTitle>Add Content</DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
-            Upload a file, paste a Youtube video, or record a lecture.
+            Paste a YouTube video URL or enter text content.
           </DialogDescription>
         </DialogHeader>
+
         <Tabs
           className="grid gap-4 py-4"
           value={tab}
           onValueChange={(val) => setTab(val as any)}
         >
           <div className="grid gap-2">
-            <Label>Lecture Type</Label>
+            <Label>Content Type</Label>
             <TabsList className="w-full">
-              <TabsTrigger disabled={isLoading} className="w-full" value="live">
-                Live
-              </TabsTrigger>
               <TabsTrigger
                 disabled={isLoading}
                 className="w-full"
                 value="youtube"
               >
-                Youtube Video
+                YouTube
               </TabsTrigger>
-              <TabsTrigger disabled={isLoading} className="w-full" value="file">
-                File
+              <TabsTrigger disabled={isLoading} className="w-full" value="text">
+                Text
               </TabsTrigger>
             </TabsList>
           </div>
-          {/* <TabsContent value="live"></TabsContent> */}
+
           <TabsContent value="youtube">
             <div className="grid gap-2">
               <Label htmlFor="name">Video URL</Label>
@@ -285,96 +446,87 @@ export function LectureCreateDialog({
               </p>
             </div>
           </TabsContent>
-          <TabsContent value="file">
-            <div
-              className={cn(
-                "grid gap-2",
-                isDragging && "rounded-md bg-muted/20 p-4",
-              )}
-            >
-              <Label htmlFor="audioFile">File</Label>
-              <Input
-                id="file"
-                type="file"
-                ref={fileRef}
-                accept="audio/*,application/pdf"
+
+          <TabsContent value="text">
+            <div className="grid gap-2">
+              <Label htmlFor="pastedText">Text Content</Label>
+              <Textarea
+                id="pastedText"
+                placeholder="Paste your lecture content here..."
+                value={pastedText}
+                onChange={(e) => setPastedText(e.target.value)}
+                className="min-h-[160px]"
               />
               <p className="text-sm text-muted-foreground">
-                Upload a PDF or audio file.
+                Type or paste text directly to generate notes from it.
               </p>
-              {isDragging && (
-                <div className="mt-2 flex flex-col items-center justify-center gap-4 rounded-md border border-2 border-dashed border-primary bg-muted/20 p-4 text-center text-sm text-primary">
-                  <UploadCloud className="size-10" />
-                  Drop your file here to upload
-                </div>
-              )}
             </div>
           </TabsContent>
-          <div>
-            <div className="grid gap-2">
-              <Label htmlFor="course">Course</Label>
-              <Popover
-                open={coursePopoverOpen}
-                onOpenChange={setCoursePopoverOpen}
-              >
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    role="combobox"
-                    className="justify-between"
+
+          <div className="grid gap-2">
+            <Label htmlFor="course">Course (Optional)</Label>
+            <Popover
+              open={coursePopoverOpen}
+              onOpenChange={setCoursePopoverOpen}
+            >
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  className="justify-between"
+                  disabled={isLoading}
+                >
+                  {selectedCourseId
+                    ? courses.find((c) => c.id === selectedCourseId)?.name
+                    : "Select course..."}
+                  <Icons.chevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="mr-[80px] w-[360px] p-0">
+                <Command>
+                  <CommandInput
+                    name="course"
                     disabled={isLoading}
-                  >
-                    {selectedCourseId
-                      ? courses.find((c) => c.id === selectedCourseId)?.name
-                      : "Select course..."}
-                    <Icons.chevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="mr-[80px] w-[360px] p-0">
-                  <Command>
-                    <CommandInput
-                      name="course"
-                      disabled={isLoading}
-                      placeholder="Search your courses..."
-                    />
-                    <CommandGroup>
-                      {courses.map((c) => (
-                        <CommandItem
-                          key={c.id}
-                          value={c.id}
-                          onSelect={(currentSelectedCourse) => {
-                            setSelectedCourseId(
-                              currentSelectedCourse === selectedCourseId
-                                ? ""
-                                : currentSelectedCourse,
-                            );
-                            setCoursePopoverOpen(false);
-                          }}
-                        >
-                          <Icons.check
-                            className={cn(
-                              "mr-2 h-4 w-4",
-                              selectedCourseId === c.id
-                                ? "opacity-100"
-                                : "opacity-0",
-                            )}
-                          />
-                          {c.name}
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-            </div>
+                    placeholder="Search your courses..."
+                  />
+                  <CommandGroup>
+                    {courses.map((c) => (
+                      <CommandItem
+                        key={c.id}
+                        value={c.id}
+                        onSelect={(currentSelectedCourse) => {
+                          setSelectedCourseId(
+                            currentSelectedCourse === selectedCourseId
+                              ? ""
+                              : currentSelectedCourse,
+                          );
+                          setCoursePopoverOpen(false);
+                        }}
+                      >
+                        <Icons.check
+                          className={cn(
+                            "mr-2 h-4 w-4",
+                            selectedCourseId === c.id
+                              ? "opacity-100"
+                              : "opacity-0",
+                          )}
+                        />
+                        {c.name}
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </Command>
+              </PopoverContent>
+            </Popover>
           </div>
         </Tabs>
+
         <DialogFooter>
           <Button onClick={() => onSubmit()} disabled={isLoading}>
             {isLoading && (
               <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
             )}
-            Create
+            {tab === "youtube" ? "Upload" : "Create"}
           </Button>
         </DialogFooter>
       </DialogContent>

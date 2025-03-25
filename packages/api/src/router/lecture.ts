@@ -6,12 +6,12 @@ import { generateObject, generateText } from "ai";
 import { fileTypeFromBuffer } from "file-type";
 import { z } from "zod";
 
-import type { Lecture } from "@acme/db";
+import type { Lecture, LectureType } from "@acme/db";
 import type { Transcript } from "@acme/validators";
 import { CreateLectureSchema, formatTranscript } from "@acme/validators";
 
 import type { CtxType } from "../trpc";
-import { parsePdf } from "../lib/file";
+import { parseDocx, parsePdf, parseTxt } from "../lib/file";
 import { embedTranscripts, supabase } from "../lib/supabase";
 import { formatDeepgramTranscript } from "../lib/utils";
 import { getVideoId, getVideoTranscript } from "../lib/youtube";
@@ -581,8 +581,40 @@ export const lectureRouter = {
         // Get the file type.
         const fileType = await fileTypeFromBuffer(buffer);
         console.log("[uploadFile] File type:", fileType);
-        if (!fileType) throw new Error("Could not determine file type.");
-        const type = fileType.ext === "pdf" ? "PDF" : "AUDIO_FILE";
+        console.log("[uploadFile] File name:", filePath);
+
+        let type: LectureType = "AUDIO_FILE";
+        if (fileType) {
+          // Use detected file type
+          if (fileType.ext === "pdf") {
+            type = "PDF";
+          } else if (fileType.mime.startsWith("audio/")) {
+            type = "AUDIO_FILE";
+          } else if (fileType.ext === "docx") {
+            type = "DOCX";
+          }
+        } else {
+          // For text files or other types that might not be detected
+          // Check the file extension from the original path
+          if (filePath.toLowerCase().endsWith(".txt")) {
+            console.log("[uploadFile] Detected TXT file from extension");
+            type = "TEXT";
+          } else if (filePath.toLowerCase().endsWith(".docx")) {
+            console.log("[uploadFile] Detected DOCX file from extension");
+            type = "DOCX";
+          }
+        }
+
+        if (
+          type !== "PDF" &&
+          type !== "AUDIO_FILE" &&
+          type !== "DOCX" &&
+          type !== "TEXT"
+        ) {
+          throw new Error(
+            "Unsupported file type. Please upload a PDF, DOCX, TXT, or audio file.",
+          );
+        }
 
         let transcript: Transcript[] = [];
 
@@ -590,21 +622,61 @@ export const lectureRouter = {
           console.log("[uploadFile] Parsing PDF...");
           const text = await parsePdf(buffer);
           transcript = [{ start: 0, text }];
-        } else {
+        } else if (type === "DOCX") {
+          console.log("[uploadFile] Parsing DOCX...");
+          const text = await parseDocx(buffer);
+          transcript = [{ start: 0, text }];
+        } else if (type === "TEXT") {
+          console.log("[uploadFile] Parsing TXT...");
+          const text = await parseTxt(buffer);
+          transcript = [{ start: 0, text }];
+        } else if (type === "AUDIO_FILE") {
           console.log("[uploadFile] Transcribing audio file...");
-          const { result, error: transcriptionError } =
-            await deepgram.listen.prerecorded.transcribeFile(
-              fs.readFileSync(path),
-              {
+          console.log("[uploadFile] Audio file path:", path);
+
+          try {
+            // Read the file content
+            const fileContent = fs.readFileSync(path);
+            console.log("[uploadFile] File size:", fileContent.length, "bytes");
+
+            const { result, error: transcriptionError } =
+              await deepgram.listen.prerecorded.transcribeFile(fileContent, {
                 model: "nova-2",
                 punctuate: true,
                 smart_formatting: true,
                 paragraphs: true,
                 tag: ["knownotes-file-upload"],
-              },
+              });
+
+            if (transcriptionError) {
+              console.error(
+                "[uploadFile] Deepgram transcription error:",
+                transcriptionError,
+              );
+              throw new Error(transcriptionError.message);
+            }
+
+            console.log(
+              "[uploadFile] Deepgram result received:",
+              result ? "Success" : "Empty result",
             );
-          if (transcriptionError) throw new Error(transcriptionError.message);
-          transcript = formatDeepgramTranscript(result);
+
+            transcript = formatDeepgramTranscript(result);
+            console.log(
+              "[uploadFile] Formatted transcript length:",
+              transcript.length,
+            );
+            console.log(
+              "[uploadFile] First transcript item:",
+              transcript.length > 0 ? JSON.stringify(transcript[0]) : "None",
+            );
+          } catch (error) {
+            console.error(
+              "[uploadFile] Error during transcription process:",
+              error,
+            );
+            throw error;
+          }
         }
 
         let lecture: Lecture;
@@ -660,6 +732,76 @@ export const lectureRouter = {
         // Delete the file locally.
         await fs.promises.unlink(path);
       }
+    }),
+  uploadText: protectedProcedure
+    .input(
+      z.object({
+        text: z.string(),
+        courseId: z.string().optional(),
+        generateNotes: z.boolean().default(true),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { text, courseId, generateNotes } = input;
+
+      // Verify the user has access to the course.
+      if (courseId) {
+        const course = await ctx.db.course.findFirst({
+          where: { id: courseId, userId: ctx.session.user.id },
+        });
+        if (!course)
+          throw new Error("User does not have access to the course.");
+      }
+
+      const transcript: Transcript[] = [{ start: 0, text }];
+
+      let lecture: Lecture;
+
+      if (generateNotes) {
+        console.log("[uploadText] Generating notes...");
+        const { title, notes } = await generateLectureNotes({
+          transcript,
+          generateTitle: true,
+        });
+
+        lecture = await ctx.db.lecture.create({
+          data: {
+            type: "TEXT",
+            title,
+            markdownNotes: notes,
+            enhancedNotes: notes,
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
+            transcript: transcript as any,
+            userId: ctx.session.user.id,
+            ...(courseId ? { courseId } : {}),
+          },
+        });
+      } else {
+        lecture = await ctx.db.lecture.create({
+          data: {
+            type: "TEXT",
+            title: "Untitled Lecture",
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
+            transcript: transcript as any,
+            userId: ctx.session.user.id,
+            ...(courseId ? { courseId } : {}),
+          },
+        });
+      }
+
+      // Create vector embeddings for the lecture.
+      await embedTranscripts(transcript, lecture.id, courseId);
+
+      // Update the lecture with the transcript embedding document ids.
+      await ctx.db.lecture.update({
+        where: { id: lecture.id },
+        data: {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
+          transcript: transcript as any,
+        },
+      });
+
+      return lecture;
     }),
   search: protectedProcedure
     .input(

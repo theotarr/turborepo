@@ -24,6 +24,7 @@
     "@acme/validators": "workspace:*",
     "@trpc/server": "catalog:",
     "file-type": "^20.0.0",
+    "mammoth": "^1.9.0",
     "superjson": "2.2.1",
     "zod": "catalog:"
   },

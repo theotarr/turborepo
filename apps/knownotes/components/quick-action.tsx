@@ -1,23 +1,25 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+import { createLecture } from "@/app/(lecture)/actions";
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardTitle,
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 import { Icons } from "./icons";
-import { useLectureCreateDialogStore } from "./lecture-create-dialog";
+import {
+  useFileUploadDialogStore,
+  useYoutubeTextDialogStore,
+} from "./lecture-create-dialog";
 
 interface QuickActionProps {
-  icon: keyof typeof Icons;
+  icon: React.ReactNode | keyof typeof Icons;
   title: string;
   description?: string;
-  children?: React.ReactNode;
-  footer?: React.ReactNode;
   className?: string;
   [key: string]: any;
 }
@@ -25,42 +27,83 @@ export function QuickAction({
   icon,
   title,
   description,
-  children,
-  footer,
   className,
   ...props
 }: QuickActionProps) {
-  const Icon = Icons[icon];
+  // Render the icon based on its type
+  let iconElement: React.ReactNode;
+  if (typeof icon === "string") {
+    const IconComponent = Icons[icon as keyof typeof Icons];
+    iconElement = (
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-primary/5 text-primary">
+        <IconComponent className="h-5 w-5" />
+      </div>
+    );
+  } else {
+    iconElement = icon;
+  }
+
   return (
     <Card
       className={cn(
-        "group max-w-[400px] cursor-pointer pt-4 transition-all hover:bg-secondary/20 md:max-w-full",
+        "group relative h-full w-full cursor-pointer border-muted bg-card transition-all duration-200 hover:border-border hover:bg-gradient-to-br hover:from-card hover:to-primary/10",
         className,
       )}
       {...props}
     >
-      <CardContent>
-        <div className="flex justify-between space-x-4">
-          <Icon className="h-10 w-10 shrink-0 rounded-full bg-secondary p-1 text-muted-foreground transition-all group-hover:text-primary" />
-          <div className="space-y-1">
-            <CardTitle className="text-sm font-semibold">{title}</CardTitle>
-            {description && <CardDescription>{description}</CardDescription>}
-            {children}
+      <CardContent className="flex h-full flex-col p-5">
+        <div className="flex gap-4">
+          <div className="shrink-0">{iconElement}</div>
+          <div className="flex-1 space-y-1.5">
+            <CardTitle className="text-base font-medium tracking-tight">
+              {title}
+            </CardTitle>
+            {description && (
+              <CardDescription className="text-sm leading-normal text-muted-foreground">
+                {description}
+              </CardDescription>
+            )}
           </div>
         </div>
       </CardContent>
-      {footer && <CardFooter>{footer}</CardFooter>}
     </Card>
   );
 }
 
-export function QuickYoutubeImport() {
-  const { setOpen, setTab } = useLectureCreateDialogStore();
+export function QuickLecture() {
+  const router = useRouter();
   return (
     <QuickAction
-      icon="youtube"
-      title="Import Youtube Video"
-      description="Upload a Youtube video for the transcript, notes, and a custom AI-tutor for that video."
+      icon="mic"
+      title="Record Lecture"
+      description="Record your class in real-time"
+      onClick={async () => {
+        const id = await createLecture(undefined, "LIVE");
+        router.push(`/lecture/${id}`);
+      }}
+    />
+  );
+}
+
+export function QuickAffiliate() {
+  return (
+    <QuickAction
+      icon="dollarSign"
+      title="Get Paid"
+      description="Refer your friends to KnowNotes."
+      onClick={() => window.open("https://affiliates.knownotes.ai/", "_blank")}
+    />
+  );
+}
+
+export function QuickPaste() {
+  const { setOpen, setTab } = useYoutubeTextDialogStore();
+
+  return (
+    <QuickAction
+      icon="link"
+      title="YouTube/Text"
+      description="Paste a YouTube URL or text content"
       onClick={() => {
         setOpen(true);
         setTab("youtube");
@@ -69,16 +112,16 @@ export function QuickYoutubeImport() {
   );
 }
 
-export function QuickAudioUpload() {
-  const { setOpen, setTab } = useLectureCreateDialogStore();
+export function QuickUpload() {
+  const { setOpen } = useFileUploadDialogStore();
+
   return (
     <QuickAction
-      icon="audioFile"
-      title="Upload Your Lecture"
-      description="Upload an audio file to get transcribed, notes, and a custom AI-tutor for that video."
+      icon="page"
+      title="Upload File"
+      description="Upload PDF, DOCX, TXT, or audio file"
       onClick={() => {
         setOpen(true);
-        setTab("file");
       }}
     />
   );

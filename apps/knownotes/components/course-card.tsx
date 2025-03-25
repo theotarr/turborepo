@@ -12,7 +12,6 @@ import {
 import { cn } from "@/lib/utils";
 import { Course } from "@prisma/client";
 
-import { useLectureCreateDialogStore } from "./lecture-create-dialog";
 import { Badge } from "./ui/badge";
 
 type CourseCardProps = {
@@ -25,8 +24,6 @@ type CourseCardProps = {
 };
 
 export function CourseCard({ course, className, ...props }: CourseCardProps) {
-  const { setOpen, setSelectedCourseId } = useLectureCreateDialogStore();
-
   return (
     <Card className={cn("w-[340px] border", className)} {...props}>
       <CardHeader>
@@ -45,20 +42,10 @@ export function CourseCard({ course, className, ...props }: CourseCardProps) {
       </CardContent>
       <CardFooter className="flex space-x-4">
         <Link href={`/chat/${course.id}`}>
-          <Button size={"sm"} variant={"default"}>
+          <Button size="sm" variant="secondary">
             Chat with Course
           </Button>
         </Link>
-        <Button
-          onClick={() => {
-            setSelectedCourseId(course.id);
-            setOpen(true);
-          }}
-          size={"sm"}
-          variant={"secondary"}
-        >
-          New Lecture
-        </Button>
       </CardFooter>
     </Card>
   );
