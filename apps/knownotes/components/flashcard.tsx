@@ -85,7 +85,7 @@ export function Flashcard({
   };
 
   const flipCard = () => {
-    setIsFlipped(!isFlipped);
+    setIsFlipped((current) => !current);
   };
 
   // Add keyboard navigation handler
@@ -103,7 +103,11 @@ export function Flashcard({
           break;
         case "ArrowUp":
         case "ArrowDown":
+          e.preventDefault(); // Prevent scrolling or other default behaviors
+          flipCard();
+          break;
         case " ": // Space bar
+          e.preventDefault(); // Prevent scrolling or other default behaviors
           flipCard();
           break;
         case "s": // 's' key to star/unstar
@@ -123,7 +127,7 @@ export function Flashcard({
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [filteredCards.length, currentCard]);
+  }, [filteredCards.length, currentCard, isFlipped]);
 
   const toggleStar = async (e: React.MouseEvent, cardId: string) => {
     e.stopPropagation(); // Prevent card flip
