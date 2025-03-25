@@ -46,7 +46,7 @@ export function QuickAction({
   return (
     <Card
       className={cn(
-        "group relative h-full w-full cursor-pointer border-muted bg-card transition-all duration-200 hover:border-border hover:bg-gradient-to-br hover:from-card hover:to-primary/10",
+        "group relative h-full w-full cursor-pointer border-border bg-card transition-all duration-200 hover:bg-gradient-to-br hover:from-card hover:to-primary/10",
         className,
       )}
       {...props}
