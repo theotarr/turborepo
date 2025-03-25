@@ -1,5 +1,24 @@
 import type { Transcript } from "@acme/validators";
 
+// Define a type for the expected Deepgram response structure
+interface DeepgramResult {
+  results?: {
+    channels?: {
+      alternatives?: {
+        paragraphs?: {
+          paragraphs?: {
+            start: number;
+            text?: string;
+            sentences?: { text: string }[];
+          }[];
+        };
+        words?: { start: number }[];
+        transcript?: string;
+      }[];
+    }[];
+  };
+}
+
 export function formatDeepgramTranscript(result: unknown): Transcript[] {
   console.log("[formatDeepgramTranscript] Starting transcript formatting");
 
@@ -11,14 +30,16 @@ export function formatDeepgramTranscript(result: unknown): Transcript[] {
 
     console.log("[formatDeepgramTranscript] Result type:", typeof result);
 
+    // Cast the unknown result to our expected structure
+    const typedResult = result as DeepgramResult;
+
     // Safely check the structure
-    // @ts-expect-error
-    const hasResults = result.results;
-    // @ts-expect-error
-    const hasChannels = hasResults && Array.isArray(result.results.channels);
-    // @ts-expect-error
+    const hasResults = !!typedResult.results;
+    const hasChannels =
+      hasResults && Array.isArray(typedResult.results?.channels);
     const hasAlternatives =
-      hasChannels && result.results.channels[0]?.alternatives;
+      hasChannels &&
+      typedResult.results?.channels?.[0]?.alternatives !== undefined;
 
     console.log("[formatDeepgramTranscript] Structure check:", {
       hasResults,
@@ -33,46 +54,51 @@ export function formatDeepgramTranscript(result: unknown): Transcript[] {
       return [];
     }
 
-    // @ts-expect-error eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-    const res = result.results.channels[0].alternatives[0];
+    const alternative = typedResult.results?.channels?.[0]?.alternatives?.[0];
+    if (!alternative) {
+      console.error("[formatDeepgramTranscript] Could not extract alternative");
+      return [];
+    }
+
     console.log(
       "[formatDeepgramTranscript] Extracted alternative:",
-      JSON.stringify(Object.keys(res || {})),
+      JSON.stringify(Object.keys(alternative)),
     );
 
     // Check if paragraphs exist
-    if (!res.paragraphs?.paragraphs) {
+    if (!alternative.paragraphs?.paragraphs) {
       console.error(
         "[formatDeepgramTranscript] Missing paragraphs in alternative",
       );
 
       // Try to extract from words if paragraphs are missing
-      if (res.words && Array.isArray(res.words)) {
+      if (alternative.words && Array.isArray(alternative.words)) {
         console.log("[formatDeepgramTranscript] Falling back to words array");
         return [
-          { start: res.words[0]?.start || 0, text: res.transcript || "" },
+          {
+            start: alternative.words[0]?.start ?? 0,
+            text: alternative.transcript ?? "",
+          },
         ];
       }
 
       return [];
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-    const paragraphs = res.paragraphs.paragraphs;
+    const paragraphs = alternative.paragraphs.paragraphs;
     console.log(
       "[formatDeepgramTranscript] Paragraphs found:",
-      paragraphs ? paragraphs.length : 0,
+      paragraphs.length,
     );
 
-    if (!paragraphs || !Array.isArray(paragraphs)) {
+    if (!Array.isArray(paragraphs)) {
       console.error("[formatDeepgramTranscript] Paragraphs is not an array");
       return [];
     }
 
     const transcript = paragraphs
-      .map((p: unknown, index: number) => {
-        // @ts-expect-error eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      .map((p, index) => {
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         if (!p || typeof p !== "object" || p.start === undefined) {
           console.warn(
             `[formatDeepgramTranscript] Invalid paragraph at index ${index}:`,
@@ -82,25 +108,18 @@ export function formatDeepgramTranscript(result: unknown): Transcript[] {
         }
 
         // Get text from sentences if available
-        // @ts-expect-error eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        let paragraphText = p.text || "";
-        // @ts-expect-error eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        let paragraphText = p.text ?? "";
         if (!paragraphText && p.sentences && Array.isArray(p.sentences)) {
           console.log(
             `[formatDeepgramTranscript] Extracting text from sentences for paragraph ${index}`,
           );
-          // @ts-expect-error eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-          paragraphText = p.sentences.map((s: any) => s.text).join(" ");
+          paragraphText = p.sentences.map((s) => s.text).join(" ");
         }
 
-        const entry = {
-          // @ts-expect-error eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        return {
           start: p.start,
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           text: paragraphText,
         };
-        return entry;
       })
       .filter((entry: Transcript) => entry.text.trim() !== "");
 

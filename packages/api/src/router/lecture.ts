@@ -622,14 +622,17 @@ export const lectureRouter = {
           console.log("[uploadFile] Parsing PDF...");
           const text = await parsePdf(buffer);
           transcript = [{ start: 0, text }];
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         } else if (type === "DOCX") {
           console.log("[uploadFile] Parsing DOCX...");
           const text = await parseDocx(buffer);
           transcript = [{ start: 0, text }];
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         } else if (type === "TEXT") {
           console.log("[uploadFile] Parsing TXT...");
           const text = await parseTxt(buffer);
           transcript = [{ start: 0, text }];
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         } else if (type === "AUDIO_FILE") {
           console.log("[uploadFile] Transcribing audio file...");
           console.log("[uploadFile] Audio file path:", path);
@@ -655,21 +658,7 @@ export const lectureRouter = {
               );
               throw new Error(transcriptionError.message);
             }
-
-            console.log(
-              "[uploadFile] Deepgram result received:",
-              result ? "Success" : "Empty result",
-            );
-
             transcript = formatDeepgramTranscript(result);
-            console.log(
-              "[uploadFile] Formatted transcript length:",
-              transcript.length,
-            );
-            console.log(
-              "[uploadFile] First transcript item:",
-              transcript.length > 0 ? JSON.stringify(transcript[0]) : "None",
-            );
           } catch (error) {
             console.error(
               "[uploadFile] Error during transcription process:",
