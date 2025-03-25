@@ -13,7 +13,6 @@ import {
 } from "lucide-react";
 
 import { FlashcardShortcuts } from "./flashcard-shortcuts";
-import { useFlashcardStore } from "./notes-page";
 import { Button } from "./ui/button";
 import { Label } from "./ui/label";
 import { Switch } from "./ui/switch";
@@ -50,10 +49,16 @@ export function Flashcard({
   );
   const [showStarredOnly, setShowStarredOnly] = useState(false);
   const [isStarringCard, setIsStarringCard] = useState(false);
-  const { setTab } = useFlashcardStore();
+  // Track flashcards that have been starred only client-side (not saved to server yet)
+  const [clientSideStars, setClientSideStars] = useState<Set<string>>(
+    new Set(),
+  );
+
   // Get current filtered cards based on showStarredOnly
   const filteredCards = showStarredOnly
-    ? shuffledCards.filter((card) => starredCardIds.has(card.id))
+    ? shuffledCards.filter(
+        (card) => starredCardIds.has(card.id) || clientSideStars.has(card.id),
+      )
     : shuffledCards;
 
   const currentCard =
@@ -127,8 +132,45 @@ export function Flashcard({
 
     setIsStarringCard(true);
 
+    // Check if this is an UUID - a valid server ID
+    const isValidUuid =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+        cardId,
+      );
+
+    // Handle client-side only starring for newly generated flashcards
+    if (!isValidUuid) {
+      // Toggle client-side star status
+      setClientSideStars((prev) => {
+        const newSet = new Set(prev);
+        if (newSet.has(cardId)) {
+          newSet.delete(cardId);
+        } else {
+          newSet.add(cardId);
+        }
+        return newSet;
+      });
+
+      // Update the card in the shuffled cards array for UI consistency
+      setShuffledCards((prev) =>
+        prev.map((card) =>
+          card.id === cardId ? { ...card, isStarred: !card.isStarred } : card,
+        ),
+      );
+
+      // If there's a callback, notify parent
+      if (onStarToggle) {
+        const isNowStarred = !shuffledCards.find((c) => c.id === cardId)
+          ?.isStarred;
+        onStarToggle(cardId, isNowStarred);
+      }
+
+      setIsStarringCard(false);
+      return;
+    }
+
     try {
-      // Call the server action to toggle star status
+      // Call the server action to toggle star status for valid IDs
       const { isStarred } = await toggleFlashcardStar(cardId);
 
       // Update local state
@@ -197,6 +239,9 @@ export function Flashcard({
     }
   }, [filteredCards, currentIndex]);
 
+  // Calculate if we have any starred cards (either from server or client-side)
+  const hasStarredCards = starredCardIds.size > 0 || clientSideStars.size > 0;
+
   if (!filteredCards.length) {
     return (
       <div className="flex h-56 w-full flex-col items-center justify-center rounded-lg border border-dashed">
@@ -243,7 +288,8 @@ export function Flashcard({
               className={cn(
                 "size-4",
                 isStarringCard ? "opacity-50" : "",
-                starredCardIds.has(currentCard?.id || "")
+                starredCardIds.has(currentCard?.id || "") ||
+                  clientSideStars.has(currentCard?.id || "")
                   ? "fill-primary text-primary"
                   : "text-muted-foreground",
               )}
@@ -354,7 +400,7 @@ export function Flashcard({
             id="starred-only"
             checked={showStarredOnly}
             onCheckedChange={toggleShowStarredOnly}
-            disabled={starredCardIds.size === 0}
+            disabled={!hasStarredCards}
           />
           <Label htmlFor="starred-only" className="text-sm">
             Starred

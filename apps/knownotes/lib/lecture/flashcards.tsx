@@ -49,19 +49,56 @@ export async function generateFlashcards(
     Transcript:
     ${formatTranscript(transcript)}`,
       onFinish: async ({ object }) => {
+        if (!object?.flashcards.length) return;
+
         // Create flashcards in the database.
-        await supabase.from("Flashcard").insert(
-          object?.flashcards.map(({ term, definition }) => ({
-            lectureId,
-            term,
-            definition,
-          })),
-        );
+        const { data: insertedCards, error } = await supabase
+          .from("Flashcard")
+          .insert(
+            object?.flashcards.map(({ term, definition }) => ({
+              lectureId,
+              term,
+              definition,
+            })),
+          )
+          .select("id, term, definition, isStarred");
+
+        if (error) {
+          console.error("Error inserting flashcards:", error);
+          return;
+        }
+
+        // Send the database-generated IDs back to the client
+        if (insertedCards) {
+          // Map the inserted cards to the same format as the original flashcards
+          const cardsWithIds = insertedCards.map((card) => ({
+            id: card.id,
+            term: card.term,
+            definition: card.definition,
+            isStarred: card.isStarred || false,
+          }));
+
+          // Update the stream with the final cards that have database IDs
+          stream.update({ flashcards: cardsWithIds });
+        }
       },
     });
 
     for await (const partialObject of partialObjectStream) {
-      stream.update(partialObject);
+      // For the streaming updates, assign temporary IDs to the flashcards
+      if (partialObject && partialObject.flashcards) {
+        const flashcardsWithTempIds = partialObject.flashcards.map(
+          (card, index) => ({
+            ...card,
+            id: `temp-${index}-${Date.now()}`, // Create a unique temporary ID
+            isStarred: false,
+          }),
+        );
+
+        stream.update({ flashcards: flashcardsWithTempIds });
+      } else {
+        stream.update(partialObject);
+      }
     }
 
     stream.done();
