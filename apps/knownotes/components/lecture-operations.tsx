@@ -253,11 +253,10 @@ export function LectureOperations({
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>
-                  Are you sure you want to delete this lecture?
-                </AlertDialogTitle>
+                <AlertDialogTitle>Delete lecture</AlertDialogTitle>
                 <AlertDialogDescription>
-                  This action cannot be undone.
+                  Are you sure you want to delete this lecture? This action
+                  cannot be undone.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
