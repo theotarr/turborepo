@@ -26,12 +26,13 @@ export async function updateLecture({
   title,
   notes,
   enhancedNotes,
-  markdownNotes,
+  courseId,
 }: {
   lectureId: string;
   title?: string | undefined;
   notes?: string | undefined;
   enhancedNotes?: string | undefined;
+  courseId?: string | undefined;
 }) {
   const session = await auth();
   if (!session) throw new Error("User not found.");
@@ -40,6 +41,19 @@ export async function updateLecture({
   if (title) updateData["title"] = title;
   if (notes) updateData["notes"] = JSON.parse(notes);
   if (enhancedNotes) updateData["enhancedNotes"] = JSON.parse(enhancedNotes);
+
+  if (courseId) {
+    // Verify the user has access to the course.
+    const { data: course } = await supabase
+      .from("Course")
+      .select("id")
+      .eq("id", courseId)
+      .eq("userId", session.user.id);
+
+    if (!course) throw new Error("User does not have access to the course.");
+
+    updateData["courseId"] = courseId;
+  }
 
   const { data, error } = await supabase
     .from("Lecture")

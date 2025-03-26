@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
-import { Course, Lecture } from "@prisma/client";
+import { Lecture } from "@prisma/client";
 import { motion } from "framer-motion";
 
 import { useTabStore } from "./notes-page";
@@ -11,7 +11,6 @@ import { Progress } from "./ui/progress";
 
 interface QuizPageProps {
   lecture: Lecture & {
-    course: Course;
     questions: {
       id: string;
       question: string;

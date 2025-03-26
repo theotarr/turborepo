@@ -12,7 +12,7 @@ import { generateEnhancedNotes } from "@/lib/lecture/notes";
 import { generateQuiz } from "@/lib/lecture/quiz";
 import { cn } from "@/lib/utils";
 import { Transcript } from "@/types";
-import { Course, Lecture, Message } from "@prisma/client";
+import { Lecture, Message } from "@prisma/client";
 import { createBrowserClient } from "@supabase/ssr";
 import { Editor as EditorType, JSONContent } from "@tiptap/core";
 import { readStreamableValue } from "ai/rsc";
@@ -182,7 +182,6 @@ export function isNotesNull(notes: JSONContent | string | undefined) {
 
 interface NotesPageProps {
   lecture: Lecture & {
-    course: Course;
     messages: Message[];
     flashcards?: {
       id: string;

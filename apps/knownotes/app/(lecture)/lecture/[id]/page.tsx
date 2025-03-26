@@ -3,9 +3,9 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { EditableTitle } from "@/components/editable-title";
 import { Icons } from "@/components/icons";
+import { LectureOperations } from "@/components/lecture-operations";
 import { NotesPage } from "@/components/notes-page";
 import { PremiumFeature } from "@/components/premium-feature";
-import { ShareLectureDialog } from "@/components/share-lecture-dialog";
 import { buttonVariants } from "@/components/ui/button";
 import {
   Tooltip,
@@ -16,13 +16,12 @@ import {
 import { UserAccountNav } from "@/components/user-account-nav";
 import { env } from "@/env";
 import { AI } from "@/lib/chat/actions";
+import { db } from "@/lib/db";
 import { supabase } from "@/lib/supabase";
 import { absoluteUrl, cn } from "@/lib/utils";
+import { Transcript } from "@/types";
 
 import { auth } from "@acme/auth";
-
-export const dynamic = "force-dynamic";
-export const maxDuration = 120;
 
 interface LecturePageProps {
   params: { id: string };
@@ -72,20 +71,26 @@ export default async function LecturePage({ params }: LecturePageProps) {
   const session = await auth();
   if (!session) redirect("/login");
 
-  const { data: lecture } = await supabase
-    .from("Lecture")
-    .select("*, course:courseId (*), Message(*), Flashcard(*), Question(*)")
-    .eq("userId", session.user.id)
-    .eq("id", params.id)
-    .single();
+  const lecture = await db.lecture.findUnique({
+    where: {
+      id: params.id,
+    },
+    include: {
+      course: true,
+      messages: true,
+      flashcards: true,
+      questions: true,
+    },
+  });
 
-  // Convert SQL to Prisma relations format.
-  lecture.messages = lecture.Message;
-  delete lecture.Message;
-  lecture.flashcards = lecture.Flashcard;
-  delete lecture.Flashcard;
-  lecture.questions = lecture.Question;
-  delete lecture.Question;
+  const courses = await db.course.findMany({
+    where: {
+      userId: session.user.id,
+    },
+    orderBy: {
+      updatedAt: "desc",
+    },
+  });
 
   if (!lecture) return <>Loading...</>;
 
@@ -103,6 +108,7 @@ export default async function LecturePage({ params }: LecturePageProps) {
   };
 
   return (
+    // @ts-ignore
     <AI initialAIState={aiState}>
       <div className="flex h-screen flex-col overflow-hidden">
         <header className="sticky top-0 z-10">
@@ -126,16 +132,29 @@ export default async function LecturePage({ params }: LecturePageProps) {
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
-              <div className="flex flex-col justify-center gap-y-2">
-                <EditableTitle
-                  lectureId={params.id}
-                  initialTitle={lecture.title}
-                />
-              </div>
+              <EditableTitle
+                lectureId={params.id}
+                initialTitle={lecture.title}
+              />
             </div>
             <div className="flex flex-1 items-center sm:justify-end">
               <div className="ml-4 flex flex-1 justify-end space-x-4 sm:grow-0">
-                <ShareLectureDialog lectureId={params.id} />
+                <LectureOperations
+                  className={cn(
+                    buttonVariants({
+                      variant: "ghost",
+                      size: "icon",
+                    }),
+                    "size-8 border-none",
+                  )}
+                  lecture={{
+                    id: lecture.id,
+                    title: lecture.title,
+                    courseId: lecture.courseId || undefined,
+                    transcript: lecture.transcript as unknown as Transcript[],
+                  }}
+                  courses={courses || []}
+                />
                 <UserAccountNav
                   user={{
                     name: session.user.name,
