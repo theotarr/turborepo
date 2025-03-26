@@ -914,9 +914,9 @@ export function NotesPage({ lecture }: NotesPageProps) {
 
               <TabsContent value="flashcards">
                 <div className="flex h-[calc(100vh-8rem)] flex-col items-center overflow-y-auto pb-20">
-                  {isLoadingFlashcards ? (
+                  {isLoadingFlashcards && flashcards?.length === 0 ? (
                     <FlashcardSkeleton />
-                  ) : flashcards.length > 0 ? (
+                  ) : flashcards?.length > 0 ? (
                     <div className="mt-4 w-full max-w-3xl">
                       <FlashcardContainer flashcards={flashcards} />
                     </div>
