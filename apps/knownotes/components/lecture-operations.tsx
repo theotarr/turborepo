@@ -284,7 +284,7 @@ export function LectureOperations({
       <AlertDialog open={isDeleteAlertOpen} onOpenChange={setIsDeleteAlertOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete lecture</AlertDialogTitle>
+            <AlertDialogTitle>Delete Lecture</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to delete this lecture? This action cannot
               be undone.
