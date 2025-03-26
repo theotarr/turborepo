@@ -29,6 +29,7 @@ import { Icons } from "./icons";
 import { PdfRenderer } from "./pdf-renderer";
 import { QuizPage, QuizSkeleton } from "./quiz";
 import { Button, buttonVariants } from "./ui/button";
+import { ScrollArea, ScrollBar } from "./ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import {
   Tooltip,
@@ -661,119 +662,122 @@ export function NotesPage({ lecture }: NotesPageProps) {
               value={activeTab}
               onValueChange={(value) => setActiveTab(value as any)}
             >
-              <TabsList className="w-full rounded-xl">
-                {pdfUrl && (
-                  <TabsTrigger
-                    className="w-full rounded-lg"
-                    value="notes"
-                    onClick={async () => {
-                      // Check if enhanced notes do not exist and automatically generate them
-                      if (
-                        pdfUrl &&
-                        isNotesNull(enhancedNotes) &&
-                        !isGeneratingNotes
-                      ) {
-                        setActiveTab("notes");
-                        setIsGeneratingNotes(true);
+              <ScrollArea>
+                <TabsList className="w-full rounded-xl">
+                  {pdfUrl && (
+                    <TabsTrigger
+                      className="w-full rounded-lg"
+                      value="notes"
+                      onClick={async () => {
+                        // Check if enhanced notes do not exist and automatically generate them
+                        if (
+                          pdfUrl &&
+                          isNotesNull(enhancedNotes) &&
+                          !isGeneratingNotes
+                        ) {
+                          setActiveTab("notes");
+                          setIsGeneratingNotes(true);
 
-                        try {
-                          // Get the notes in markdown format if they exist
-                          const markdownNotes =
-                            editor?.storage.markdown?.getMarkdown() || "";
+                          try {
+                            // Get the notes in markdown format if they exist
+                            const markdownNotes =
+                              editor?.storage.markdown?.getMarkdown() || "";
 
-                          setNotesTab("enhanced");
-                          setEnhancedNotes(undefined);
+                            setNotesTab("enhanced");
+                            setEnhancedNotes(undefined);
 
-                          // Generate enhanced notes using the transcript and existing notes
-                          const output = await generateEnhancedNotes(
-                            lecture.id,
-                            transcript,
-                            markdownNotes,
-                          );
+                            // Generate enhanced notes using the transcript and existing notes
+                            const output = await generateEnhancedNotes(
+                              lecture.id,
+                              transcript,
+                              markdownNotes,
+                            );
 
-                          let text = "";
-                          let chunkBuffer = "";
-                          const CHUNK_SIZE = 100; // Update after collecting ~100 characters
+                            let text = "";
+                            let chunkBuffer = "";
+                            const CHUNK_SIZE = 100; // Update after collecting ~100 characters
 
-                          // Add streaming with less frequent updates
-                          for await (const delta of readStreamableValue(
-                            output,
-                          )) {
-                            text = `${text}${delta}`;
-                            chunkBuffer += delta;
+                            // Add streaming with less frequent updates
+                            for await (const delta of readStreamableValue(
+                              output,
+                            )) {
+                              text = `${text}${delta}`;
+                              chunkBuffer += delta;
 
-                            // Only update the editor content after collecting enough chunks
-                            if (chunkBuffer.length >= CHUNK_SIZE) {
-                              // Add transition effect
-                              const prosemirrorEl = document.querySelector(
-                                ".editor-transition .ProseMirror",
-                              );
-                              if (prosemirrorEl) {
-                                prosemirrorEl.classList.add("updating");
+                              // Only update the editor content after collecting enough chunks
+                              if (chunkBuffer.length >= CHUNK_SIZE) {
+                                // Add transition effect
+                                const prosemirrorEl = document.querySelector(
+                                  ".editor-transition .ProseMirror",
+                                );
+                                if (prosemirrorEl) {
+                                  prosemirrorEl.classList.add("updating");
 
-                                // Set content and then remove the updating class after a short delay
-                                editor?.commands.setContent(text);
+                                  // Set content and then remove the updating class after a short delay
+                                  editor?.commands.setContent(text);
 
-                                setTimeout(() => {
-                                  prosemirrorEl.classList.remove("updating");
-                                }, 50);
-                              } else {
-                                editor?.commands.setContent(text);
+                                  setTimeout(() => {
+                                    prosemirrorEl.classList.remove("updating");
+                                  }, 50);
+                                } else {
+                                  editor?.commands.setContent(text);
+                                }
+
+                                chunkBuffer = ""; // Reset buffer
+                                // Small delay to allow React to process
+                                await new Promise((resolve) =>
+                                  setTimeout(resolve, 100),
+                                );
                               }
-
-                              chunkBuffer = ""; // Reset buffer
-                              // Small delay to allow React to process
-                              await new Promise((resolve) =>
-                                setTimeout(resolve, 100),
-                              );
                             }
+
+                            // Final update to ensure all content is displayed
+                            if (chunkBuffer.length > 0 || text.length > 0) {
+                              editor?.commands.setContent(text);
+                            }
+
+                            setEnhancedNotes(text);
+                            setIsGeneratingNotes(false);
+
+                            // Update the lecture with the enhanced notes.
+                            // Save the notes with the Tiptap JSONContent format so that special characters and LaTeX are preserved.
+                            await updateLecture({
+                              lectureId: lecture.id,
+                              enhancedNotes: JSON.stringify(editor?.getJSON()),
+                            });
+                          } catch (error) {
+                            console.error(
+                              "Error generating enhanced notes:",
+                              error,
+                            );
+                            toast.error(
+                              "Failed to generate enhanced notes. Please try again.",
+                            );
+                          } finally {
+                            setIsGeneratingNotes(false);
                           }
-
-                          // Final update to ensure all content is displayed
-                          if (chunkBuffer.length > 0 || text.length > 0) {
-                            editor?.commands.setContent(text);
-                          }
-
-                          setEnhancedNotes(text);
-                          setIsGeneratingNotes(false);
-
-                          // Update the lecture with the enhanced notes.
-                          // Save the notes with the Tiptap JSONContent format so that special characters and LaTeX are preserved.
-                          await updateLecture({
-                            lectureId: lecture.id,
-                            enhancedNotes: JSON.stringify(editor?.getJSON()),
-                          });
-                        } catch (error) {
-                          console.error(
-                            "Error generating enhanced notes:",
-                            error,
-                          );
-                          toast.error(
-                            "Failed to generate enhanced notes. Please try again.",
-                          );
-                        } finally {
-                          setIsGeneratingNotes(false);
                         }
-                      }
-                    }}
-                  >
-                    <Icons.text className="mr-2 size-4" />
-                    Notes
+                      }}
+                    >
+                      <Icons.text className="mr-2 size-4" />
+                      Notes
+                    </TabsTrigger>
+                  )}
+                  <TabsTrigger className="w-full rounded-lg" value="chat">
+                    <Icons.messageSquareText className="mr-2 size-4" />
+                    Chat
                   </TabsTrigger>
-                )}
-                <TabsTrigger className="w-full rounded-lg" value="chat">
-                  <Icons.messageSquareText className="mr-2 size-4" />
-                  Chat
-                </TabsTrigger>
-                <TabsTrigger className="w-full rounded-lg" value="flashcards">
-                  <Icons.flashcards className="mr-2 size-4" />
-                  Flashcards
-                </TabsTrigger>
-                <TabsTrigger className="w-full rounded-lg" value="quiz">
-                  <Icons.study className="mr-2 size-4" />
-                  Quiz
-                </TabsTrigger>
-              </TabsList>
+                  <TabsTrigger className="w-full rounded-lg" value="flashcards">
+                    <Icons.flashcards className="mr-2 size-4" />
+                    Flashcards
+                  </TabsTrigger>
+                  <TabsTrigger className="w-full rounded-lg" value="quiz">
+                    <Icons.study className="mr-2 size-4" />
+                    Quiz
+                  </TabsTrigger>
+                  <ScrollBar className="h-2 px-2" orientation="horizontal" />
+                </TabsList>
+              </ScrollArea>
               <TabsContent value="chat">
                 <Chat lectureId={lecture.id} />
               </TabsContent>
