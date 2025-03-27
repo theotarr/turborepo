@@ -4,8 +4,8 @@ import { User } from "@prisma/client";
 
 export interface Transcript {
   text: string;
-  start: number; // seconds from the beginning of the audio
-  embeddingIds?: string[]; // the id of the embedding in the database
+  start: number; // Seconds from the beginning of the audio.
+  embeddingIds?: string[]; // IDs of the embeddings in the database.
 }
 
 export type NavItem = {
