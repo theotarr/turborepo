@@ -622,12 +622,10 @@ export const lectureRouter = {
           console.log("[uploadFile] Parsing PDF...");
           const text = await parsePdf(buffer);
           transcript = [{ start: 0, text }];
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         } else if (type === "DOCX") {
           console.log("[uploadFile] Parsing DOCX...");
           const text = await parseDocx(buffer);
           transcript = [{ start: 0, text }];
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         } else if (type === "TEXT") {
           console.log("[uploadFile] Parsing TXT...");
           const text = await parseTxt(buffer);
