@@ -17,7 +17,6 @@ import { UserAccountNav } from "@/components/user-account-nav";
 import { env } from "@/env";
 import { AI } from "@/lib/chat/actions";
 import { db } from "@/lib/db";
-import { supabase } from "@/lib/supabase";
 import { absoluteUrl, cn } from "@/lib/utils";
 import { Transcript } from "@/types";
 
@@ -30,11 +29,11 @@ interface LecturePageProps {
 export async function generateMetadata({
   params,
 }: LecturePageProps): Promise<Metadata> {
-  const { data: lecture } = await supabase
-    .from("Lecture")
-    .select("*")
-    .eq("id", params.id)
-    .single();
+  const lecture = await db.lecture.findUnique({
+    where: {
+      id: params.id,
+    },
+  });
   if (!lecture) return {};
 
   const ogUrl = new URL(`${env.NEXT_PUBLIC_APP_URL}/api/og`);

@@ -30,6 +30,8 @@ export const FlashcardItem = ({
     id: string;
     term: string;
     definition: string;
+    hint?: string;
+    explanation?: string;
     isStarred?: boolean;
   };
   cardNumber: number;
@@ -46,6 +48,10 @@ export const FlashcardItem = ({
   const [editedTerm, setEditedTerm] = useState(flashcard.term);
   const [editedDefinition, setEditedDefinition] = useState(
     flashcard.definition,
+  );
+  const [editedHint, setEditedHint] = useState(flashcard.hint || "");
+  const [editedExplanation, setEditedExplanation] = useState(
+    flashcard.explanation || "",
   );
 
   useDebouncedCallback(async (term: string) => {
@@ -81,13 +87,32 @@ export const FlashcardItem = ({
       await updateFlashcard({ id: flashcard.id, definition: editedDefinition });
     }
 
-    updateFlashcardState(flashcard.id, editedTerm, editedDefinition);
+    if (editedHint !== (flashcard.hint || "")) {
+      await updateFlashcard({ id: flashcard.id, hint: editedHint });
+    }
+
+    if (editedExplanation !== (flashcard.explanation || "")) {
+      await updateFlashcard({
+        id: flashcard.id,
+        explanation: editedExplanation,
+      });
+    }
+
+    updateFlashcardState(
+      flashcard.id,
+      editedTerm,
+      editedDefinition,
+      editedHint,
+      editedExplanation,
+    );
     setIsEditing(false);
   };
 
   const handleCancelEdit = () => {
     setEditedTerm(flashcard.term);
     setEditedDefinition(flashcard.definition);
+    setEditedHint(flashcard.hint || "");
+    setEditedExplanation(flashcard.explanation || "");
     setIsEditing(false);
   };
 
@@ -215,6 +240,30 @@ export const FlashcardItem = ({
                 rows={3}
               />
             </div>
+            <div>
+              <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                Hint
+              </label>
+              <textarea
+                className="w-full rounded-md border bg-background p-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                value={editedHint}
+                onChange={(e) => setEditedHint(e.target.value)}
+                rows={2}
+                placeholder="Add a hint to help remember the term"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                Explanation
+              </label>
+              <textarea
+                className="w-full rounded-md border bg-background p-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                value={editedExplanation}
+                onChange={(e) => setEditedExplanation(e.target.value)}
+                rows={3}
+                placeholder="Add additional context and deeper explanation"
+              />
+            </div>
           </div>
         ) : (
           <div className="grid gap-3 md:grid-cols-2">
@@ -223,12 +272,32 @@ export const FlashcardItem = ({
                 Term
               </div>
               <div className="text-sm font-semibold">{flashcard.term}</div>
+              {flashcard.hint && (
+                <>
+                  <div className="mt-2 text-xs font-medium text-muted-foreground">
+                    Hint
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    {flashcard.hint}
+                  </div>
+                </>
+              )}
             </div>
             <div>
               <div className="mb-1 text-xs font-medium text-muted-foreground">
                 Definition
               </div>
               <div className="text-sm">{flashcard.definition}</div>
+              {flashcard.explanation && (
+                <>
+                  <div className="mt-2 text-xs font-medium text-muted-foreground">
+                    Explanation
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    {flashcard.explanation}
+                  </div>
+                </>
+              )}
             </div>
           </div>
         )}

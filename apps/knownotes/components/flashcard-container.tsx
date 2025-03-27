@@ -12,6 +12,8 @@ interface FlashcardData {
   id: string;
   term: string;
   definition: string;
+  hint?: string | null;
+  explanation?: string | null;
   isStarred?: boolean;
 }
 

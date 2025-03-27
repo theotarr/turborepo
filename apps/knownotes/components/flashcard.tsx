@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
+  Lightbulb,
   PencilIcon,
   ShuffleIcon,
   Star,
@@ -21,6 +22,8 @@ interface FlashcardData {
   id: string;
   term: string;
   definition: string;
+  hint?: string | null;
+  explanation?: string | null;
   isStarred?: boolean;
 }
 
@@ -42,6 +45,8 @@ export function Flashcard({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [direction, setDirection] = useState(0);
+  const [showHint, setShowHint] = useState(false);
+  const [showExplanation, setShowExplanation] = useState(false);
   const [shuffledCards, setShuffledCards] =
     useState<FlashcardData[]>(flashcards);
   const [starredCardIds, setStarredCardIds] = useState<Set<string>>(
@@ -64,9 +69,15 @@ export function Flashcard({
   const currentCard =
     filteredCards.length > 0 ? filteredCards[currentIndex] : null;
 
+  const resetCardState = () => {
+    setShowHint(false);
+    setShowExplanation(false);
+  };
+
   const goToNextCard = () => {
     if (!filteredCards.length) return;
     setIsFlipped(false);
+    resetCardState();
     setDirection(1);
     setTimeout(() => {
       setCurrentIndex((prev) => (prev + 1) % filteredCards.length);
@@ -76,6 +87,7 @@ export function Flashcard({
   const goToPrevCard = () => {
     if (!filteredCards.length) return;
     setIsFlipped(false);
+    resetCardState();
     setDirection(-1);
     setTimeout(() => {
       setCurrentIndex(
@@ -113,6 +125,18 @@ export function Flashcard({
         case "s": // 's' key to star/unstar
           if (currentCard) {
             toggleStar(e as unknown as React.MouseEvent, currentCard.id);
+          }
+          break;
+        case "h": // 'h' key to toggle hint
+          e.preventDefault(); // Prevent default browser behavior
+          if (currentCard?.hint && !isFlipped) {
+            setShowHint((prev) => !prev);
+          }
+          break;
+        case "e": // 'e' key to toggle explanation
+          e.preventDefault(); // Prevent default browser behavior
+          if (currentCard?.explanation && isFlipped) {
+            setShowExplanation((prev) => !prev);
           }
           break;
         default:
@@ -272,14 +296,25 @@ export function Flashcard({
       <div
         style={{
           perspective: "1000px",
-          position: "relative",
-          height: "16rem",
-          width: "100%",
-          maxWidth: "36rem",
-          cursor: "pointer",
         }}
+        className="relative h-[16rem] w-full max-w-[36rem] cursor-pointer"
         onClick={flipCard}
       >
+        {currentCard?.hint && !isFlipped && (
+          <div className="absolute left-2 top-2 z-10 flex gap-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowHint((prev) => !prev);
+              }}
+            >
+              <Lightbulb className="mr-1 size-4" />
+              Hint
+            </Button>
+          </div>
+        )}
         <div className="absolute right-2 top-2 z-10">
           <Button
             variant="ghost"
@@ -337,6 +372,11 @@ export function Flashcard({
           >
             <div className="max-h-full overflow-auto text-center text-xl font-medium">
               {currentCard?.term}
+              {showHint && currentCard?.hint && (
+                <div className="mt-4 text-center text-sm text-muted-foreground duration-150 animate-in fade-in">
+                  <p>Hint: {currentCard.hint}</p>
+                </div>
+              )}
             </div>
           </div>
 
@@ -352,8 +392,32 @@ export function Flashcard({
               transform: "rotateX(180deg)",
             }}
           >
-            <div className="max-h-full overflow-auto text-center">
-              {currentCard?.definition}
+            <div className="max-h-full w-full overflow-auto text-center">
+              {showExplanation ? (
+                <div className="text-muted-foreground duration-150 animate-in fade-in">
+                  Explanation: {currentCard?.explanation}
+                </div>
+              ) : (
+                <div className="text-lg duration-150 animate-in fade-in">
+                  {currentCard?.definition}
+                </div>
+              )}
+
+              {currentCard?.explanation && (
+                <div className="mt-4">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="mx-auto"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowExplanation((prev) => !prev);
+                    }}
+                  >
+                    {showExplanation ? "Hide Explanation" : "Show Explanation"}
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         </motion.div>

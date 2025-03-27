@@ -44,6 +44,14 @@ export function FlashcardShortcuts() {
                 keys={["S"]}
                 description="Star/unstar current card"
               />
+              <ShortcutItem
+                keys={["H"]}
+                description="Show/hide hint (front side)"
+              />
+              <ShortcutItem
+                keys={["E"]}
+                description="Show/hide explanation (back side)"
+              />
             </div>
           </div>
 
@@ -52,6 +60,8 @@ export function FlashcardShortcuts() {
             <ul className="list-inside list-disc space-y-1 text-sm text-muted-foreground">
               <li>Use arrow keys to quickly navigate between cards</li>
               <li>Press space to flip the current card</li>
+              <li>Press H for hints while viewing the front of a card</li>
+              <li>Press E for explanations while viewing the back of a card</li>
               <li>Star difficult cards to study them separately later</li>
             </ul>
           </div>

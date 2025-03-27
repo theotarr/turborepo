@@ -38,13 +38,20 @@ export async function generateFlashcards(
           z.object({
             term: z.string(),
             definition: z.string(),
+            hint: z.string(),
+            explanation: z.string(),
           }),
         ),
       }),
       system: `\
     You are an expert in creating flashcards.
     You are provided with a transcript of a lecture.
-    Your goal is to create flashcards covering as many topics from the lecture as possible.`,
+    Your goal is to create flashcards covering all the topics from the lecture.
+    For each flashcard, include:
+    - A term: the concept or key idea
+    - A definition: the explanation of the term
+    - A hint: a short clue that helps recall the term without giving away the full definition
+    - An explanation: additional context and deeper explanation about why this concept is important and how it connects to other ideas`,
       prompt: `\
     Transcript:
     ${formatTranscript(transcript)}`,
@@ -55,13 +62,17 @@ export async function generateFlashcards(
         const { data: insertedCards, error } = await supabase
           .from("Flashcard")
           .insert(
-            object?.flashcards.map(({ term, definition }) => ({
-              lectureId,
-              term,
-              definition,
-            })),
+            object?.flashcards.map(
+              ({ term, definition, hint, explanation }) => ({
+                lectureId,
+                term,
+                definition,
+                hint,
+                explanation,
+              }),
+            ),
           )
-          .select("id, term, definition, isStarred");
+          .select("id, term, definition, hint, explanation, isStarred");
 
         if (error) {
           console.error("Error inserting flashcards:", error);
@@ -75,6 +86,8 @@ export async function generateFlashcards(
             id: card.id,
             term: card.term,
             definition: card.definition,
+            hint: card.hint,
+            explanation: card.explanation,
             isStarred: card.isStarred || false,
           }));
 
@@ -122,10 +135,14 @@ export async function updateFlashcard({
   id,
   term,
   definition,
+  hint,
+  explanation,
 }: {
   id: string;
   term?: string;
   definition?: string;
+  hint?: string;
+  explanation?: string;
 }): Promise<void> {
   const session = await auth();
   if (!session) throw new Error("User not authenticated");
@@ -133,6 +150,8 @@ export async function updateFlashcard({
   let query = {};
   if (term) query["term"] = term;
   if (definition) query["definition"] = definition;
+  if (hint) query["hint"] = hint;
+  if (explanation) query["explanation"] = explanation;
 
   const { error } = await supabase.from("Flashcard").update(query).eq("id", id);
 

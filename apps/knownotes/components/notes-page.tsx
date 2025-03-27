@@ -100,6 +100,8 @@ export const useFlashcardStore = create<{
     id: string;
     term: string;
     definition: string;
+    hint?: string | null;
+    explanation?: string | null;
     isStarred?: boolean;
   }[];
   setFlashcards: (
@@ -107,10 +109,18 @@ export const useFlashcardStore = create<{
       id: string;
       term: string;
       definition: string;
+      hint?: string | null;
+      explanation?: string | null;
       isStarred?: boolean;
     }[],
   ) => void;
-  updateFlashcard: (id: string, term: string, definition: string) => void;
+  updateFlashcard: (
+    id: string,
+    term: string,
+    definition: string,
+    hint?: string,
+    explanation?: string,
+  ) => void;
   deleteFlashcard: (id: string) => void;
   updateStarredStatus: (id: string, isStarred: boolean) => void;
 }>((set) => ({
@@ -118,13 +128,15 @@ export const useFlashcardStore = create<{
   setTab: (tab) => set({ tab }),
   flashcards: [],
   setFlashcards: (flashcards) => set({ flashcards }),
-  updateFlashcard: (id, term, definition) => {
+  updateFlashcard: (id, term, definition, hint, explanation) => {
     set((state) => {
       const flashcard = state.flashcards.find((card) => card.id === id);
       if (!flashcard) return state;
 
       flashcard.term = term;
       flashcard.definition = definition;
+      if (hint) flashcard.hint = hint;
+      if (explanation) flashcard.explanation = explanation;
 
       return { flashcards: state.flashcards };
     });
@@ -188,6 +200,8 @@ interface NotesPageProps {
       id: string;
       term: string;
       definition: string;
+      hint?: string | null;
+      explanation?: string | null;
       isStarred?: boolean;
     }[];
     questions?: {
@@ -236,7 +250,6 @@ export function NotesPage({ lecture }: NotesPageProps) {
   // Hydate the component with the lecture data.
   useEffect(() => {
     if (!hydrated) {
-      console.log(lecture.flashcards);
       setTranscript(lecture.transcript as any as Transcript[]);
 
       // If the lecture is a PDF, get the public url for it.
@@ -394,10 +407,6 @@ export function NotesPage({ lecture }: NotesPageProps) {
         setIsLoadingQuiz(true);
 
         try {
-          console.log(
-            "Loading quiz questions. Lecture questions:",
-            lecture.questions,
-          );
           // If lecture already has questions, use those
           if (lecture.questions && lecture.questions.length > 0) {
             setQuizQuestions(lecture.questions);

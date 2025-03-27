@@ -60,10 +60,12 @@ model Lecture {
 }
 
 model Flashcard {
-  id         String  @id @default(dbgenerated("uuid_generate_v1()")) @db.Uuid
-  term       String
-  definition String
-  isStarred  Boolean @default(false)
+  id          String  @id @default(dbgenerated("uuid_generate_v1()")) @db.Uuid
+  term        String
+  definition  String
+  hint        String?
+  explanation String?
+  isStarred   Boolean @default(false)
 
   lectureId String  @db.Uuid
   lecture   Lecture @relation(fields: [lectureId], references: [id], onDelete: Cascade)
