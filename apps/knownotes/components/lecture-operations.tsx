@@ -1,7 +1,7 @@
 "use client";
 
 import { HTMLAttributes, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Icons } from "@/components/icons";
 import {
   AlertDialog,
@@ -70,6 +70,7 @@ export function LectureOperations({
 }: LectureOperationsProps) {
   const router = useRouter();
   const utils = api.useUtils();
+  const pathname = usePathname();
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
   const [isDeleteLoading, setIsDeleteLoading] = useState(false);
 
@@ -301,6 +302,11 @@ export function LectureOperations({
                   await deleteLecture(lecture.id);
                   setIsDeleteLoading(false);
                   setIsDeleteAlertOpen(false);
+
+                  // Check if current route starts with /lecture and redirect to dashboard if so
+                  if (pathname.startsWith("/lecture"))
+                    router.push("/dashboard");
+
                   router.refresh();
                   await utils.lecture.invalidate();
                 } catch (error) {
