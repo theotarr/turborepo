@@ -27,14 +27,15 @@ import { api } from "@/lib/trpc/react";
 import { cn } from "@/lib/utils";
 import { Course } from "@prisma/client";
 import { DialogDescription } from "@radix-ui/react-dialog";
-import { createBrowserClient } from "@supabase/ssr";
 import { UploadCloud } from "lucide-react";
 import { toast } from "sonner";
+import * as Tus from "tus-js-client";
 import { v1 as uuidv1 } from "uuid";
 import { create } from "zustand";
 
 import { Icons } from "./icons";
 import { Input } from "./ui/input";
+import { Progress } from "./ui/progress";
 import { Textarea } from "./ui/textarea";
 
 // Upload File Dialog Store
@@ -96,6 +97,8 @@ function FileUploadDialog({
     useFileUploadDialogStore();
   const [coursePopoverOpen, setCoursePopoverOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const uploadRef = useRef<Tus.Upload | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const dragCounter = useRef(0);
@@ -177,6 +180,7 @@ function FileUploadDialog({
 
   const onSubmit = async () => {
     setIsLoading(true);
+    setUploadProgress(0);
 
     // check if the user has uploaded a file
     if (!fileRef.current?.files?.length) {
@@ -185,48 +189,120 @@ function FileUploadDialog({
       return;
     }
 
-    // Upload the file to the Supabase `audio` bucket
+    // Prepare the file for upload
     const file = fileRef.current.files[0];
     const fileExt = file.name.split(".").pop()?.toLowerCase() || "";
     const fileId = `${uuidv1()}.${fileExt}`;
-    const supabase = createBrowserClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL as string,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string,
-    );
-
-    const { error } = await supabase.storage
-      .from("audio")
-      .upload(`${userId}/${fileId}`, file);
-
-    if (error) {
-      console.error(error);
-      setIsLoading(false);
-      toast.error("Failed to upload the file.");
-      return;
-    }
-    toast.success("File uploaded successfully.");
+    const path = `${userId}/${fileId}`;
 
     try {
-      const lecture = await uploadFile.mutateAsync({
-        fileId,
-        courseId: selectedCourseId,
-      });
-      setIsDragging(false);
-      window.location.href = `/lecture/${lecture.id}`;
-    } catch (error) {
-      console.error(error);
-      setIsLoading(false);
-      toast.error("Failed to parse the file. Please try again.");
-      return;
-    }
+      // Configure the TUS upload
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
+      const supabaseAnonKey = process.env
+        .NEXT_PUBLIC_SUPABASE_ANON_KEY as string;
+      const endpoint = `${supabaseUrl}/storage/v1/upload/resumable`;
 
-    setIsLoading(false);
-    setIsDragging(false);
-    setOpen(false);
+      const upload = new Tus.Upload(file, {
+        endpoint,
+        retryDelays: [0, 3000, 5000, 10000, 20000],
+        headers: {
+          authorization: `Bearer ${supabaseAnonKey}`,
+          "x-upsert": "true", // Overwrite files with the same name
+        },
+        uploadDataDuringCreation: true,
+        removeFingerprintOnSuccess: true, // Important to allow re-uploading the same file
+        metadata: {
+          bucketName: "audio",
+          objectName: path,
+          contentType: file.type || "application/octet-stream",
+          cacheControl: "3600",
+        },
+        chunkSize: 6 * 1024 * 1024, // Must be set to 6MB for Supabase
+        onError: (error) => {
+          console.error("Upload failed:", error);
+          toast.error(`Upload failed: ${error.message || "Unknown error"}`);
+          setIsLoading(false);
+        },
+        onProgress: (bytesUploaded, bytesTotal) => {
+          const percentage = (bytesUploaded / bytesTotal) * 100;
+          setUploadProgress(percentage);
+        },
+        onSuccess: async () => {
+          setUploadProgress(100);
+          toast.success("File uploaded successfully.");
+
+          try {
+            const lecture = await uploadFile.mutateAsync({
+              fileId,
+              courseId: selectedCourseId,
+            });
+            setIsDragging(false);
+            window.location.href = `/lecture/${lecture.id}`;
+          } catch (error) {
+            console.error(error);
+            setIsLoading(false);
+            toast.error("Failed to process the file. Please try again.");
+          }
+        },
+      });
+
+      // Store the upload instance to potentially cancel it later
+      uploadRef.current = upload;
+
+      // Check for previous uploads to resume
+      upload.findPreviousUploads().then((previousUploads) => {
+        // Found previous uploads so we select the first one
+        if (previousUploads.length) {
+          upload.resumeFromPreviousUpload(previousUploads[0]);
+        }
+
+        // Start the upload
+        upload.start();
+      });
+    } catch (error) {
+      console.error("Error setting up upload:", error);
+      toast.error(
+        `Upload failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
+      setIsLoading(false);
+    }
   };
 
+  // Function to cancel ongoing upload
+  const cancelUpload = () => {
+    if (uploadRef.current) {
+      uploadRef.current.abort();
+      uploadRef.current = null;
+      setUploadProgress(0);
+      setIsLoading(false);
+      toast.info("Upload cancelled");
+    }
+  };
+
+  // Reset upload state when dialog closes
+  useEffect(() => {
+    if (!open) {
+      if (uploadRef.current) {
+        cancelUpload();
+      }
+    }
+  }, [open]);
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={(newOpen) => {
+        if (!newOpen && isLoading && uploadProgress < 100) {
+          // Ask for confirmation before closing
+          if (window.confirm("Cancel the upload?")) {
+            cancelUpload();
+            setOpen(false);
+          }
+          return;
+        }
+        setOpen(newOpen);
+      }}
+    >
       <DialogContent
         className={cn(
           "sm:max-w-lg",
@@ -253,6 +329,7 @@ function FileUploadDialog({
               type="file"
               ref={fileRef}
               accept="audio/*,application/pdf,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/msword,text/plain"
+              disabled={isLoading}
             />
             <p className="text-sm text-muted-foreground">
               Upload a PDF, DOCX, TXT, or audio file to create notes.
@@ -261,6 +338,23 @@ function FileUploadDialog({
               <div className="mt-2 flex flex-col items-center justify-center gap-4 rounded-md border border-2 border-dashed border-primary bg-muted/20 p-4 text-center text-sm text-primary">
                 <UploadCloud className="size-10" />
                 Drop your file here to upload
+              </div>
+            )}
+
+            {isLoading && uploadProgress > 0 && (
+              <div className="mt-4 space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span>Uploading... {Math.round(uploadProgress)}%</span>
+                  {uploadProgress < 100 && (
+                    <button
+                      onClick={cancelUpload}
+                      className="text-destructive hover:underline"
+                    >
+                      Cancel
+                    </button>
+                  )}
+                </div>
+                <Progress value={uploadProgress} max={100} />
               </div>
             )}
           </div>
@@ -324,11 +418,11 @@ function FileUploadDialog({
         </div>
 
         <DialogFooter>
-          <Button onClick={() => onSubmit()} disabled={isLoading}>
-            {isLoading && (
+          <Button onClick={onSubmit} disabled={isLoading}>
+            {isLoading && uploadProgress === 0 && (
               <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
             )}
-            Upload
+            {uploadProgress === 100 ? "Processing..." : "Upload"}
           </Button>
         </DialogFooter>
       </DialogContent>
