@@ -335,7 +335,7 @@ function FileUploadDialog({
               Upload a PDF, DOCX, TXT, or audio file to create notes.
             </p>
             {isDragging && (
-              <div className="mt-2 flex flex-col items-center justify-center gap-4 rounded-md border border-2 border-dashed border-primary bg-muted/20 p-4 text-center text-sm text-primary">
+              <div className="mt-2 flex flex-col items-center justify-center gap-4 rounded-md border-2 border-dashed border-primary bg-muted/20 p-4 text-center text-sm text-primary">
                 <UploadCloud className="size-10" />
                 Drop your file here to upload
               </div>
