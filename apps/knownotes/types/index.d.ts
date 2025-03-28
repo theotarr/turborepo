@@ -74,7 +74,6 @@ export type SubscriptionPlan = {
   description: string;
   stripePriceIds: string[];
   appStoreProductIds?: string[];
-  chatModel?: "gpt-4o-mini" | "gpt-4" | "gpt-4-turbo" | "gpt-4o";
   lecturesPerMonth?: number;
   messagesPerMonth?: number;
   noteGenerationsPerMonth?: number;
