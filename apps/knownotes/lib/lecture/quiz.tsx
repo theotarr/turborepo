@@ -1,8 +1,8 @@
 "use server";
 
-import { supabase } from "@/lib/supabase";
+import { db } from "@/lib/db";
 import { Transcript } from "@/types";
-import { openai } from "@ai-sdk/openai";
+import { google } from "@ai-sdk/google";
 import { streamObject } from "ai";
 import { createStreamableValue } from "ai/rsc";
 import { z } from "zod";
@@ -19,20 +19,21 @@ export async function generateQuiz(
   if (!session) throw new Error("User not authenticated");
 
   // Verify the user has access to the lecture.
-  const { data: lecture, error } = await supabase
-    .from("Lecture")
-    .select()
-    .eq("id", lectureId)
-    .eq("userId", session.user.id)
-    .single();
-  if (error) throw error;
+  const lecture = await db.lecture.findUnique({
+    where: {
+      id: lectureId,
+      userId: session.user.id,
+    },
+  });
+
   if (!lecture) throw new Error("Lecture not found");
 
   const stream = createStreamableValue();
 
   (async () => {
     const { partialObjectStream } = await streamObject({
-      model: openai("gpt-4o"),
+      // @ts-expect-error - Google model is not typed.
+      model: google("gemini-2.0-flash-001"),
       schema: z.object({
         questions: z.array(
           z.object({
@@ -52,14 +53,18 @@ export async function generateQuiz(
     ${formatTranscript(transcript)}`,
       onFinish: async ({ object }) => {
         // Save the questions in the database.
-        await supabase.from("Question").insert(
-          object?.questions.map(({ question, choices, answerIndex }) => ({
-            lectureId,
-            question,
-            choices,
-            answerIndex,
-          })),
-        );
+        if (object?.questions) {
+          await db.question.createMany({
+            data: object.questions.map(
+              ({ question, choices, answerIndex }) => ({
+                lectureId,
+                question,
+                choices,
+                answerIndex,
+              }),
+            ),
+          });
+        }
       },
     });
 

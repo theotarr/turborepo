@@ -1,5 +1,6 @@
 import fs from "fs";
 import type { TRPCRouterRecord } from "@trpc/server";
+import { google } from "@ai-sdk/google";
 import { openai } from "@ai-sdk/openai";
 import { createClient } from "@deepgram/sdk";
 import { generateObject, generateText } from "ai";
@@ -248,7 +249,8 @@ export const lectureRouter = {
           : lecture.transcript.slice(-100); // Use the last 100 transcript rows.
 
       const { text } = await generateText({
-        model: openai("gpt-4o"),
+        // @ts-expect-error - Google model has different type signature than OpenAI
+        model: google("gemini-2.0-flash-001"),
         system: `\
       You are an AI assistant helping a user with their lecture.
       You are provided with a transcript of the lecture and previous messages.
@@ -357,7 +359,8 @@ export const lectureRouter = {
       if (!lecture) throw new Error("Lecture not found");
 
       const { object } = await generateObject({
-        model: openai("gpt-4o"),
+        // @ts-expect-error - Google model is not typed.
+        model: google("gemini-2.0-flash-001"),
         schema: z.object({
           flashcards: z.array(
             z.object({
@@ -400,7 +403,8 @@ export const lectureRouter = {
       if (!lecture) throw new Error("Lecture not found");
 
       const { object } = await generateObject({
-        model: openai("gpt-4o"),
+        // @ts-expect-error - Google model is not typed.
+        model: google("gemini-2.0-flash-001"),
         schema: z.object({
           questions: z.array(
             z.object({

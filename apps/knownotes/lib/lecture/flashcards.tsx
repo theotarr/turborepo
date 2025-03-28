@@ -2,7 +2,7 @@
 
 import { supabase } from "@/lib/supabase";
 import { Transcript } from "@/types";
-import { openai } from "@ai-sdk/openai";
+import { google } from "@ai-sdk/google";
 import { streamObject } from "ai";
 import { createStreamableValue } from "ai/rsc";
 import { z } from "zod";
@@ -32,7 +32,8 @@ export async function generateFlashcards(
 
   (async () => {
     const { partialObjectStream } = await streamObject({
-      model: openai("gpt-4o"),
+      // @ts-expect-error - Google model is not typed.
+      model: google("gemini-2.0-flash-001"),
       schema: z.object({
         flashcards: z.array(
           z.object({

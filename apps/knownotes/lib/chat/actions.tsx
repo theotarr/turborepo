@@ -9,7 +9,7 @@ import {
 } from "@/lib/prompt";
 import { supabase, vectorStore } from "@/lib/supabase";
 import { Transcript } from "@/types";
-import { openai } from "@ai-sdk/openai";
+import { google } from "@ai-sdk/google";
 import { CoreMessage } from "ai";
 import {
   createAI,
@@ -66,7 +66,7 @@ async function submitLectureMessage(
       .join(" ")
       .split(" ").length * 2;
 
-  if (estimatedTokens > 128000) {
+  if (estimatedTokens > 500_000) {
     const documents = await vectorStore.similaritySearchWithScore(
       content,
       10,
@@ -86,7 +86,8 @@ async function submitLectureMessage(
   let textNode: undefined | React.ReactNode;
 
   const result = await streamUI({
-    model: openai("gpt-4o-mini"),
+    // @ts-ignore
+    model: google("gemini-2.0-flash-001"),
     initial: <SpinnerMessage />,
     messages: [
       { role: "system", content: await LECTURE_CHAT_SYSTEM_PROMPT.format({}) },
@@ -241,7 +242,8 @@ async function submitCourseMessage(
   const messagesLength = aiState.get().messages.length;
 
   const result = await streamUI({
-    model: openai("gpt-4o"),
+    // @ts-expect-error - Google model has different type signature than OpenAI
+    model: google("gemini-2.0-flash-001"),
     initial: <BotMessage sources={sourceList} content={""} />,
     messages: [
       { role: "system", content: await COURSE_CHAT_SYSTEM_PROMPT.format({}) },
@@ -371,7 +373,7 @@ export const getUIStateFromAIState = (aiState: AIState) => {
       display:
         message.role === "user" ? (
           <UserMessage>{message.content as string}</UserMessage>
-        ) : "assistant" ? (
+        ) : message.role === "assistant" ? (
           <BotMessage
             sources={message.sources}
             content={message.content as string}
