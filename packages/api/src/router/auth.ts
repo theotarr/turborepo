@@ -49,7 +49,7 @@ export const authRouter = {
 
     return {
       isPro,
-      isPaused: user.stripeSubscriptionPaused || false,
+      isPaused: user.stripeSubscriptionPaused ?? false,
       resumeAt: user.stripeSubscriptionResumeAt
         ? user.stripeSubscriptionResumeAt.getTime()
         : null,

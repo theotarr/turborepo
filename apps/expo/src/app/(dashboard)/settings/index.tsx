@@ -1,3 +1,4 @@
+import type { Href } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -13,6 +14,7 @@ import * as StoreReview from "expo-store-review";
 import { Picker } from "@react-native-picker/picker";
 import { ChevronLeft, LogOut, Plus, Star } from "lucide-react-native";
 
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
@@ -27,6 +29,7 @@ export default function SettingsPage() {
   const router = useRouter();
   const { colorScheme, setColorScheme } = useColorScheme();
   const user = api.auth.getUser.useQuery();
+  const { data: subscription } = api.auth.getSubscription.useQuery();
   const updateUser = api.auth.update.useMutation();
   const signOut = useSignOut();
 
@@ -57,8 +60,38 @@ export default function SettingsPage() {
           ),
         }}
       />
-      <ScrollView className="flex h-full w-full flex-col gap-6 px-4 py-6">
-        <View className="flex flex-col">
+      <ScrollView className="flex h-full w-full flex-col px-4 py-6">
+        <View className="mb-6">
+          <Text className="text-xl font-semibold text-secondary-foreground">
+            Your Plan
+          </Text>
+          <View className="mt-4 flex flex-col gap-4">
+            <View className="flex-row items-center justify-between">
+              <Text className="text-base font-medium">Plan</Text>
+              {subscription?.isPro ? (
+                <Badge>
+                  <Text>KnowNotes Pro</Text>
+                </Badge>
+              ) : (
+                <Badge variant="outline">
+                  <Text>Free Plan</Text>
+                </Badge>
+              )}
+            </View>
+            <Text className="text-sm text-muted-foreground">
+              Check out{" "}
+              <Link
+                className="text-sm text-muted-foreground underline"
+                href="https://knownotes.ai/login"
+              >
+                KnowNotes web
+              </Link>{" "}
+              to access your notes on any device at any time.
+            </Text>
+          </View>
+        </View>
+
+        <View className="mb-6">
           <Text className="text-xl font-semibold text-secondary-foreground">
             For You
           </Text>
@@ -98,8 +131,10 @@ export default function SettingsPage() {
           </View>
         </View>
 
-        <View className="mt-4 flex flex-col">
-          <Label nativeID="theme">Theme</Label>
+        <View>
+          <Text className="text-xl font-semibold text-secondary-foreground">
+            Theme
+          </Text>
           <Picker
             selectedValue={colorScheme}
             onValueChange={setColorScheme}
@@ -117,6 +152,7 @@ export default function SettingsPage() {
             <Picker.Item label="Dark" value="dark" />
           </Picker>
         </View>
+
         <View>
           <Text className="text-xl font-semibold text-secondary-foreground">
             Account
@@ -137,7 +173,7 @@ export default function SettingsPage() {
                 Update email or delete your account on{" "}
                 <Link
                   className="underline"
-                  href={`${getBaseUrl()}/dashboard/settings`}
+                  href={`${getBaseUrl()}/dashboard/settings` as Href<string>}
                 >
                   KnowNotes.ai
                 </Link>
