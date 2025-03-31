@@ -67,6 +67,7 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isPickingFile, setIsPickingFile] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [isGeneratingNotes, setIsGeneratingNotes] = useState(false);
   const [courseFilter, setCourseFilter] = useState<{
     courseId: string;
     name: string;
@@ -190,6 +191,7 @@ export default function DashboardPage() {
             onSuccess: async () => {
               console.log("Upload completed successfully");
               setUploadProgress(100);
+              setIsGeneratingNotes(true);
 
               // Create the lecture entry in your database
               const lecture = await uploadFile.mutateAsync({
@@ -201,6 +203,7 @@ export default function DashboardPage() {
               router.push(`/lecture/${lecture.id}`);
               setIsPickingFile(false);
               setUploadProgress(0);
+              setIsGeneratingNotes(false);
             },
           });
 
@@ -642,7 +645,9 @@ export default function DashboardPage() {
                     />
                     <Text>
                       {isPickingFile && uploadProgress > 0
-                        ? `Uploading ${uploadProgress.toFixed(0)}%`
+                        ? isGeneratingNotes
+                          ? "Upload complete. Processing..."
+                          : `Uploading ${uploadProgress.toFixed(0)}%`
                         : "Upload File"}
                     </Text>
                   </View>
