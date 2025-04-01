@@ -3,15 +3,12 @@ import { redirect } from "next/navigation";
 import { CourseCard } from "@/components/course-card";
 import { CourseCreateDialog } from "@/components/course-create-dialog";
 import { EmptyPlaceholder } from "@/components/empty-placeholder";
-import { DashboardHeader } from "@/components/header";
 import { LectureCreateActions } from "@/components/lecture-create-dialog";
-import { LectureSearch } from "@/components/lecture-search";
 import {
   QuickLecture,
   QuickPaste,
   QuickUpload,
 } from "@/components/quick-action";
-import { DashboardShell } from "@/components/shell";
 import { buttonVariants } from "@/components/ui/button";
 import { db } from "@/lib/db";
 import { absoluteUrl } from "@/lib/utils";
@@ -73,29 +70,13 @@ export default async function DashboardPage() {
         userId={user?.id as string}
         courses={user?.courses as Course[]}
       />
-      <DashboardShell>
-        <DashboardHeader heading="Dashboard" text={description} />
+      <div className="space-y-8">
         <div className="mb-8 grid auto-rows-fr grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
           <QuickLecture />
           <QuickUpload />
           <QuickPaste />
         </div>
-        <div className="flex flex-col space-y-4">
-          <div className="flex flex-col space-y-2 px-1">
-            <div className="flex items-center justify-between">
-              <span className="text-lg font-medium">Lectures</span>
-            </div>
-            <LectureSearch courses={user?.courses} />
-          </div>
-          <div className="flex justify-center">
-            <Link
-              href="/dashboard/lectures"
-              className="text-sm font-medium text-secondary-foreground hover:underline"
-            >
-              View all lectures
-            </Link>
-          </div>
-        </div>
+
         {user?.courses.length! > 0 ? (
           <div className="flex flex-col space-y-4">
             <div className="flex w-full items-center justify-between">
@@ -137,7 +118,7 @@ export default async function DashboardPage() {
             />
           </EmptyPlaceholder>
         )}
-      </DashboardShell>
+      </div>
     </>
   );
 }
