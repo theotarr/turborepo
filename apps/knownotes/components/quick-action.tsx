@@ -55,7 +55,7 @@ export function QuickAction({
         <div className="flex gap-4">
           <div className="shrink-0">{iconElement}</div>
           <div className="flex-1 space-y-1.5">
-            <CardTitle className="text-base font-medium tracking-tight">
+            <CardTitle className="text-base font-semibold tracking-tight">
               {title}
             </CardTitle>
             {description && (
