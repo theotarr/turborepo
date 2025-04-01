@@ -44,7 +44,7 @@ export const useTabStore = create<{
   notesTab: "notes" | "enhanced";
   setNotesTab: (tab: "notes" | "enhanced") => void;
 }>((set) => ({
-  activeTab: "chat",
+  activeTab: "notes",
   setActiveTab: (activeTab) => set({ activeTab }),
   notesTab: "notes",
   setNotesTab: (notesTab) => set({ notesTab }),
@@ -240,6 +240,9 @@ export function NotesPage({ lecture }: NotesPageProps) {
   const [isLoadingQuiz, setIsLoadingQuiz] = useState(false);
   const [quizQuestions, setQuizQuestions] = useState<any[]>([]);
 
+  // Determine the layout based on lecture type and PDF availability
+  const layout = lecture.type === "PDF" && lecture.fileId ? "pdf" : "notes";
+
   function changeNotesTab(tab: "notes" | "enhanced") {
     setNotesTab(tab);
     if (tab === "notes")
@@ -252,8 +255,8 @@ export function NotesPage({ lecture }: NotesPageProps) {
     if (!hydrated) {
       setTranscript(lecture.transcript as any as Transcript[]);
 
-      // If the lecture is a PDF, get the public url for it.
-      if (lecture.type === "PDF" && !pdfUrl) {
+      // If the lecture is a PDF and has a fileId, get the public url for it.
+      if (lecture.type === "PDF" && lecture.fileId && !pdfUrl) {
         const supabase = createBrowserClient(
           process.env.NEXT_PUBLIC_SUPABASE_URL as string,
           process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string,
@@ -273,6 +276,8 @@ export function NotesPage({ lecture }: NotesPageProps) {
           }
 
           setPdfUrl(pdf.signedUrl);
+          // Set active tab to notes for PDFs
+          setActiveTab("notes");
         })();
       }
 
@@ -467,10 +472,10 @@ export function NotesPage({ lecture }: NotesPageProps) {
       />
       <ResizablePanelGroup direction={resizablePanelDirection}>
         <ResizablePanel
-          defaultSize={lecture.type === "PDF" ? 50 : 65}
+          defaultSize={layout === "pdf" ? 50 : 65}
           className="relative mx-8"
         >
-          {pdfUrl ? (
+          {layout === "pdf" && pdfUrl ? (
             <PdfRenderer lectureId={lecture.id} url={pdfUrl} />
           ) : (
             <>
