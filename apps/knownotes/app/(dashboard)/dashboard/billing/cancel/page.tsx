@@ -34,16 +34,19 @@ const CANCELLATION_REASONS = [
     id: "too-expensive",
     label: "Too expensive",
     action: "discount",
+    requiresInput: true,
   },
   {
     id: "too-complex",
     label: "Too complex",
     action: "tutorial",
+    requiresInput: true,
   },
   {
     id: "transcription-accuracy",
     label: "Transcription isn't accurate",
     action: "info",
+    requiresInput: true,
   },
   {
     id: "competitor",
@@ -182,12 +185,12 @@ export default function CancelSubscriptionPage() {
               </RadioGroup>
             </div>
 
-            {requiresInput && (
+            {selectedReason && (
               <div className="mt-4">
                 <Label htmlFor="details">
                   {selectedReason === "competitor"
                     ? "Which competitor are you switching to?"
-                    : "Please provide more details"}
+                    : "Please provide more details about your experience"}
                 </Label>
                 <Input
                   id="details"
