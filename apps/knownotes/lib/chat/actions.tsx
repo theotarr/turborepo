@@ -7,7 +7,7 @@ import {
   LECTURE_CHAT_SYSTEM_PROMPT,
   LECTURE_CHAT_USER_PROMPT,
 } from "@/lib/prompt";
-import { supabase, vectorStore } from "@/lib/supabase";
+import { vectorStore } from "@/lib/supabase";
 import { Transcript } from "@/types";
 import { google } from "@ai-sdk/google";
 import { CoreMessage } from "ai";
@@ -20,6 +20,7 @@ import {
 } from "ai/rsc";
 import { v1 as uuidv1 } from "uuid";
 
+import { db } from "../db";
 import { formatTranscript } from "../utils";
 
 async function submitLectureMessage(
@@ -43,18 +44,20 @@ async function submitLectureMessage(
     ],
   });
 
-  let { data: lecture } = await supabase
-    .from("Lecture")
-    .select()
-    .eq("id", lectureId)
-    .single();
+  const lecture = await db.lecture.findUnique({
+    where: {
+      id: lectureId,
+    },
+  });
   if (!lecture) throw new Error("Lecture not found");
 
   // Save the user messsage in the DB.
-  await supabase.from("Message").insert({
-    lectureId,
-    content,
-    role: "USER",
+  await db.message.create({
+    data: {
+      lectureId,
+      content,
+      role: "USER",
+    },
   });
 
   let transcriptContext: string = "";
@@ -123,10 +126,12 @@ async function submitLectureMessage(
       // When it's the final content, mark the state as done and ready for the client to access.
       if (done) {
         // Save the AI response in the DB.
-        await supabase.from("Message").insert({
-          content,
-          role: "ASSISTANT",
-          lectureId,
+        await db.message.create({
+          data: {
+            content,
+            role: "ASSISTANT",
+            lectureId,
+          },
         });
 
         textStream.done();
@@ -178,31 +183,30 @@ async function submitCourseMessage(
     ],
   });
 
-  let { data: chat } = await supabase
-    .from("Chat")
-    .select()
-    .eq("id", chatId)
-    .single();
+  const chat = await db.chat.findUnique({
+    where: {
+      id: chatId,
+    },
+  });
   if (!chat) {
-    const { data } = await supabase
-      .from("Chat")
-      .insert({
+    const chat = await db.chat.create({
+      data: {
         id: chatId,
         name: `${content.slice(0, 20)}...`,
         courseId,
         userId,
-      })
-      .select()
-      .single();
-    chat = data;
+      },
+    });
   }
-  if (!chat) return new Response("Stored chat not found", { status: 404 });
+  if (!chat) throw new Error("Stored chat not found");
 
   // Save the user messsage in the DB.
-  await supabase.from("Message").insert({
-    content,
-    role: "USER",
-    chatId,
+  await db.message.create({
+    data: {
+      content,
+      role: "USER",
+      chatId,
+    },
   });
 
   // Fetch the relevant lecture transcripts from the db.
@@ -222,16 +226,17 @@ async function submitCourseMessage(
   const uniqueLectures = [
     ...new Set(similarCourseDocuments.map((doc) => doc.metadata.lectureId)),
   ];
-  const { data: lectures, error } = await supabase
-    .from("Lecture")
-    .select("*")
-    .in("id", uniqueLectures);
-  if (error) throw error;
+  const lectures = await db.lecture.findMany({
+    where: {
+      id: { in: uniqueLectures },
+    },
+  });
+
   const sourceList = lectures.map((l) => ({
     id: l.id,
     title: l.title,
     source: l.youtubeVideoId ? "YouTube" : "Lecture",
-    date: l.createdAt,
+    date: l.createdAt.toISOString(),
   }));
 
   let textStream: undefined | ReturnType<typeof createStreamableValue<string>>;
@@ -278,11 +283,13 @@ async function submitCourseMessage(
       // When it's the final content, mark the state as done and ready for the client to access.
       if (done) {
         // Save the AI response in the DB.
-        await supabase.from("Message").insert({
-          sources: sourceList,
-          content,
-          role: "ASSISTANT",
-          chatId,
+        await db.message.create({
+          data: {
+            sources: sourceList,
+            content,
+            role: "ASSISTANT",
+            chatId,
+          },
         });
 
         textStream.done();

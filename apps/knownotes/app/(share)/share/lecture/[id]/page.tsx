@@ -1,11 +1,8 @@
 import { Metadata } from "next";
 import { NotesSharePage } from "@/components/notes-share-page";
 import { env } from "@/env";
-import { supabase } from "@/lib/supabase";
+import { db } from "@/lib/db";
 import { absoluteUrl } from "@/lib/utils";
-
-export const dynamic = "force-dynamic";
-export const maxDuration = 30;
 
 interface LecturePageProps {
   params: { id: string };
@@ -14,11 +11,11 @@ interface LecturePageProps {
 export async function generateMetadata({
   params,
 }: LecturePageProps): Promise<Metadata> {
-  const { data: lecture } = await supabase
-    .from("Lecture")
-    .select("*")
-    .eq("id", params.id)
-    .single();
+  const lecture = await db.lecture.findUnique({
+    where: {
+      id: params.id,
+    },
+  });
   if (!lecture) return {};
 
   const ogUrl = new URL(`${env.NEXT_PUBLIC_APP_URL}/api/og`);
@@ -52,15 +49,15 @@ export async function generateMetadata({
 }
 
 export default async function SharePage({ params }: LecturePageProps) {
-  const { data: lecture } = await supabase
-    .from("Lecture")
-    .select("*, course:courseId (*), Message(*)")
-    .eq("id", params.id)
-    .single();
-
-  // Convert lecture.Message to lecture.messages
-  lecture.messages = lecture.Message;
-  delete lecture.Message;
+  const lecture = await db.lecture.findUnique({
+    where: {
+      id: params.id,
+    },
+    include: {
+      course: true,
+      messages: true,
+    },
+  });
 
   if (!lecture) return <>Loading...</>;
 

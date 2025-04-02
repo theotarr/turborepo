@@ -12,7 +12,7 @@ import { Badge } from "./ui/badge";
 
 interface NotesPageProps {
   lecture: Lecture & {
-    course: Course;
+    course?: Course | null;
     messages: Message[];
   };
 }
