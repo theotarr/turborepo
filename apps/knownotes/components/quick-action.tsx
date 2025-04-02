@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { useRouter } from "next/navigation";
 import { createLecture } from "@/app/(lecture)/actions";
 import {
@@ -9,6 +10,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 
 import { Icons } from "./icons";
 import {
@@ -70,7 +72,7 @@ export function QuickAction({
   );
 }
 
-export function QuickLecture() {
+function QuickLectureComponent() {
   const router = useRouter();
   return (
     <QuickAction
@@ -85,18 +87,7 @@ export function QuickLecture() {
   );
 }
 
-export function QuickAffiliate() {
-  return (
-    <QuickAction
-      icon="dollarSign"
-      title="Get Paid"
-      description="Refer your friends to KnowNotes."
-      onClick={() => window.open("https://affiliates.knownotes.ai/", "_blank")}
-    />
-  );
-}
-
-export function QuickPaste() {
+function QuickPasteComponent() {
   const { setOpen, setTab } = useYoutubeTextDialogStore();
 
   return (
@@ -112,7 +103,7 @@ export function QuickPaste() {
   );
 }
 
-export function QuickUpload() {
+function QuickUploadComponent() {
   const { setOpen } = useFileUploadDialogStore();
 
   return (
@@ -126,3 +117,25 @@ export function QuickUpload() {
     />
   );
 }
+
+// Memoized components
+export const QuickLecture = memo(QuickLectureComponent);
+export const QuickPaste = memo(QuickPasteComponent);
+export const QuickUpload = memo(QuickUploadComponent);
+
+// Array of quick actions with animations
+export const QuickActions = memo(function QuickActionsComponent() {
+  const quickActions = [
+    { Component: QuickLecture },
+    { Component: QuickPaste },
+    { Component: QuickUpload },
+  ];
+
+  return (
+    <>
+      {quickActions.map(({ Component }, index) => (
+        <Component key={index} />
+      ))}
+    </>
+  );
+});

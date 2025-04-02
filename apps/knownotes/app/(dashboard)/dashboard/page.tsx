@@ -6,11 +6,7 @@ import { EmptyPlaceholder } from "@/components/empty-placeholder";
 import { DashboardHeader } from "@/components/header";
 import { LectureCreateActions } from "@/components/lecture-create-dialog";
 import { LectureSearch } from "@/components/lecture-search";
-import {
-  QuickLecture,
-  QuickPaste,
-  QuickUpload,
-} from "@/components/quick-action";
+import { QuickActions } from "@/components/quick-action";
 import { DashboardShell } from "@/components/shell";
 import { buttonVariants } from "@/components/ui/button";
 import { db } from "@/lib/db";
@@ -76,9 +72,7 @@ export default async function DashboardPage() {
       <DashboardShell>
         <DashboardHeader heading="Dashboard" text={description} />
         <div className="mb-8 grid auto-rows-fr grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
-          <QuickLecture />
-          <QuickUpload />
-          <QuickPaste />
+          <QuickActions />
         </div>
         <div className="flex flex-col space-y-4">
           <div className="flex flex-col space-y-2 px-1">
