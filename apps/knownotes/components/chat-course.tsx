@@ -12,6 +12,7 @@ import { PromptForm } from "./chat-form";
 import { EmptyChat } from "./empty-chat";
 import { UserMessage } from "./message";
 import { PremiumFeature } from "./premium-feature";
+import { SuggestedActions } from "./suggested-actions";
 import { Separator } from "./ui/separator";
 
 interface ChatCourseProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -22,29 +23,6 @@ interface ChatCourseProps extends React.HTMLAttributes<HTMLDivElement> {
   };
   chatName?: string;
 }
-
-const exampleMessages = [
-  {
-    heading: "What did my teacher say",
-    subheading: "that I need to know for the test?",
-    message: `What did my teacher say that I need to know for the test?`,
-  },
-  {
-    heading: "Search for relevant quotes",
-    subheading: "about Macbeth's soliloquy",
-    message: "Search for relevant quotes about a Macbeth's soliloquy",
-  },
-  {
-    heading: "Write an essay",
-    subheading: "on the theme of love in Romeo and Juliet",
-    message: `Write an essay on the theme of love in Romeo and Juliet`,
-  },
-  {
-    heading: "Help me study for the test",
-    subheading: `on the history of Reconstruction in the US`,
-    message: `Help me study for the test on the history of Reconstruction in the US`,
-  },
-];
 
 export function ChatCourse({
   id,
@@ -111,25 +89,15 @@ export function ChatCourse({
           <div className="fixed inset-x-0 bottom-0 duration-300 ease-in-out animate-in peer-[[data-state=open]]:group-[]:lg:pl-[250px] peer-[[data-state=open]]:group-[]:xl:pl-[300px]">
             <ButtonScrollToBottom />
             <div className="mx-auto sm:max-w-2xl sm:px-4">
-              <div className="mb-4 grid grid-cols-2 gap-2 px-4 sm:px-0">
-                {messages.length === 0 &&
-                  exampleMessages.map((example, index) => (
-                    <div
-                      key={index}
-                      className={`cursor-pointer rounded-lg border bg-background p-4 hover:bg-secondary/70 ${
-                        index > 1 && "hidden md:block"
-                      }`}
-                      onClick={() => setInput(example.message)}
-                    >
-                      <div className="text-sm font-semibold">
-                        {example.heading}
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        {example.subheading}
-                      </div>
-                    </div>
-                  ))}
-              </div>
+              {messages.length === 0 && (
+                <SuggestedActions
+                  // @ts-ignore
+                  append={(message) => {
+                    setInput(message.content);
+                  }}
+                  className="mb-4"
+                />
+              )}
               <div className="pb-4 md:pb-6">
                 <PromptForm
                   onSubmit={async (input) => {

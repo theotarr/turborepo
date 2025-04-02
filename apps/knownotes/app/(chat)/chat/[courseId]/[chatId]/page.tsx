@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import { ChatCourse } from "@/components/chat-course";
 import { env } from "@/env";
 import { AI } from "@/lib/chat/actions";
+import { db } from "@/lib/db";
 import { supabase } from "@/lib/supabase";
 import { absoluteUrl } from "@/lib/utils";
 
@@ -12,21 +13,19 @@ interface SavedChatPageProps {
 export async function generateMetadata({
   params,
 }: SavedChatPageProps): Promise<Metadata> {
-  const { data: course } = await supabase
-    .from("Course")
-    .select("id, name")
-    .eq("id", params.courseId)
-    .single();
+  const course = await db.course.findUnique({
+    where: {
+      id: params.courseId,
+    },
+  });
   if (!course) return {};
 
   const chat = params.chatId
-    ? (
-        await supabase
-          .from("Chat")
-          .select("id, name")
-          .eq("id", params.chatId)
-          .single()
-      ).data
+    ? await db.chat.findUnique({
+        where: {
+          id: params.chatId,
+        },
+      })
     : null;
 
   const ogUrl = new URL(`${env.NEXT_PUBLIC_APP_URL}/api/og`);
@@ -65,21 +64,22 @@ export async function generateMetadata({
 }
 
 export default async function CourseChatPage({ params }: SavedChatPageProps) {
-  const { data: course } = await supabase
-    .from("Course")
-    .select("*")
-    .eq("id", params.courseId)
-    .single();
+  const course = await db.course.findUnique({
+    where: {
+      id: params.courseId,
+    },
+  });
+  if (!course) return <div>Course not found</div>;
 
-  const { data: chat } = await supabase
-    .from("Chat")
-    .select("*, Message(*)")
-    .eq("id", params.chatId)
-    .single();
-
-  // Convert chat.Message to chat.messages
-  chat.messages = chat.Message;
-  delete chat.Message;
+  const chat = await db.chat.findUnique({
+    where: {
+      id: params.chatId,
+    },
+    include: {
+      messages: true,
+    },
+  });
+  if (!chat) return <div>Chat not found</div>;
 
   const aiState = {
     chatId: chat.id as string,
@@ -96,6 +96,7 @@ export default async function CourseChatPage({ params }: SavedChatPageProps) {
   };
 
   return (
+    // @ts-ignore
     <AI initialAIState={aiState}>
       <ChatCourse id={chat.id} course={course} chatName={chat.name} />
     </AI>

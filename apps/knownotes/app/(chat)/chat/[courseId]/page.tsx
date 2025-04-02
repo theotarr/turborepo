@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import { ChatCourse } from "@/components/chat-course";
 import { env } from "@/env";
 import { AI } from "@/lib/chat/actions";
-import { supabase } from "@/lib/supabase";
+import { db } from "@/lib/db";
 import { absoluteUrl } from "@/lib/utils";
 import { v1 as uuidv1 } from "uuid";
 
@@ -13,11 +13,11 @@ interface ChatPageProps {
 export async function generateMetadata({
   params,
 }: ChatPageProps): Promise<Metadata> {
-  const { data: course } = await supabase
-    .from("Course")
-    .select("id, name")
-    .eq("id", params.courseId)
-    .single();
+  const course = await db.course.findUnique({
+    where: {
+      id: params.courseId,
+    },
+  });
   if (!course) return {};
 
   const ogUrl = new URL(`${env.NEXT_PUBLIC_APP_URL}/api/og`);
@@ -54,11 +54,14 @@ export async function generateMetadata({
 }
 
 export default async function CourseChatPage({ params }: ChatPageProps) {
-  const { data: course } = await supabase
-    .from("Course")
-    .select("*")
-    .eq("id", params.courseId)
-    .single();
+  console.log({ params });
+  const course = await db.course.findUnique({
+    where: {
+      id: params.courseId,
+    },
+  });
+  console.log({ course });
+  if (!course) return <div>Course not found</div>;
 
   const chatId = uuidv1();
   const aiState = {
