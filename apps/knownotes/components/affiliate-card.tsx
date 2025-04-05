@@ -20,10 +20,7 @@ export function StaticAffiliateCard({
   ...props
 }: StaticAffiliateCardProps) {
   return (
-    <Card
-      className={cn("absolute bottom-4 right-4 z-50", className)}
-      {...props}
-    >
+    <Card className={cn("absolute bottom-4 left-4 z-50", className)} {...props}>
       <CardHeader>
         <CardTitle>Get Paid To Share</CardTitle>
         <CardDescription>

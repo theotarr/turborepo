@@ -134,9 +134,12 @@ model Chat {
 
 model Message {
   id      String      @id @default(dbgenerated("uuid_generate_v1()")) @db.Uuid
-  content String
-  sources Json[]      @default([])
   role    MessageRole
+  content String?
+
+  parts       Json[]
+  attachments Json[]
+  sources     Json[]
 
   lecture   Lecture? @relation(fields: [lectureId], references: [id], onDelete: Cascade)
   lectureId String?  @db.Uuid

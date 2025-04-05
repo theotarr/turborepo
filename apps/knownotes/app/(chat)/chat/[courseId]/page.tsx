@@ -1,10 +1,12 @@
 import { Metadata } from "next";
+import { notFound, redirect } from "next/navigation";
 import { ChatCourse } from "@/components/chat-course";
 import { env } from "@/env";
-import { AI } from "@/lib/chat/actions";
 import { db } from "@/lib/db";
 import { absoluteUrl } from "@/lib/utils";
 import { v1 as uuidv1 } from "uuid";
+
+import { auth } from "@acme/auth";
 
 interface ChatPageProps {
   params: { courseId: string };
@@ -54,24 +56,21 @@ export async function generateMetadata({
 }
 
 export default async function CourseChatPage({ params }: ChatPageProps) {
-  console.log({ params });
+  const session = await auth();
+  if (!session) return redirect("/login");
+
   const course = await db.course.findUnique({
     where: {
       id: params.courseId,
     },
   });
-  console.log({ course });
-  if (!course) return <div>Course not found</div>;
+  if (!course) return notFound();
 
   const chatId = uuidv1();
-  const aiState = {
-    chatId,
-    messages: [],
-  };
 
   return (
-    <AI initialAIState={aiState}>
-      <ChatCourse id={chatId} course={course} />
-    </AI>
+    <main className="relative flex min-h-svh flex-1 flex-col bg-background">
+      <ChatCourse id={chatId} userId={session.user.id} course={course} />
+    </main>
   );
 }

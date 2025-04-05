@@ -21,6 +21,7 @@ import {
   FileAudio2,
   FileSignature,
   FileText,
+  FileVideo2,
   Folder,
   Forward,
   GalleryVerticalEnd,
@@ -307,4 +308,7 @@ export const Icons = {
       ></path>
     </svg>
   ),
+  file: File,
+  video: FileVideo2,
+  audio: FileAudio2,
 };

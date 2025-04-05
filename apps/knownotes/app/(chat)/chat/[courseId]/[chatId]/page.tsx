@@ -1,9 +1,8 @@
 import { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { ChatCourse } from "@/components/chat-course";
 import { env } from "@/env";
-import { AI } from "@/lib/chat/actions";
 import { db } from "@/lib/db";
-import { supabase } from "@/lib/supabase";
 import { absoluteUrl } from "@/lib/utils";
 
 interface SavedChatPageProps {
@@ -69,36 +68,21 @@ export default async function CourseChatPage({ params }: SavedChatPageProps) {
       id: params.courseId,
     },
   });
-  if (!course) return <div>Course not found</div>;
+  if (!course) return notFound();
 
   const chat = await db.chat.findUnique({
     where: {
       id: params.chatId,
     },
-    include: {
-      messages: true,
-    },
   });
-  if (!chat) return <div>Chat not found</div>;
-
-  const aiState = {
-    chatId: chat.id as string,
-    messages: chat.messages.map((m) => ({
-      id: m.id as string,
-      role: m.role.toLowerCase() as
-        | "function"
-        | "user"
-        | "assistant"
-        | "system",
-      content: m.content as string,
-      sources: m.sources,
-    })),
-  };
+  if (!chat) return notFound();
 
   return (
-    // @ts-ignore
-    <AI initialAIState={aiState}>
-      <ChatCourse id={chat.id} course={course} chatName={chat.name} />
-    </AI>
+    <ChatCourse
+      id={chat.id}
+      userId={session.user.id}
+      course={course}
+      chatName={chat.name}
+    />
   );
 }

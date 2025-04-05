@@ -12,15 +12,16 @@ import { generateEnhancedNotes } from "@/lib/lecture/notes";
 import { generateQuiz } from "@/lib/lecture/quiz";
 import { cn } from "@/lib/utils";
 import { Transcript } from "@/types";
-import { Lecture, Message } from "@prisma/client";
+import { Lecture } from "@prisma/client";
 import { createBrowserClient } from "@supabase/ssr";
 import { Editor as EditorType, JSONContent } from "@tiptap/core";
+import { UIMessage } from "ai";
 import { readStreamableValue } from "ai/rsc";
 import { toast } from "sonner";
 import { create } from "zustand";
 
 import { AffiliateCard } from "./affiliate-card";
-import { Chat } from "./chat-lecture";
+import { Chat } from "./chat";
 import { Dictaphone } from "./dictaphone";
 import Editor from "./editor";
 import { FlashcardSkeleton } from "./flashcard";
@@ -194,8 +195,9 @@ export function isNotesNull(notes: JSONContent | string | undefined) {
 }
 
 interface NotesPageProps {
+  userId: string;
+  initialMessages: UIMessage[];
   lecture: Lecture & {
-    messages: Message[];
     flashcards?: {
       id: string;
       term: string;
@@ -213,7 +215,11 @@ interface NotesPageProps {
   };
 }
 
-export function NotesPage({ lecture }: NotesPageProps) {
+export function NotesPage({
+  userId,
+  initialMessages,
+  lecture,
+}: NotesPageProps) {
   const [hydrated, setHydrated] = useState(false);
   const [pdfUrl, setPdfUrl] = useState<string | undefined>(undefined);
   const { activeTab, setActiveTab, notesTab, setNotesTab } = useTabStore();
@@ -793,7 +799,11 @@ export function NotesPage({ lecture }: NotesPageProps) {
                 </TabsList>
               </ScrollArea>
               <TabsContent value="chat">
-                <Chat lectureId={lecture.id} />
+                <Chat
+                  userId={userId}
+                  lectureId={lecture.id}
+                  initialMessages={initialMessages}
+                />
               </TabsContent>
 
               {pdfUrl && (

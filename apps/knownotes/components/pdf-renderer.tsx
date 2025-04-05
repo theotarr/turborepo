@@ -1,6 +1,5 @@
 "use client";
 
-import { useActions, useUIState } from "ai/rsc";
 import {
   ChevronDown,
   ChevronUp,
@@ -16,6 +15,7 @@ import "react-pdf/dist/Page/TextLayer.css";
 
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
+import { UseChatHelpers } from "@ai-sdk/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useResizeDetector } from "react-resize-detector";
@@ -23,8 +23,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 import { Icons } from "./icons";
-import { UserMessage } from "./message";
-import { useChatUIStore, useTabStore, useTranscriptStore } from "./notes-page";
+import { useChatUIStore, useTabStore } from "./notes-page";
 import { Button } from "./ui/button";
 import {
   DropdownMenu,
@@ -38,6 +37,7 @@ pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/b
 
 interface PdfRendererProps {
   lectureId: string;
+  append: UseChatHelpers["append"];
   url: string;
   className?: string;
 }
@@ -54,14 +54,7 @@ const documentOptions = {
   standardFontDataUrl: "https://unpkg.com/pdfjs-dist@3.4.120/standard_fonts/",
 };
 
-export const PdfRenderer = ({
-  url,
-  className,
-  lectureId,
-}: PdfRendererProps) => {
-  const [_, setMessages] = useUIState();
-  const { transcript } = useTranscriptStore();
-  const { submitLectureMessage } = useActions();
+export const PdfRenderer = ({ url, className, append }: PdfRendererProps) => {
   const { setIsLoading, setScrollToBottom } = useChatUIStore();
   const { setActiveTab } = useTabStore();
 
@@ -289,26 +282,16 @@ export const PdfRenderer = ({
   const handleAction = async (action: string) => {
     const input = `${action}${selectedText}`;
 
-    // Set loading state to true
     setIsLoading(true);
-
     setActiveTab("chat");
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: new Date().getTime(),
-        role: "user" as "function" | "assistant" | "user" | "system",
-        display: <UserMessage>{input}</UserMessage>,
-      },
-    ]);
-
-    // Hide popup after selection
     setShowPopup(false);
 
     // Submit the user message to the server.
     try {
-      const message = await submitLectureMessage(input, lectureId, transcript);
-      setMessages((prev) => [...prev, message]);
+      append({
+        role: "user",
+        content: input,
+      });
 
       // Trigger scroll to bottom
       setScrollToBottom(true);
