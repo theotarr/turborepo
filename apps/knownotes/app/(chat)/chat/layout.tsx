@@ -1,4 +1,3 @@
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
@@ -13,11 +12,9 @@ export default async function ChatLayout({ children }: ChatLayoutProps) {
   const session = await auth();
   if (!session) return redirect("/login");
 
-  const isCollapsed = cookies().get("sidebar:state")?.value !== "true";
-
   return (
-    <div className="flex min-h-screen flex-col">
-      <SidebarProvider defaultOpen={!isCollapsed}>
+    <div className="flex min-h-screen">
+      <SidebarProvider defaultOpen={true}>
         <AppSidebar userId={session?.user.id} />
         <SidebarInset>{children}</SidebarInset>
       </SidebarProvider>

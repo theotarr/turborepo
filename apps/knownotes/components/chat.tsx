@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { v1 as uuidv1 } from "uuid";
 
+import { ChatHeader } from "./chat-header";
 import { Messages } from "./messages";
 import { MultimodalInput } from "./multimodal-input";
 import { Button } from "./ui/button";
@@ -34,7 +35,6 @@ interface ChatProps {
   onMessage?: (message: UIMessage) => void;
   bodyData?: Record<string, any>; // Additional data to send in the request body
   apiPath?: string; // Custom API path
-  showTemplates?: boolean; // Whether to show templates
   onAppendAvailable?: (append: (message: UIMessage) => void) => void;
 }
 
@@ -46,7 +46,6 @@ export function Chat({
   onMessage,
   bodyData = {},
   apiPath = "/api/chat",
-  showTemplates = false,
   onAppendAvailable,
 }: ChatProps) {
   const {
@@ -106,10 +105,12 @@ export function Chat({
   return (
     <>
       <div className="flex h-full flex-col">
-        <div className="mt-2 flex flex-col items-start gap-2">
-          {lectureId &&
-            messages.length === 0 &&
-            CHAT_TEMPLATES.map((template, i) => (
+        {chatId && <ChatHeader />}
+
+        {lectureId &&
+          messages.length === 0 &&
+          CHAT_TEMPLATES.map((template, i) => (
+            <div className="mt-2 flex flex-col items-start gap-2">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -132,8 +133,8 @@ export function Chat({
                   {template.text}
                 </Button>
               </motion.div>
-            ))}
-        </div>
+            </div>
+          ))}
 
         <div className="flex-1 overflow-y-auto">
           <Messages
