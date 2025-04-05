@@ -8,5 +8,5 @@ interface PremiumFeatureProps {
 
 export function PremiumFeature({ children }: PremiumFeatureProps) {
   usePaywall(); // Show the correct paywall based on the user subscription status.
-  return <>{children}</>;
+  return children;
 }

@@ -2,29 +2,26 @@
 
 import React from "react";
 import { useRouter } from "next/navigation";
-import { cn } from "@/lib/utils";
 import { UIMessage } from "ai";
 
 import { Chat } from "./chat";
 import { PremiumFeature } from "./premium-feature";
 
-interface ChatCourseProps extends React.HTMLAttributes<HTMLDivElement> {
+interface ChatCourseProps {
   id: string;
   userId: string;
   course: {
     id: string;
     name: string;
   };
-  chatName?: string;
+  initialMessages?: UIMessage[];
 }
 
 export function ChatCourse({
   id,
   userId,
   course,
-  chatName,
-  className,
-  ...props
+  initialMessages,
 }: ChatCourseProps) {
   const router = useRouter();
 
@@ -39,29 +36,14 @@ export function ChatCourse({
 
   return (
     <PremiumFeature>
-      <div
-        className={cn("flex w-full flex-col sm:max-w-3xl", className)}
-        {...props}
-      >
-        <div className="mb-6 mt-10 flex-col px-4 md:-ml-4 md:px-0">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-semibold leading-tight tracking-tighter md:text-4xl">
-                {chatName || "New Chat"}
-              </h1>
-              <p className="text-lg text-muted-foreground">{course.name}</p>
-            </div>
-          </div>
-        </div>
-        <Chat
-          userId={userId}
-          chatId={id}
-          initialMessages={[]}
-          onMessage={handleMessage}
-          bodyData={{ courseId: course.id }}
-          apiPath="/api/chat/course"
-        />
-      </div>
+      <Chat
+        userId={userId}
+        chatId={id}
+        initialMessages={initialMessages || []}
+        onMessage={handleMessage}
+        bodyData={{ courseId: course.id }}
+        apiPath="/api/chat/course"
+      />
     </PremiumFeature>
   );
 }

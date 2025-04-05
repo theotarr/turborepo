@@ -68,9 +68,5 @@ export default async function CourseChatPage({ params }: ChatPageProps) {
 
   const chatId = uuidv1();
 
-  return (
-    <main className="relative flex min-h-svh flex-1 flex-col bg-background">
-      <ChatCourse id={chatId} userId={session.user.id} course={course} />
-    </main>
-  );
+  return <ChatCourse id={chatId} userId={session.user.id} course={course} />;
 }

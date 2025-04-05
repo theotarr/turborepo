@@ -45,22 +45,20 @@ export const useTabStore = create<{
   notesTab: "notes" | "enhanced";
   setNotesTab: (tab: "notes" | "enhanced") => void;
 }>((set) => ({
-  activeTab: "notes",
+  activeTab: "chat",
   setActiveTab: (activeTab) => set({ activeTab }),
   notesTab: "notes",
   setNotesTab: (notesTab) => set({ notesTab }),
 }));
 
-export const useChatUIStore = create<{
-  isLoading: boolean;
-  setIsLoading: (isLoading: boolean) => void;
-  scrollToBottom: boolean;
-  setScrollToBottom: (scrollToBottom: boolean) => void;
+export const useChatStore = create<{
+  append: ((message: { role: string; content: string }) => void) | null;
+  setAppend: (
+    append: (message: { role: string; content: string }) => void,
+  ) => void;
 }>((set) => ({
-  isLoading: false,
-  setIsLoading: (isLoading) => set({ isLoading }),
-  scrollToBottom: false,
-  setScrollToBottom: (scrollToBottom) => set({ scrollToBottom }),
+  append: null,
+  setAppend: (append) => set({ append }),
 }));
 
 export const useNotesStore = create<{
@@ -469,6 +467,25 @@ export function NotesPage({
     };
   }, [isGeneratingNotes]);
 
+  // Add effect to ensure there's always a default tab selected
+  useEffect(() => {
+    // If no tab is selected or activeTab is invalid, default to "chat"
+    // This ensures there's always a tab selected even after page reload
+    if (
+      !activeTab ||
+      (activeTab !== "notes" &&
+        activeTab !== "chat" &&
+        activeTab !== "flashcards" &&
+        activeTab !== "quiz")
+    ) {
+      if (lecture.type === "PDF" && lecture.fileId) {
+        setActiveTab("notes");
+      } else {
+        setActiveTab("chat");
+      }
+    }
+  }, [activeTab, lecture.type, lecture.fileId, setActiveTab]);
+
   return (
     <>
       <AffiliateCard
@@ -678,7 +695,6 @@ export function NotesPage({
           <div className="flex w-full flex-col px-4">
             <Tabs
               className="mb-2"
-              defaultValue="chat"
               value={activeTab}
               onValueChange={(value) => setActiveTab(value as any)}
             >
@@ -799,11 +815,16 @@ export function NotesPage({
                 </TabsList>
               </ScrollArea>
               <TabsContent value="chat">
-                <Chat
-                  userId={userId}
-                  lectureId={lecture.id}
-                  initialMessages={initialMessages}
-                />
+                <div className="flex h-[calc(100vh-8rem)] flex-col">
+                  <Chat
+                    userId={userId}
+                    lectureId={lecture.id}
+                    initialMessages={initialMessages}
+                    onAppendAvailable={(append) =>
+                      useChatStore.getState().setAppend(append)
+                    }
+                  />
+                </div>
               </TabsContent>
 
               {pdfUrl && (

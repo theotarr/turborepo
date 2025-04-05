@@ -23,7 +23,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 import { Icons } from "./icons";
-import { useChatUIStore, useTabStore } from "./notes-page";
+import { useChatStore, useTabStore } from "./notes-page";
 import { Button } from "./ui/button";
 import {
   DropdownMenu,
@@ -37,7 +37,6 @@ pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/b
 
 interface PdfRendererProps {
   lectureId: string;
-  append: UseChatHelpers["append"];
   url: string;
   className?: string;
 }
@@ -54,9 +53,9 @@ const documentOptions = {
   standardFontDataUrl: "https://unpkg.com/pdfjs-dist@3.4.120/standard_fonts/",
 };
 
-export const PdfRenderer = ({ url, className, append }: PdfRendererProps) => {
-  const { setIsLoading, setScrollToBottom } = useChatUIStore();
+export const PdfRenderer = ({ url, className }: PdfRendererProps) => {
   const { setActiveTab } = useTabStore();
+  const { append } = useChatStore();
 
   const [numPages, setNumPages] = useState<number>();
   const [currPage, setCurrPage] = useState<number>(1);
@@ -280,28 +279,34 @@ export const PdfRenderer = ({ url, className, append }: PdfRendererProps) => {
 
   // Handle actions.
   const handleAction = async (action: string) => {
-    const input = `${action}${selectedText}`;
+    if (!append) {
+      toast.error("Chat functionality not available");
+      setActiveTab("chat");
+      return;
+    }
 
-    setIsLoading(true);
-    setActiveTab("chat");
     setShowPopup(false);
 
-    // Submit the user message to the server.
-    try {
+    // Send different prompts based on the action
+    if (action === "explain") {
       append({
         role: "user",
-        content: input,
+        content: `Explain this text from the PDF: "${selectedText}"`,
       });
-
-      // Trigger scroll to bottom
-      setScrollToBottom(true);
-    } catch (error) {
-      toast.error("Failed to process request");
-      console.error(error);
-    } finally {
-      // Set loading state back to false
-      setIsLoading(false);
+    } else if (action === "summarize") {
+      append({
+        role: "user",
+        content: `Summarize this text from the PDF: "${selectedText}"`,
+      });
+    } else if (action === "ask") {
+      append({
+        role: "user",
+        content: `I have a question about this text from the PDF: "${selectedText}". Can you explain it in more detail?`,
+      });
     }
+
+    // Switch to the chat tab after sending the message
+    setActiveTab("chat");
   };
 
   // Add state for tracking all visible pages and observers
@@ -533,7 +538,7 @@ export const PdfRenderer = ({ url, className, append }: PdfRendererProps) => {
                   variant="ghost"
                   size="sm"
                   className="h-8 text-sm"
-                  onClick={() => handleAction("Explain: ")}
+                  onClick={() => handleAction("explain")}
                 >
                   <HelpCircle className="mr-1 size-3" />
                   Explain
@@ -542,10 +547,19 @@ export const PdfRenderer = ({ url, className, append }: PdfRendererProps) => {
                   variant="ghost"
                   size="sm"
                   className="h-8 text-sm"
-                  onClick={() => handleAction("")}
+                  onClick={() => handleAction("summarize")}
                 >
                   <Sparkles className="mr-1 size-3" />
-                  Ask AI
+                  Summarize
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 text-sm"
+                  onClick={() => handleAction("ask")}
+                >
+                  <Sparkles className="mr-1 size-3" />
+                  Ask
                 </Button>
               </div>
             )}

@@ -1,8 +1,9 @@
 "use client";
 
 import type { Attachment, UIMessage } from "ai";
-import { useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useChat } from "@ai-sdk/react";
+import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { v1 as uuidv1 } from "uuid";
 
@@ -34,6 +35,7 @@ interface ChatProps {
   bodyData?: Record<string, any>; // Additional data to send in the request body
   apiPath?: string; // Custom API path
   showTemplates?: boolean; // Whether to show templates
+  onAppendAvailable?: (append: (message: UIMessage) => void) => void;
 }
 
 export function Chat({
@@ -44,6 +46,8 @@ export function Chat({
   onMessage,
   bodyData = {},
   apiPath = "/api/chat",
+  showTemplates = false,
+  onAppendAvailable,
 }: ChatProps) {
   const {
     messages,
@@ -80,51 +84,71 @@ export function Chat({
   });
   const [attachments, setAttachments] = useState<Array<Attachment>>([]);
 
-  // Create a ref for the chat container to scroll to bottom
-  const chatContainerRef = useRef<HTMLDivElement>(null);
-
   // Handle append but don't try to call onMessage directly
   // The onFinish handler will handle notifying about new messages
   const handleAppend = async (message: Parameters<typeof append>[0]) => {
     return append(message);
   };
 
+  useEffect(() => {
+    if (chatId) {
+      setMessages(initialMessages);
+    }
+  }, [initialMessages, chatId, setMessages]);
+
+  // Expose append function to parent
+  useEffect(() => {
+    if (onAppendAvailable) {
+      onAppendAvailable(handleAppend);
+    }
+  }, [handleAppend, onAppendAvailable]);
+
   return (
     <>
-      <div
-        ref={chatContainerRef}
-        className="flex max-h-dvh min-w-0 flex-col bg-background"
-      >
+      <div className="flex h-full flex-col">
         <div className="mt-2 flex flex-col items-start gap-2">
           {lectureId &&
             messages.length === 0 &&
             CHAT_TEMPLATES.map((template, i) => (
-              <Button
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
+                transition={{ delay: 0.05 * i }}
                 key={i}
-                variant="secondary"
-                size="sm"
-                onClick={() => {
-                  handleAppend({
-                    role: "user",
-                    content: template.prompt,
-                  });
-                }}
+                className="w-full sm:w-auto"
               >
-                {template.text}
-              </Button>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="w-full"
+                  onClick={() => {
+                    handleAppend({
+                      role: "user",
+                      content: template.prompt,
+                    });
+                  }}
+                >
+                  {template.text}
+                </Button>
+              </motion.div>
             ))}
         </div>
-        <Messages
-          chatId={chatId}
-          lectureId={lectureId}
-          status={status}
-          messages={messages}
-          setMessages={setMessages}
-          reload={reload}
-          isReadonly={false}
-          isArtifactVisible={false}
-        />
-        <form className="mx-auto flex w-full gap-2 bg-background px-4 pb-4 md:max-w-3xl md:pb-6">
+
+        <div className="flex-1 overflow-y-auto">
+          <Messages
+            chatId={chatId}
+            lectureId={lectureId}
+            status={status}
+            messages={messages}
+            setMessages={setMessages}
+            reload={reload}
+            isReadonly={false}
+            isArtifactVisible={false}
+          />
+        </div>
+
+        <div className="sticky bottom-0 mx-auto w-full bg-background px-4 pb-4 md:max-w-3xl md:pb-6">
           <MultimodalInput
             userId={userId}
             input={input}
@@ -139,7 +163,7 @@ export function Chat({
             append={handleAppend}
             showSuggestedActions={lectureId ? false : true}
           />
-        </form>
+        </div>
       </div>
     </>
   );

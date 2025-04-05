@@ -1,9 +1,12 @@
 import { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { ChatCourse } from "@/components/chat-course";
 import { env } from "@/env";
+import { convertToUIMessages } from "@/lib/ai/utils";
 import { db } from "@/lib/db";
 import { absoluteUrl } from "@/lib/utils";
+
+import { auth } from "@acme/auth";
 
 interface SavedChatPageProps {
   params: { courseId: string; chatId: string };
@@ -63,6 +66,9 @@ export async function generateMetadata({
 }
 
 export default async function CourseChatPage({ params }: SavedChatPageProps) {
+  const session = await auth();
+  if (!session) return redirect("/login");
+
   const course = await db.course.findUnique({
     where: {
       id: params.courseId,
@@ -74,6 +80,9 @@ export default async function CourseChatPage({ params }: SavedChatPageProps) {
     where: {
       id: params.chatId,
     },
+    include: {
+      messages: true,
+    },
   });
   if (!chat) return notFound();
 
@@ -83,6 +92,7 @@ export default async function CourseChatPage({ params }: SavedChatPageProps) {
       userId={session.user.id}
       course={course}
       chatName={chat.name}
+      initialMessages={convertToUIMessages(chat.messages)}
     />
   );
 }

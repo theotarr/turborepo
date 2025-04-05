@@ -15,12 +15,11 @@ import {
 } from "@/components/ui/tooltip";
 import { UserAccountNav } from "@/components/user-account-nav";
 import { env } from "@/env";
+import { convertToUIMessages } from "@/lib/ai/utils";
 import { db } from "@/lib/db";
 import { absoluteUrl, cn } from "@/lib/utils";
 import { Transcript } from "@/types";
-import { Attachment, UIMessage } from "ai";
 
-import type { Message } from "@acme/db";
 import { auth } from "@acme/auth";
 
 interface LecturePageProps {
@@ -97,19 +96,6 @@ export default async function LecturePage({ params }: LecturePageProps) {
   });
 
   if (!lecture) return notFound();
-
-  function convertToUIMessages(messages: Array<Message>): Array<UIMessage> {
-    return messages.map((message) => ({
-      id: message.id,
-      parts: message.parts as UIMessage["parts"],
-      role: message.role.toLowerCase() as UIMessage["role"],
-      // Note: content will soon be deprecated in @ai-sdk/react
-      content: "",
-      createdAt: message.createdAt,
-      experimental_attachments:
-        (message.attachments as Array<Attachment>) ?? [],
-    }));
-  }
 
   return (
     <div className="flex h-screen flex-col overflow-hidden">

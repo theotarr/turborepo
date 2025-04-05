@@ -4,6 +4,7 @@ import { UseChatHelpers } from "@ai-sdk/react";
 import { UIMessage } from "ai";
 import equal from "fast-deep-equal";
 
+import { Greeting } from "./greeting";
 import { PreviewMessage, ThinkingMessage } from "./message";
 
 interface MessagesProps {
@@ -34,6 +35,8 @@ function PureMessages({
       ref={messagesContainerRef}
       className="flex min-w-0 flex-1 flex-col gap-6 overflow-y-scroll pt-4"
     >
+      {messages.length === 0 && chatId && <Greeting />}
+
       {messages.map((message, index) => (
         <PreviewMessage
           key={message.id}
