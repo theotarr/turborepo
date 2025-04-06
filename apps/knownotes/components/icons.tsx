@@ -7,7 +7,7 @@ import {
   ArrowUp,
   AudioLines,
   Book,
-  Boxes,
+  Box,
   BoxSelect,
   Calendar,
   Check,
@@ -325,5 +325,5 @@ export const Icons = {
   file: File,
   video: FileVideo2,
   audio: FileAudio2,
-  course: Boxes,
+  course: Box,
 };

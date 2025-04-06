@@ -102,7 +102,7 @@ export const lectureRouter = {
         },
       });
     }),
-  byUser: protectedProcedure.query(({ ctx }) => {
+  list: protectedProcedure.query(({ ctx }) => {
     return ctx.db.lecture.findMany({
       where: {
         userId: ctx.session.user.id,
@@ -126,8 +126,8 @@ export const lectureRouter = {
           },
         },
       },
-      // Limit to 10 lectures, and don't fetch transcripts that are too large as it will cause the request to time out or exceed maximum request size.
-      take: 10,
+      // Limit to 6 lectures, and don't fetch transcripts that are too large as it will cause the request to time out or exceed maximum request size.
+      take: 6,
       orderBy: { updatedAt: "desc" },
     });
   }),

@@ -1,6 +1,5 @@
 import type { TRPCRouterRecord } from "@trpc/server";
-
-import type { Chat } from "@acme/db";
+import { z } from "zod";
 
 import { protectedProcedure } from "../trpc";
 
@@ -14,20 +13,57 @@ export const chatRouter = {
       orderBy: {
         createdAt: "desc",
       },
+      take: 6,
     });
 
-    const chatsByCourse = chats.reduce(
-      (acc, chat) => {
-        const course = chat.course.name;
-        if (!acc[course]) {
-          acc[course] = [];
-        }
-        acc[course].push(chat);
-        return acc;
-      },
-      {} as Record<string, Chat[]>,
-    );
-
-    return chatsByCourse;
+    return chats;
   }),
+
+  update: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        name: z.string().min(1),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      // First verify the user owns this chat
+      const chat = await ctx.db.chat.findUnique({
+        where: { id: input.id },
+      });
+
+      if (!chat || chat.userId !== ctx.session.user.id) {
+        throw new Error("Unauthorized: Chat not found or access denied");
+      }
+
+      // Update the chat name
+      return ctx.db.chat.update({
+        where: { id: input.id },
+        data: {
+          name: input.name,
+        },
+      });
+    }),
+
+  delete: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      // First verify the user owns this chat
+      const chat = await ctx.db.chat.findUnique({
+        where: { id: input.id },
+      });
+
+      if (!chat || chat.userId !== ctx.session.user.id) {
+        throw new Error("Unauthorized: Chat not found or access denied");
+      }
+
+      // Delete the chat
+      return ctx.db.chat.delete({
+        where: { id: input.id },
+      });
+    }),
 } satisfies TRPCRouterRecord;
