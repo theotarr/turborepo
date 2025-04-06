@@ -83,7 +83,7 @@ export default async function DashboardPage() {
           </div>
           <div className="flex justify-center">
             <Link
-              href="/dashboard/lectures"
+              href="/library?tab=notes"
               className="text-sm font-medium text-secondary-foreground hover:underline"
             >
               View all lectures

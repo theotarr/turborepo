@@ -13,7 +13,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -41,6 +41,7 @@ interface ChatOperationsProps extends HTMLAttributes<HTMLDivElement> {
     name: string;
     courseId: string;
   };
+  triggerClassName?: string;
 }
 
 export function ChatOperations({ chat, className }: ChatOperationsProps) {
@@ -100,7 +101,7 @@ export function ChatOperations({ chat, className }: ChatOperationsProps) {
       <DropdownMenu modal={false}>
         <DropdownMenuTrigger
           className={cn(
-            "flex size-7 items-center justify-center rounded-md transition-colors hover:text-foreground/80",
+            "flex size-8 items-center justify-center rounded-md border transition-colors hover:bg-muted",
             className,
           )}
         >

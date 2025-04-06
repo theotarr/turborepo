@@ -187,7 +187,7 @@ export function AppSidebar() {
                   </SidebarMenuItem>
                 )}
                 <Link
-                  href="/dashboard/lectures"
+                  href="/library?tab=notes"
                   className={cn(
                     buttonVariants({
                       variant: "ghost",
@@ -261,7 +261,7 @@ export function AppSidebar() {
                             <ChatOperations
                               chat={chat}
                               className={cn(
-                                "flex-shrink-0 text-muted-foreground/60",
+                                "size-7 flex-shrink-0 border-0 bg-transparent text-muted-foreground/60",
                                 isActive
                                   ? "text-foreground/80 hover:text-foreground"
                                   : "group-hover:text-foreground",
@@ -279,6 +279,18 @@ export function AppSidebar() {
                     </div>
                   </SidebarMenuItem>
                 )}
+                <Link
+                  href="/library?tab=chats"
+                  className={cn(
+                    buttonVariants({
+                      variant: "ghost",
+                      size: "sm",
+                    }),
+                    "w-full justify-start bg-transparent text-xs text-muted-foreground hover:bg-transparent hover:underline",
+                  )}
+                >
+                  View all <Icons.chevronRight className="ml-2 size-4" />
+                </Link>
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
@@ -318,6 +330,43 @@ export function AppSidebar() {
                     </div>
                   </SidebarMenuItem>
                 )}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+
+          {/* Navigation Section */}
+          <SidebarGroup>
+            <SidebarGroupLabel>
+              <span>Navigation</span>
+            </SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    onClick={() => router.push("/dashboard")}
+                    tooltip="Dashboard"
+                    className={cn(
+                      pathname === "/dashboard" && "bg-secondary font-medium",
+                    )}
+                    isActive={pathname === "/dashboard"}
+                  >
+                    <Icons.home className="mr-2 size-4" />
+                    <span>Dashboard</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    onClick={() => router.push("/library")}
+                    tooltip="Library"
+                    className={cn(
+                      pathname === "/library" && "bg-secondary font-medium",
+                    )}
+                    isActive={pathname === "/library"}
+                  >
+                    <Icons.book className="mr-2 size-4" />
+                    <span>Library</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>

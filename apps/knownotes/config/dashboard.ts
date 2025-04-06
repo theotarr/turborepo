@@ -32,7 +32,7 @@ export const dashboardConfig: DashboardConfig = {
     },
     {
       title: "Lectures",
-      href: "/dashboard/lectures",
+      href: "/library?tab=notes",
       icon: "lecture",
     },
     // {

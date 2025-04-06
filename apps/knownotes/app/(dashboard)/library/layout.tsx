@@ -4,11 +4,11 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
 import { auth } from "@acme/auth";
 
-interface ChatLayoutProps {
+interface LibraryLayoutProps {
   children?: React.ReactNode;
 }
 
-export default async function ChatLayout({ children }: ChatLayoutProps) {
+export default async function LibraryLayout({ children }: LibraryLayoutProps) {
   const session = await auth();
   if (!session) return redirect("/login");
 

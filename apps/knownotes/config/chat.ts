@@ -12,7 +12,7 @@ export const chatConfig: ChatConfig = {
     },
     {
       title: "Lectures",
-      href: "/dashboard/lectures",
+      href: "/library?tab=notes",
     },
     {
       title: "Affiliate",
