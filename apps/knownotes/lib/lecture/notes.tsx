@@ -31,7 +31,7 @@ export async function generateEnhancedNotes(
   const stream = createStreamableValue();
 
   (async () => {
-    const { textStream } = await streamText({
+    const { textStream } = streamText({
       model: openai("gpt-4o"),
       system: `\
       You are an expert in taking detailed, concise, and easy-to-understand notes.

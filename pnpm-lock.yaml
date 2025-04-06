@@ -387,8 +387,8 @@ importers:
         specifier: ^1.2.5
         version: 1.2.5(zod@3.23.8)
       '@ai-sdk/openai':
-        specifier: ^0.0.32
-        version: 0.0.32(zod@3.23.8)
+        specifier: ^1.3.7
+        version: 1.3.7(zod@3.23.8)
       '@ai-sdk/react':
         specifier: ^1.2.5
         version: 1.2.5(react@18.3.1)(zod@3.23.8)
@@ -1469,20 +1469,11 @@ packages:
     peerDependencies:
       zod: ^3.0.0
 
-  '@ai-sdk/openai@0.0.32':
-    resolution: {integrity: sha512-ySwtOoGTwmK+CiXreJO9iJkV7SBhetdgrmoP0gOKbz1uWQ9B1FMQ6Zdq6V5koWFXeN91Sz9n4jRIZ09GjxjY2g==}
+  '@ai-sdk/openai@1.3.7':
+    resolution: {integrity: sha512-JjjEulfMgH5kGyCWKdyhxNLSIs2qBkUr6LtzNJtYlV23e5RbOHA5qgbbxn6IbGxeZs4xpPhpGmOnUVzh7GZwcg==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.0.0
-
-  '@ai-sdk/provider-utils@0.0.15':
-    resolution: {integrity: sha512-eTkIaZc/Ud96DYG40lLuKWJvZ2GoW/wT4KH9r1f3wGUhj5wgQN+bzgdI57z60VOEDuMmDVuILVnTLFe0HNT5Iw==}
-    engines: {node: '>=18'}
-    peerDependencies:
-      zod: ^3.0.0
-    peerDependenciesMeta:
-      zod:
-        optional: true
 
   '@ai-sdk/provider-utils@2.2.3':
     resolution: {integrity: sha512-o3fWTzkxzI5Af7U7y794MZkYNEsxbjLam2nxyoUZSScqkacb7vZ3EYHLh21+xCcSSzEC161C7pZAGHtC0hTUMw==}
@@ -1490,9 +1481,11 @@ packages:
     peerDependencies:
       zod: ^3.23.8
 
-  '@ai-sdk/provider@0.0.10':
-    resolution: {integrity: sha512-NzkrtREQpHID1cTqY/C4CI30PVOaXWKYytDR2EcytmFgnP7Z6+CrGIA/YCnNhYAuUm6Nx+nGpRL/Hmyrv7NYzg==}
+  '@ai-sdk/provider-utils@2.2.4':
+    resolution: {integrity: sha512-13sEGBxB6kgaMPGOgCLYibF6r8iv8mgjhuToFrOTU09bBxbFQd8ZoARarCfJN6VomCUbUvMKwjTBLb1vQnN+WA==}
     engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^3.23.8
 
   '@ai-sdk/provider@1.1.0':
     resolution: {integrity: sha512-0M+qjp+clUD0R1E5eWQFhxEvWLNaOtGQRUaBn8CUABnSKredagq92hUS9VjOzGsTm37xLfpaxl97AVtbeOsHew==}
@@ -8860,10 +8853,6 @@ packages:
     resolution: {integrity: sha512-mQw+2fkQbALzQ7V0MY0IqdnXNOeTtP4r0lN9z7AAawCXgqea7bDii20AYrIBrFd/Hx0M2Ocz6S111CaFkUcb0Q==}
     engines: {node: '>=0.8.x'}
 
-  eventsource-parser@1.1.2:
-    resolution: {integrity: sha512-v0eOBUbiaFojBu2s2NPBfYUoRR9GjcDNvCXVaqEf5vVfpIAh9f8RCo4vXTP8c63QRKCFwoLpMpTdPwwhEKVgzA==}
-    engines: {node: '>=14.18'}
-
   exec-async@2.2.0:
     resolution: {integrity: sha512-87OpwcEiMia/DeiKFzaQNBNFeN3XkkpYIh9FyOqq5mS2oKv3CBE67PXoEKcr6nodWdXNogTiQ0jE2NGuoffXPw==}
 
@@ -11593,11 +11582,6 @@ packages:
 
   nanoid@3.3.11:
     resolution: {integrity: sha512-N8SpfPUnUp1bK+PMYW8qSWdl9U+wwNWI4QKxOYDy9JAro3WMX7p2OeVRF9v+347pnakNevPmiHhNmZ2HbFA76w==}
-    engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
-    hasBin: true
-
-  nanoid@3.3.6:
-    resolution: {integrity: sha512-BGcqMMJuToF7i1rt+2PWSNVnWIkGCU78jBG3RxO/bZlnZPK2Cmi2QaffxGO/2RvWi9sL+FAiRiXMgsyxQ1DIDA==}
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
 
@@ -15142,19 +15126,10 @@ snapshots:
       '@ai-sdk/provider-utils': 2.2.3(zod@3.23.8)
       zod: 3.23.8
 
-  '@ai-sdk/openai@0.0.32(zod@3.23.8)':
+  '@ai-sdk/openai@1.3.7(zod@3.23.8)':
     dependencies:
-      '@ai-sdk/provider': 0.0.10
-      '@ai-sdk/provider-utils': 0.0.15(zod@3.23.8)
-      zod: 3.23.8
-
-  '@ai-sdk/provider-utils@0.0.15(zod@3.23.8)':
-    dependencies:
-      '@ai-sdk/provider': 0.0.10
-      eventsource-parser: 1.1.2
-      nanoid: 3.3.6
-      secure-json-parse: 2.7.0
-    optionalDependencies:
+      '@ai-sdk/provider': 1.1.0
+      '@ai-sdk/provider-utils': 2.2.4(zod@3.23.8)
       zod: 3.23.8
 
   '@ai-sdk/provider-utils@2.2.3(zod@3.23.8)':
@@ -15164,9 +15139,12 @@ snapshots:
       secure-json-parse: 2.7.0
       zod: 3.23.8
 
-  '@ai-sdk/provider@0.0.10':
+  '@ai-sdk/provider-utils@2.2.4(zod@3.23.8)':
     dependencies:
-      json-schema: 0.4.0
+      '@ai-sdk/provider': 1.1.0
+      nanoid: 3.3.11
+      secure-json-parse: 2.7.0
+      zod: 3.23.8
 
   '@ai-sdk/provider@1.1.0':
     dependencies:
@@ -23603,8 +23581,6 @@ snapshots:
 
   events@3.3.0: {}
 
-  eventsource-parser@1.1.2: {}
-
   exec-async@2.2.0: {}
 
   execa@1.0.0:
@@ -27039,8 +27015,6 @@ snapshots:
       stylis: 4.3.4
 
   nanoid@3.3.11: {}
-
-  nanoid@3.3.6: {}
 
   nanoid@3.3.7: {}
 

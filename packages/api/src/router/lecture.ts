@@ -244,12 +244,11 @@ export const lectureRouter = {
           .split(" ").length * 2;
 
       const transcript =
-        estimatedTokens < 128000
+        estimatedTokens < 500_000
           ? lecture.transcript
           : lecture.transcript.slice(-100); // Use the last 100 transcript rows.
 
       const { text } = await generateText({
-        // @ts-expect-error - Google model has different type signature than OpenAI
         model: google("gemini-2.0-flash-001"),
         system: `\
       You are an AI assistant helping a user with their lecture.
@@ -359,7 +358,6 @@ export const lectureRouter = {
       if (!lecture) throw new Error("Lecture not found");
 
       const { object } = await generateObject({
-        // @ts-expect-error - Google model is not typed.
         model: google("gemini-2.0-flash-001"),
         schema: z.object({
           flashcards: z.array(
@@ -403,7 +401,6 @@ export const lectureRouter = {
       if (!lecture) throw new Error("Lecture not found");
 
       const { object } = await generateObject({
-        // @ts-expect-error - Google model is not typed.
         model: google("gemini-2.0-flash-001"),
         schema: z.object({
           questions: z.array(
