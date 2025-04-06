@@ -6,25 +6,65 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { UserAvatar } from "@/components/user-avatar";
-import { absoluteUrl } from "@/lib/utils";
+import { absoluteUrl, cn } from "@/lib/utils";
 import { User } from "next-auth";
 import { signOut } from "next-auth/react";
+import { useTheme } from "next-themes";
+
+import { Icons } from "./icons";
 
 interface UserAccountNavProps extends React.HTMLAttributes<HTMLDivElement> {
   user: Pick<User, "name" | "image" | "email">;
+  showFullInfo?: boolean;
+  className?: string;
 }
 
-export function UserAccountNav({ user }: UserAccountNavProps) {
+export function UserAccountNav({
+  user,
+  showFullInfo = false,
+  className,
+  ...props
+}: UserAccountNavProps) {
+  const { setTheme } = useTheme();
+
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger>
-        <UserAvatar
-          user={{ name: user.name || null, image: user.image || null }}
-          className="h-8 w-8"
-        />
+      <DropdownMenuTrigger
+        className={cn("focus:outline-none", className)}
+        asChild
+      >
+        <div
+          className={cn(
+            "flex items-center gap-2",
+            showFullInfo && "rounded-md px-2 py-1.5 hover:bg-muted",
+          )}
+          {...props}
+        >
+          <UserAvatar
+            user={{ name: user.name || null, image: user.image || null }}
+            className="h-8 w-8"
+          />
+          {showFullInfo && (
+            <div className="flex flex-col text-left">
+              {user.name && (
+                <span className="truncate text-sm font-medium">
+                  {user.name}
+                </span>
+              )}
+              {user.email && (
+                <span className="truncate text-xs text-muted-foreground">
+                  {user.email}
+                </span>
+              )}
+            </div>
+          )}
+        </div>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <div className="flex items-center justify-start gap-2 p-2">
@@ -44,12 +84,30 @@ export function UserAccountNav({ user }: UserAccountNavProps) {
         <DropdownMenuItem asChild>
           <Link href="/dashboard/lectures">Lectures</Link>
         </DropdownMenuItem>
-        {/* <DropdownMenuItem asChild>
-          <Link href="/dashboard/billing">Billing</Link>
-        </DropdownMenuItem> */}
         <DropdownMenuItem asChild>
           <Link href="/dashboard/settings">Settings</Link>
         </DropdownMenuItem>
+        <DropdownMenuSeparator />
+
+        {/* Theme Selection */}
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger>Theme</DropdownMenuSubTrigger>
+          <DropdownMenuSubContent>
+            <DropdownMenuItem onClick={() => setTheme("light")}>
+              <Icons.sun className="mr-2 h-4 w-4" />
+              <span>Light</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setTheme("dark")}>
+              <Icons.moon className="mr-2 h-4 w-4" />
+              <span>Dark</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setTheme("system")}>
+              <Icons.laptop className="mr-2 h-4 w-4" />
+              <span>System</span>
+            </DropdownMenuItem>
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
+
         <DropdownMenuSeparator />
         <DropdownMenuItem
           className="cursor-pointer"

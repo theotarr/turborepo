@@ -31,7 +31,7 @@ function PureChatHeader() {
               }}
             >
               <Icons.add className="size-4" />
-              <span className="md:sr-only">New Chat</span>
+              <span className="ml-2 md:sr-only">New Chat</span>
             </Button>
           </TooltipTrigger>
           <TooltipContent>New Chat</TooltipContent>
