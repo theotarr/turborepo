@@ -4,19 +4,22 @@ import { appendResponseMessages } from "ai";
 
 const prisma = new PrismaClient();
 
-const BATCH_SIZE = 50; // Process 50 chats at a time
-const INSERT_BATCH_SIZE = 100; // Insert 100 messages at a time
+const BATCH_SIZE = 100; // Process messages in batches
 
-// Define the roles we know exist in the database
 type DBMessageRole = "USER" | "ASSISTANT" | "SYSTEM";
 
-type NewMessageInsert = {
+type MessagePart = {
+  type: string;
+  text?: string;
+  [key: string]: any;
+};
+
+type ProcessableMessage = {
   id: string;
-  chatId: string;
-  parts: any[];
-  role: DBMessageRole;
-  attachments?: any[];
+  role: UIMessage["role"];
+  content: string;
   createdAt: Date;
+  parts?: MessagePart[];
 };
 
 // Map database role to AI SDK role
@@ -31,57 +34,43 @@ const mapRole = (role: DBMessageRole): UIMessage["role"] => {
   }
 };
 
-// Map AI SDK role to database role
-const mapRoleBack = (role: UIMessage["role"]): DBMessageRole => {
-  switch (role) {
-    case "user":
-      return "USER";
-    case "assistant":
-      return "ASSISTANT";
-    case "system":
-    case "data":
-      return "SYSTEM";
-  }
-};
-
 async function migrateMessages() {
-  // Get all chats
-  const chats = await prisma.chat.findMany();
+  // Get total count of messages
+  const totalCount = await prisma.message.count();
   let processedCount = 0;
+  let skippedCount = 0;
 
-  // Process chats in batches
-  for (let i = 0; i < chats.length; i += BATCH_SIZE) {
-    const chatBatch = chats.slice(i, i + BATCH_SIZE);
-    const chatIds = chatBatch.map((chat) => chat.id);
-
-    // Fetch all messages for the current batch of chats in bulk
-    const allMessages = await prisma.message.findMany({
-      where: {
-        chatId: {
-          in: chatIds,
-        },
-      },
-      orderBy: {
-        createdAt: "asc",
-      },
+  // Process messages in batches
+  for (let skip = 0; skip < totalCount; skip += BATCH_SIZE) {
+    // Fetch batch of messages
+    const messages = await prisma.message.findMany({
+      skip,
+      take: BATCH_SIZE,
+      orderBy: [{ chatId: "asc" }, { lectureId: "asc" }, { createdAt: "asc" }],
     });
 
-    // Prepare batches for insertion
-    const newMessagesToInsert: NewMessageInsert[] = [];
+    // Process each message individually first
+    const processedMessages = new Set<string>();
 
-    // Process each chat in the batch
-    for (const chat of chatBatch) {
-      processedCount++;
-      console.info(`Processed ${processedCount}/${chats.length} chats`);
+    // Group messages by conversation (chat or lecture) if possible
+    const conversationGroups = new Map<string, Message[]>();
 
-      // Filter messages for this specific chat
-      const messages = allMessages.filter((msg) => msg.chatId === chat.id);
+    messages.forEach((message) => {
+      const conversationId = message.chatId || message.lectureId;
+      if (conversationId) {
+        const group = conversationGroups.get(conversationId) || [];
+        group.push(message);
+        conversationGroups.set(conversationId, group);
+      }
+    });
 
+    // Process conversation groups first (for context-aware processing)
+    for (const [conversationId, conversationMessages] of conversationGroups) {
       // Group messages into sections (user message followed by assistant messages)
-      const messageSection: Array<Partial<UIMessage>> = [];
-      const messageSections: Array<Array<Partial<UIMessage>>> = [];
+      const messageSection: Array<Partial<ProcessableMessage>> = [];
+      const messageSections: Array<Array<Partial<ProcessableMessage>>> = [];
 
-      for (const message of messages) {
+      for (const message of conversationMessages) {
         const mappedRole = mapRole(message.role as DBMessageRole);
 
         if (mappedRole === "user" && messageSection.length > 0) {
@@ -106,7 +95,15 @@ async function migrateMessages() {
       for (const section of messageSections) {
         const [userMessage, ...assistantMessages] = section;
 
-        if (!userMessage || !assistantMessages.length) continue;
+        if (!userMessage || !assistantMessages.length) {
+          // Handle single message in section
+          for (const msg of section) {
+            if (!msg.id) continue;
+            await processMessage(msg as ProcessableMessage, messages);
+            processedMessages.add(msg.id);
+          }
+          continue;
+        }
 
         try {
           const uiSection = appendResponseMessages({
@@ -122,62 +119,78 @@ async function migrateMessages() {
             },
           });
 
-          const projectedUISection = uiSection
-            .map((message): NewMessageInsert | null => {
-              if (message.role === "user") {
-                return {
-                  id: message.id,
-                  chatId: chat.id,
-                  parts: [{ type: "text", text: message.content }],
-                  role: mapRoleBack(message.role),
-                  createdAt: message.createdAt || new Date(),
-                  attachments: [],
-                };
-              } else if (message.role === "assistant") {
-                return {
-                  id: message.id,
-                  chatId: chat.id,
-                  parts: message.parts || [
-                    { type: "text", text: message.content },
-                  ],
-                  role: mapRoleBack(message.role),
-                  createdAt: message.createdAt || new Date(),
-                  attachments: [],
-                };
-              }
-              return null;
-            })
-            .filter((msg): msg is NewMessageInsert => msg !== null);
-
-          // Add messages to batch
-          newMessagesToInsert.push(...projectedUISection);
+          // Update each message in the section
+          await Promise.all(
+            uiSection.map(async (message) => {
+              await processMessage(message as ProcessableMessage, messages);
+              if (message.id) processedMessages.add(message.id);
+            }),
+          );
         } catch (error) {
-          console.error(`Error processing chat ${chat.id}:`, error);
+          console.error(
+            `Error processing conversation ${conversationId}:`,
+            error,
+          );
         }
       }
     }
 
-    // Batch insert messages
-    for (let j = 0; j < newMessagesToInsert.length; j += INSERT_BATCH_SIZE) {
-      const messageBatch = newMessagesToInsert.slice(j, j + INSERT_BATCH_SIZE);
-      if (messageBatch.length > 0) {
-        // Update messages in batches
-        await Promise.all(
-          messageBatch.map((msg) =>
-            prisma.message.update({
-              where: { id: msg.id },
-              data: {
-                parts: msg.parts,
-                attachments: msg.attachments,
-              },
-            }),
-          ),
-        );
-      }
+    // Process remaining messages that weren't part of a conversation
+    await Promise.all(
+      messages
+        .filter((message) => !processedMessages.has(message.id))
+        .map(async (message) => {
+          const uiMessage: ProcessableMessage = {
+            id: message.id,
+            role: mapRole(message.role as DBMessageRole),
+            content: message.content || "",
+            createdAt: message.createdAt,
+          };
+          await processMessage(uiMessage, messages);
+          processedCount++;
+        }),
+    );
+
+    if (processedCount % 100 === 0) {
+      console.info(
+        `Processed ${processedCount}/${totalCount} messages (${skippedCount} skipped)`,
+      );
     }
   }
 
-  console.info(`Migration completed: ${processedCount} chats processed`);
+  console.info(
+    `Migration completed: ${processedCount}/${totalCount} messages processed (${skippedCount} skipped)`,
+  );
+}
+
+async function processMessage(
+  message: ProcessableMessage,
+  allMessages: Message[],
+) {
+  const originalMessage = allMessages.find((m) => m.id === message.id);
+  if (!originalMessage) return;
+
+  try {
+    let parts;
+    if (message.role === "assistant" && message.parts) {
+      parts = message.parts.map((part) => ({
+        ...part,
+        text: "text" in part ? part.text : undefined,
+      }));
+    } else {
+      parts = [{ type: "text", text: message.content }];
+    }
+
+    await prisma.message.update({
+      where: { id: message.id },
+      data: {
+        parts: parts as any,
+        attachments: (originalMessage.attachments as any) || [],
+      },
+    });
+  } catch (error) {
+    console.error(`Error processing message ${message.id}:`, error);
+  }
 }
 
 // Run the migration
