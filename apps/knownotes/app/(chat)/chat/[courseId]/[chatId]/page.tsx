@@ -91,7 +91,6 @@ export default async function CourseChatPage({ params }: SavedChatPageProps) {
       id={chat.id}
       userId={session.user.id}
       course={course}
-      chatName={chat.name}
       initialMessages={convertToUIMessages(chat.messages)}
     />
   );
