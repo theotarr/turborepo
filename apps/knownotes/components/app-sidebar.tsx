@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Sidebar,
   SidebarContent,
@@ -28,6 +28,7 @@ import { api } from "@/lib/trpc/react";
 import { cn } from "@/lib/utils";
 
 import { ChatOperations } from "./chat-operations";
+import { CourseCreateDialog } from "./course-create-dialog";
 import { Icons } from "./icons";
 import { LectureOperations } from "./lecture-operations";
 import { UserAccountNav } from "./user-account-nav";
@@ -105,8 +106,16 @@ export function AppSidebar() {
 
           {/* Recent Notes Section */}
           <SidebarGroup>
-            <SidebarGroupLabel>
+            <SidebarGroupLabel className="flex items-center justify-between">
               <span>Recent Notes</span>
+              <Link href="/dashboard">
+                <Button
+                  variant="outline"
+                  className="size-7 border-0 bg-transparent p-0"
+                >
+                  <Icons.add className="size-4" />
+                </Button>
+              </Link>
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
@@ -298,7 +307,12 @@ export function AppSidebar() {
           {/* Courses Section */}
           <SidebarGroup>
             <SidebarGroupLabel>
-              <span>Your Courses</span>
+              <div className="flex w-full items-center justify-between">
+                <span>Your Courses</span>
+                <CourseCreateDialog
+                  className={cn("h-7 w-7 border-0 bg-transparent p-0")}
+                />
+              </div>
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
@@ -326,53 +340,16 @@ export function AppSidebar() {
                 ) : (
                   <SidebarMenuItem>
                     <div className="px-2 py-1.5 text-sm text-muted-foreground">
-                      No courses found
+                      No courses yet.
                     </div>
                   </SidebarMenuItem>
                 )}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
-
-          {/* Navigation Section */}
-          <SidebarGroup>
-            <SidebarGroupLabel>
-              <span>Navigation</span>
-            </SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    onClick={() => router.push("/dashboard")}
-                    tooltip="Dashboard"
-                    className={cn(
-                      pathname === "/dashboard" && "bg-secondary font-medium",
-                    )}
-                    isActive={pathname === "/dashboard"}
-                  >
-                    <Icons.home className="mr-2 size-4" />
-                    <span>Dashboard</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    onClick={() => router.push("/library")}
-                    tooltip="Library"
-                    className={cn(
-                      pathname === "/library" && "bg-secondary font-medium",
-                    )}
-                    isActive={pathname === "/library"}
-                  >
-                    <Icons.book className="mr-2 size-4" />
-                    <span>Library</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
         </SidebarContent>
 
-        <SidebarFooter className="border-t p-4">
+        <SidebarFooter className="border-t">
           <div className="flex items-center justify-between">
             {session?.user && (
               <UserAccountNav

@@ -6,11 +6,6 @@ import { Icons } from "@/components/icons";
 import { api } from "@/lib/trpc/react";
 import { motion } from "framer-motion";
 
-interface Course {
-  id: string;
-  name: string;
-}
-
 export default function ChatPage() {
   const { data: courses, isLoading } = api.course.list.useQuery();
 
@@ -32,8 +27,8 @@ export default function ChatPage() {
   return (
     <>
       <ChatHeader />
-      <div className="flex h-[calc(100vh-56px)] flex-col items-center justify-center">
-        <div className="mx-auto flex w-full max-w-3xl flex-col justify-center space-y-8 px-4 sm:px-8">
+      <div className="flex h-[calc(100vh-56px)] flex-col items-center justify-center overflow-y-auto py-12">
+        <div className="mx-auto flex w-full max-w-3xl flex-col justify-center space-y-8 px-4 py-8 sm:px-8">
           <div className="flex flex-col space-y-2">
             <motion.div
               initial={{ opacity: 0, y: 10 }}

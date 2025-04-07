@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -13,6 +12,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { api } from "@/lib/trpc/react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -41,7 +41,7 @@ interface CourseCreateDialogProps {
 }
 
 export function CourseCreateDialog({ className }: CourseCreateDialogProps) {
-  const router = useRouter();
+  const utils = api.useUtils();
   const [name, setName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -54,8 +54,7 @@ export function CourseCreateDialog({ className }: CourseCreateDialogProps) {
       return toast.error("Something went wrong. Please try again.");
     } else {
       toast.success("Success!");
-      router.push(`/course/${courseId}`);
-      router.refresh();
+      utils.course.list.invalidate();
     }
   };
 
@@ -63,14 +62,19 @@ export function CourseCreateDialog({ className }: CourseCreateDialogProps) {
     <Dialog>
       <DialogTrigger asChild>
         <button
-          className={
-            className
-              ? className
-              : buttonVariants({ variant: "outline", size: "sm" })
-          }
+          className={cn(
+            buttonVariants({ variant: "outline", size: "sm" }),
+            className,
+          )}
         >
-          <Icons.add className="mr-2 h-4 w-4 sm:hidden" />
-          <div className="mr-1 hidden sm:inline">Add </div> Course
+          {className?.includes("w-7") ? (
+            <Icons.add className="size-4" />
+          ) : (
+            <>
+              <Icons.add className="mr-2 h-4 w-4" />
+              <span>Add Course</span>
+            </>
+          )}
         </button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
@@ -96,7 +100,7 @@ export function CourseCreateDialog({ className }: CourseCreateDialogProps) {
         <DialogFooter>
           <button
             onClick={async (e) => onSubmit(e)}
-            className={cn(buttonVariants())}
+            className={cn(buttonVariants({ variant: "default", size: "sm" }))}
             disabled={isLoading}
           >
             {isLoading && (
