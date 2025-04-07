@@ -14,7 +14,7 @@ interface LectureItemProps {
     course?: {
       id: string;
       name: string;
-    };
+    } | null;
   };
   courses?: Array<{
     id: string;
