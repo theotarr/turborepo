@@ -47,15 +47,13 @@ import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
 import { deleteLecture, updateLecture } from "@/lib/lecture/actions";
 import { api } from "@/lib/trpc/react";
 import { absoluteUrl, cn } from "@/lib/utils";
-import { Transcript } from "@/types";
 import { toast } from "sonner";
 
 interface LectureOperationsProps extends HTMLAttributes<HTMLDivElement> {
   lecture: {
     id: string;
     title: string;
-    courseId?: string;
-    transcript: Transcript[];
+    courseId?: string | null;
   };
   courses?: {
     id: string;

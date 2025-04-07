@@ -1,15 +1,25 @@
 import Link from "next/link";
 import { LectureOperations } from "@/components/lecture-operations";
 import { formatLectureType, formatShortDate } from "@/lib/utils";
-import { Course, Lecture } from "@prisma/client";
 
 import { Badge } from "./ui/badge";
 
 interface LectureItemProps {
-  lecture: Lecture & {
-    course?: Course;
+  lecture: {
+    id: string;
+    title: string;
+    type: string;
+    updatedAt: Date;
+    courseId: string | null;
+    course?: {
+      id: string;
+      name: string;
+    };
   };
-  courses?: Course[];
+  courses?: Array<{
+    id: string;
+    name: string;
+  }>;
 }
 
 export function LectureItem({ lecture, courses }: LectureItemProps) {
@@ -37,7 +47,7 @@ export function LectureItem({ lecture, courses }: LectureItemProps) {
         <p className="text-xs text-muted-foreground">
           Updated {formatShortDate(lecture.updatedAt.toDateString())}
         </p>
-        <LectureOperations lecture={lecture as any} courses={courses} />
+        <LectureOperations lecture={lecture} courses={courses} />
       </div>
     </div>
   );
