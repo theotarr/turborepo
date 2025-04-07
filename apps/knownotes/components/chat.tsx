@@ -89,12 +89,6 @@ export function Chat({
     return append(message);
   };
 
-  useEffect(() => {
-    if (chatId) {
-      setMessages(initialMessages);
-    }
-  }, [initialMessages, chatId, setMessages]);
-
   // Expose append function to parent
   useEffect(() => {
     if (onAppendAvailable) {

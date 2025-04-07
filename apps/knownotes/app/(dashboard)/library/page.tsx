@@ -1,12 +1,8 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ChatItem } from "@/components/chat-item";
-import { Icons } from "@/components/icons";
 import { LectureItem } from "@/components/lecture-item";
-import { buttonVariants } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { db } from "@/lib/db";
-import { cn } from "@/lib/utils";
 
 import { auth } from "@acme/auth";
 
@@ -111,18 +107,6 @@ export default async function LibraryPage({
               </div>
             )}
           </div>
-          <Link
-            href="/library?tab=chats"
-            className={cn(
-              buttonVariants({
-                variant: "ghost",
-                size: "sm",
-              }),
-              "mt-2 w-full justify-start bg-transparent text-xs text-muted-foreground hover:bg-transparent hover:underline",
-            )}
-          >
-            View all <Icons.chevronRight className="ml-2 size-4" />
-          </Link>
         </TabsContent>
       </Tabs>
     </div>
