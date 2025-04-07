@@ -27,7 +27,7 @@ export default function ChatPage() {
   return (
     <>
       <ChatHeader />
-      <div className="flex h-[calc(100vh-56px)] flex-col items-center justify-center overflow-y-auto py-12">
+      <div className="flex h-full flex-col items-center justify-center">
         <div className="mx-auto flex w-full max-w-3xl flex-col justify-center space-y-8 px-4 py-8 sm:px-8">
           <div className="flex flex-col space-y-2">
             <motion.div
@@ -54,7 +54,7 @@ export default function ChatPage() {
             variants={container}
             initial="hidden"
             animate="show"
-            className="flex flex-col space-y-3"
+            className="flex flex-col space-y-3 overflow-y-auto"
           >
             {isLoading ? (
               // Loading state
@@ -74,13 +74,15 @@ export default function ChatPage() {
                     href={`/chat/${course.id}`}
                     className="flex items-center justify-between rounded-md border border-border p-4 transition-all hover:bg-muted hover:shadow-sm"
                   >
-                    <div className="flex items-center space-x-3">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted">
+                    <div className="flex min-w-0 items-center space-x-3">
+                      <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-muted">
                         <Icons.course className="h-4 w-4 text-muted-foreground" />
                       </div>
-                      <h2 className="text-base font-medium">{course.name}</h2>
+                      <h2 className="truncate text-base font-medium">
+                        {course.name}
+                      </h2>
                     </div>
-                    <Icons.chevronRight className="h-4 w-4" />
+                    <Icons.chevronRight className="ml-2 h-4 w-4 flex-shrink-0" />
                   </Link>
                 </motion.div>
               ))
