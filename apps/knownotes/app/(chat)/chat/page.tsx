@@ -6,23 +6,13 @@ import { Icons } from "@/components/icons";
 import { api } from "@/lib/trpc/react";
 import { motion } from "framer-motion";
 
+const item = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.4 } },
+};
+
 export default function ChatPage() {
   const { data: courses, isLoading } = api.course.list.useQuery();
-
-  const container = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-      },
-    },
-  };
-
-  const item = {
-    hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.4 } },
-  };
 
   return (
     <>
@@ -51,7 +41,15 @@ export default function ChatPage() {
           </div>
 
           <motion.div
-            variants={container}
+            variants={{
+              hidden: { opacity: 0 },
+              show: {
+                opacity: 1,
+                transition: {
+                  staggerChildren: 0.1,
+                },
+              },
+            }}
             initial="hidden"
             animate="show"
             className="flex flex-col space-y-3 overflow-y-auto"
@@ -66,7 +64,7 @@ export default function ChatPage() {
                   />
                 ))}
               </div>
-            ) : courses.length > 0 ? (
+            ) : courses && courses.length > 0 ? (
               // Course list with animations
               courses.map((course) => (
                 <motion.div key={course.id} variants={item}>
