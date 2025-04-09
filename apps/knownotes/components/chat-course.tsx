@@ -2,6 +2,7 @@
 
 import React from "react";
 import { useRouter } from "next/navigation";
+import { api } from "@/lib/trpc/react";
 import { UIMessage } from "ai";
 
 import { Chat } from "./chat";
@@ -23,15 +24,13 @@ export function ChatCourse({
   course,
   initialMessages,
 }: ChatCourseProps) {
-  const router = useRouter();
+  const utils = api.useUtils();
 
   // Handle new messages to update the URL and refresh the router
-  const handleMessage = (message: UIMessage) => {
-    if (message.role === "user") {
-      // Only update URL and refresh on user messages
-      window.history.pushState({}, "", `/chat/${course.id}/${chatId}`);
-      router.refresh();
-    }
+  const handleMessage = () => {
+    // Only update URL and refresh on user messages
+    window.history.replaceState({}, "", `/chat/${course.id}/${chatId}`);
+    utils.chat.list.invalidate();
   };
 
   return (
