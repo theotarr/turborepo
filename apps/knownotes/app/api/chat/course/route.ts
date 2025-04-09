@@ -1,3 +1,4 @@
+import { generateTitleFromUserMessage } from "@/lib/ai/actions";
 import { chatCoursePrompt, chatCourseSystemPrompt } from "@/lib/ai/prompts";
 import { getMostRecentUserMessage, getTrailingMessageId } from "@/lib/ai/utils";
 import { db } from "@/lib/db";
@@ -48,12 +49,16 @@ export async function POST(request: Request) {
       },
     });
 
+    const name = await generateTitleFromUserMessage({
+      message: userMessage,
+    });
+
     if (!chat) {
       // Create a new chat
       chat = await db.chat.create({
         data: {
           id,
-          name: userMessage.content?.slice(0, 20) + "..." || "New Chat",
+          name,
           courseId,
           userId: session.user.id,
         },
