@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation";
 import { Onboarding } from "@/components/onboarding-flow";
-import { db } from "@/lib/db";
 
 import { auth } from "@acme/auth";
+import { db } from "@acme/db";
 
 export const metadata = {
   title: "Welcome to KnowNotes!",

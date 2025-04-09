@@ -1,9 +1,9 @@
-import { db } from "@/lib/db";
 import { verifyCurrentUserHasAccessToCourse } from "@/lib/lecture/actions";
 import { Prisma } from "@prisma/client";
 import * as z from "zod";
 
 import { auth } from "@acme/auth";
+import { db } from "@acme/db";
 
 const routeContextSchema = z.object({
   params: z.object({

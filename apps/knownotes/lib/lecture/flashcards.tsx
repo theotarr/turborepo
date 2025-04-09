@@ -31,8 +31,7 @@ export async function generateFlashcards(
   const stream = createStreamableValue();
 
   (async () => {
-    const { partialObjectStream } = await streamObject({
-      // @ts-expect-error - Google model is not typed.
+    const { partialObjectStream } = streamObject({
       model: google("gemini-2.0-flash-001"),
       schema: z.object({
         flashcards: z.array(

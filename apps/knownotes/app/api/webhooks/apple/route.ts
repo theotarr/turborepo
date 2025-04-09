@@ -1,4 +1,4 @@
-import { db } from "@/lib/db";
+import { db } from "@acme/db";
 
 const SUPERWALL_WEBHOOK_URL =
   "https://superwall.com/api/integrations/app-store-connect/webhook?pk=pk_944813c8354eb5f1ef827fb9d3f04a23fae6834cbeff114c";

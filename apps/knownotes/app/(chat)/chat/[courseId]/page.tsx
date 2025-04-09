@@ -2,11 +2,11 @@ import { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { ChatCourse } from "@/components/chat-course";
 import { env } from "@/env";
-import { db } from "@/lib/db";
 import { absoluteUrl } from "@/lib/utils";
 import { v1 as uuidv1 } from "uuid";
 
 import { auth } from "@acme/auth";
+import { db } from "@acme/db";
 
 interface ChatPageProps {
   params: { courseId: string };
@@ -68,5 +68,7 @@ export default async function CourseChatPage({ params }: ChatPageProps) {
 
   const chatId = uuidv1();
 
-  return <ChatCourse id={chatId} userId={session.user.id} course={course} />;
+  return (
+    <ChatCourse chatId={chatId} userId={session.user.id} course={course} />
+  );
 }

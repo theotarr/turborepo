@@ -5,12 +5,12 @@ import { DashboardShell } from "@/components/shell";
 import { UsageCard } from "@/components/usage-card";
 import { UserDeleteForm } from "@/components/user-delete-form";
 import { UserNameForm } from "@/components/user-name-form";
-import { db } from "@/lib/db";
 import { stripe } from "@/lib/stripe";
 import { getUserSubscriptionPlan } from "@/lib/subscription";
 import { absoluteUrl } from "@/lib/utils";
 
 import { auth } from "@acme/auth";
+import { db } from "@acme/db";
 
 const title = "Settings";
 const description = "Manage your account settings.";

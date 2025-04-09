@@ -1,7 +1,8 @@
 import NewUserOfferEmail from "@/components/emails/new-user-offer-email";
 import { env } from "@/env";
-import { db } from "@/lib/db";
 import { resend } from "@/lib/resend";
+
+import { db } from "@acme/db";
 
 export const maxDuration = 300; // 5 minutes
 

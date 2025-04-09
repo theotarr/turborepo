@@ -1,6 +1,5 @@
 import { chatPrompt, systemPrompt } from "@/lib/ai/prompts";
 import { getMostRecentUserMessage, getTrailingMessageId } from "@/lib/ai/utils";
-import { db } from "@/lib/db";
 import { formatTranscript } from "@/lib/utils";
 import { Transcript } from "@/types";
 import { google } from "@ai-sdk/google";
@@ -14,7 +13,7 @@ import {
 import { v1 as uuidv1 } from "uuid";
 
 import { auth } from "@acme/auth";
-import { MessageRole } from "@acme/db";
+import { db, MessageRole } from "@acme/db";
 
 export const maxDuration = 60;
 

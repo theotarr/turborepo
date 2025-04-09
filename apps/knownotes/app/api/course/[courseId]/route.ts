@@ -1,7 +1,8 @@
-import { db } from "@/lib/db";
 import { verifyCurrentUserHasAccessToCourse } from "@/lib/lecture/actions";
 import { JSONContent } from "@tiptap/core";
 import * as z from "zod";
+
+import { db } from "@acme/db";
 
 const routeContextSchema = z.object({
   params: z.object({

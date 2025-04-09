@@ -3,10 +3,10 @@ import { notFound, redirect } from "next/navigation";
 import { ChatCourse } from "@/components/chat-course";
 import { env } from "@/env";
 import { convertToUIMessages } from "@/lib/ai/utils";
-import { db } from "@/lib/db";
 import { absoluteUrl } from "@/lib/utils";
 
 import { auth } from "@acme/auth";
+import { db } from "@acme/db";
 
 interface SavedChatPageProps {
   params: { courseId: string; chatId: string };
@@ -88,7 +88,7 @@ export default async function CourseChatPage({ params }: SavedChatPageProps) {
 
   return (
     <ChatCourse
-      id={chat.id}
+      chatId={chat.id}
       userId={session.user.id}
       course={course}
       initialMessages={convertToUIMessages(chat.messages)}

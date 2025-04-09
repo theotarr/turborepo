@@ -8,12 +8,10 @@ import { LectureItem } from "@/components/lecture-item";
 import { DashboardShell } from "@/components/shell";
 import { Button } from "@/components/ui/button";
 import { env } from "@/env";
-import { db } from "@/lib/db";
 import { absoluteUrl } from "@/lib/utils";
 
 import { auth } from "@acme/auth";
-
-// import { FileUpload } from "@/components/file-upload"
+import { db } from "@acme/db";
 
 interface CoursePageProps {
   params: { courseId: string };

@@ -1,8 +1,9 @@
 import { Metadata } from "next";
 import { NotesSharePage } from "@/components/notes-share-page";
 import { env } from "@/env";
-import { db } from "@/lib/db";
 import { absoluteUrl } from "@/lib/utils";
+
+import { db } from "@acme/db";
 
 interface LecturePageProps {
   params: { id: string };

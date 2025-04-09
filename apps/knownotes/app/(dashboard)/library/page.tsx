@@ -2,9 +2,9 @@ import { redirect } from "next/navigation";
 import { ChatItem } from "@/components/chat-item";
 import { LectureItem } from "@/components/lecture-item";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { db } from "@/lib/db";
 
 import { auth } from "@acme/auth";
+import { db } from "@acme/db";
 
 export const metadata = {
   title: "Library",

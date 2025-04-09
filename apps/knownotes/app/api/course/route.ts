@@ -1,7 +1,7 @@
-import { db } from "@/lib/db";
 import * as z from "zod";
 
 import { auth } from "@acme/auth";
+import { db } from "@acme/db";
 
 export async function POST(req: Request) {
   const session = await auth();

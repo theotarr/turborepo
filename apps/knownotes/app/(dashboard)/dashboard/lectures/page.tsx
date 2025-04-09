@@ -7,10 +7,10 @@ import { LectureItem } from "@/components/lecture-item";
 import { DashboardShell } from "@/components/shell";
 import { Button } from "@/components/ui/button";
 import { env } from "@/env";
-import { db } from "@/lib/db";
 import { Course, Lecture } from "@prisma/client";
 
 import { auth } from "@acme/auth";
+import { db } from "@acme/db";
 
 const title = "Lectures";
 const description = "View and manage your lectures.";

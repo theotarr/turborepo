@@ -9,11 +9,11 @@ import { LectureSearch } from "@/components/lecture-search";
 import { QuickActions } from "@/components/quick-action";
 import { DashboardShell } from "@/components/shell";
 import { buttonVariants } from "@/components/ui/button";
-import { db } from "@/lib/db";
 import { absoluteUrl } from "@/lib/utils";
 import { Course } from "@prisma/client";
 
 import { auth } from "@acme/auth";
+import { db } from "@acme/db";
 
 const title = "Dashboard";
 const ogUrl = `${absoluteUrl("")}/api/og?heading=${title}&mode=light`;

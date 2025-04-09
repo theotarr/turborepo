@@ -1,8 +1,9 @@
 "use server";
 
-import { db } from "@/lib/db";
 import { google } from "@ai-sdk/google";
 import { generateText, Message } from "ai";
+
+import { db } from "@acme/db";
 
 export async function generateTitleFromUserMessage({
   message,

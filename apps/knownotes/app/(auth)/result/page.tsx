@@ -3,10 +3,10 @@ import { redirect } from "next/navigation";
 import { Icons } from "@/components/icons";
 import { PaymentResultRedirect } from "@/components/payment-result-redirect";
 import { proPlan } from "@/config/subscriptions";
-import { db } from "@/lib/db";
 import { stripe } from "@/lib/stripe";
 
 import { auth } from "@acme/auth";
+import { db } from "@acme/db";
 
 export const metadata = {
   title: "Welcome to KnowNotes!",

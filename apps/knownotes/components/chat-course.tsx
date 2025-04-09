@@ -8,7 +8,7 @@ import { Chat } from "./chat";
 import { PremiumFeature } from "./premium-feature";
 
 interface ChatCourseProps {
-  id: string;
+  chatId: string;
   userId: string;
   course: {
     id: string;
@@ -18,7 +18,7 @@ interface ChatCourseProps {
 }
 
 export function ChatCourse({
-  id,
+  chatId,
   userId,
   course,
   initialMessages,
@@ -29,7 +29,7 @@ export function ChatCourse({
   const handleMessage = (message: UIMessage) => {
     if (message.role === "user") {
       // Only update URL and refresh on user messages
-      window.history.pushState({}, "", `/chat/${course.id}/${id}`);
+      window.history.pushState({}, "", `/chat/${course.id}/${chatId}`);
       router.refresh();
     }
   };
@@ -38,7 +38,7 @@ export function ChatCourse({
     <PremiumFeature>
       <Chat
         userId={userId}
-        chatId={id}
+        chatId={chatId}
         initialMessages={initialMessages || []}
         onMessage={handleMessage}
         bodyData={{ courseId: course.id }}

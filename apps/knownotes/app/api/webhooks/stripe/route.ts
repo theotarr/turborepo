@@ -1,7 +1,6 @@
 import { headers } from "next/headers";
 import { proPlan } from "@/config/subscriptions";
 import { env } from "@/env";
-import { db } from "@/lib/db";
 import {
   getResendContactIdFromEmail,
   PAID_USER_AUDIENCE_ID,
@@ -11,6 +10,7 @@ import { stripe } from "@/lib/stripe";
 import Stripe from "stripe";
 
 import { trackMetaEvent, trackTiktokEvent } from "@acme/analytics";
+import { db } from "@acme/db";
 
 export async function POST(req: Request) {
   const body = await req.text();

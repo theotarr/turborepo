@@ -1,7 +1,6 @@
 import { generateTitleFromUserMessage } from "@/lib/ai/actions";
 import { chatCoursePrompt, chatCourseSystemPrompt } from "@/lib/ai/prompts";
 import { getMostRecentUserMessage, getTrailingMessageId } from "@/lib/ai/utils";
-import { db } from "@/lib/db";
 import { vectorStore } from "@/lib/supabase";
 import { google } from "@ai-sdk/google";
 import {
@@ -14,7 +13,7 @@ import {
 import { v1 as uuidv1 } from "uuid";
 
 import { auth } from "@acme/auth";
-import { MessageRole } from "@acme/db";
+import { db, MessageRole } from "@acme/db";
 
 export const maxDuration = 60;
 

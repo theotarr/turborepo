@@ -16,11 +16,11 @@ import {
 import { UserAccountNav } from "@/components/user-account-nav";
 import { env } from "@/env";
 import { convertToUIMessages } from "@/lib/ai/utils";
-import { db } from "@/lib/db";
 import { absoluteUrl, cn } from "@/lib/utils";
 import { Transcript } from "@/types";
 
 import { auth } from "@acme/auth";
+import { db } from "@acme/db";
 
 interface LecturePageProps {
   params: { id: string };

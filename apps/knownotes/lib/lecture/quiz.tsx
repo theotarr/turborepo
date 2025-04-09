@@ -1,6 +1,5 @@
 "use server";
 
-import { db } from "@/lib/db";
 import { Transcript } from "@/types";
 import { google } from "@ai-sdk/google";
 import { streamObject } from "ai";
@@ -8,6 +7,7 @@ import { createStreamableValue } from "ai/rsc";
 import { z } from "zod";
 
 import { auth } from "@acme/auth";
+import { db } from "@acme/db";
 
 import { formatTranscript } from "../utils";
 
@@ -31,8 +31,7 @@ export async function generateQuiz(
   const stream = createStreamableValue();
 
   (async () => {
-    const { partialObjectStream } = await streamObject({
-      // @ts-expect-error - Google model is not typed.
+    const { partialObjectStream } = streamObject({
       model: google("gemini-2.0-flash-001"),
       schema: z.object({
         questions: z.array(

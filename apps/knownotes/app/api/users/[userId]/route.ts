@@ -1,9 +1,9 @@
-import { db } from "@/lib/db";
 import { resend, USER_AUDIENCE_ID } from "@/lib/resend";
 import { userSchema } from "@/lib/validations/user";
 import { z } from "zod";
 
 import { auth } from "@acme/auth";
+import { db } from "@acme/db";
 
 const routeContextSchema = z.object({
   params: z.object({

@@ -1,9 +1,9 @@
-import { db } from "@/lib/db";
 import { embedTranscripts, shouldEmbedTranscripts } from "@/lib/embeddings";
 import { Transcript } from "@/types";
 import * as z from "zod";
 
 import { auth } from "@acme/auth";
+import { db } from "@acme/db";
 
 const routeContextSchema = z.object({
   params: z.object({
