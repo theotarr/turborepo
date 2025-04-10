@@ -1,7 +1,6 @@
 import { generateTitleFromUserMessage } from "@/lib/ai/actions";
-import { chatCoursePrompt, chatCourseSystemPrompt } from "@/lib/ai/prompts";
+import { chatCourseSystemPrompt } from "@/lib/ai/prompts";
 import { getMostRecentUserMessage, getTrailingMessageId } from "@/lib/ai/utils";
-import { vectorStore } from "@/lib/supabase";
 import { google } from "@ai-sdk/google";
 import {
   appendResponseMessages,
@@ -86,69 +85,75 @@ export async function POST(request: Request) {
       },
     });
 
-    // Fetch the relevant lecture transcripts from the course
-    const similarCourseDocumentsWithScore =
-      await vectorStore.similaritySearchWithScore(
-        userMessage.content || "",
-        10,
-        (rpc) => rpc.eq("metadata->>courseId", courseId), // Filter by course
-      );
-
-    // Filter out the documents with a score less than 0.8
-    const similarCourseDocuments = similarCourseDocumentsWithScore
-      .filter((doc) => doc[1] > 0.8)
-      .map((doc) => doc[0]);
-
-    const context = similarCourseDocuments
-      .map((doc, i) => `${i}. ${doc.pageContent}`)
-      .join("\n\n");
-
-    // Get unique lecture IDs from the documents
-    const uniqueLectures = [
-      ...new Set(similarCourseDocuments.map((doc) => doc.metadata.lectureId)),
-    ];
-
-    // Fetch lecture data for sources
     const lectures = await db.lecture.findMany({
-      where: {
-        id: { in: uniqueLectures },
-      },
+      where: { courseId },
+      select: { id: true, title: true, transcript: true, createdAt: true },
+      orderBy: { createdAt: "desc" }, // Order by most recent first
     });
 
-    const sourceList = lectures.map((l) => ({
-      id: l.id,
-      title: l.title,
-      source: l.youtubeVideoId ? "YouTube" : "Lecture",
-      date: l.createdAt.toISOString(),
-    }));
-
-    // Prepare messages for the AI
-    const messagesPrompt = [...messages];
-    const lastMessageIndex = messagesPrompt.findIndex(
-      (message) => message.id === userMessage.id,
+    const totalChars = lectures.reduce(
+      (sum, lecture) => sum + (lecture.transcript?.length || 0),
+      0,
     );
+    const estimatedTokens = Math.ceil(totalChars / 4); // Simple estimation
 
-    if (lastMessageIndex !== -1) {
-      const lastMessage = messagesPrompt[lastMessageIndex];
-      messagesPrompt[lastMessageIndex] = {
-        ...lastMessage,
-        parts: lastMessage.parts?.map((part) => {
-          if (part.type === "text") {
-            return {
-              ...part,
-              text: chatCoursePrompt(context, part.text || ""),
-            };
-          }
-          return part;
-        }),
-      };
+    let context = "";
+    const TOKEN_LIMIT = 900_000; // Set the token limit
+
+    if (estimatedTokens < TOKEN_LIMIT) {
+      // If total tokens are below the limit, include all transcripts
+      context = lectures
+        .map(
+          (l) =>
+            `Lecture: ${l.title || "Untitled"}
+${l.transcript || "No transcript available."}`,
+        )
+        .join("\n\n---\n\n"); // Separator between lectures
+    } else {
+      // Take the most recent lectures up to approaching the token limit
+      let currentTokens = 0;
+      const selectedLectures: typeof lectures = [];
+
+      for (const lecture of lectures) {
+        const lectureChars = lecture.transcript?.length || 0;
+        const lectureTokens = Math.ceil(lectureChars / 4);
+
+        // If adding this lecture would exceed ~90% of token limit, stop
+        if (currentTokens + lectureTokens > TOKEN_LIMIT * 0.9) {
+          break;
+        }
+
+        selectedLectures.push(lecture);
+        currentTokens += lectureTokens;
+      }
+
+      context = selectedLectures
+        .map(
+          (l) =>
+            `Lecture: ${l.title || "Untitled"} (ID: ${l.id})
+${l.transcript || "No transcript available."}`,
+        )
+        .join("\n\n---\n\n");
+
+      console.log(
+        `Used ${currentTokens} tokens from the ${selectedLectures.length} most recent lectures (out of ${lectures.length} total lectures)`,
+      );
     }
+
+    // Prepare messages for the AI (without context injection in user message)
+    const messagesPrompt = [...messages];
+
+    // Prepare the system prompt, conditionally adding the context
+    const baseSystemPrompt = chatCourseSystemPrompt();
+    const finalSystemPrompt = context
+      ? `${baseSystemPrompt}\n\nBased on the following course lecture transcripts, answer the user's query:\nSTART CONTEXT\n${context}\nEND CONTEXT\n`
+      : baseSystemPrompt;
 
     return createDataStreamResponse({
       execute: (dataStream) => {
         const result = streamText({
           model: google("gemini-2.0-flash-001"),
-          system: chatCourseSystemPrompt(),
+          system: finalSystemPrompt,
           messages: messagesPrompt,
           maxSteps: 5,
           experimental_transform: smoothStream({ chunking: "word" }),
@@ -172,7 +177,7 @@ export async function POST(request: Request) {
                   responseMessages: response.messages,
                 });
 
-                // Save the assistant message in the database with sources
+                // Save the assistant message in the database
                 await db.message.create({
                   data: {
                     id: assistantMessage.id,
@@ -181,7 +186,6 @@ export async function POST(request: Request) {
                     parts: assistantMessage.parts as any,
                     attachments:
                       (assistantMessage.experimental_attachments as any) ?? [],
-                    sources: sourceList,
                   },
                 });
               } catch (error) {
