@@ -9,7 +9,7 @@ import {
 import { updateLecture } from "@/lib/lecture/actions";
 import { generateFlashcards } from "@/lib/lecture/flashcards";
 import { generateEnhancedNotes } from "@/lib/lecture/notes";
-import { generateQuiz } from "@/lib/lecture/quiz";
+import { generateQuiz, QuizResult } from "@/lib/lecture/quiz";
 import { cn } from "@/lib/utils";
 import { Transcript } from "@/types";
 import { Lecture } from "@prisma/client";
@@ -243,6 +243,7 @@ export function NotesPage({
   const [isLoadingFlashcards, setIsLoadingFlashcards] = useState(false);
   const [isLoadingQuiz, setIsLoadingQuiz] = useState(false);
   const [quizQuestions, setQuizQuestions] = useState<any[]>([]);
+  const [quizGenerationAttempted, setQuizGenerationAttempted] = useState(false);
 
   // Determine the layout based on lecture type and PDF availability
   const layout = lecture.type === "PDF" && lecture.fileId ? "pdf" : "notes";
@@ -411,7 +412,8 @@ export function NotesPage({
       if (
         activeTab === "quiz" &&
         quizQuestions.length === 0 &&
-        !isLoadingQuiz
+        !isLoadingQuiz &&
+        !quizGenerationAttempted // Only attempt if we haven't tried before
       ) {
         setIsLoadingQuiz(true);
 
@@ -422,21 +424,24 @@ export function NotesPage({
             return;
           }
 
-          // Otherwise generate new quiz questions
-          const object = await generateQuiz(lecture.id, transcript);
+          // Otherwise generate new quiz questions using the non-streaming version
+          const result = await generateQuiz(lecture.id, transcript);
 
-          for await (const partialObject of readStreamableValue(object)) {
-            if (partialObject && partialObject.questions) {
-              setQuizQuestions(partialObject.questions);
-            }
+          if (result.questions && result.questions.length > 0) {
+            setQuizQuestions(result.questions);
+            toast.success("Quiz generated successfully");
+          } else {
+            // Not treating this as an error - the transcript might be insufficient
+            toast.info(
+              "No questions generated. There might not be enough content in the transcript.",
+            );
           }
-
-          toast.success("Quiz generated successfully");
         } catch (error) {
           console.error("Error generating quiz:", error);
           toast.error("Failed to generate quiz");
         } finally {
           setIsLoadingQuiz(false);
+          setQuizGenerationAttempted(true); // Mark that we've attempted generation
         }
       }
     }
@@ -449,6 +454,7 @@ export function NotesPage({
     lecture.id,
     quizQuestions.length,
     transcript,
+    quizGenerationAttempted, // Add as dependency
   ]);
 
   // Function to add/remove the editing-content class to the document body
@@ -1032,22 +1038,29 @@ export function NotesPage({
                         No quiz questions found
                       </p>
                       <Button
+                        size="sm"
                         onClick={async () => {
                           setIsLoadingQuiz(true);
+                          setQuizGenerationAttempted(true); // Mark as attempted before starting
                           try {
-                            const object = await generateQuiz(
+                            // Generate new quiz questions using non-streaming version
+                            const result = await generateQuiz(
                               lecture.id,
                               transcript,
                             );
 
-                            for await (const partialObject of readStreamableValue(
-                              object,
-                            )) {
-                              if (partialObject && partialObject.questions) {
-                                setQuizQuestions(partialObject.questions);
-                              }
+                            if (
+                              result.questions &&
+                              result.questions.length > 0
+                            ) {
+                              setQuizQuestions(result.questions);
+                              toast.success("Quiz generated successfully");
+                            } else {
+                              // Not treating this as an error - the transcript might be insufficient
+                              toast.info(
+                                "No questions generated. There might not be enough content in the transcript.",
+                              );
                             }
-                            toast.success("Quiz generated successfully");
                           } catch (error) {
                             console.error("Error generating quiz:", error);
                             toast.error("Failed to generate quiz");
