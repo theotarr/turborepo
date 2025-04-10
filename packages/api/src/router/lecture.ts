@@ -32,6 +32,27 @@ async function verifyCurrentUserHasAccessToLecture(
   return true;
 }
 
+async function generateTitleFromTranscript({
+  transcript,
+}: {
+  transcript: Transcript[];
+}) {
+  const { text: title } = await generateText({
+    model: google("gemini-1.5-flash-8b"),
+    system: `\n
+    - You will generate a short title based on the transcript of a lecture
+    - Ensure it is not more than 80 characters long
+    - The title should include the topics covered in the lecture
+    - If the lecture is in a serires or unit, include the unit number or name
+    - Do not use quotes or colons`,
+    prompt: `\
+    Transcript:
+    ${formatTranscript(transcript)}`,
+  });
+
+  return title;
+}
+
 async function generateLectureNotes({
   transcript,
   generateTitle = false,
@@ -690,11 +711,15 @@ export const lectureRouter = {
             },
           });
         } else {
+          const title = await generateTitleFromTranscript({
+            transcript,
+          });
+
           lecture = await ctx.db.lecture.create({
             data: {
               type,
               fileId,
-              title: "Untitled Lecture",
+              title,
               userId: ctx.session.user.id,
               ...(courseId ? { courseId } : {}),
             },
