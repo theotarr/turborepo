@@ -631,6 +631,7 @@ export const lectureRouter = {
           type !== "PDF" &&
           type !== "AUDIO_FILE" &&
           type !== "DOCX" &&
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
           type !== "TEXT"
         ) {
           throw new Error(
