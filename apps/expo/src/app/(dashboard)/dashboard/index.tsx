@@ -412,7 +412,7 @@ export default function DashboardPage() {
                 <DialogHeader>
                   <DialogTitle>Create Course</DialogTitle>
                   <DialogDescription>
-                    Add a new course to organize your notes and lectures.
+                    Add a new course to organize your notes.
                   </DialogDescription>
                 </DialogHeader>
                 <View className="gap-4">

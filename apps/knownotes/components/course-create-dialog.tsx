@@ -81,7 +81,7 @@ export function CourseCreateDialog({ className }: CourseCreateDialogProps) {
         <DialogHeader>
           <DialogTitle>New Course</DialogTitle>
           <DialogDescription>
-            Create a new course to organize your lectures.
+            Create a new course to organize your notes.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
