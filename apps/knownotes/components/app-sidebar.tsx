@@ -84,7 +84,7 @@ export function AppSidebar() {
               <Link
                 href="/dashboard"
                 onClick={() => setOpenMobile(false)}
-                className="flex flex-row items-center gap-2 font-bold tracking-tight"
+                className="flex flex-row items-center gap-2 font-bold tracking-tighter text-secondary-foreground"
               >
                 <Icons.logo className="size-6" />
                 KnowNotes
@@ -111,7 +111,7 @@ export function AppSidebar() {
               <Link href="/dashboard">
                 <Button
                   variant="outline"
-                  className="size-7 border-0 bg-transparent p-0"
+                  className="-mr-2 size-7 border-0 bg-transparent p-0"
                 >
                   <Icons.add className="size-4" />
                 </Button>
@@ -310,7 +310,7 @@ export function AppSidebar() {
               <div className="flex w-full items-center justify-between">
                 <span>Your Courses</span>
                 <CourseCreateDialog
-                  className={cn("h-7 w-7 border-0 bg-transparent p-0")}
+                  className={cn("-mr-2 h-7 w-7 border-0 bg-transparent p-0")}
                 />
               </div>
             </SidebarGroupLabel>
