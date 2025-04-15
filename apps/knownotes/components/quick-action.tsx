@@ -9,8 +9,8 @@ import {
   CardDescription,
   CardTitle,
 } from "@/components/ui/card";
+import { api } from "@/lib/trpc/react";
 import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
 
 import { Icons } from "./icons";
 import {
@@ -74,6 +74,7 @@ export function QuickAction({
 
 function QuickLectureComponent() {
   const router = useRouter();
+  const utils = api.useUtils();
   return (
     <QuickAction
       icon="mic"
@@ -81,6 +82,7 @@ function QuickLectureComponent() {
       description="Record your class in real-time"
       onClick={async () => {
         const id = await createLecture(undefined, "LIVE");
+        utils.lecture.list.invalidate();
         router.push(`/lecture/${id}`);
       }}
     />
