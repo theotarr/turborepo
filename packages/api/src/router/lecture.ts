@@ -128,6 +128,7 @@ export const lectureRouter = {
       where: {
         userId: ctx.session.user.id,
       },
+      // Do not fetch transcripts as it will cause the request to exceed maximum request size.
       select: {
         id: true,
         type: true,
@@ -147,8 +148,7 @@ export const lectureRouter = {
           },
         },
       },
-      // Limit to 6 lectures, and don't fetch transcripts that are too large as it will cause the request to time out or exceed maximum request size.
-      take: 6,
+      take: 5,
       orderBy: { updatedAt: "desc" },
     });
   }),

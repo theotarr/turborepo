@@ -13,7 +13,7 @@ export const chatRouter = {
       orderBy: {
         createdAt: "desc",
       },
-      take: 6,
+      take: 5,
     });
 
     return chats;
