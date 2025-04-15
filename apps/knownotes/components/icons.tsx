@@ -52,6 +52,7 @@ import {
   Quote,
   RefreshCw,
   School,
+  Search,
   Send,
   Settings,
   Settings2,
@@ -326,4 +327,5 @@ export const Icons = {
   video: FileVideo2,
   audio: FileAudio2,
   course: Box,
+  search: Search,
 };
