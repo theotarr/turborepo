@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { api } from "@/lib/trpc/react";
 import { cn } from "@/lib/utils";
 import { Course } from "@prisma/client";
 import { toast } from "sonner";
@@ -79,6 +80,7 @@ interface CourseOperationsProps {
 
 export function CourseOperations({ course }: CourseOperationsProps) {
   const router = useRouter();
+  const utils = api.useUtils();
 
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
   const [isDeleteLoading, setIsDeleteLoading] = useState(false);
@@ -127,7 +129,7 @@ export function CourseOperations({ course }: CourseOperationsProps) {
               </div>
               <DialogFooter>
                 <button
-                  className={cn(buttonVariants())}
+                  className={cn(buttonVariants({ size: "sm" }))}
                   onClick={async (event) => {
                     event.preventDefault();
                     setIsUpdateLoading(true);
@@ -135,7 +137,7 @@ export function CourseOperations({ course }: CourseOperationsProps) {
                     if (updated) {
                       setIsUpdateLoading(false);
                       setIsEditDialogOpen(false);
-                      router.refresh();
+                      utils.course.invalidate();
                     }
                   }}
                   disabled={isUpdateLoading}
@@ -181,10 +183,12 @@ export function CourseOperations({ course }: CourseOperationsProps) {
                       setIsDeleteLoading(false);
                       setIsDeleteAlertOpen(false);
                       router.push("/dashboard");
-                      router.refresh();
+                      utils.course.invalidate();
                     }
                   }}
-                  className="bg-red-600 focus:ring-red-600"
+                  className={cn(
+                    buttonVariants({ size: "sm", variant: "destructive" }),
+                  )}
                 >
                   {isDeleteLoading ? (
                     <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />

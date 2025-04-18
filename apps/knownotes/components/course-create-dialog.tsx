@@ -48,14 +48,15 @@ export function CourseCreateDialog({ className }: CourseCreateDialogProps) {
   const onSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
+
     const { courseId } = await createCourse({ name });
     setIsLoading(false);
-    if (!courseId) {
+
+    if (!courseId)
       return toast.error("Something went wrong. Please try again.");
-    } else {
-      toast.success("Success!");
-      utils.course.list.invalidate();
-    }
+
+    toast.success("Success!");
+    utils.course.invalidate();
   };
 
   return (
