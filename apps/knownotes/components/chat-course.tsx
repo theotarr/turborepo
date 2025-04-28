@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { useRouter } from "next/navigation";
 import { api } from "@/lib/trpc/react";
 import { UIMessage } from "ai";
 
