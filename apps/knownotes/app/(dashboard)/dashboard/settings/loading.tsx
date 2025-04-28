@@ -1,10 +1,9 @@
 import { CardSkeleton } from "@/components/card-skeleton";
 import { DashboardHeader } from "@/components/header";
-import { DashboardShell } from "@/components/shell";
 
-export default function DashboardSettingsLoading() {
+export default function SettingsLoading() {
   return (
-    <DashboardShell>
+    <div className="grid items-start gap-8">
       <DashboardHeader
         heading="Settings"
         text="Manage your account settings."
@@ -14,6 +13,6 @@ export default function DashboardSettingsLoading() {
         <CardSkeleton />
         <CardSkeleton />
       </div>
-    </DashboardShell>
+    </div>
   );
 }

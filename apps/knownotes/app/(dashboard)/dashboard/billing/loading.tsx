@@ -1,10 +1,9 @@
 import { CardSkeleton } from "@/components/card-skeleton";
 import { DashboardHeader } from "@/components/header";
-import { DashboardShell } from "@/components/shell";
 
 export default function BillingLoading() {
   return (
-    <DashboardShell>
+    <div className="grid items-start gap-8">
       <DashboardHeader
         heading="Billing"
         text="Manage your billing information."
@@ -14,6 +13,6 @@ export default function BillingLoading() {
         <CardSkeleton />
         <CardSkeleton />
       </div>
-    </DashboardShell>
+    </div>
   );
 }
