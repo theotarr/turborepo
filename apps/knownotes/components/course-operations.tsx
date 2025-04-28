@@ -38,41 +38,7 @@ import { cn } from "@/lib/utils";
 import { Course } from "@prisma/client";
 import { toast } from "sonner";
 
-async function deleteCourse(courseId: string) {
-  const response = await fetch(`/api/course/${courseId}`, {
-    method: "DELETE",
-  });
-
-  if (!response?.ok) {
-    toast.error(
-      "Something went wrong. Your course was not deleted. Please try again.",
-    );
-    return false;
-  }
-
-  return true;
-}
-
-async function updateCourse(courseId: string, name: string) {
-  const response = await fetch(`/api/course/${courseId}`, {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      name,
-    }),
-  });
-
-  if (!response?.ok) {
-    toast.error(
-      "Something went wrong. Your course was not updated. Please try again.",
-    );
-    return false;
-  }
-
-  return true;
-}
+import { deleteCourse, updateCourse } from "../app/(auth)/actions";
 
 interface CourseOperationsProps {
   course: Course;
@@ -133,11 +99,20 @@ export function CourseOperations({ course }: CourseOperationsProps) {
                   onClick={async (event) => {
                     event.preventDefault();
                     setIsUpdateLoading(true);
-                    const updated = await updateCourse(course.id, courseName);
-                    if (updated) {
+
+                    try {
+                      await updateCourse(course.id, courseName);
                       setIsUpdateLoading(false);
                       setIsEditDialogOpen(false);
                       utils.course.invalidate();
+                      router.refresh();
+                    } catch (error) {
+                      console.error(error);
+                      toast.error(
+                        "Something went wrong. Your course was not updated. Please try again.",
+                      );
+                    } finally {
+                      setIsUpdateLoading(false);
                     }
                   }}
                   disabled={isUpdateLoading}
@@ -178,12 +153,21 @@ export function CourseOperations({ course }: CourseOperationsProps) {
                   onClick={async (event) => {
                     event.preventDefault();
                     setIsDeleteLoading(true);
-                    const deleted = await deleteCourse(course.id);
-                    if (deleted) {
+
+                    try {
+                      await deleteCourse(course.id);
                       setIsDeleteLoading(false);
                       setIsDeleteAlertOpen(false);
                       router.push("/dashboard");
                       utils.course.invalidate();
+                      router.refresh();
+                    } catch (error) {
+                      console.error(error);
+                      toast.error(
+                        "Something went wrong. Your course was not deleted. Please try again.",
+                      );
+                    } finally {
+                      setIsDeleteLoading(false);
                     }
                   }}
                   className={cn(
