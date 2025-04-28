@@ -78,8 +78,8 @@ function QuickLectureComponent() {
   return (
     <QuickAction
       icon="mic"
-      title="Record Lecture"
-      description="Record your class in real-time"
+      title="Record"
+      description="Record your lecture in real-time"
       onClick={async () => {
         const id = await createLecture(undefined, "LIVE");
         utils.lecture.list.invalidate();
@@ -95,8 +95,8 @@ function QuickPasteComponent() {
   return (
     <QuickAction
       icon="link"
-      title="YouTube/Text"
-      description="Paste a YouTube URL or text content"
+      title="Paste"
+      description="Paste a YouTube URL or text"
       onClick={() => {
         setOpen(true);
         setTab("youtube");
@@ -111,8 +111,8 @@ function QuickUploadComponent() {
   return (
     <QuickAction
       icon="page"
-      title="Upload File"
-      description="Upload PDF, DOCX, TXT, or audio file"
+      title="Upload"
+      description="PDF, DOCX, TXT, or audio file"
       onClick={() => {
         setOpen(true);
       }}
