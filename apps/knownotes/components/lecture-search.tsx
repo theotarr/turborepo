@@ -26,7 +26,7 @@ interface LectureSearchProps extends React.HTMLAttributes<HTMLDivElement> {
 
 export function LectureSearch({
   className,
-  placeholder = "Search your lectures...",
+  placeholder = "Search your notes...",
   courses,
   ...props
 }: LectureSearchProps) {
