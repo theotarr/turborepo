@@ -3,7 +3,6 @@ import { redirect } from "next/navigation";
 import { BillingCard } from "@/components/billing-card";
 import { DashboardHeader } from "@/components/header";
 import { PaymentInfoCard } from "@/components/payment-info-card";
-import { DashboardShell } from "@/components/shell";
 import { SubscriptionManagementCard } from "@/components/subscription-management-card";
 import { stripe } from "@/lib/stripe";
 import { getUserSubscriptionPlan } from "@/lib/subscription";
@@ -65,17 +64,17 @@ export default async function BillingPage() {
 
     if (customer.deleted) {
       return (
-        <DashboardShell>
+        <>
           <DashboardHeader
             heading="Billing"
             text="Manage your subscription and billing information."
           />
-          <div className="grid gap-10">
+          <div className="mt-8 grid gap-10">
             <div className="rounded-lg border bg-background p-6">
               Customer has been deleted. Please contact support.
             </div>
           </div>
-        </DashboardShell>
+        </>
       );
     }
 
@@ -94,12 +93,12 @@ export default async function BillingPage() {
   }
 
   return (
-    <DashboardShell>
+    <>
       <DashboardHeader
         heading="Billing"
         text="Manage your subscription and billing information."
       />
-      <div className="grid gap-10">
+      <div className="mt-8 grid gap-10">
         <BillingCard
           subscriptionPlan={{
             ...subscriptionPlan,
@@ -118,6 +117,6 @@ export default async function BillingPage() {
           />
         )}
       </div>
-    </DashboardShell>
+    </>
   );
 }

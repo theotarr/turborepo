@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Icons } from "@/components/icons";
-import { DashboardShell } from "@/components/shell";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -146,7 +145,7 @@ export default function CancelSubscriptionPage() {
   };
 
   return (
-    <DashboardShell>
+    <>
       {isLoading ? (
         <Card className="flex items-center justify-center p-12">
           <div className="flex flex-col items-center space-y-4">
@@ -355,6 +354,6 @@ export default function CancelSubscriptionPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </DashboardShell>
+    </>
   );
 }

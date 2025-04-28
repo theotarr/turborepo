@@ -1,7 +1,5 @@
 import { redirect } from "next/navigation";
-import { ChatItem } from "@/components/chat-item";
-import { LectureItem } from "@/components/lecture-item";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Library } from "@/components/library";
 
 import { auth } from "@acme/auth";
 import { db } from "@acme/db";
@@ -65,50 +63,19 @@ export default async function LibraryPage({
   });
 
   return (
-    <div className="container pt-8">
-      <div className="mb-8">
+    <>
+      <div className="mb-6">
         <h1 className="text-3xl font-bold tracking-tight">Library</h1>
         <p className="text-muted-foreground">
           Browse your notes and chats all in one place
         </p>
       </div>
-
-      <Tabs defaultValue={defaultTab} className="mb-8">
-        <TabsList className="mb-6">
-          <TabsTrigger value="notes">Notes</TabsTrigger>
-          <TabsTrigger value="chats">Chats</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="notes">
-          <div className="overflow-hidden rounded-lg border">
-            {lectures && lectures.length > 0 ? (
-              lectures.map((lecture) => (
-                <LectureItem
-                  key={lecture.id}
-                  lecture={lecture}
-                  courses={courses}
-                />
-              ))
-            ) : (
-              <div className="flex min-h-[200px] items-center justify-center p-4 text-center text-muted-foreground">
-                No notes found. Create a new note to get started.
-              </div>
-            )}
-          </div>
-        </TabsContent>
-
-        <TabsContent value="chats">
-          <div className="overflow-hidden rounded-lg border">
-            {chats && chats.length > 0 ? (
-              chats.map((chat) => <ChatItem key={chat.id} chat={chat} />)
-            ) : (
-              <div className="flex min-h-[200px] items-center justify-center p-4 text-center text-muted-foreground">
-                No chats found. Start a new chat to get started.
-              </div>
-            )}
-          </div>
-        </TabsContent>
-      </Tabs>
-    </div>
+      <Library
+        lectures={lectures}
+        chats={chats}
+        courses={courses}
+        defaultTab={defaultTab}
+      />
+    </>
   );
 }

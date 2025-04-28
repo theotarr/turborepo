@@ -1,23 +1,14 @@
 import { Metadata } from "next";
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { EditableTitle } from "@/components/editable-title";
-import { Icons } from "@/components/icons";
 import { LectureOperations } from "@/components/lecture-operations";
 import { NotesPage } from "@/components/notes-page";
 import { PremiumFeature } from "@/components/premium-feature";
+import { SidebarToggle } from "@/components/sidebar-toggle";
 import { buttonVariants } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { UserAccountNav } from "@/components/user-account-nav";
 import { env } from "@/env";
 import { convertToUIMessages } from "@/lib/ai/utils";
 import { absoluteUrl, cn } from "@/lib/utils";
-import { Transcript } from "@/types";
 
 import { auth } from "@acme/auth";
 import { db } from "@acme/db";
@@ -98,63 +89,37 @@ export default async function LecturePage({ params }: LecturePageProps) {
   if (!lecture) return notFound();
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden">
-      <header className="sticky top-0 z-10">
-        <div className="container flex h-16 items-center justify-between py-4">
+    <div className="flex h-full flex-col overflow-hidden">
+      <div className="sticky top-0 z-10 bg-background">
+        <div className="flex h-16 items-center justify-between px-4 py-3">
           <div className="flex items-center space-x-2 overflow-hidden">
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Link
-                    href="/dashboard"
-                    className={cn(buttonVariants({ variant: "ghost" }), "p-1")}
-                  >
-                    <Icons.chevronLeft className="size-4" />
-                  </Link>
-                </TooltipTrigger>
-                <TooltipContent side="right">Back to dashboard</TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            <SidebarToggle />
             <EditableTitle lectureId={params.id} initialTitle={lecture.title} />
           </div>
-          <div className="flex flex-1 items-center sm:justify-end">
-            <div className="ml-4 flex flex-1 justify-end space-x-4 sm:grow-0">
-              <LectureOperations
-                className={cn(
-                  buttonVariants({
-                    variant: "ghost",
-                    size: "icon",
-                  }),
-                  "size-8 border-none",
-                )}
-                lecture={{
-                  id: lecture.id,
-                  title: lecture.title,
-                  courseId: lecture.courseId || undefined,
-                  transcript: lecture.transcript as unknown as Transcript[],
-                }}
-                courses={courses || []}
-              />
-              <UserAccountNav
-                user={{
-                  name: session.user.name,
-                  image: session.user.image,
-                  email: session.user.email,
-                }}
-              />
-            </div>
-          </div>
-        </div>
-      </header>
-      <main>
-        <PremiumFeature>
-          <NotesPage
-            userId={session.user.id}
-            initialMessages={convertToUIMessages(lecture.messages)}
-            lecture={lecture}
+          <LectureOperations
+            className={cn(
+              buttonVariants({
+                variant: "ghost",
+                size: "icon",
+              }),
+              "size-8 border-none",
+            )}
+            lecture={{
+              id: lecture.id,
+              title: lecture.title,
+              courseId: lecture.courseId || undefined,
+            }}
+            courses={courses || []}
           />
-        </PremiumFeature>
-      </main>
+        </div>
+      </div>
+      <PremiumFeature>
+        <NotesPage
+          userId={session.user.id}
+          initialMessages={convertToUIMessages(lecture.messages)}
+          lecture={lecture}
+        />
+      </PremiumFeature>
     </div>
   );
 }

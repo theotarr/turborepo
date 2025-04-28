@@ -1,5 +1,4 @@
 import { redirect } from "next/navigation";
-import { DashboardShell } from "@/components/shell";
 import { absoluteUrl } from "@/lib/utils";
 
 import { createLecture } from "../actions";
@@ -48,8 +47,12 @@ export default async function LecturePage({ searchParams }: RecordPageParams) {
   if (id) redirect(`/lecture/${id}`);
 
   return (
-    <DashboardShell>
-      <div>Creating new live lecture environment...</div>
-    </DashboardShell>
+    <div className="flex h-full items-center justify-center">
+      <div className="p-8 text-center">
+        <div className="animate-pulse text-lg">
+          Creating new live lecture environment...
+        </div>
+      </div>
+    </div>
   );
 }

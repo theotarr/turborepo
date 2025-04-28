@@ -4,7 +4,6 @@ import { EmptyPlaceholder } from "@/components/empty-placeholder";
 import { DashboardHeader } from "@/components/header";
 import { Icons } from "@/components/icons";
 import { LectureItem } from "@/components/lecture-item";
-import { DashboardShell } from "@/components/shell";
 import { Button } from "@/components/ui/button";
 import { env } from "@/env";
 import { Course, Lecture } from "@prisma/client";
@@ -66,7 +65,7 @@ export default async function LecturesPage() {
   });
 
   return (
-    <DashboardShell>
+    <div className="grid items-start gap-8">
       <DashboardHeader heading={title} text={description}>
         <div className="flex items-center space-x-6">
           <Link href="/lecture">
@@ -105,6 +104,6 @@ export default async function LecturesPage() {
           </EmptyPlaceholder>
         )}
       </div>
-    </DashboardShell>
+    </div>
   );
 }

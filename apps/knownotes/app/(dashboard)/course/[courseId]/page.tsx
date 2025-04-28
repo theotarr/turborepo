@@ -5,7 +5,6 @@ import { EmptyPlaceholder } from "@/components/empty-placeholder";
 import { DashboardHeader } from "@/components/header";
 import { Icons } from "@/components/icons";
 import { LectureItem } from "@/components/lecture-item";
-import { DashboardShell } from "@/components/shell";
 import { Button } from "@/components/ui/button";
 import { env } from "@/env";
 import { absoluteUrl } from "@/lib/utils";
@@ -75,7 +74,7 @@ export default async function CoursePage({ params }) {
   if (!course) return <>Loading...</>;
 
   return (
-    <DashboardShell>
+    <div className="grid items-start gap-8">
       <DashboardHeader
         heading={course.name}
         text="View this course's lectures."
@@ -119,6 +118,6 @@ export default async function CoursePage({ params }) {
           </EmptyPlaceholder>
         )}
       </div>
-    </DashboardShell>
+    </div>
   );
 }

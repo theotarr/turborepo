@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
 import { BillingForm } from "@/components/billing-form";
 import { DashboardHeader } from "@/components/header";
-import { DashboardShell } from "@/components/shell";
 import { UsageCard } from "@/components/usage-card";
 import { UserDeleteForm } from "@/components/user-delete-form";
 import { UserNameForm } from "@/components/user-name-form";
@@ -97,12 +96,12 @@ export default async function SettingsPage() {
   }
 
   return (
-    <DashboardShell>
+    <div className="grid items-start gap-8">
       <DashboardHeader
         heading="Settings"
         text="Manage your account settings."
       />
-      <div className="grid gap-10">
+      <div className="mt-6 grid gap-10">
         <UserNameForm
           user={{
             id: session.user.id,
@@ -125,6 +124,6 @@ export default async function SettingsPage() {
           <UserDeleteForm user={{ id: session.user.id }} />
         ) : null}
       </div>
-    </DashboardShell>
+    </div>
   );
 }
