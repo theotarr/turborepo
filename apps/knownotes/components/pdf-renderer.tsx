@@ -15,7 +15,6 @@ import "react-pdf/dist/Page/TextLayer.css";
 
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
-import { UseChatHelpers } from "@ai-sdk/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useResizeDetector } from "react-resize-detector";
