@@ -9,7 +9,7 @@ import {
 import { updateLecture } from "@/lib/lecture/actions";
 import { generateFlashcards } from "@/lib/lecture/flashcards";
 import { generateEnhancedNotes } from "@/lib/lecture/notes";
-import { generateQuiz, QuizResult } from "@/lib/lecture/quiz";
+import { generateQuiz } from "@/lib/lecture/quiz";
 import { cn } from "@/lib/utils";
 import { Transcript } from "@/types";
 import { Lecture } from "@prisma/client";
@@ -20,7 +20,6 @@ import { readStreamableValue } from "ai/rsc";
 import { toast } from "sonner";
 import { create } from "zustand";
 
-import { AffiliateCard } from "./affiliate-card";
 import { Chat } from "./chat";
 import { Dictaphone } from "./dictaphone";
 import Editor from "./editor";
@@ -235,12 +234,14 @@ export function NotesPage({
   const [isUpdateTranscriptLoading, setIsUpdateTranscriptLoading] =
     useState(false);
   const [saveStatus, setSaveStatus] = useState("Saved");
-  const [isAffiliateCardOpen, setIsAffiliateCardOpen] = useState(false);
   const [resizablePanelDirection, setResizablePanelDirection] = useState<
     "horizontal" | "vertical"
   >("horizontal");
   const { flashcards, setFlashcards } = useFlashcardStore();
   const [isLoadingFlashcards, setIsLoadingFlashcards] = useState(false);
+  const [flashcardsGenerationAttempted, setFlashcardsGenerationAttempted] =
+    useState(false);
+
   const [isLoadingQuiz, setIsLoadingQuiz] = useState(false);
   const [quizQuestions, setQuizQuestions] = useState<any[]>([]);
   const [quizGenerationAttempted, setQuizGenerationAttempted] = useState(false);
@@ -335,17 +336,6 @@ export function NotesPage({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isUpdateTranscriptLoading]);
 
-  // Open the affiliate card after 2 minutes.
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsAffiliateCardOpen(true);
-    }, 120 * 1000); // 120 seconds
-
-    return () => {
-      clearTimeout(timer);
-    };
-  }, []);
-
   // Change the direction of the resizable panel group based on the screen size
   useEffect(() => {
     const onResize = () => {
@@ -366,7 +356,8 @@ export function NotesPage({
       if (
         activeTab === "flashcards" &&
         flashcards.length === 0 &&
-        !isLoadingFlashcards
+        !isLoadingFlashcards &&
+        !flashcardsGenerationAttempted
       ) {
         setIsLoadingFlashcards(true);
 
@@ -392,6 +383,7 @@ export function NotesPage({
           toast.error("Failed to generate flashcards");
         } finally {
           setIsLoadingFlashcards(false);
+          setFlashcardsGenerationAttempted(true);
         }
       }
     }
@@ -404,6 +396,7 @@ export function NotesPage({
     lecture.id,
     setFlashcards,
     transcript,
+    flashcardsGenerationAttempted,
   ]);
 
   // Add effect to load quiz questions when the quiz tab is selected
@@ -494,15 +487,11 @@ export function NotesPage({
 
   return (
     <>
-      <AffiliateCard
-        className="w-64"
-        open={isAffiliateCardOpen}
-        onClose={() => setIsAffiliateCardOpen(false)}
-      />
       <ResizablePanelGroup direction={resizablePanelDirection}>
         <ResizablePanel
           defaultSize={layout === "pdf" ? 50 : 65}
-          className="relative mx-8"
+          maxSize={layout === "pdf" ? 60 : 80}
+          className="relative mx-4"
         >
           {layout === "pdf" && pdfUrl ? (
             <PdfRenderer lectureId={lecture.id} url={pdfUrl} />
@@ -1004,6 +993,7 @@ export function NotesPage({
                             toast.error("Failed to generate flashcards");
                           } finally {
                             setIsLoadingFlashcards(false);
+                            setFlashcardsGenerationAttempted(true);
                           }
                         }}
                       >
