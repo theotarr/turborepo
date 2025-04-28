@@ -127,4 +127,68 @@ export const authRouter = {
       where: { id: ctx.session.user.id },
     });
   }),
+  search: protectedProcedure
+    .input(
+      z.object({
+        query: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const { query } = input;
+
+      if (query.length === 0) {
+        return {
+          lectures: [],
+          chats: [],
+          courses: [],
+        };
+      }
+
+      const lectures = await ctx.db.lecture.findMany({
+        where: {
+          userId: ctx.session.user.id,
+          title: {
+            contains: query,
+            mode: "insensitive",
+          },
+        },
+        include: {
+          course: true,
+        },
+        take: 10,
+      });
+
+      // Search for chats by name
+      const chats = await ctx.db.chat.findMany({
+        where: {
+          userId: ctx.session.user.id,
+          name: {
+            contains: query,
+            mode: "insensitive",
+          },
+        },
+        include: {
+          course: true,
+        },
+        take: 10,
+      });
+
+      // Search for courses by name
+      const courses = await ctx.db.course.findMany({
+        where: {
+          userId: ctx.session.user.id,
+          name: {
+            contains: query,
+            mode: "insensitive",
+          },
+        },
+        take: 10,
+      });
+
+      return {
+        lectures,
+        chats,
+        courses,
+      };
+    }),
 } satisfies TRPCRouterRecord;
