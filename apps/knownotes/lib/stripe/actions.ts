@@ -1,14 +1,14 @@
 "use server";
 
 import type { Stripe } from "stripe";
+import { redirect } from "next/navigation";
 import { proPlan } from "@/config/subscriptions";
 import { stripe } from "@/lib/stripe";
 import { getUserSubscriptionPlan } from "@/lib/subscription";
 
 import { trackMetaEvent, trackTiktokEvent } from "@acme/analytics";
 import { auth } from "@acme/auth";
-
-import { supabase } from "../supabase";
+import { db } from "@acme/db";
 
 export async function getPromotionCode(
   promotionCode: string,
@@ -22,7 +22,7 @@ export async function createSetupIntent(promotekitReferral?: string): Promise<{
   client_secret: string;
 }> {
   const session = await auth();
-  if (!session) throw new Error("User not found.");
+  if (!session) redirect("/login");
 
   const subscription = await getUserSubscriptionPlan(session.user.id);
   if (subscription.isPro) throw new Error("User is already subscribed.");
@@ -43,12 +43,14 @@ export async function createSetupIntent(promotekitReferral?: string): Promise<{
     });
 
     // Update the user's stripe customer id
-    await supabase
-      .from("User")
-      .update({
+    await db.user.update({
+      where: {
+        id: session.user.id,
+      },
+      data: {
         stripeCustomerId: customer.id,
-      })
-      .eq("id", session.user.id);
+      },
+    });
   }
 
   const setupIntent: Stripe.SetupIntent = await stripe.setupIntents.create({
@@ -113,7 +115,7 @@ export async function validatePromotionCode(
 
 export async function updateUserSubsciptionPlan(setupIntentId: string) {
   const session = await auth();
-  if (!session?.user) throw new Error("User not found.");
+  if (!session) redirect("/login");
 
   const subscription = await getUserSubscriptionPlan(
     session?.user.id as string,
@@ -125,32 +127,36 @@ export async function updateUserSubsciptionPlan(setupIntentId: string) {
 
   if (setupIntent.status === "succeeded") {
     // Add the price id and a temporary current period end date of 5min from now (to allow the user continue) to wait for Stripe webhook to trigger.
-    await supabase
-      .from("User")
-      .update({
+    await db.user.update({
+      where: {
+        id: session.user.id,
+      },
+      data: {
         stripePriceId: proPlan.stripePriceIds[0],
         stripeCurrentPeriodEnd: new Date(
           Date.now() + 1000 * 60 * 5,
         ).toISOString(),
-      })
-      .eq("id", session?.user.id);
+      },
+    });
   } else {
     // If the setup intent failed, then don remove the stripe customer id from the user.
-    await supabase
-      .from("User")
-      .update({
+    await db.user.update({
+      where: {
+        id: session.user.id,
+      },
+      data: {
         stripeCustomerId: undefined,
         stripeCurrentPeriodEnd: undefined,
         stripeSubscriptionId: undefined,
         stripePriceId: undefined,
-      })
-      .eq("id", session?.user.id);
+      },
+    });
   }
 }
 
 export async function createSubscription() {
   const session = await auth();
-  if (!session?.user) throw new Error("User not found.");
+  if (!session) redirect("/login");
 
   const subscription = await getUserSubscriptionPlan(
     session?.user.id as string,
@@ -167,22 +173,24 @@ export async function createSubscription() {
     });
 
     // Update the user's subscription id.
-    await supabase
-      .from("User")
-      .update({
+    await db.user.update({
+      where: {
+        id: session.user.id,
+      },
+      data: {
         stripeSubscriptionId: newSubscription.id,
         stripePriceId: newSubscription.items.data[0].price.id,
         stripeCurrentPeriodEnd: new Date(
           newSubscription.current_period_end * 1000,
         ),
-      })
-      .eq("id", session.user.id);
+      },
+    });
   }
 }
 
 export async function cancelSubscription() {
   const session = await auth();
-  if (!session?.user) throw new Error("User not found.");
+  if (!session) redirect("/login");
 
   try {
     const subscription = await getUserSubscriptionPlan(session.user.id);
@@ -203,7 +211,7 @@ export async function cancelSubscription() {
 
 export async function keepSubscription() {
   const session = await auth();
-  if (!session?.user) throw new Error("User not found.");
+  if (!session) redirect("/login");
 
   const subscription = await getUserSubscriptionPlan(session.user.id);
 
@@ -224,7 +232,7 @@ export async function keepSubscription() {
 
 export async function pauseSubscription(resumeDate?: Date): Promise<boolean> {
   const session = await auth();
-  if (!session?.user) throw new Error("User not found.");
+  if (!session) redirect("/login");
 
   try {
     const subscription = await getUserSubscriptionPlan(session.user.id);
@@ -251,13 +259,15 @@ export async function pauseSubscription(resumeDate?: Date): Promise<boolean> {
     });
 
     // Update user record
-    await supabase
-      .from("User")
-      .update({
+    await db.user.update({
+      where: {
+        id: session.user.id,
+      },
+      data: {
         stripeSubscriptionPaused: true,
         stripeSubscriptionResumeAt: resumeAt.toISOString(),
-      })
-      .eq("id", session.user.id);
+      },
+    });
 
     return true;
   } catch (error) {
@@ -268,7 +278,7 @@ export async function pauseSubscription(resumeDate?: Date): Promise<boolean> {
 
 export async function resumeSubscription(): Promise<boolean> {
   const session = await auth();
-  if (!session?.user) throw new Error("User not found.");
+  if (!session) redirect("/login");
 
   try {
     const dbSubscription = await getUserSubscriptionPlan(session.user.id);
@@ -301,26 +311,30 @@ export async function resumeSubscription(): Promise<boolean> {
     );
 
     // Update the database with a temporary future end date to prevent payment dialogs from showing during the Stripe operations.
-    await supabase
-      .from("User")
-      .update({
+    await db.user.update({
+      where: {
+        id: session.user.id,
+      },
+      data: {
         stripeSubscriptionPaused: false,
         stripeSubscriptionResumeAt: null,
         stripeCurrentPeriodEnd: new Date(Date.now() + 10 * 60 * 1000), // 10-minute window to prevent payment dialogs from appearing.
-      })
-      .eq("id", session.user.id);
+      },
+    });
 
     return true;
   } catch (error) {
     console.error("Error resuming subscription:", error);
 
     // In case of an error, we need to reset the database to show paused status.
-    await supabase
-      .from("User")
-      .update({
+    await db.user.update({
+      where: {
+        id: session.user.id,
+      },
+      data: {
         stripeSubscriptionPaused: true,
-      })
-      .eq("id", session.user.id);
+      },
+    });
 
     throw new Error("Failed to resume subscription.");
   }
