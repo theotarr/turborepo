@@ -350,7 +350,7 @@ export default function DashboardPage() {
                     className="rounded-full"
                     onPress={() => setIsCourseDialogOpen(true)}
                   >
-                    <Text>Add course</Text>
+                    <Text>New course</Text>
                   </Button>
                 ) : (
                   <BottomSheetOpenTrigger asChild>
