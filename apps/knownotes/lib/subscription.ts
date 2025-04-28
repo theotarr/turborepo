@@ -1,26 +1,16 @@
 import { freePlan, proPlan } from "@/config/subscriptions";
 import { UserSubscriptionPlan } from "types";
 
-import { supabase } from "./supabase";
+import { db } from "@acme/db";
 
 export async function getUserSubscriptionPlan(
   userId: string,
 ): Promise<UserSubscriptionPlan> {
-  const { data: user } = await supabase
-    .from("User")
-    .select(
-      `stripeSubscriptionId,
-      stripeCurrentPeriodEnd,
-      stripeCustomerId,
-      stripePriceId,
-      stripeSubscriptionPaused,
-      stripeSubscriptionResumeAt,
-      appStoreSubscriptionId,
-      appStoreProductId,
-      appStoreCurrentPeriodEnd`,
-    )
-    .eq("id", userId)
-    .single();
+  const user = await db.user.findUnique({
+    where: {
+      id: userId,
+    },
+  });
 
   if (!user) {
     throw new Error("User not found");
@@ -28,11 +18,14 @@ export async function getUserSubscriptionPlan(
   // Get the user's plan from Stripe price Id or App Store product Id
   let plan = freePlan;
   const isStripeSubscriptionActive =
+    user.stripePriceId &&
     proPlan.stripePriceIds.includes(user.stripePriceId) &&
+    user.stripeCurrentPeriodEnd &&
     new Date(user.stripeCurrentPeriodEnd).getTime() > new Date().getTime(); // Check if the Stripe subscription is active
 
   const isAppStoreSubscriptionActive =
     // proPlan.appStoreProductIds?.includes(user.appStoreProductId) &&
+    user.appStoreCurrentPeriodEnd &&
     new Date(user.appStoreCurrentPeriodEnd).getTime() > new Date().getTime(); // Check if the App Store subscription is active
 
   if (isStripeSubscriptionActive && isAppStoreSubscriptionActive)
@@ -51,7 +44,11 @@ export async function getUserSubscriptionPlan(
     resumeAt: user.stripeSubscriptionResumeAt
       ? new Date(user.stripeSubscriptionResumeAt).getTime()
       : null,
-    stripeCurrentPeriodEnd: new Date(user.stripeCurrentPeriodEnd).getTime(),
-    appStoreCurrentPeriodEnd: new Date(user.appStoreCurrentPeriodEnd).getTime(),
+    stripeCurrentPeriodEnd: user.stripeCurrentPeriodEnd
+      ? new Date(user.stripeCurrentPeriodEnd).getTime()
+      : 0,
+    appStoreCurrentPeriodEnd: user.appStoreCurrentPeriodEnd
+      ? new Date(user.appStoreCurrentPeriodEnd).getTime()
+      : 0,
   };
 }

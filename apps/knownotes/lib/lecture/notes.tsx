@@ -1,12 +1,13 @@
 "use server";
 
-import { supabase } from "@/lib/supabase";
+import { redirect } from "next/navigation";
 import { Transcript } from "@/types";
 import { openai } from "@ai-sdk/openai";
 import { streamText } from "ai";
 import { createStreamableValue } from "ai/rsc";
 
 import { auth } from "@acme/auth";
+import { db } from "@acme/db";
 
 import { formatTranscript } from "../utils";
 
@@ -16,16 +17,15 @@ export async function generateEnhancedNotes(
   notes: string,
 ) {
   const session = await auth();
-  if (!session) throw new Error("User not authenticated");
+  if (!session) redirect("/login");
 
   // Verify the user has access to the lecture.
-  const { data: lecture, error } = await supabase
-    .from("Lecture")
-    .select()
-    .eq("id", lectureId)
-    .eq("userId", session.user.id)
-    .single();
-  if (error) throw error;
+  const lecture = await db.lecture.findUnique({
+    where: {
+      id: lectureId,
+      userId: session.user.id,
+    },
+  });
   if (!lecture) throw new Error("Lecture not found");
 
   const stream = createStreamableValue();
@@ -55,13 +55,16 @@ export async function generateEnhancedNotes(
       }`,
       onFinish: async ({ text }) => {
         console.log(text);
-        await supabase
-          .from("Lecture")
-          .update({
+        await db.lecture.update({
+          where: {
+            id: lectureId,
+            userId: session.user.id,
+          },
+          data: {
             enhancedNotes: text,
             markdownNotes: text,
-          })
-          .eq("id", lectureId);
+          },
+        });
       },
     });
 

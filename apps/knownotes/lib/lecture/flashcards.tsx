@@ -1,6 +1,6 @@
 "use server";
 
-import { supabase } from "@/lib/supabase";
+import { redirect } from "next/navigation";
 import { Transcript } from "@/types";
 import { google } from "@ai-sdk/google";
 import { streamObject } from "ai";
@@ -8,6 +8,7 @@ import { createStreamableValue } from "ai/rsc";
 import { z } from "zod";
 
 import { auth } from "@acme/auth";
+import { db } from "@acme/db";
 
 import { formatTranscript } from "../utils";
 
@@ -16,16 +17,15 @@ export async function generateFlashcards(
   transcript: Transcript[],
 ) {
   const session = await auth();
-  if (!session) throw new Error("User not authenticated");
+  if (!session) redirect("/login");
 
   // Verify the user has access to the lecture.
-  const { data: lecture, error } = await supabase
-    .from("Lecture")
-    .select()
-    .eq("id", lectureId)
-    .eq("userId", session.user.id)
-    .single();
-  if (error) throw error;
+  const lecture = await db.lecture.findUnique({
+    where: {
+      id: lectureId,
+      userId: session.user.id,
+    },
+  });
   if (!lecture) throw new Error("Lecture not found");
 
   const stream = createStreamableValue();
@@ -59,25 +59,17 @@ export async function generateFlashcards(
         if (!object?.flashcards.length) return;
 
         // Create flashcards in the database.
-        const { data: insertedCards, error } = await supabase
-          .from("Flashcard")
-          .insert(
-            object?.flashcards.map(
-              ({ term, definition, hint, explanation }) => ({
-                lectureId,
-                term,
-                definition,
-                hint,
-                explanation,
-              }),
-            ),
-          )
-          .select("id, term, definition, hint, explanation, isStarred");
-
-        if (error) {
-          console.error("Error inserting flashcards:", error);
-          return;
-        }
+        const insertedCards = await db.flashcard.createManyAndReturn({
+          data: object?.flashcards.map(
+            ({ term, definition, hint, explanation }) => ({
+              lectureId,
+              term,
+              definition,
+              hint,
+              explanation,
+            }),
+          ),
+        });
 
         // Send the database-generated IDs back to the client
         if (insertedCards) {
@@ -122,13 +114,16 @@ export async function generateFlashcards(
 
 export async function deleteFlashcard(id: string): Promise<void> {
   const session = await auth();
-  if (!session) throw new Error("User not authenticated");
+  if (!session) redirect("/login");
 
-  const { error } = await supabase.from("Flashcard").delete().eq("id", id);
-  if (error) {
-    console.error(error);
-    throw error;
-  }
+  await db.flashcard.delete({
+    where: {
+      id,
+      lecture: {
+        userId: session.user.id,
+      },
+    },
+  });
 }
 
 export async function updateFlashcard({
@@ -145,20 +140,22 @@ export async function updateFlashcard({
   explanation?: string;
 }): Promise<void> {
   const session = await auth();
-  if (!session) throw new Error("User not authenticated");
+  if (!session) redirect("/login");
 
-  let query = {};
-  if (term) query["term"] = term;
-  if (definition) query["definition"] = definition;
-  if (hint) query["hint"] = hint;
-  if (explanation) query["explanation"] = explanation;
-
-  const { error } = await supabase.from("Flashcard").update(query).eq("id", id);
-
-  if (error) {
-    console.error(error);
-    throw error;
-  }
+  await db.flashcard.update({
+    where: {
+      id,
+      lecture: {
+        userId: session.user.id,
+      },
+    },
+    data: {
+      ...(term && { term }),
+      ...(definition && { definition }),
+      ...(hint && { hint }),
+      ...(explanation && { explanation }),
+    },
+  });
 }
 
 /**
@@ -168,32 +165,32 @@ export async function toggleFlashcardStar(
   id: string,
 ): Promise<{ isStarred: boolean }> {
   const session = await auth();
-  if (!session) throw new Error("User not authenticated");
+  if (!session) redirect("/login");
 
   // First get the current state
-  const { data: flashcard, error: fetchError } = await supabase
-    .from("Flashcard")
-    .select("isStarred")
-    .eq("id", id)
-    .single();
+  const flashcard = await db.flashcard.findUnique({
+    where: {
+      id,
+      lecture: {
+        userId: session.user.id,
+      },
+    },
+  });
 
-  if (fetchError) {
-    console.error(fetchError);
-    throw fetchError;
-  }
+  if (!flashcard) throw new Error("Flashcard not found");
 
   // Toggle the isStarred status
   const newStarredState = !flashcard.isStarred;
 
-  const { error: updateError } = await supabase
-    .from("Flashcard")
-    .update({ isStarred: newStarredState })
-    .eq("id", id);
-
-  if (updateError) {
-    console.error(updateError);
-    throw updateError;
-  }
+  await db.flashcard.update({
+    where: {
+      id,
+      lecture: {
+        userId: session.user.id,
+      },
+    },
+    data: { isStarred: newStarredState },
+  });
 
   return { isStarred: newStarredState };
 }

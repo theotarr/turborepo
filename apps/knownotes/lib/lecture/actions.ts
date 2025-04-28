@@ -1,25 +1,9 @@
 "use server";
 
+import { redirect } from "next/navigation";
+
 import { auth } from "@acme/auth";
-
-import { supabase } from "../supabase";
-
-export async function getLectures() {
-  const session = await auth();
-  if (!session) throw new Error("User not found.");
-
-  const { data, error } = await supabase
-    .from("Lecture")
-    .select("*")
-    .eq("userId", session.user.id);
-
-  if (error) {
-    console.error("Error getting lectures:", error);
-    throw error;
-  }
-
-  return data;
-}
+import { db } from "@acme/db";
 
 export async function updateLecture({
   lectureId,
@@ -35,108 +19,72 @@ export async function updateLecture({
   courseId?: string | undefined;
 }) {
   const session = await auth();
-  if (!session) throw new Error("User not found.");
-
-  const updateData = {};
-  if (title) updateData["title"] = title;
-  if (notes) updateData["notes"] = JSON.parse(notes);
-  if (enhancedNotes) updateData["enhancedNotes"] = JSON.parse(enhancedNotes);
+  if (!session) redirect("/login");
 
   if (courseId) {
-    // Verify the user has access to the course.
-    const { data: course } = await supabase
-      .from("Course")
-      .select("id")
-      .eq("id", courseId)
-      .eq("userId", session.user.id);
-
-    if (!course) throw new Error("User does not have access to the course.");
-
-    updateData["courseId"] = courseId;
+    if (!(await verifyCurrentUserHasAccessToCourse(courseId))) {
+      throw new Error("User does not have access to the course.");
+    }
   }
 
-  const { data, error } = await supabase
-    .from("Lecture")
-    .update(updateData)
-    .eq("id", lectureId)
-    .eq("userId", session.user.id);
+  const lecture = await db.lecture.update({
+    where: {
+      id: lectureId,
+      userId: session.user.id,
+    },
+    data: {
+      title,
+      ...(notes && { notes: JSON.parse(notes) }),
+      ...(enhancedNotes && { enhancedNotes: JSON.parse(enhancedNotes) }),
+      ...(courseId && { courseId }),
+    },
+  });
+  if (!lecture) throw new Error("Error updating lecture.");
 
-  if (error) {
-    console.error("Error updating lecture:", error);
-    throw error;
-  }
-
-  return data;
+  return lecture;
 }
 
 export async function deleteLecture(lectureId: string) {
   const session = await auth();
-  if (!session) throw new Error("User not found.");
+  if (!session) redirect("/login");
 
-  const { error } = await supabase
-    .from("Lecture")
-    .delete()
-    .eq("id", lectureId)
-    .eq("userId", session.user.id);
+  const lecture = await db.lecture.delete({
+    where: {
+      id: lectureId,
+      userId: session.user.id,
+    },
+  });
+  if (!lecture) throw new Error("Error deleting lecture.");
 
-  if (error) {
-    console.error("Error deleting lecture:", error);
-    throw error;
-  }
+  return lecture;
 }
 
 export async function verifyCurrentUserHasAccessToLecture(lectureId: string) {
   const session = await auth();
-  const { data, error } = await supabase
-    .from("lecture")
-    .select("id")
-    .eq("id", lectureId)
-    .eq("userId", session?.user.id);
+  if (!session) redirect("/login");
 
-  if (error) {
-    throw new Error(
-      "There was an error verifying the user access to the lecture.",
-    );
-  }
+  const lecture = await db.lecture.findUnique({
+    where: {
+      id: lectureId,
+      userId: session.user.id,
+    },
+  });
+  if (!lecture) throw new Error("Error verifying lecture access.");
 
-  const count = data?.length || 0;
-
-  return count > 0;
+  return true;
 }
 
 export async function verifyCurrentUserHasAccessToCourse(courseId: string) {
   const session = await auth();
-  const { data, error } = await supabase
-    .from("Course")
-    .select("id")
-    .eq("id", courseId)
-    .eq("userId", session?.user.id);
+  if (!session) redirect("/login");
 
-  if (error) {
-    throw new Error(
-      "There was an error verifying the user access to the course.",
-    );
-  }
+  const course = await db.course.findUnique({
+    where: {
+      id: courseId,
+      userId: session.user.id,
+    },
+  });
+  if (!course) throw new Error("Error verifying course access.");
 
-  const count = data?.length || 0;
-
-  return count > 0;
-}
-
-export async function searchLectures(query: string) {
-  const session = await auth();
-  if (!session) throw new Error("User not found.");
-
-  const { data, error } = await supabase
-    .from("Lecture")
-    .select("*")
-    .textSearch("title", query)
-    .eq("userId", session.user.id);
-
-  if (error) {
-    console.error("Error searching lectures:", error);
-    throw error;
-  }
-
-  return data;
+  return true;
 }
