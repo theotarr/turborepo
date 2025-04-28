@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { createCourse } from "@/app/(auth)/actions";
 import { buttonVariants } from "@/components/ui/button";
 import {
   Dialog,
@@ -19,28 +21,13 @@ import { toast } from "sonner";
 import { Icons } from "./icons";
 import { Input } from "./ui/input";
 
-async function createCourse({ name }: { name: string }) {
-  const response = await fetch(`/api/course`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      name,
-    }),
-  });
-  const { courseId } = await response.json();
-  return {
-    courseId,
-  };
-}
-
 interface CourseCreateDialogProps {
   className?: string;
   [key: string]: any;
 }
 
 export function CourseCreateDialog({ className }: CourseCreateDialogProps) {
+  const router = useRouter();
   const utils = api.useUtils();
   const [name, setName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -49,14 +36,14 @@ export function CourseCreateDialog({ className }: CourseCreateDialogProps) {
     e.preventDefault();
     setIsLoading(true);
 
-    const { courseId } = await createCourse({ name });
+    const { id } = await createCourse(name);
     setIsLoading(false);
 
-    if (!courseId)
-      return toast.error("Something went wrong. Please try again.");
+    if (!id) return toast.error("Something went wrong. Please try again.");
 
     toast.success("Success!");
     utils.course.invalidate();
+    router.refresh();
   };
 
   return (
@@ -73,7 +60,7 @@ export function CourseCreateDialog({ className }: CourseCreateDialogProps) {
           ) : (
             <>
               <Icons.add className="mr-2 h-4 w-4" />
-              <span>Add Course</span>
+              <span>New Course</span>
             </>
           )}
         </button>
