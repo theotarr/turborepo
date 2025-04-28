@@ -105,7 +105,7 @@ export function BillingForm({ subscriptionPlan, className }: BillingFormProps) {
                   ) : (
                     <p className="text-xs font-medium">
                       Your subscription has ended. Reactivate your subscription
-                      to continue using KnowNotes.
+                      to access your notes.
                     </p>
                   )}
                 </>
