@@ -453,14 +453,14 @@ export function AppSidebar() {
                     ))
                   ) : filteredCourses && filteredCourses.length > 0 ? (
                     <div>
-                      {filteredCourses.map((course, index) => (
-                        <SidebarMenuItem key={course.id}>
+                      {filteredCourses.map((course) => (
+                        <SidebarMenuItem key={`course-sidebar-${course.id}`}>
                           <SidebarMenuButton
-                            onClick={() => router.push(`/course/${course.id}`)}
+                            onClick={() => router.push(`/chat/${course.id}`)}
                             className="gap-2"
                           >
                             <div className="flex w-4 flex-shrink-0 items-center justify-center">
-                              {pathname === `/course/${course.id}` ? (
+                              {pathname === `/chat/${course.id}` ? (
                                 <div className="size-2 rounded-full bg-primary" />
                               ) : (
                                 <Icons.course className="size-4" />

@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { AppSidebar } from "@/components/app-sidebar";
+import { SidebarHeader } from "@/components/sidebar-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { getUserSubscriptionPlan } from "@/lib/subscription";
 
@@ -38,6 +39,7 @@ export default async function LibraryLayout({ children }: LibraryLayoutProps) {
               </p>
             </div>
           ) : null}
+          <SidebarHeader />
           <main className="p-8">{children}</main>
         </SidebarInset>
       </SidebarProvider>

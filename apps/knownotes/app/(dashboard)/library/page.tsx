@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { DashboardHeader } from "@/components/header";
 import { Library } from "@/components/library";
 
 import { auth } from "@acme/auth";
@@ -63,19 +64,17 @@ export default async function LibraryPage({
   });
 
   return (
-    <>
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold tracking-tight">Library</h1>
-        <p className="text-muted-foreground">
-          Browse your notes and chats all in one place
-        </p>
-      </div>
+    <div className="grid items-start gap-6">
+      <DashboardHeader
+        heading="Library"
+        text="Browse your notes and chats all in one place"
+      />
       <Library
         lectures={lectures}
         chats={chats}
         courses={courses}
         defaultTab={defaultTab}
       />
-    </>
+    </div>
   );
 }
