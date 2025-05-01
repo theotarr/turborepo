@@ -94,7 +94,7 @@ export default async function LecturePage({ params }: LecturePageProps) {
         <div className="flex h-16 items-center justify-between px-4 py-3">
           <div className="flex items-center space-x-2 overflow-hidden">
             <SidebarToggle />
-            <EditableTitle lectureId={params.id} initialTitle={lecture.title} />
+            <EditableTitle lectureId={params.id} defaultTitle={lecture.title} />
           </div>
           <LectureOperations
             className={cn(

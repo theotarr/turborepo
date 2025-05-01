@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { updateLecture } from "@/lib/lecture/actions";
 import { api } from "@/lib/trpc/react";
 import { cn } from "@/lib/utils";
@@ -9,12 +9,31 @@ import { useDebouncedCallback } from "use-debounce";
 
 interface EditableTitleProps {
   lectureId: string;
-  initialTitle: string;
+  defaultTitle?: string;
 }
 
-export function EditableTitle({ lectureId, initialTitle }: EditableTitleProps) {
+export function EditableTitle({
+  lectureId,
+  defaultTitle = "Untitled lecture",
+}: EditableTitleProps) {
   const utils = api.useUtils();
-  const [lectureTitle, setLectureTitle] = useState(initialTitle);
+  const { data: lectureData } = api.lecture.byId.useQuery({ id: lectureId });
+  const [lectureTitle, setLectureTitle] = useState(
+    lectureData?.title || defaultTitle,
+  );
+
+  // Update local state and document title when fetched data changes
+  useEffect(() => {
+    const newTitle = lectureData?.title || defaultTitle;
+    if (newTitle) {
+      setLectureTitle(newTitle);
+
+      // Update document title safely (avoiding direct innerHTML)
+      const tempElement = document.createElement("div");
+      tempElement.textContent = newTitle;
+      document.title = tempElement.textContent || defaultTitle; // Fallback for document title
+    }
+  }, [lectureData?.title]);
 
   const debouncedLectureTitle = useDebouncedCallback(async (title: string) => {
     try {

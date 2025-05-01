@@ -10,6 +10,7 @@ import { updateLecture } from "@/lib/lecture/actions";
 import { generateFlashcards } from "@/lib/lecture/flashcards";
 import { generateEnhancedNotes } from "@/lib/lecture/notes";
 import { generateQuiz } from "@/lib/lecture/quiz";
+import { api } from "@/lib/trpc/react";
 import { cn } from "@/lib/utils";
 import { Transcript } from "@/types";
 import { Lecture } from "@prisma/client";
@@ -217,6 +218,7 @@ export function NotesPage({
   initialMessages,
   lecture,
 }: NotesPageProps) {
+  const utils = api.useUtils();
   const [hydrated, setHydrated] = useState(false);
   const [pdfUrl, setPdfUrl] = useState<string | undefined>(undefined);
   const { activeTab, setActiveTab, notesTab, setNotesTab } = useTabStore();
@@ -248,6 +250,71 @@ export function NotesPage({
 
   // Determine the layout based on lecture type and PDF availability
   const layout = lecture.type === "PDF" && lecture.fileId ? "pdf" : "notes";
+
+  // Helper function to handle generating enhanced notes
+  async function handleGenerateEnhancedNotes() {
+    setIsGeneratingNotes(true);
+    setNotesTab("enhanced"); // Switch to enhanced tab immediately
+    setEnhancedNotes(undefined); // Clear previous enhanced notes visually
+    editor?.commands.clearContent(); // Clear editor content
+
+    // Get the current user notes in markdown format if the 'notes' tab was active
+    changeNotesTab("notes"); // Temporarily switch to get notes
+    const markdownNotes = editor?.storage.markdown.getMarkdown() || "";
+    changeNotesTab("enhanced"); // Switch back
+
+    try {
+      const streamableObject = await generateEnhancedNotes(
+        lecture.id,
+        transcript,
+        markdownNotes,
+      );
+
+      let finalNotes = "";
+
+      for await (const partialObject of readStreamableValue(streamableObject)) {
+        if (partialObject?.notes) {
+          finalNotes = partialObject.notes; // Update final notes string
+
+          // Update editor content - consider throttling or chunking if needed for performance
+          const prosemirrorEl = document.querySelector(
+            ".editor-transition .ProseMirror",
+          );
+          if (prosemirrorEl) {
+            prosemirrorEl.classList.add("updating");
+            editor?.commands.setContent(finalNotes); // Update editor
+            setTimeout(() => {
+              prosemirrorEl.classList.remove("updating");
+            }, 50);
+          } else {
+            editor?.commands.setContent(finalNotes); // Update editor
+          }
+        }
+      }
+
+      editor?.commands.setContent(finalNotes);
+      setEnhancedNotes(finalNotes);
+
+      // Notes (including title) are saved server-side via onFinish, no need to call updateLecture here
+      // unless specifically saving the JSON representation immediately.
+      // For consistency, let's save the final JSON state
+      await updateLecture({
+        lectureId: lecture.id,
+        enhancedNotes: JSON.stringify(editor?.getJSON()),
+      });
+      toast.success("Enhanced notes generated and saved.");
+    } catch (error) {
+      console.error("Error generating enhanced notes:", error);
+      toast.error("Failed to generate enhanced notes.");
+
+      // Optionally reset editor or state here on error
+      changeNotesTab("notes"); // Revert to user notes on error?
+    } finally {
+      utils.lecture.list.invalidate();
+      utils.lecture.byId.invalidate();
+      setIsGeneratingNotes(false);
+    }
+  }
 
   function changeNotesTab(tab: "notes" | "enhanced") {
     setNotesTab(tab);
@@ -506,75 +573,7 @@ export function NotesPage({
                     setInterim(null);
                   }}
                   onInterimCaption={(t) => setInterim(t)}
-                  onGenerate={async () => {
-                    setIsGeneratingNotes(true);
-                    // The useEffect will handle the class changes
-
-                    // Get the notes in markdown format.
-                    changeNotesTab("notes");
-                    const markdownNotes =
-                      editor?.storage.markdown.getMarkdown();
-
-                    setNotesTab("enhanced");
-                    setEnhancedNotes(undefined);
-                    // sendGAEvent("Notes", "Generate Enhanced Notes", lecture.id)
-                    const output = await generateEnhancedNotes(
-                      lecture.id,
-                      transcript,
-                      markdownNotes,
-                    );
-                    let text = "";
-                    let chunkBuffer = "";
-                    const CHUNK_SIZE = 100; // Update after collecting ~100 characters
-
-                    // Add streaming with less frequent updates
-                    for await (const delta of readStreamableValue(output)) {
-                      text = `${text}${delta}`;
-                      chunkBuffer += delta;
-
-                      // Only update the editor content after collecting enough chunks
-                      if (chunkBuffer.length >= CHUNK_SIZE) {
-                        // Add transition effect
-                        const prosemirrorEl = document.querySelector(
-                          ".editor-transition .ProseMirror",
-                        );
-                        if (prosemirrorEl) {
-                          prosemirrorEl.classList.add("updating");
-
-                          // Set content and then remove the updating class after a short delay
-                          editor?.commands.setContent(text);
-
-                          setTimeout(() => {
-                            prosemirrorEl.classList.remove("updating");
-                          }, 50);
-                        } else {
-                          editor?.commands.setContent(text);
-                        }
-
-                        chunkBuffer = ""; // Reset buffer
-                        // Small delay to allow React to process
-                        await new Promise((resolve) =>
-                          setTimeout(resolve, 100),
-                        );
-                      }
-                    }
-
-                    // Final update to ensure all content is displayed
-                    if (chunkBuffer.length > 0 || text.length > 0) {
-                      editor?.commands.setContent(text);
-                    }
-
-                    setEnhancedNotes(text);
-                    setIsGeneratingNotes(false);
-                    // The useEffect will handle the class changes
-
-                    // Update the lecture with the enhanced notes.
-                    // Save the notes with the Tiptap JSONContent format so that special characters and LaTeX are preserved.
-                    await updateLecture({
-                      lectureId: lecture.id,
-                      enhancedNotes: JSON.stringify(editor?.getJSON()),
-                    });
-                  }}
+                  onGenerate={handleGenerateEnhancedNotes}
                 />
               </div>
 
@@ -706,87 +705,9 @@ export function NotesPage({
                           isNotesNull(enhancedNotes) &&
                           !isGeneratingNotes
                         ) {
+                          await handleGenerateEnhancedNotes();
+                        } else {
                           setActiveTab("notes");
-                          setIsGeneratingNotes(true);
-
-                          try {
-                            // Get the notes in markdown format if they exist
-                            const markdownNotes =
-                              editor?.storage.markdown?.getMarkdown() || "";
-
-                            setNotesTab("enhanced");
-                            setEnhancedNotes(undefined);
-
-                            // Generate enhanced notes using the transcript and existing notes
-                            const output = await generateEnhancedNotes(
-                              lecture.id,
-                              transcript,
-                              markdownNotes,
-                            );
-
-                            let text = "";
-                            let chunkBuffer = "";
-                            const CHUNK_SIZE = 100; // Update after collecting ~100 characters
-
-                            // Add streaming with less frequent updates
-                            for await (const delta of readStreamableValue(
-                              output,
-                            )) {
-                              text = `${text}${delta}`;
-                              chunkBuffer += delta;
-
-                              // Only update the editor content after collecting enough chunks
-                              if (chunkBuffer.length >= CHUNK_SIZE) {
-                                // Add transition effect
-                                const prosemirrorEl = document.querySelector(
-                                  ".editor-transition .ProseMirror",
-                                );
-                                if (prosemirrorEl) {
-                                  prosemirrorEl.classList.add("updating");
-
-                                  // Set content and then remove the updating class after a short delay
-                                  editor?.commands.setContent(text);
-
-                                  setTimeout(() => {
-                                    prosemirrorEl.classList.remove("updating");
-                                  }, 50);
-                                } else {
-                                  editor?.commands.setContent(text);
-                                }
-
-                                chunkBuffer = ""; // Reset buffer
-                                // Small delay to allow React to process
-                                await new Promise((resolve) =>
-                                  setTimeout(resolve, 100),
-                                );
-                              }
-                            }
-
-                            // Final update to ensure all content is displayed
-                            if (chunkBuffer.length > 0 || text.length > 0) {
-                              editor?.commands.setContent(text);
-                            }
-
-                            setEnhancedNotes(text);
-                            setIsGeneratingNotes(false);
-
-                            // Update the lecture with the enhanced notes.
-                            // Save the notes with the Tiptap JSONContent format so that special characters and LaTeX are preserved.
-                            await updateLecture({
-                              lectureId: lecture.id,
-                              enhancedNotes: JSON.stringify(editor?.getJSON()),
-                            });
-                          } catch (error) {
-                            console.error(
-                              "Error generating enhanced notes:",
-                              error,
-                            );
-                            toast.error(
-                              "Failed to generate enhanced notes. Please try again.",
-                            );
-                          } finally {
-                            setIsGeneratingNotes(false);
-                          }
                         }
                       }}
                     >
@@ -870,75 +791,7 @@ export function NotesPage({
                     <button
                       aria-label="Regenerate notes"
                       disabled={isGeneratingNotes}
-                      onClick={async () => {
-                        setIsGeneratingNotes(true);
-                        // The useEffect will handle the class changes
-
-                        // Get the notes in markdown format.
-                        changeNotesTab("notes");
-                        const markdownNotes =
-                          editor?.storage.markdown.getMarkdown();
-
-                        setNotesTab("enhanced");
-                        setEnhancedNotes(undefined);
-
-                        const output = await generateEnhancedNotes(
-                          lecture.id,
-                          transcript,
-                          markdownNotes,
-                        );
-                        let text = "";
-                        let chunkBuffer = "";
-                        const CHUNK_SIZE = 100; // Update after collecting ~100 characters
-
-                        // Add streaming with less frequent updates
-                        for await (const delta of readStreamableValue(output)) {
-                          text = `${text}${delta}`;
-                          chunkBuffer += delta;
-
-                          // Only update the editor content after collecting enough chunks
-                          if (chunkBuffer.length >= CHUNK_SIZE) {
-                            // Add transition effect
-                            const prosemirrorEl = document.querySelector(
-                              ".editor-transition .ProseMirror",
-                            );
-                            if (prosemirrorEl) {
-                              prosemirrorEl.classList.add("updating");
-
-                              // Set content and then remove the updating class after a short delay
-                              editor?.commands.setContent(text);
-
-                              setTimeout(() => {
-                                prosemirrorEl.classList.remove("updating");
-                              }, 50);
-                            } else {
-                              editor?.commands.setContent(text);
-                            }
-
-                            chunkBuffer = ""; // Reset buffer
-                            // Small delay to allow React to process
-                            await new Promise((resolve) =>
-                              setTimeout(resolve, 100),
-                            );
-                          }
-                        }
-
-                        // Final update to ensure all content is displayed
-                        if (chunkBuffer.length > 0 || text.length > 0) {
-                          editor?.commands.setContent(text);
-                        }
-
-                        setEnhancedNotes(text);
-                        setIsGeneratingNotes(false);
-                        // The useEffect will handle the class changes
-
-                        // Update the lecture with the enhanced notes.
-                        // Save the notes with the Tiptap JSONContent format so that special characters and LaTeX are preserved.
-                        await updateLecture({
-                          lectureId: lecture.id,
-                          enhancedNotes: JSON.stringify(editor?.getJSON()),
-                        });
-                      }}
+                      onClick={handleGenerateEnhancedNotes}
                       className={cn(
                         buttonVariants({ variant: "outline" }),
                         "items-center rounded-full border border-border shadow-lg transition-all",
