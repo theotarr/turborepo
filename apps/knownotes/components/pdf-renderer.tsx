@@ -492,7 +492,7 @@ export const PdfRenderer = ({ url, className }: PdfRendererProps) => {
         </div>
       </div>
 
-      <div className="flex h-[calc(100vh-9rem)] w-full overflow-scroll">
+      <div className="flex h-[calc(100vh-8.5rem)] w-full overflow-scroll">
         <div
           ref={ref}
           onMouseUp={handleTextSelection}

@@ -810,7 +810,7 @@ export function NotesPage({
                 </TabsList>
               </ScrollArea>
               <TabsContent value="chat">
-                <div className="flex h-[calc(100vh-8rem)] flex-col">
+                <div className="flex h-[calc(100vh-7.875rem)] flex-col">
                   <Chat
                     userId={userId}
                     lectureId={lecture.id}

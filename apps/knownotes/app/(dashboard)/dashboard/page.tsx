@@ -3,7 +3,6 @@ import { redirect } from "next/navigation";
 import { CourseCard } from "@/components/course-card";
 import { CourseCreateDialog } from "@/components/course-create-dialog";
 import { EmptyPlaceholder } from "@/components/empty-placeholder";
-import { Icons } from "@/components/icons";
 import { LectureCreateActions } from "@/components/lecture-create-dialog";
 import { LectureSearch } from "@/components/lecture-search";
 import { QuickActions } from "@/components/quick-action";

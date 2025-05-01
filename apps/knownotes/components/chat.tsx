@@ -2,6 +2,7 @@
 
 import type { Attachment, UIMessage } from "ai";
 import { useEffect, useState } from "react";
+import { cn } from "@/lib/utils";
 import { useChat } from "@ai-sdk/react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
@@ -143,7 +144,12 @@ export function Chat({
           />
         </div>
 
-        <div className="sticky bottom-0 mx-auto w-full bg-background px-4 pb-4 md:max-w-3xl md:pb-6">
+        <div
+          className={cn(
+            "mx-auto w-full bg-background px-4 pb-4 md:max-w-3xl md:pb-6",
+            lectureId && "w-full px-0 pb-0 md:pb-0",
+          )}
+        >
           <MultimodalInput
             userId={userId}
             input={input}
