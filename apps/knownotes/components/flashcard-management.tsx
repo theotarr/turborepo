@@ -145,7 +145,11 @@ export function FlashcardManagement({
               <FlashcardItem
                 key={card.id}
                 cardNumber={index + 1}
-                flashcard={card}
+                flashcard={{
+                  ...card,
+                  hint: card.hint ?? undefined,
+                  explanation: card.explanation ?? undefined,
+                }}
               />
             ))}
           </div>

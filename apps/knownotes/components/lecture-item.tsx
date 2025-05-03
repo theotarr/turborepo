@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { LectureOperations } from "@/components/lecture-operations";
 import { formatLectureType, formatShortDate } from "@/lib/utils";
 
@@ -23,15 +24,19 @@ interface LectureItemProps {
 }
 
 export function LectureItem({ lecture, courses }: LectureItemProps) {
+  const router = useRouter();
   return (
     <div className="group flex items-center justify-between p-4 hover:bg-muted/50">
       <div className="grid gap-1">
-        <a
-          href={`/lecture/${lecture.id}`}
+        <button
           className="font-semibold hover:underline"
+          onClick={() => {
+            router.push(`/lecture/${lecture.id}`);
+            router.refresh();
+          }}
         >
           {lecture.title}
-        </a>
+        </button>
         <div className="flex space-x-2 text-sm text-muted-foreground">
           {lecture.type && (
             <Badge variant="secondary">{formatLectureType(lecture.type)}</Badge>

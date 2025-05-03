@@ -28,6 +28,7 @@ export function YoutubeGenerator({ videoUrl }: YoutubeGeneratorProps) {
     (async () => {
       const lecture = await uploadYoutube.mutateAsync({ videoUrl });
       router.push(`/lecture/${lecture.id}`);
+      router.refresh();
     })();
   }, []);
 

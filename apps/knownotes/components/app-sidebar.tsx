@@ -210,9 +210,10 @@ export function AppSidebar() {
                               )}
                             >
                               <SidebarMenuButton
-                                onClick={() =>
-                                  router.push(`/lecture/${lecture.id}`)
-                                }
+                                onClick={() => {
+                                  router.push(`/lecture/${lecture.id}`);
+                                  router.refresh();
+                                }}
                                 isActive={isActive}
                               >
                                 {isActive ? (

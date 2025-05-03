@@ -93,6 +93,7 @@ function FileUploadDialog({
   userId: string;
   courses: Course[];
 }) {
+  const router = useRouter();
   const { open, setOpen, selectedCourseId, setSelectedCourseId } =
     useFileUploadDialogStore();
   const [coursePopoverOpen, setCoursePopoverOpen] = useState(false);
@@ -237,7 +238,8 @@ function FileUploadDialog({
               courseId: selectedCourseId,
             });
             setIsDragging(false);
-            window.location.href = `/lecture/${lecture.id}`;
+            router.push(`/lecture/${lecture.id}`);
+            router.refresh();
           } catch (error) {
             console.error(error);
             setIsLoading(false);
@@ -458,7 +460,7 @@ function YoutubeTextDialog({ courses }: { courses: Course[] }) {
           videoUrl,
           courseId: selectedCourseId,
         });
-        window.location.href = `/lecture/${lecture.id}`;
+        router.push(`/lecture/${lecture.id}`);
         router.refresh();
       } catch (error) {
         console.error(error);
@@ -478,7 +480,7 @@ function YoutubeTextDialog({ courses }: { courses: Course[] }) {
           text: pastedText,
           courseId: selectedCourseId,
         });
-        window.location.href = `/lecture/${lecture.id}`;
+        router.push(`/lecture/${lecture.id}`);
         router.refresh();
       } catch (error) {
         console.error(error);

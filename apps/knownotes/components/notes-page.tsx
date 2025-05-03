@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ResizableHandle,
   ResizablePanel,
@@ -44,11 +44,13 @@ export const useTabStore = create<{
   setActiveTab: (tab: "notes" | "chat" | "flashcards" | "quiz") => void;
   notesTab: "notes" | "enhanced";
   setNotesTab: (tab: "notes" | "enhanced") => void;
+  reset: () => void;
 }>((set) => ({
   activeTab: "chat",
   setActiveTab: (activeTab) => set({ activeTab }),
   notesTab: "notes",
   setNotesTab: (notesTab) => set({ notesTab }),
+  reset: () => set({ activeTab: "chat", notesTab: "notes" }),
 }));
 
 export const useChatStore = create<{
@@ -68,6 +70,7 @@ export const useNotesStore = create<{
   setNotes: (notes: JSONContent | string) => void;
   enhancedNotes: JSONContent | string | undefined;
   setEnhancedNotes: (notes: JSONContent | string | undefined) => void;
+  reset: () => void;
 }>((set) => ({
   editor: null,
   setEditor: (editor) => set({ editor }),
@@ -75,6 +78,8 @@ export const useNotesStore = create<{
   setNotes: (notes) => set({ notes }),
   enhancedNotes: undefined,
   setEnhancedNotes: (notes) => set({ enhancedNotes: notes }),
+  reset: () =>
+    set({ editor: null, notes: undefined, enhancedNotes: undefined }),
 }));
 
 export const useTranscriptStore = create<{
@@ -83,6 +88,7 @@ export const useTranscriptStore = create<{
   addTranscript: (transcript: Transcript) => void;
   interim: Transcript | null;
   setInterim: (transcript: Transcript | null) => void;
+  reset: () => void;
 }>((set) => ({
   transcript: [],
   setTranscript: (transcript) => set({ transcript }),
@@ -90,6 +96,7 @@ export const useTranscriptStore = create<{
     set((state) => ({ transcript: [...state.transcript, transcript] })),
   interim: null,
   setInterim: (transcript) => set({ interim: transcript }),
+  reset: () => set({ transcript: [], interim: null }),
 }));
 
 export const useFlashcardStore = create<{
@@ -122,6 +129,7 @@ export const useFlashcardStore = create<{
   ) => void;
   deleteFlashcard: (id: string) => void;
   updateStarredStatus: (id: string, isStarred: boolean) => void;
+  reset: () => void;
 }>((set) => ({
   tab: "study",
   setTab: (tab) => set({ tab }),
@@ -154,6 +162,7 @@ export const useFlashcardStore = create<{
       return { flashcards };
     });
   },
+  reset: () => set({ tab: "study", flashcards: [] }),
 }));
 
 export function isNotesNull(notes: JSONContent | string | undefined) {
@@ -192,6 +201,12 @@ export function isNotesNull(notes: JSONContent | string | undefined) {
   return false;
 }
 
+// Default empty content for Tiptap
+const defaultEditorContent: JSONContent = {
+  type: "doc",
+  content: [],
+};
+
 interface NotesPageProps {
   userId: string;
   initialMessages: UIMessage[];
@@ -219,9 +234,14 @@ export function NotesPage({
   lecture,
 }: NotesPageProps) {
   const utils = api.useUtils();
-  const [hydrated, setHydrated] = useState(false);
-  const [pdfUrl, setPdfUrl] = useState<string | undefined>(undefined);
-  const { activeTab, setActiveTab, notesTab, setNotesTab } = useTabStore();
+  const isMounted = useRef(false);
+  const {
+    activeTab,
+    setActiveTab,
+    notesTab,
+    setNotesTab,
+    reset: resetTabStore,
+  } = useTabStore();
   const {
     editor,
     setEditor,
@@ -229,27 +249,66 @@ export function NotesPage({
     setNotes,
     enhancedNotes,
     setEnhancedNotes,
+    reset: resetNotesStore,
   } = useNotesStore();
+  const {
+    transcript,
+    addTranscript,
+    setTranscript,
+    setInterim,
+    reset: resetTranscriptStore,
+  } = useTranscriptStore();
+  const {
+    flashcards,
+    setFlashcards,
+    reset: resetFlashcardStore,
+  } = useFlashcardStore();
+  const [hydrated, setHydrated] = useState(false);
+  const [pdfUrl, setPdfUrl] = useState<string | undefined>(undefined);
   const [isGeneratingNotes, setIsGeneratingNotes] = useState(false);
-  const { transcript, addTranscript, setTranscript, setInterim } =
-    useTranscriptStore();
   const [isUpdateTranscriptLoading, setIsUpdateTranscriptLoading] =
     useState(false);
   const [saveStatus, setSaveStatus] = useState("Saved");
   const [resizablePanelDirection, setResizablePanelDirection] = useState<
     "horizontal" | "vertical"
   >("horizontal");
-  const { flashcards, setFlashcards } = useFlashcardStore();
   const [isLoadingFlashcards, setIsLoadingFlashcards] = useState(false);
   const [flashcardsGenerationAttempted, setFlashcardsGenerationAttempted] =
     useState(false);
-
   const [isLoadingQuiz, setIsLoadingQuiz] = useState(false);
   const [quizQuestions, setQuizQuestions] = useState<any[]>([]);
   const [quizGenerationAttempted, setQuizGenerationAttempted] = useState(false);
 
-  // Determine the layout based on lecture type and PDF availability
   const layout = lecture.type === "PDF" && lecture.fileId ? "pdf" : "notes";
+
+  // Effect to reset Zustand stores (excluding chat) when lecture.id changes (after initial mount)
+  useEffect(() => {
+    if (isMounted.current) {
+      console.log("Resetting Zustand stores for lecture:", lecture.id);
+      resetTabStore();
+      resetNotesStore();
+      resetTranscriptStore();
+      resetFlashcardStore();
+      // Also explicitly reset relevant local state dependent on lecture
+      setHydrated(false);
+      setPdfUrl(undefined);
+      setQuizQuestions(lecture.questions || []);
+      setFlashcardsGenerationAttempted(false);
+      setQuizGenerationAttempted(false);
+      setIsLoadingFlashcards(false);
+      setIsLoadingQuiz(false);
+      setIsGeneratingNotes(false);
+      setSaveStatus("Saved");
+    } else {
+      isMounted.current = true;
+    }
+  }, [
+    lecture.id,
+    resetTabStore,
+    resetNotesStore,
+    resetTranscriptStore,
+    resetFlashcardStore,
+  ]);
 
   // Helper function to handle generating enhanced notes
   async function handleGenerateEnhancedNotes() {
@@ -326,10 +385,37 @@ export function NotesPage({
   // Hydate the component with the lecture data.
   useEffect(() => {
     if (!hydrated) {
-      setTranscript(lecture.transcript as any as Transcript[]);
+      console.log("Hydrating component instance for lecture:", lecture.id);
 
-      // If the lecture is a PDF and has a fileId, get the public url for it.
-      if (lecture.type === "PDF" && lecture.fileId && !pdfUrl) {
+      setTranscript((lecture.transcript as any as Transcript[]) || []);
+      setFlashcards(lecture.flashcards || []);
+      setQuizQuestions(lecture.questions || []);
+
+      // Determine initial tabs based *only* on the current lecture prop
+      const initialNotesTab =
+        lecture.enhancedNotes || lecture.markdownNotes ? "enhanced" : "notes";
+      const initialActiveTab =
+        lecture.type === "PDF" && lecture.fileId ? "notes" : "chat";
+      setNotesTab(initialNotesTab);
+      setActiveTab(initialActiveTab);
+
+      // Initialize Notes Store & Editor Content
+      const initialEditorContent =
+        initialNotesTab === "enhanced"
+          ? lecture.enhancedNotes || lecture.markdownNotes
+          : lecture.notes;
+      setNotes((lecture.notes as JSONContent) || defaultEditorContent);
+      setEnhancedNotes(
+        lecture.enhancedNotes as JSONContent | string | undefined,
+      );
+      if (editor) {
+        editor.commands.setContent(
+          (initialEditorContent as JSONContent) || defaultEditorContent,
+        );
+      }
+
+      // PDF Loading
+      if (lecture.type === "PDF" && lecture.fileId) {
         const supabase = createBrowserClient(
           process.env.NEXT_PUBLIC_SUPABASE_URL as string,
           process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string,
@@ -343,39 +429,31 @@ export function NotesPage({
               60 * 60 * 24 * 7,
             );
 
-          if (!pdf?.signedUrl) {
-            toast.error("Cannot render your PDF.");
-            return;
+          if (pdf?.signedUrl) {
+            setPdfUrl(pdf.signedUrl);
+          } else {
+            toast.error("Cannot render PDF.");
           }
-
-          setPdfUrl(pdf.signedUrl);
-          // Set active tab to notes for PDFs
-          setActiveTab("notes");
         })();
-      }
-
-      // If there are markdown notes, default the notes tab to markdown.
-      if (lecture.markdownNotes && !lecture.enhancedNotes) {
-        setEnhancedNotes(lecture.markdownNotes as string);
-        setNotes(lecture.notes as JSONContent);
-        setNotesTab("enhanced");
-        editor?.commands.setContent(lecture.markdownNotes);
-      } else if (lecture.enhancedNotes) {
-        // If there are enhanced notes, default the notes tab to enhanced.
-        setEnhancedNotes(lecture.enhancedNotes as JSONContent);
-        setNotes(lecture.notes as JSONContent);
-        setNotesTab("enhanced");
-        editor?.commands.setContent(lecture.enhancedNotes as JSONContent);
       } else {
-        setNotes(lecture.notes as JSONContent);
-        setNotesTab("notes");
-        editor?.commands.setContent(lecture.notes as JSONContent);
+        setPdfUrl(undefined); // Explicitly clear if not PDF
       }
 
       setHydrated(true);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [
+    lecture.id,
+    lecture.transcript,
+    lecture.notes,
+    lecture.enhancedNotes,
+    lecture.markdownNotes,
+    lecture.type,
+    lecture.fileId,
+    lecture.flashcards,
+    lecture.questions,
+    editor,
+    hydrated,
+  ]);
 
   // Save the new transcript in the DB.
   useEffect(() => {
@@ -561,11 +639,16 @@ export function NotesPage({
           className="relative mx-4"
         >
           {layout === "pdf" && pdfUrl ? (
-            <PdfRenderer lectureId={lecture.id} url={pdfUrl} />
+            <PdfRenderer
+              key={`pdf-${lecture.id}`}
+              lectureId={lecture.id}
+              url={pdfUrl}
+            />
           ) : (
             <>
               <div className="absolute bottom-16 left-1/2 z-10 -translate-x-1/2">
                 <Dictaphone
+                  key={`dictaphone-${lecture.id}`}
                   isGenerating={isGeneratingNotes}
                   onCaption={(t) => {
                     setIsUpdateTranscriptLoading(true);
@@ -638,6 +721,7 @@ export function NotesPage({
                   </TooltipProvider>
 
                   <Editor
+                    key={`main-editor-${lecture.id}`}
                     lectureId={lecture.id}
                     defaultValue={notesTab === "notes" ? notes : enhancedNotes}
                     className="relative z-0 flex grow flex-col overflow-hidden border-0 bg-background py-2 shadow-none"
@@ -733,6 +817,7 @@ export function NotesPage({
               <TabsContent value="chat">
                 <div className="flex h-[calc(100vh-7.875rem)] flex-col">
                   <Chat
+                    key={`chat-${lecture.id}`}
                     userId={userId}
                     lectureId={lecture.id}
                     initialMessages={initialMessages}
@@ -748,6 +833,7 @@ export function NotesPage({
                   <div className="absolute max-h-full w-full overflow-y-scroll">
                     <div className="relative mx-auto max-w-4xl pr-4">
                       <Editor
+                        key={`pdf-notes-editor-${lecture.id}`}
                         lectureId={lecture.id}
                         defaultValue={enhancedNotes}
                         className="relative z-0 flex grow flex-col overflow-hidden border-0 bg-background py-2 pb-24 shadow-none"
@@ -814,7 +900,10 @@ export function NotesPage({
                     <FlashcardSkeleton />
                   ) : flashcards?.length > 0 ? (
                     <div className="mt-4 w-full max-w-3xl">
-                      <FlashcardContainer flashcards={flashcards} />
+                      <FlashcardContainer
+                        key={`flashcards-${lecture.id}`}
+                        flashcards={flashcards}
+                      />
                     </div>
                   ) : (
                     <div className="flex h-full flex-col items-center justify-center">
@@ -869,6 +958,7 @@ export function NotesPage({
                   ) : quizQuestions.length > 0 ? (
                     <div className="w-full">
                       <QuizPage
+                        key={`quiz-${lecture.id}`}
                         lecture={{
                           ...lecture,
                           questions: quizQuestions,

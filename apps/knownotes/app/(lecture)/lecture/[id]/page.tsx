@@ -115,6 +115,7 @@ export default async function LecturePage({ params }: LecturePageProps) {
       </div>
       <PremiumFeature>
         <NotesPage
+          key={lecture.id}
           userId={session.user.id}
           initialMessages={convertToUIMessages(lecture.messages)}
           lecture={lecture}

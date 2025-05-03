@@ -84,6 +84,7 @@ function QuickLectureComponent() {
         const id = await createLecture(undefined, "LIVE");
         utils.lecture.list.invalidate();
         router.push(`/lecture/${id}`);
+        router.refresh();
       }}
     />
   );
