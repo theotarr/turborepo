@@ -361,7 +361,6 @@ export function NotesPage({
         lectureId: lecture.id,
         enhancedNotes: JSON.stringify(editor?.getJSON()),
       });
-      toast.success("Enhanced notes generated and saved.");
     } catch (error) {
       console.error("Error generating enhanced notes:", error);
       toast.error("Failed to generate enhanced notes.");
