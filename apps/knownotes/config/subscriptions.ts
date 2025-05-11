@@ -5,9 +5,6 @@ export const freePlan: SubscriptionPlan = {
   planName: "Free",
   description: "Try out KnowNotes for free with limited access.",
   stripePriceIds: [],
-  // lecturesPerMonth: 30,
-  // noteGenerationsPerMonth: 500,
-  // messagesPerMonth: 500,
 };
 
 // KnowNotes Pro.
@@ -31,7 +28,4 @@ export const proPlan: SubscriptionPlan = {
     "monthly_18.99",
     "offer_89.99",
   ],
-  // lecturesPerMonth: 1_000,
-  // noteGenerationsPerMonth: 1_000,
-  // messagesPerMonth: 1_000,
 };
