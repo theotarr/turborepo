@@ -1,7 +1,8 @@
 import { SubscriptionPlan } from "types";
 
+// Free plan.
 export const freePlan: SubscriptionPlan = {
-  name: "Free Plan",
+  planName: "Free",
   description: "Try out KnowNotes for free with limited access.",
   stripePriceIds: [],
   // lecturesPerMonth: 30,
@@ -9,8 +10,9 @@ export const freePlan: SubscriptionPlan = {
   // messagesPerMonth: 500,
 };
 
+// KnowNotes Pro.
 export const proPlan: SubscriptionPlan = {
-  name: "KnowNotes Pro",
+  planName: "KnowNotes Pro",
   description: "Access to all KnowNotes' features and powerful models.",
   stripePriceIds:
     process.env.NODE_ENV === "development"

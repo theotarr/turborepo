@@ -70,6 +70,7 @@ export type ChatConfig = {
 };
 
 export type SubscriptionPlan = {
+  planName: string;
   description: string;
   stripePriceIds: string[];
   appStoreProductIds?: string[];
