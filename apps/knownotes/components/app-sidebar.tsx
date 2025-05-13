@@ -116,13 +116,13 @@ export function AppSidebar() {
       <Sidebar className="border-sidebar-border border-r">
         <SidebarHeader>
           <SidebarMenu>
-            <div className="flex flex-row items-center justify-between px-2 pt-2">
+            <div className="flex items-center px-2 pt-2">
               <Link
                 href="/dashboard"
                 onClick={() => setOpenMobile(false)}
-                className="flex flex-row items-center gap-2 font-bold tracking-tighter text-secondary-foreground"
+                className="flex flex-row items-center gap-2 font-[650] tracking-tight text-secondary-foreground"
               >
-                <Icons.logo className="size-6" />
+                <Icons.logo className="size-[22px] stroke-[2.2]" />
                 KnowNotes
               </Link>
             </div>
@@ -130,15 +130,14 @@ export function AppSidebar() {
         </SidebarHeader>
 
         <SidebarContent>
-          <SidebarGroup className="mt-2 py-1">
+          <SidebarGroup className="py-1">
             <SidebarMenu>
               <Button
                 variant="outline"
                 size="sm"
-                className="border-2 border-dashed"
+                className="h-8 rounded-lg shadow-sm"
                 onClick={() => router.push("/dashboard")}
               >
-                <Icons.add className="mr-2 size-4" />
                 Add content
               </Button>
             </SidebarMenu>
