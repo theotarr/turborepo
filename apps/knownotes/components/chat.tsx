@@ -37,6 +37,14 @@ interface ChatProps {
   bodyData?: Record<string, any>; // Additional data to send in the request body
   apiPath?: string; // Custom API path
   onAppendAvailable?: (append: (message: UIMessage) => void) => void;
+  courses?: {
+    id: string;
+    name: string;
+  }[];
+  onCourseSelect?: (courseId: string) => void;
+  isCourseSelectionDisabled?: boolean;
+  selectedCourseIdProp?: string;
+  isCourseSelectionRequired?: boolean;
 }
 
 export function Chat({
@@ -48,6 +56,11 @@ export function Chat({
   bodyData = {},
   apiPath = "/api/chat",
   onAppendAvailable,
+  courses,
+  onCourseSelect,
+  isCourseSelectionDisabled,
+  selectedCourseIdProp,
+  isCourseSelectionRequired,
 }: ChatProps) {
   const {
     messages,
@@ -163,6 +176,11 @@ export function Chat({
             setMessages={setMessages}
             append={handleAppend}
             showSuggestedActions={lectureId ? false : true}
+            courses={courses}
+            onCourseSelect={onCourseSelect}
+            selectedCourseIdProp={selectedCourseIdProp}
+            isCourseSelectionRequired={isCourseSelectionRequired}
+            lectureId={lectureId}
           />
         </div>
       </div>

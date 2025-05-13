@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { api } from "@/lib/trpc/react";
 import { UIMessage } from "ai";
 
@@ -10,11 +10,15 @@ import { PremiumFeature } from "./premium-feature";
 interface ChatCourseProps {
   chatId: string;
   userId: string;
-  course: {
+  course?: {
     id: string;
     name: string;
   };
   initialMessages?: UIMessage[];
+  courses?: {
+    id: string;
+    name: string;
+  }[];
 }
 
 export function ChatCourse({
@@ -22,13 +26,17 @@ export function ChatCourse({
   userId,
   course,
   initialMessages,
+  courses,
 }: ChatCourseProps) {
   const utils = api.useUtils();
+  const [selectedCourseId, setSelectedCourseId] = useState<string | null>(
+    course?.id || null,
+  );
 
   // Handle new messages to update the URL and refresh the router
   const handleMessage = () => {
     // Only update URL and refresh on user messages
-    window.history.replaceState({}, "", `/chat/${course.id}/${chatId}`);
+    window.history.replaceState({}, "", `/chat/${selectedCourseId}/${chatId}`);
     utils.chat.list.invalidate();
   };
 
@@ -39,8 +47,13 @@ export function ChatCourse({
         chatId={chatId}
         initialMessages={initialMessages || []}
         onMessage={handleMessage}
-        bodyData={{ courseId: course.id }}
+        bodyData={{ courseId: selectedCourseId }}
         apiPath="/api/chat/course"
+        courses={courses}
+        onCourseSelect={setSelectedCourseId}
+        isCourseSelectionDisabled={!!course}
+        selectedCourseIdProp={course?.id}
+        isCourseSelectionRequired={!course}
       />
     </PremiumFeature>
   );

@@ -145,7 +145,7 @@ export function AppSidebar() {
             {/* Search Bar */}
             <div className="relative mt-2">
               <div className="relative flex items-center border-b border-border">
-                <div className="pointer-events-none absolute left-2 flex h-full items-center text-muted-foreground/50">
+                <div className="pointer-events-none absolute left-2 flex h-full items-center text-muted-foreground/60">
                   {isSearching ? (
                     <Icons.spinner className="size-3.5 animate-spin" />
                   ) : (
@@ -456,16 +456,14 @@ export function AppSidebar() {
                       {filteredCourses.map((course) => (
                         <SidebarMenuItem key={`course-sidebar-${course.id}`}>
                           <SidebarMenuButton
+                            isActive={pathname === `/chat/${course.id}`}
                             onClick={() => router.push(`/chat/${course.id}`)}
-                            className="gap-2"
                           >
-                            <div className="flex w-4 flex-shrink-0 items-center justify-center">
-                              {pathname === `/chat/${course.id}` ? (
+                            {pathname === `/chat/${course.id}` && (
+                              <div className="flex flex-shrink-0 items-center justify-center">
                                 <div className="size-2 rounded-full bg-primary" />
-                              ) : (
-                                <Icons.course className="size-4" />
-                              )}
-                            </div>
+                              </div>
+                            )}
                             <span>{course.name}</span>
                           </SidebarMenuButton>
                         </SidebarMenuItem>

@@ -76,6 +76,12 @@ export default async function CourseChatPage({ params }: SavedChatPageProps) {
   });
   if (!course) return notFound();
 
+  const courses = await db.course.findMany({
+    where: {
+      userId: session.user.id,
+    },
+  });
+
   const chat = await db.chat.findUnique({
     where: {
       id: params.chatId,
@@ -91,6 +97,7 @@ export default async function CourseChatPage({ params }: SavedChatPageProps) {
       chatId={chat.id}
       userId={session.user.id}
       course={course}
+      courses={courses}
       initialMessages={convertToUIMessages(chat.messages)}
     />
   );

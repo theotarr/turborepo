@@ -23,10 +23,18 @@ import { Input } from "./ui/input";
 
 interface CourseCreateDialogProps {
   className?: string;
+  open?: boolean;
+  onOpenChange?: (isOpen: boolean) => void;
+  onCourseCreated?: (newCourse: { id: string; name: string }) => void;
   [key: string]: any;
 }
 
-export function CourseCreateDialog({ className }: CourseCreateDialogProps) {
+export function CourseCreateDialog({
+  open,
+  onOpenChange,
+  onCourseCreated,
+  className,
+}: CourseCreateDialogProps) {
   const router = useRouter();
   const utils = api.useUtils();
   const [name, setName] = useState("");
@@ -36,7 +44,8 @@ export function CourseCreateDialog({ className }: CourseCreateDialogProps) {
     e.preventDefault();
     setIsLoading(true);
 
-    const { id } = await createCourse(name);
+    const courseName = name;
+    const { id } = await createCourse(courseName);
     setIsLoading(false);
 
     if (!id) return toast.error("Something went wrong. Please try again.");
@@ -44,27 +53,38 @@ export function CourseCreateDialog({ className }: CourseCreateDialogProps) {
     toast.success("Success!");
     utils.course.invalidate();
     router.refresh();
+
+    if (onCourseCreated) {
+      onCourseCreated({ id, name: courseName });
+    }
+
+    if (onOpenChange && open) {
+      onOpenChange(false);
+    }
+    setName("");
   };
 
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <button
-          className={cn(
-            buttonVariants({ variant: "outline", size: "sm" }),
-            className,
-          )}
-        >
-          {className?.includes("w-7") ? (
-            <Icons.add className="size-4" />
-          ) : (
-            <>
-              <Icons.add className="mr-2 h-4 w-4" />
-              <span>New Course</span>
-            </>
-          )}
-        </button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      {open === undefined && (
+        <DialogTrigger asChild>
+          <button
+            className={cn(
+              buttonVariants({ variant: "outline", size: "sm" }),
+              className,
+            )}
+          >
+            {className?.includes("w-7") ? (
+              <Icons.add className="size-4" />
+            ) : (
+              <>
+                <Icons.add className="mr-2 h-4 w-4" />
+                <span>New Course</span>
+              </>
+            )}
+          </button>
+        </DialogTrigger>
+      )}
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>New Course</DialogTitle>

@@ -66,9 +66,20 @@ export default async function CourseChatPage({ params }: ChatPageProps) {
   });
   if (!course) return notFound();
 
+  const courses = await db.course.findMany({
+    where: {
+      userId: session.user.id,
+    },
+  });
+
   const chatId = uuidv1();
 
   return (
-    <ChatCourse chatId={chatId} userId={session.user.id} course={course} />
+    <ChatCourse
+      chatId={chatId}
+      userId={session.user.id}
+      course={course}
+      courses={courses}
+    />
   );
 }

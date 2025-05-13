@@ -4,14 +4,33 @@ import type { Attachment, UIMessage } from "ai";
 import type React from "react";
 import type { ChangeEvent, Dispatch, SetStateAction } from "react";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { UseChatHelpers } from "@ai-sdk/react";
 import equal from "fast-deep-equal";
-import { ArrowUp, Paperclip, Square } from "lucide-react";
+import {
+  ArrowUp,
+  ChevronDown,
+  Paperclip,
+  PlusCircle,
+  Square,
+} from "lucide-react";
 import { toast } from "sonner";
 import * as Tus from "tus-js-client";
 import { v1 as uuidv1 } from "uuid";
 
+import { CourseCreateDialog } from "./course-create-dialog";
 import { PreviewAttachment } from "./preview-attachment";
 import { SuggestedActions } from "./suggested-actions";
 import { Button } from "./ui/button";
@@ -31,6 +50,11 @@ function PureMultimodalInput({
   handleSubmit,
   className,
   showSuggestedActions,
+  courses,
+  onCourseSelect,
+  selectedCourseIdProp,
+  isCourseSelectionRequired,
+  lectureId,
 }: {
   userId: string;
   input: UseChatHelpers["input"];
@@ -45,6 +69,14 @@ function PureMultimodalInput({
   handleSubmit: UseChatHelpers["handleSubmit"];
   className?: string;
   showSuggestedActions?: boolean;
+  courses?: {
+    id: string;
+    name: string;
+  }[];
+  onCourseSelect?: (courseId: string | null) => void;
+  selectedCourseIdProp?: string;
+  isCourseSelectionRequired?: boolean;
+  lectureId?: string;
 }) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [uploadQueue, setUploadQueue] = useState<Array<string>>([]);
@@ -52,6 +84,17 @@ function PureMultimodalInput({
     {},
   );
   const uploadRefs = useRef<Record<string, any>>({});
+  const [currentSelectedCourseId, setCurrentSelectedCourseId] = useState<
+    string | null
+  >(selectedCourseIdProp ?? null);
+  const [popoverOpen, setPopoverOpen] = useState(false);
+  const [isCreateCourseDialogOpen, setIsCreateCourseDialogOpen] =
+    useState(false);
+
+  // Update local state if prop changes
+  useEffect(() => {
+    setCurrentSelectedCourseId(selectedCourseIdProp ?? null);
+  }, [selectedCourseIdProp]);
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -273,6 +316,17 @@ function PureMultimodalInput({
     [setAttachments],
   );
 
+  const courseSelectionPending =
+    isCourseSelectionRequired === true && !currentSelectedCourseId;
+
+  const sendButtonDisabled =
+    (input.trim().length === 0 && attachments.length === 0) ||
+    uploadQueue.length > 0 ||
+    courseSelectionPending;
+
+  const showCourseSelector = !lectureId && courses && courses.length > 0;
+  const effectiveComboboxDisabled = messages.length > 0;
+
   return (
     <div className="relative flex w-full flex-col gap-4">
       {messages.length === 0 &&
@@ -340,7 +394,7 @@ function PureMultimodalInput({
         value={input}
         onChange={handleInput}
         className={cn(
-          "max-h-[calc(75dvh)] min-h-[24px] resize-none overflow-hidden rounded-2xl border bg-muted pb-10 !text-base",
+          "max-h-[calc(75dvh)] min-h-[24px] resize-none overflow-hidden rounded-xl border bg-muted pb-10 !text-base",
           className,
         )}
         rows={2}
@@ -353,7 +407,14 @@ function PureMultimodalInput({
           ) {
             event.preventDefault();
 
-            if (status !== "ready") {
+            // Use the same comprehensive check as the SendButton
+            if (sendButtonDisabled) {
+              toast.error(
+                courseSelectionPending
+                  ? "Please select a course first."
+                  : "Cannot send message right now.", // Generic for other disabled cases
+              );
+            } else if (status !== "ready") {
               toast.error("Please wait for the model to finish its response!");
             } else {
               submitForm();
@@ -362,19 +423,95 @@ function PureMultimodalInput({
         }}
       />
 
-      <div className="absolute bottom-0 flex w-fit flex-row justify-start p-2">
-        <AttachmentsButton fileInputRef={fileInputRef} status={status} />
+      <div className="absolute bottom-0 left-0 flex w-fit flex-row items-center space-x-2 p-2">
+        {showCourseSelector && (
+          <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="secondary"
+                role="combobox"
+                aria-expanded={popoverOpen}
+                className={cn(
+                  "h-fit w-auto min-w-[150px] max-w-[200px] justify-between truncate rounded-md bg-background p-[7px] text-xs",
+                  effectiveComboboxDisabled && "cursor-not-allowed opacity-80",
+                )}
+                // disabled={effectiveComboboxDisabled}
+              >
+                {currentSelectedCourseId
+                  ? courses.find(
+                      (course) => course.id === currentSelectedCourseId,
+                    )?.name
+                  : "No course selected"}
+                <ChevronDown className="ml-1.5 shrink-0 opacity-50 last:size-4" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-[200px] p-0" align="start">
+              <Command>
+                <CommandList>
+                  <CommandEmpty>No course found.</CommandEmpty>
+                  <CommandGroup>
+                    {courses.map((course) => (
+                      <CommandItem
+                        key={course.id}
+                        value={course.id}
+                        onSelect={(currentId) => {
+                          const newSelectedId =
+                            currentId === currentSelectedCourseId
+                              ? null
+                              : currentId;
+                          setCurrentSelectedCourseId(newSelectedId);
+                          if (onCourseSelect) {
+                            onCourseSelect(newSelectedId);
+                          }
+                          setPopoverOpen(false);
+                        }}
+                      >
+                        {course.name}
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                  <CommandGroup className="border-t pt-1">
+                    <CommandItem
+                      onSelect={() => {
+                        setPopoverOpen(false);
+                        setIsCreateCourseDialogOpen(true);
+                      }}
+                      className="text-xs"
+                    >
+                      <PlusCircle className="mr-2 size-4" />
+                      New Course
+                    </CommandItem>
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
+        )}
       </div>
 
-      <div className="absolute bottom-0 right-0 flex w-fit flex-row justify-end p-2">
+      <CourseCreateDialog
+        open={isCreateCourseDialogOpen}
+        onOpenChange={setIsCreateCourseDialogOpen}
+        onCourseCreated={(newCourse) => {
+          // Dialog is already set to close by onOpenChange in CourseCreateDialog itself
+          // or will be by setIsCreateCourseDialogOpen(false) if not already.
+          setIsCreateCourseDialogOpen(false);
+
+          setCurrentSelectedCourseId(newCourse.id);
+          if (onCourseSelect) {
+            onCourseSelect(newCourse.id);
+          }
+          // The router.refresh() in CourseCreateDialog will handle updating the courses list in the popover
+          // after navigation triggered by onCourseSelect.
+        }}
+      />
+
+      <div className="absolute bottom-0 right-0 flex w-fit flex-row items-center space-x-2 p-2">
+        <AttachmentsButton fileInputRef={fileInputRef} status={status} />
         {status === "submitted" ? (
           <StopButton stop={stop} setMessages={setMessages} />
         ) : (
-          <SendButton
-            input={input}
-            submitForm={submitForm}
-            uploadQueue={uploadQueue}
-          />
+          <SendButton submitForm={submitForm} disabled={sendButtonDisabled} />
         )}
       </div>
     </div>
@@ -387,6 +524,7 @@ export const MultimodalInput = memo(
     if (prevProps.input !== nextProps.input) return false;
     if (prevProps.status !== nextProps.status) return false;
     if (!equal(prevProps.attachments, nextProps.attachments)) return false;
+    if (prevProps.courses !== nextProps.courses) return false;
 
     return true;
   },
@@ -443,12 +581,10 @@ const StopButton = memo(PureStopButton);
 
 function PureSendButton({
   submitForm,
-  input,
-  uploadQueue,
+  disabled,
 }: {
   submitForm: () => void;
-  input: string;
-  uploadQueue: Array<string>;
+  disabled: boolean;
 }) {
   return (
     <Button
@@ -458,7 +594,7 @@ function PureSendButton({
         event.preventDefault();
         submitForm();
       }}
-      disabled={input.length === 0 || uploadQueue.length > 0}
+      disabled={disabled}
     >
       <ArrowUp size={14} />
     </Button>
@@ -466,8 +602,8 @@ function PureSendButton({
 }
 
 const SendButton = memo(PureSendButton, (prevProps, nextProps) => {
-  if (prevProps.uploadQueue.length !== nextProps.uploadQueue.length)
-    return false;
-  if (prevProps.input !== nextProps.input) return false;
+  if (prevProps.disabled !== nextProps.disabled) return false;
+  // submitForm is a function, typically stable, but if it changes, re-render.
+  if (prevProps.submitForm !== nextProps.submitForm) return false;
   return true;
 });
