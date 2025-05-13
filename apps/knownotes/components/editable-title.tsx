@@ -54,7 +54,7 @@ export function EditableTitle({
   }, 500);
 
   return (
-    <div className="group relative flex items-center">
+    <div className="group relative my-1 flex items-center">
       <ContentEditable
         className={cn(
           "mr-1 inline-block max-w-[280px] truncate rounded-md px-2 text-lg font-medium tracking-tight outline-none outline-1 ring-0 transition-all group-hover:bg-accent/50 group-hover:outline group-hover:outline-border sm:max-w-none",
