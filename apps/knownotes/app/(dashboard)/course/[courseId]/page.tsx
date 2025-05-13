@@ -67,6 +67,19 @@ export default async function CoursePage({ params }) {
     where: { id: params.courseId },
     include: {
       lectures: {
+        select: {
+          id: true,
+          title: true,
+          type: true,
+          updatedAt: true,
+          courseId: true,
+          course: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
         orderBy: { createdAt: "desc" },
       },
     },
@@ -80,7 +93,6 @@ export default async function CoursePage({ params }) {
         text="View this course's lectures."
       >
         <div className="flex items-center space-x-6">
-          {/* <FileUpload /> */}
           <Link href={`/lecture?courseId=${course.id}`}>
             <Button variant="secondary" size="sm">
               <Icons.add className="mr-2 h-4 w-4" />
