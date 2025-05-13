@@ -1,37 +1,47 @@
-import { Icons } from "@/components/icons";
-import { ListItemSkeleton } from "@/components/list-item-skeleton";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function DashboardLoading() {
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between">
-        <div className="space-y-1">
-          <Skeleton className="h-8 w-40" />
-          <Skeleton className="h-4 w-[250px]" />
+    <div className="mx-auto max-w-3xl flex-col space-y-12 pt-20 lg:pt-28">
+      <div className="flex flex-col gap-4">
+        {/* Main Heading Skeleton */}
+        <Skeleton className="mx-auto h-10 w-3/4 sm:h-12 md:h-14" />
+
+        {/* Quick Actions Skeleton */}
+        <div className="grid auto-rows-fr grid-cols-1 gap-4 sm:grid-cols-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Skeleton key={i} className="h-24 w-full" /> // Adjusted height for quick action cards
+          ))}
         </div>
-        <Button variant="secondary" disabled>
-          <Icons.add className="mr-2 h-4 w-4" />
-          New lecture
-        </Button>
       </div>
 
-      <div className="grid auto-rows-fr grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
-        {Array.from({ length: 3 }).map((_, i) => (
-          <Skeleton key={i} className="h-40 w-full" />
-        ))}
+      {/* Courses Section Skeleton */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-6 w-20" /> {/* "Courses" heading */}
+          <Skeleton className="h-9 w-32" /> {/* CourseCreateDialog button */}
+        </div>
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+          {Array.from({ length: 2 }).map((_, i) => (
+            <Skeleton key={i} className="h-40 w-full" /> // CourseCard skeleton
+          ))}
+        </div>
       </div>
 
-      <div>
-        <Skeleton className="mb-4 h-6 w-24" />
-        <div className="divide-border-200 divide-y rounded-md border">
-          <ListItemSkeleton />
-          <ListItemSkeleton />
-          <ListItemSkeleton />
-          <ListItemSkeleton />
-          <ListItemSkeleton />
+      {/* Recent Notes Section Skeleton */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-6 w-20" /> {/* "Recent" heading */}
+          <Skeleton className="h-5 w-16" /> {/* "View all" link */}
         </div>
+        <Skeleton className="h-10 w-full" />{" "}
+        {/* LectureSearch input skeleton */}
+      </div>
+
+      {/* Lecture Create Actions Skeleton */}
+      <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">
+        <Skeleton className="h-10 w-full sm:w-40" />
+        <Skeleton className="h-10 w-full sm:w-40" />
       </div>
     </div>
   );
