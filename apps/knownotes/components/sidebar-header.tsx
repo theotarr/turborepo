@@ -21,15 +21,16 @@ export function SidebarHeader() {
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
-              variant="outline"
-              className="order-2 ml-auto px-2 md:order-1 md:ml-0 md:h-fit md:px-2"
+              variant="ghost"
+              size="sm"
+              className="order-2 ml-auto h-8 px-2 md:order-1 md:ml-0 md:h-8 md:w-8 md:px-2"
               onClick={() => {
                 // Navigate to the chat page which has the course selector
                 router.push("/dashboard");
               }}
             >
               <Icons.add className="size-4" />
-              <span className="ml-2 md:sr-only">Add Content</span>
+              <span className="ml-2 truncate md:sr-only">Add Content</span>
             </Button>
           </TooltipTrigger>
           <TooltipContent>Add Content</TooltipContent>

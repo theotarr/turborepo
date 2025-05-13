@@ -18,8 +18,9 @@ export function SidebarToggle() {
       <TooltipTrigger asChild>
         <Button
           onClick={toggleSidebar}
-          variant="outline"
-          className="md:h-fit md:px-2"
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8"
         >
           <Icons.sidebar className="size-4" />
         </Button>
