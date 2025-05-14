@@ -2,6 +2,7 @@
 
 import { HTMLAttributes, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { CourseCreateDialog } from "@/components/course-create-dialog";
 import { Icons } from "@/components/icons";
 import {
   AlertDialog,
@@ -47,6 +48,7 @@ import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
 import { deleteLecture, updateLecture } from "@/lib/lecture/actions";
 import { api } from "@/lib/trpc/react";
 import { absoluteUrl, cn } from "@/lib/utils";
+import { Plus } from "lucide-react";
 import { toast } from "sonner";
 
 interface LectureOperationsProps extends HTMLAttributes<HTMLDivElement> {
@@ -83,6 +85,8 @@ export function LectureOperations({
   const [courseId, setCourseId] = useState<string | undefined>(
     lecture.courseId ?? undefined,
   );
+  const [isCreateCourseDialogOpen, setIsCreateCourseDialogOpen] =
+    useState(false);
 
   const [lectureName, setLectureName] = useState<string>(lecture.title);
 
@@ -202,6 +206,18 @@ export function LectureOperations({
                             {c.name}
                           </CommandItem>
                         ))}
+                      </CommandGroup>
+                      <CommandGroup className="border-t pt-1">
+                        <CommandItem
+                          onSelect={() => {
+                            setIsCourseComboOpen(false);
+                            setIsCreateCourseDialogOpen(true);
+                          }}
+                          className="text-sm"
+                        >
+                          <Plus className="mr-2 size-4" />
+                          New Course
+                        </CommandItem>
                       </CommandGroup>
                     </Command>
                   </PopoverContent>
@@ -330,6 +346,18 @@ export function LectureOperations({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Course Create Dialog for Lecture Operations */}
+      <CourseCreateDialog
+        open={isCreateCourseDialogOpen}
+        onOpenChange={setIsCreateCourseDialogOpen}
+        onCourseCreated={(newCourse) => {
+          setIsCreateCourseDialogOpen(false); // Close the creation dialog
+          setCourseId(newCourse.id); // Auto-select the new course in the Edit Lecture dialog
+          // The router.refresh() and utils.course.invalidate() in CourseCreateDialog
+          // should handle updating the courses list for the Popover.
+        }}
+      />
     </>
   );
 }
