@@ -248,7 +248,7 @@ export function AppSidebar() {
                 <CollapsibleTrigger className="w-full">
                   <div className="hover:bg-sidebar-accent/50 flex h-[1.875rem] w-full cursor-pointer select-none items-center justify-between rounded-md px-2 text-[0.8125rem] font-medium text-muted-foreground transition-colors hover:text-secondary-foreground/80">
                     <span>Notes</span>
-                    <Icons.chevronDown className="size-4 transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                    <Icons.chevronDown className="size-4 transition-transform group-data-[state=closed]/collapsible:-rotate-90" />
                   </div>
                 </CollapsibleTrigger>
                 <CollapsibleContent>
@@ -389,7 +389,7 @@ export function AppSidebar() {
                 <CollapsibleTrigger className="w-full">
                   <div className="hover:bg-sidebar-accent/50 flex h-[1.875rem] w-full cursor-pointer select-none items-center justify-between rounded-md px-2 text-[0.8125rem] font-medium text-muted-foreground transition-colors hover:text-secondary-foreground/80">
                     <span>Chats</span>
-                    <Icons.chevronDown className="size-4 transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                    <Icons.chevronDown className="size-4 transition-transform group-data-[state=closed]/collapsible:-rotate-90" />
                   </div>
                 </CollapsibleTrigger>
                 <CollapsibleContent>
@@ -536,7 +536,7 @@ export function AppSidebar() {
                 <CollapsibleTrigger className="w-full">
                   <div className="hover:bg-sidebar-accent/50 flex h-[1.875rem] w-full cursor-pointer select-none items-center justify-between rounded-md px-2 text-[0.8125rem] font-medium text-muted-foreground transition-colors hover:text-secondary-foreground/80">
                     <span>Courses</span>
-                    <Icons.chevronDown className="size-4 transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                    <Icons.chevronDown className="size-4 transition-transform group-data-[state=closed]/collapsible:-rotate-90" />
                   </div>
                 </CollapsibleTrigger>
                 <CollapsibleContent>
