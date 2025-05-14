@@ -19,13 +19,7 @@ import {
 import { cn } from "@/lib/utils";
 import { UseChatHelpers } from "@ai-sdk/react";
 import equal from "fast-deep-equal";
-import {
-  ArrowUp,
-  ChevronDown,
-  Paperclip,
-  PlusCircle,
-  Square,
-} from "lucide-react";
+import { ArrowUp, ChevronDown, Paperclip, Plus, Square } from "lucide-react";
 import { toast } from "sonner";
 import * as Tus from "tus-js-client";
 import { v1 as uuidv1 } from "uuid";
@@ -478,7 +472,7 @@ function PureMultimodalInput({
                       }}
                       className="text-xs"
                     >
-                      <PlusCircle className="mr-2 size-4" />
+                      <Plus className="mr-2 size-4" />
                       New Course
                     </CommandItem>
                   </CommandGroup>
