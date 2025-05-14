@@ -476,14 +476,18 @@ export function AppSidebar() {
                         </div>
                       ) : (
                         <SidebarMenuItem>
-                          <div className="px-2 py-1.5 text-sm text-muted-foreground">
-                            {debouncedQuery
-                              ? "No results found"
-                              : "No recent chats"}
-                          </div>
+                          {debouncedQuery ? (
+                            <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                              No results found
+                            </div>
+                          ) : (
+                            <div className="m-2 flex h-16 items-center justify-center rounded-md border border-dashed border-border text-xs text-muted-foreground">
+                              Chat with your course materials.
+                            </div>
+                          )}
                         </SidebarMenuItem>
                       )}
-                      {!debouncedQuery && (
+                      {!debouncedQuery && chats && chats.length > 0 && (
                         <Link
                           href="/library?tab=chats"
                           className={cn(
@@ -571,11 +575,15 @@ export function AppSidebar() {
                         </div>
                       ) : (
                         <SidebarMenuItem>
-                          <div className="px-2 py-1.5 text-sm text-muted-foreground">
-                            {debouncedQuery
-                              ? "No results found"
-                              : "No courses yet."}
-                          </div>
+                          {debouncedQuery ? (
+                            <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                              No results found
+                            </div>
+                          ) : (
+                            <div className="m-2 flex h-16 items-center justify-center rounded-md border border-dashed border-border text-xs text-muted-foreground">
+                              No courses yet.
+                            </div>
+                          )}
                         </SidebarMenuItem>
                       )}
                       {debouncedQuery && courses && courses.length > 0 && (
