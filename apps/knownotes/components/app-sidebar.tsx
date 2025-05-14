@@ -611,7 +611,7 @@ export function AppSidebar() {
 
         <SidebarFooter className="border-t">
           <div className="flex items-center justify-between">
-            {session?.user && (
+            {session?.user ? (
               <UserAccountNav
                 user={{
                   name: session.user.name || null,
@@ -621,6 +621,8 @@ export function AppSidebar() {
                 showFullInfo={true}
                 className="flex-1"
               />
+            ) : (
+              <div className="h-12 flex-1" />
             )}
           </div>
         </SidebarFooter>

@@ -41,8 +41,8 @@ export function UserAccountNav({
       >
         <div
           className={cn(
-            "flex items-center gap-2",
-            showFullInfo && "rounded-md px-2 py-1.5 hover:bg-muted",
+            "flex items-center gap-2 transition-colors",
+            showFullInfo && "rounded-lg px-2 py-1.5 hover:bg-muted",
           )}
           {...props}
         >
