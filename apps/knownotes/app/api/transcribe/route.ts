@@ -3,39 +3,39 @@ import { env } from "@/env";
 import { createClient, DeepgramError } from "@deepgram/sdk";
 
 export async function GET(request: Request) {
-  // gotta use the request object to invalidate the cache every request
+  // // Exit early so we don't request thousands of keys in development.
+  // if (process.env.NODE_ENV === "development") {
+  //   return NextResponse.json({
+  //     key: env.DEEPGRAM_API_KEY ?? "",
+  //   });
+  // }
+
+  // Use the request object to invalidate the cache every request.
   const url = request.url;
   const deepgram = createClient(env.DEEPGRAM_API_KEY);
 
-  let { result: projectsResult, error: projectsError } =
-    await deepgram.manage.getProjects();
+  let { result: tokenResult, error: tokenError } =
+    await deepgram.auth.grantToken();
 
-  if (projectsError) {
-    return NextResponse.json(projectsError);
+  if (tokenError) {
+    return NextResponse.json(tokenError);
   }
 
-  const project = projectsResult?.projects[0];
-
-  if (!project) {
+  if (!tokenResult) {
     return NextResponse.json(
       new DeepgramError(
-        "Cannot find a Deepgram project. Please create a project first.",
+        "Failed to generate temporary token. Make sure your API key is of scope Member or higher.",
       ),
     );
   }
 
-  let { result: newKeyResult, error: newKeyError } =
-    await deepgram.manage.createProjectKey(project.project_id, {
-      comment: "Temporary API key",
-      scopes: ["usage:write"],
-      tags: ["knownotes"],
-      time_to_live_in_seconds: 10,
-    });
+  const response = NextResponse.json({ ...tokenResult, url });
+  response.headers.set("Surrogate-Control", "no-store");
+  response.headers.set(
+    "Cache-Control",
+    "s-maxage=0, no-store, no-cache, must-revalidate, proxy-revalidate",
+  );
+  response.headers.set("Expires", "0");
 
-  if (newKeyError) {
-    console.error(newKeyError);
-    return NextResponse.json(newKeyError);
-  }
-
-  return NextResponse.json({ ...newKeyResult, url });
+  return response;
 }

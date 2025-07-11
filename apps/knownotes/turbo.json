@@ -24,7 +24,8 @@
         "NEXT_PUBLIC_POSTHOG_KEY",
         "SUPABASE_PRIVATE_KEY",
         "CRON_SECRET",
-        "NEXT_PUBLIC_POSTHOG_HOST"
+        "NEXT_PUBLIC_POSTHOG_HOST",
+        "DEEPGRAM_API_KEY"
       ]
     },
     "dev": {

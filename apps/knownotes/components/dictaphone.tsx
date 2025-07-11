@@ -17,7 +17,6 @@ import { cn } from "@/lib/utils";
 import { Transcript } from "@/types";
 import {
   createClient,
-  CreateProjectKeyResponse,
   LiveClient,
   LiveTranscriptionEvents,
 } from "@deepgram/sdk";
@@ -47,11 +46,9 @@ export const Dictaphone = ({
   const { enhancedNotes } = useNotesStore();
   const [isTranscriptOpen, setTranscriptOpen] = useState(false);
   const { add, remove, first, size, queue } = useQueue<any>([]);
-  const [apiKey, setApiKey] = useState<CreateProjectKeyResponse | null>();
+  const [token, setToken] = useState<string>();
   const [connection, setConnection] = useState<LiveClient | null>();
   const [isListening, setListening] = useState(false);
-  const [isLoadingKey, setIsLoadingKey] = useState(true);
-  const [isLoading, setIsLoading] = useState(true);
   const [isProcessing, setProcessing] = useState(false);
   const [micOpen, setMicOpen] = useState(false);
   const [microphone, setMicrophone] = useState<MediaRecorder | null>();
@@ -130,26 +127,23 @@ export const Dictaphone = ({
 
   // Fetch a Deepgram API key.
   useEffect(() => {
-    if (!apiKey) {
-      fetch("/api/transcribe", { cache: "no-store" })
-        .then((res) => res.json())
-        .then((object) => {
-          if (!("key" in object))
-            throw new Error("No Deepgram api key returned");
+    const getToken = async () => {
+      try {
+        const response = await fetch("/api/transcribe", { cache: "no-store" });
+        const data = await response.json();
+        setToken(data.access_token);
+      } catch (error) {
+        console.error("Error fetching deepgram token:", error);
+      }
+    };
 
-          setApiKey(object);
-          setIsLoadingKey(false);
-        })
-        .catch((e) => {
-          console.error(`Deepgram error: ${e}`);
-        });
-    }
-  }, [apiKey]);
+    getToken();
+  }, []);
 
   // Establish the live connection.
   useEffect(() => {
-    if (apiKey && "key" in apiKey) {
-      const deepgram = createClient(apiKey?.key ?? "");
+    if (token) {
+      const deepgram = createClient({ accessToken: token });
       const connection = deepgram.listen.live({
         model: "nova-2-meeting",
         interim_results: true,
@@ -162,8 +156,6 @@ export const Dictaphone = ({
 
       connection.on(LiveTranscriptionEvents.Close, () => {
         setListening(false);
-        setApiKey(null);
-        setConnection(null);
       });
 
       connection.on(LiveTranscriptionEvents.Transcript, (data) => {
@@ -184,19 +176,16 @@ export const Dictaphone = ({
       connection.on(LiveTranscriptionEvents.Error, (error) => {
         console.error(error);
 
-        // This is a known issue.
-        if (error.message === "Unable to parse `data` as JSON.") {
-          console.log("Resetting connection...");
-          // TODO: Reset the connection.
-        }
+        // // This is a known issue.
+        // if (error.message === "Unable to parse `data` as JSON.") {
+        //   console.log("Resetting connection...");
+        //   // TODO: Reset the connection.
+        // }
       });
 
       setConnection(connection);
-      setIsLoading(false);
     }
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [apiKey]);
+  }, [token]);
 
   // Process the blob queue.
   useEffect(() => {
@@ -340,13 +329,11 @@ export const Dictaphone = ({
                 onClick={toggleMicrophone}
                 className={cn(
                   buttonVariants({ variant: "outline" }),
-                  "h-auto w-auto rounded-full border border-border p-2.5 shadow-lg",
+                  "h-14 w-14 rounded-full border border-border p-2.5 shadow-lg",
                   isRecording || transcript.length > 0 ? "hidden" : "",
                 )}
               >
-                <Icons.mic
-                  className={cn("size-8 p-1 text-secondary-foreground")}
-                />
+                <Icons.mic className="size-6 text-secondary-foreground" />
               </button>
             </TooltipTrigger>
             <TooltipContent>Start recording</TooltipContent>
