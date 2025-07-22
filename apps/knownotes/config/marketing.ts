@@ -10,13 +10,5 @@ export const marketingConfig: MarketingConfig = {
       title: "FAQ",
       href: "/#faq",
     },
-    // {
-    //   title: "Pricing",
-    //   href: "/#pricing",
-    // },
-    {
-      title: "Affiliate",
-      href: "/affiliate",
-    },
   ],
 };

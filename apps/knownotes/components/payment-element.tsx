@@ -56,9 +56,7 @@ function CheckoutForm({ className, ctaText, ...props }: CheckoutFormProps) {
       });
 
       // Create a SetupIntent.
-      const { client_secret: clientSecret } = await createSetupIntent(
-        window.promotekit_referral,
-      );
+      const { client_secret: clientSecret } = await createSetupIntent();
 
       // Confirm the SetupIntent with the payment method.
       const return_url =

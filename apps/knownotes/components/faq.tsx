@@ -24,7 +24,7 @@ const faqs = [
   {
     question: "Can I promote KnowNotes?",
     answer:
-      "Yes! Join our affiliate program so you can paid every month to invite your friends, family, and classmates!",
+      "Yes! Feel free to share KnowNotes with your friends, family, and classmates!",
   },
 ];
 

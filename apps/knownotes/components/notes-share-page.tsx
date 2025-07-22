@@ -5,7 +5,6 @@ import { cn, formatDate } from "@/lib/utils";
 import { Course, Lecture, Message } from "@prisma/client";
 import { JSONContent } from "@tiptap/core";
 
-import { AffiliateCard } from "./affiliate-card";
 import Editor from "./editor";
 import { useNotesStore } from "./notes-page";
 import { Badge } from "./ui/badge";
@@ -20,8 +19,6 @@ interface NotesPageProps {
 export function NotesSharePage({ lecture }: NotesPageProps) {
   const [hydrated, setHydrated] = useState(false);
   const { editor, enhancedNotes, setEnhancedNotes } = useNotesStore();
-  const [isAffiliateCardOpen, setIsAffiliateCardOpen] = useState(false);
-
   // Hydate the component with the lecture data.
   useEffect(() => {
     if (!hydrated) {
@@ -38,24 +35,8 @@ export function NotesSharePage({ lecture }: NotesPageProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Open the affiliate card after 2 minutes.
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsAffiliateCardOpen(true);
-    }, 120 * 1000); // 120 seconds
-
-    return () => {
-      clearTimeout(timer);
-    };
-  }, []);
-
   return (
     <>
-      <AffiliateCard
-        className="w-64"
-        open={isAffiliateCardOpen}
-        onClose={() => setIsAffiliateCardOpen(false)}
-      />
       <div className="absolute w-full overflow-y-scroll px-4">
         <div className="relative mx-auto max-w-4xl">
           <div className="px-8">

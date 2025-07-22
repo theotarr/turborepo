@@ -4,7 +4,6 @@ import "@/styles/globals.css";
 
 import { Viewport } from "next";
 import dynamic from "next/dynamic";
-import Script from "next/script";
 import { PaymentDialog } from "@/components/payment-dialog";
 import { PixelTracking } from "@/components/pixel-tracking";
 import { CSPostHogProvider } from "@/components/posthog";
@@ -100,12 +99,6 @@ export default async function RootLayout({ children }: RootLayoutProps) {
               <SpeedInsights />
               {process.env.NODE_ENV === "production" && (
                 <>
-                  {/* PromoteKit */}
-                  <Script
-                    async
-                    src="https://cdn.promotekit.com/promotekit.js"
-                    data-promotekit="8b10efa4-4d33-49c2-927f-39fe809a6468"
-                  ></Script>
                   {/* Google Analytics */}
                   <GoogleAnalytics gaId={GA_MEASUREMENT_ID} />
                   {/* Vercel Analytics */}

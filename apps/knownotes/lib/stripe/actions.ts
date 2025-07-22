@@ -18,7 +18,7 @@ export async function getPromotionCode(
   return promotion;
 }
 
-export async function createSetupIntent(promotekitReferral?: string): Promise<{
+export async function createSetupIntent(): Promise<{
   client_secret: string;
 }> {
   const session = await auth();
@@ -58,7 +58,6 @@ export async function createSetupIntent(promotekitReferral?: string): Promise<{
     automatic_payment_methods: { enabled: true },
     metadata: {
       userId: session.user.id,
-      promotekit_refferal: promotekitReferral as string,
     },
   });
 

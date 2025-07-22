@@ -14,10 +14,6 @@ export const chatConfig: ChatConfig = {
       title: "Lectures",
       href: "/library?tab=notes",
     },
-    {
-      title: "Affiliate",
-      href: "/affiliate",
-    },
   ],
   sidebarNav: [],
 };

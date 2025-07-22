@@ -9,10 +9,6 @@ export const siteConfig: SiteConfig = {
     "https://knownotes.ai/api/og?title=KnowNotes&mode=light&heading=Home",
   footer: [
     {
-      title: "Affiliate",
-      href: "/affiliate",
-    },
-    {
       title: "About",
       href: "/about",
     },

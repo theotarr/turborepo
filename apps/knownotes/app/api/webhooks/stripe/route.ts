@@ -160,16 +160,12 @@ export async function POST(req: Request) {
       return new Response(null, { status: 200 });
     }
 
-    // Check if the user has a referral.
-    const promotekitReferral = session?.metadata?.promotekitReferral as string;
-
     const subscription = await stripe.subscriptions.create({
       customer: session.customer as string,
       items: [{ price: proPlan.stripePriceIds[0] }], // Use the price of $5.99/week.
       trial_period_days: 3, // 3 day trial.
       metadata: {
         userId: user.id,
-        promotekit_referral: promotekitReferral,
       },
     });
 

@@ -10,14 +10,6 @@ export const dashboardConfig: DashboardConfig = {
       title: "Chat",
       href: "/chat",
     },
-    {
-      title: "Affiliate",
-      href: "/affiliate",
-    },
-    // {
-    //   title: "About",
-    //   href: "/about",
-    // },
   ],
   sidebarNav: [
     {
